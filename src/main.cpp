@@ -1,5 +1,4 @@
 #include "tensor.h"
-#include "random.h"
 #include "error.h"
 #include <iostream>
 using namespace nnlib;
@@ -7,19 +6,12 @@ using namespace std;
 
 int main()
 {
-	Tensor<double> t(5), u(5), v(5);
-	Random r;
+	Tensor<double> weights(10, 5), input(5), bias(10), result(10);
+	weights.fillNormal(0.0, 1.0, 3.0);
+	input.fillNormal(0.0, 1.0, 3.0);
+	bias.fillNormal(0.0, 1.0, 3.0);
 	
-	for(size_t i = 0; i < t.size(); ++i)
-	{
-		t[i] = r.normal(0.0, 1.0, 3.0);
-		u[i] = r.normal(0.0, 1.0, 3.0);
-	}
-	
-	v = t + u;
-	
-	for(size_t i = 0; i < v.size(); ++i)
-		Assert(v[i] == t[i] + u[i], "Addition failed!");
+	result = bias + weights * input;
 	
 	cout << "Passed all tests!" << endl;
 	
