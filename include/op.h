@@ -4,24 +4,24 @@
 namespace nnlib
 {
 
-template <typename LHS, typename RHS>
-struct BinaryOperator
+template <typename T, typename U>
+struct BinOp
 {
-	BinaryOperator(const LHS &_lhs, const RHS &_rhs) : lhs(_lhs), rhs(_rhs) {}
-	const LHS &lhs;
-	const RHS &rhs;
+	BinOp(const T &_lhs, const U &_rhs) : lhs(_lhs), rhs(_rhs) {}
+	const T &lhs;
+	const U &rhs;
 };
 
-template <typename LHS, typename RHS>
-struct OperatorAdd : public BinaryOperator<LHS, RHS>
+template <typename T, typename U>
+struct OpAdd : public BinOp<T, U>
 {
-using BinaryOperator<LHS, RHS>::BinaryOperator;
+using BinOp<T, U>::BinOp;
 };
 
-template <typename LHS, typename RHS>
-struct OperatorMultiply : public BinaryOperator<LHS, RHS>
+template <typename T, typename U>
+struct OpMult : public BinOp<T, U>
 {
-using BinaryOperator<LHS, RHS>::BinaryOperator;
+using BinOp<T, U>::BinOp;
 };
 
 }

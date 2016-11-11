@@ -12,10 +12,12 @@
 #include "op.h"
 #include "error.h"
 #include "random.h"
+#include "blas.h"
 
 namespace nnlib
 {
 
+/// General n-dimensional tensor (with no specialized methods).
 template <typename T>
 class Tensor
 {
@@ -77,6 +79,7 @@ protected:
 	T *m_buffer;
 };
 
+/// Matrices (2-dimensional tensors with matrix methods).
 template <typename T>
 class Matrix : public Tensor<T>
 {
@@ -127,6 +130,7 @@ private:
 	size_t m_rows, m_cols;
 };
 
+/// Vectors (1-dimensional tensors with vector methods).
 template <typename T>
 class Vector : public Tensor<T>
 {
@@ -137,6 +141,22 @@ public:
 	/// General-purpose constructor.
 	Vector(size_t n) : Tensor<T>(n)
 	{}
+	
+	/// Assign a vector.
+	Vector &operator=(const Vector &v)
+	{
+		Assert(m_size == v.m_size, "Incompatible size!");
+		BLAS<T>::copy(m_size, v.m_buffer, 1, m_buffer, 1);
+		return *this;
+	}
+	
+	/// Assign a sum.
+	template <typename U, typename V>
+	Vector &operator=(const OpAdd<U, V> &op)
+	{
+		*this = op.lhs;
+		return *this += op.rhs;
+	}
 	
 	/// Change the dimensions of the vector.
 	void resize(size_t n, const T &val = T())
@@ -161,314 +181,39 @@ public:
 		Assert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
 	}
-};
-
-/*
-template <typename T>
-class TensorBase
-{
-public:
-	TensorBase() : m_sizes(2, 0), m_size(0), m_capacity(m_size), m_buffer(nullptr)
-	{}
 	
-	TensorBase(size_t n) : m_sizes({ n, 1 }), m_size(n), m_capacity(m_size), m_buffer(new T[m_capacity])
-	{}
-	
-	TensorBase(size_t rows, size_t cols) : m_sizes({ rows, cols }), m_size(rows * cols), m_capacity(m_size), m_buffer(new T[m_capacity])
-	{}
-	
-	/// Change this into a 1-dimensional tensor of the given size and default value.
-	void resize(size_t n)
+	/// Element-wise addition.
+	Vector &operator+=(const Vector &v)
 	{
-		reserve(n);
-		m_sizes = { n, 1 };
-		m_size = n;
-	}
-	
-	/// Change this into a 2-dimensional vector of the given size and default value.
-	void resize(size_t rows, size_t cols)
-	{
-		reserve(rows * cols);
-		m_sizes = { rows, cols };
-		m_size = rows * cols;
-	}
-	
-	/// Reserve n elements in buffer.
-	/// Elements in excess of m_size are unused.
-	void reserve(size_t n)
-	{
-		if(n > m_capacity)
-		{
-			T *buffer = new T[m_capacity = n];
-			for(size_t i = 0; i < m_size; ++i)
-				buffer[i] = m_buffer[i];
-			delete[] m_buffer;
-			m_buffer = buffer;
-		}
-	}
-	
-	/// Set all elements to the given value.
-	void fill(const T &val)
-	{
-		for(size_t i = 0; i < m_size; ++i)
-			m_buffer[i] = val;
-	}
-	
-	/// Element access (vector-style).
-	T &operator[](size_t i)
-	{
-		Assert(i < m_size, "Index out-of-bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access (vector-style).
-	T &operator()(size_t i)
-	{
-		Assert(i < m_size, "Index out-of-bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access (matrix-style).
-	T &operator()(size_t i, size_t j)
-	{
-		Assert(i < m_sizes[0] && j < m_sizes[1], "Index out-of-bounds!");
-		return m_buffer[i * m_sizes[1] + j];
-	}
-	
-	/// Number of elements in total.
-	size_t size() const
-	{
-		return m_size;
-	}
-protected:
-	std::vector<size_t> m_sizes;
-	size_t m_size, m_capacity;
-	T *m_buffer;
-};
-
-/// Default Tensor.
-template <typename T>
-class Tensor : public TensorBase<T>
-{
-using TensorBase<T>::TensorBase;
-};
-
-/// Tensor specialization for double-precision floats.
-template <>
-class Tensor<double> : public TensorBase<double>
-{
-using TensorBase<double>::TensorBase;
-public:
-	typedef double T;
-	
-	Tensor() {}
-	
-	/// Fill this tensor using a normal distribution.
-	void fillNormal(Random &r, T mean = 0.0, T stddev = 1.0, T cap = 3.0)
-	{
-		for(size_t i = 0; i < m_size; ++i)
-			m_buffer[i] = r.normal(mean, stddev, cap);
-	}
-	
-	/// \todo matrix-matrix multiplication, don't assume matrix-vector
-	/// \todo also, vector-vector dot product
-	
-	/// Construction from another tensor.
-	Tensor(const Tensor &t) : TensorBase<T>(t.m_size)
-	{
-		cblas_dcopy(
-			m_size,
-			t.m_buffer, 1,
-			m_buffer, 1
-		);
-	}
-	
-	/// Assignment to another tensor.
-	Tensor &operator=(const Tensor &t)
-	{
-		Assert(m_size == t.m_size, "Incompatible size for assignment!");
-		cblas_dcopy(
-			m_size,
-			t.m_buffer, 1,
-			m_buffer, 1
-		);
+		Assert(m_size == v.m_size, "Incompatible size!");
+		BLAS<T>::axpy(m_size, 1, v.m_buffer, 1, m_buffer, 1);
 		return *this;
 	}
 	
-	/// Safe assignment to another tensor.
-	void assignSafe(const Tensor &t)
-	{
-		resize(t.m_size);
-		cblas_dcopy(
-			m_size,
-			t.m_buffer, 1,
-			m_buffer, 1
-		);
-	}
-	
-	/// Addition with another tensor.
-	Tensor &operator+=(const Tensor &t)
-	{
-		Assert(m_size == t.m_size, "Incompatible sizes for addition!");
-		cblas_daxpy(
-			m_size, 1,
-			t.m_buffer, 1,
-			m_buffer, 1
-		);
-		return *this;
-	}
-	
-	/// Construction from a matrix-vector multiplication (evalulation of deferred multiplication).
-	Tensor(const OperatorMultiply<Tensor, Tensor> &op) : TensorBase<T>(op.lhs.m_sizes[0])
-	{
-		cblas_dgemm(
-			CblasRowMajor,		// ordering
-			CblasNoTrans,		// transpose A
-			CblasNoTrans,		// transpose B
-			op.lhs.m_sizes[0],	// rows A and C
-			op.rhs.m_sizes[1],	// cols B and C
-			op.lhs.m_sizes[1],	// cols A and rows B
-			1,					// scale of A and B
-			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
-			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
-			0,					// scale of C
-			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
-		);
-	}
-	
-	/// Assignment to a matrix-vector multiplication (evaluation of deferred multiplication).
-	template <typename U>
-	Tensor &operator=(const OperatorMultiply<Tensor, Tensor> &op)
-	{
-		Assert(m_size == op.lhs.m_sizes[0], "Incompatible sizes for dot product!");
-		cblas_dgemm(
-			CblasRowMajor,		// ordering
-			CblasNoTrans,		// transpose A
-			CblasNoTrans,		// transpose B
-			op.lhs.m_sizes[0],	// rows A and C
-			op.rhs.m_sizes[1],	// cols B and C
-			op.lhs.m_sizes[1],	// cols A and rows B
-			1,					// scale of A and B
-			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
-			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
-			0,					// scale of C
-			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
-		);
-		return *this;
-	}
-	
-	/// Safe assignment to a matrix-vector multiplication (evaluation of deferred multiplication).
-	void assignSafe(const OperatorMultiply<Tensor, Tensor> &op)
-	{
-		resize(op.lhs.m_sizes[0]);
-		cblas_dgemm(
-			CblasRowMajor,		// ordering
-			CblasNoTrans,		// transpose A
-			CblasNoTrans,		// transpose B
-			op.lhs.m_sizes[0],	// rows A and C
-			op.rhs.m_sizes[1],	// cols B and C
-			op.lhs.m_sizes[1],	// cols A and rows B
-			1,					// scale of A and B
-			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
-			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
-			0,					// scale of C
-			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
-		);
-	}
-	
-	/// Addition with a matrix-vector multiplication (evaluation of deferred multiplication).
-	Tensor &operator+=(const OperatorMultiply<Tensor, Tensor> &op)
-	{
-		Assert(m_size == op.lhs.m_sizes[0], "Incompatible sizes for dot product!");
-		cblas_dgemm(
-			CblasRowMajor,		// ordering
-			CblasNoTrans,		// transpose A
-			CblasNoTrans,		// transpose B
-			op.lhs.m_sizes[0],	// rows A and C
-			op.rhs.m_sizes[1],	// cols B and C
-			op.lhs.m_sizes[1],	// cols A and rows B
-			1,					// scale of A and B
-			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
-			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
-			1,					// scale of C
-			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
-		);
-		return *this;
-	}
-	
-	/// Construction from a sum (evalulation of deferred addition).
+	/// Element-wise addition.
 	template <typename U, typename V>
-	Tensor(const OperatorAdd<U, V> &op)
-	{
-		assignSafe(op);
-	}
-	
-	/// Assignment to a sum (evaluation of deferred addition).
-	template <typename U, typename V>
-	Tensor &operator=(const OperatorAdd<U, V> &op)
-	{
-		*this = op.lhs;
-		return *this += op.rhs;
-	}
-	
-	/// Safe assignment to a sum (evaluation of deferred addition).
-	template <typename U, typename V>
-	void assignSafe(const OperatorAdd<U, V> &op)
-	{
-		assignSafe(op.lhs);
-		*this += op.rhs;
-	}
-	
-	/// Addition with a sum (i.e. more than two addends; evaluation of deferred addition).
-	template <typename U, typename V>
-	Tensor &operator+=(const OperatorAdd<U, V> &op)
+	Vector &operator+=(const OpAdd<U, V> &op)
 	{
 		*this += op.lhs;
 		return *this += op.rhs;
 	}
-	
-	/// Addition (deferred).
-	template <typename U>
-	OperatorAdd<Tensor, U> operator+(const U &other)
-	{
-		return OperatorAdd<Tensor, U>(*this, other);
-	}
-	
-	/// Multiplication (deferred).
-	template <typename U>
-	OperatorMultiply<Tensor, U> operator*(const U &other)
-	{
-		return OperatorMultiply<Tensor, U>(*this, other);
-	}
 };
 
-/// Addition (deferred).
-template <typename U, typename V>
-OperatorAdd<U, V> operator+(const U &lhs, const V &rhs)
+/// Deferred element-wise addition.
+template <typename T>
+OpAdd<Vector<T>, Vector<T>> operator+(const Vector<T> &lhs, const Vector<T> &rhs)
 {
-	return OperatorAdd<U, V>(lhs, rhs);
+	Assert(lhs.size() == rhs.size(), "Incompatible size!");
+	return OpAdd<Vector<T>, Vector<T>>(lhs, rhs);
 }
 
-/// Multiplication (deferred).
-template <typename U, typename V>
-OperatorMultiply<U, V> operator*(const U &lhs, const V &rhs)
+/// Deferred matrix multiplication.
+template <typename T>
+OpMult<Tensor<T>, Tensor<T>> operator*(const Tensor<T> &lhs, const Tensor<T> &rhs)
 {
-	return OperatorMultiply<U, V>(lhs, rhs);
+	Assert(lhs.size() == rhs.size(), "Incompatible size!");
+	return OpMult<Tensor<T>, Tensor<T>>(lhs, rhs);
 }
-
-*/
 
 }
 

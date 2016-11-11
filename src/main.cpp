@@ -50,8 +50,12 @@ void testCorrectness()
 	target(1) = 11.0;
 	target(2) = 15.14;
 	
-	for(size_t i = 0 ; i < target.size(); ++i)
-		cout << "target(" << i << ") = " << target(i) << endl;
+	Vector<double> temp(outs), temp2(outs);
+	for(size_t i = 0; i < temp.size(); ++i)
+		temp(i) = bias(i) + target(i);
+	temp2 = bias + target;
+	for(size_t i = 0; i < temp.size(); ++i)
+		Assert(temp(i) == temp2(i), "Vector addition failed!");
 	
 	/*
 	Tensor<double> result = weights * input + bias;
