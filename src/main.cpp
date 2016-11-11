@@ -60,9 +60,7 @@ void testCorrectness()
 	Vector<size_t> a(5), b(5);
 	a = b;
 	
-	Vector<double> result(outs);
-	result = weights * input + bias;
-	
+	Vector<double> result = weights * input + bias;
 	for(size_t i = 0; i < outs; ++i)
 		Assert(result(i) == target(i), "forward failed!");
 	

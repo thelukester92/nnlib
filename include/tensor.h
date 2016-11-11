@@ -148,6 +148,27 @@ public:
 	Vector(size_t n) : Tensor<T>(n)
 	{}
 	
+	/// Construct from a vector.
+	Vector(const Vector &v) : Tensor<T>(v.m_size)
+	{
+		BLAS<T>::copy(m_size, v.m_buffer, 1, m_buffer, 1);
+	}
+	
+	/// Construct from a sum.
+	template <typename U, typename V>
+	Vector(const OpAdd<U, V> &op) : Tensor<T>(0)
+	{
+		safeAssign(op.lhs);
+		*this += op.rhs;
+	}
+	
+	/// Construct from a product.
+	Vector(const OpMult<Matrix<T>, Vector> &op) : Tensor<T>(op.lhs.m_rows)
+	{
+		Assert(op.lhs.m_cols == op.rhs.m_size, "Incompatible multiplicands!");
+		BLAS<T>::gemv(CblasRowMajor, CblasNoTrans, op.lhs.m_rows, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, 1, 0, m_buffer, 1);
+	}
+	
 	/// Assign a vector.
 	Vector &operator=(const Vector &v)
 	{
@@ -170,6 +191,29 @@ public:
 		Assert(m_size == op.lhs.m_rows && op.lhs.m_cols == op.rhs.m_size, "Incompatible multiplicands!");
 		BLAS<T>::gemv(CblasRowMajor, CblasNoTrans, op.lhs.m_rows, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, 1, 0, m_buffer, 1);
 		return *this;
+	}
+	
+	/// Assign-and-resize a vector.
+	void safeAssign(const Vector &v)
+	{
+		resize(v.m_size);
+		BLAS<T>::copy(m_size, v.m_buffer, 1, m_buffer, 1);
+	}
+	
+	/// Assign-and-resize a sum.
+	template <typename U, typename V>
+	void safeAssign(const OpAdd<U, V> &op)
+	{
+		safeAssign(op.lhs);
+		*this += op.rhs;
+	}
+	
+	/// Assign-and-resize a product.
+	void safeAssign(const OpMult<Matrix<T>, Vector> &op)
+	{
+		resize(op.lhs.m_rows);
+		Assert(op.lhs.m_cols == op.rhs.m_size, "Incompatible multiplicands!");
+		BLAS<T>::gemv(CblasRowMajor, CblasNoTrans, op.lhs.m_rows, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, 1, 0, m_buffer, 1);
 	}
 	
 	/// Change the dimensions of the vector.
