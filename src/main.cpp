@@ -57,11 +57,14 @@ void testCorrectness()
 	for(size_t i = 0; i < temp.size(); ++i)
 		Assert(temp(i) == temp2(i), "Vector addition failed!");
 	
-	/*
-	Tensor<double> result = weights * input + bias;
+	Vector<size_t> a(5), b(5);
+	a = b;
+	
+	Vector<double> result(outs);
+	result = weights * input + bias;
+	
 	for(size_t i = 0; i < outs; ++i)
-		Assert(result(i) == target(i), "Linear::forward failed!");
-	*/
+		Assert(result(i) == target(i), "forward failed!");
 	
 	cout << "Passed all tests!" << endl;
 }

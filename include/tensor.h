@@ -49,7 +49,8 @@ public:
 	
 	/// Set all elements to random values drawn from a normal distribution.
 	/// This method only works if T is float or double.
-	typename std::enable_if<std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type fillNormal(Random &r, T mean = 0.0, T stddev = 1.0, T cap = 3.0)
+	template <typename U = T>
+	typename std::enable_if<std::is_same<U, float>::value || std::is_same<U, double>::value, void>::type fillNormal(Random &r, T mean = 0.0, T stddev = 1.0, T cap = 3.0)
 	{
 		for(size_t i = 0; i < m_size; ++i)
 			m_buffer[i] = r.normal(mean, stddev, cap);
@@ -79,10 +80,14 @@ protected:
 	T *m_buffer;
 };
 
+template <typename T> class Vector;
+template <typename T> class Matrix;
+
 /// Matrices (2-dimensional tensors with matrix methods).
 template <typename T>
 class Matrix : public Tensor<T>
 {
+friend class Vector<T>;
 using Tensor<T>::reserve;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
@@ -134,6 +139,7 @@ private:
 template <typename T>
 class Vector : public Tensor<T>
 {
+friend class Matrix<T>;
 using Tensor<T>::reserve;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
@@ -156,6 +162,14 @@ public:
 	{
 		*this = op.lhs;
 		return *this += op.rhs;
+	}
+	
+	/// Assign a product.
+	Vector &operator=(const OpMult<Matrix<T>, Vector> &op)
+	{
+		Assert(m_size == op.lhs.m_rows && op.lhs.m_cols == op.rhs.m_size, "Incompatible multiplicands!");
+		BLAS<T>::gemv(CblasRowMajor, CblasNoTrans, op.lhs.m_rows, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, 1, 0, m_buffer, 1);
+		return *this;
 	}
 	
 	/// Change the dimensions of the vector.
@@ -200,19 +214,17 @@ public:
 };
 
 /// Deferred element-wise addition.
-template <typename T>
-OpAdd<Vector<T>, Vector<T>> operator+(const Vector<T> &lhs, const Vector<T> &rhs)
+template <typename U, typename V>
+OpAdd<U, V> operator+(const U &lhs, V &rhs)
 {
-	Assert(lhs.size() == rhs.size(), "Incompatible size!");
-	return OpAdd<Vector<T>, Vector<T>>(lhs, rhs);
+	return OpAdd<U, V>(lhs, rhs);
 }
 
-/// Deferred matrix multiplication.
-template <typename T>
-OpMult<Tensor<T>, Tensor<T>> operator*(const Tensor<T> &lhs, const Tensor<T> &rhs)
+/// Deferred tensor multiplication.
+template <typename U, typename V>
+OpMult<U, V> operator*(const U &lhs, const V &rhs)
 {
-	Assert(lhs.size() == rhs.size(), "Incompatible size!");
-	return OpMult<Tensor<T>, Tensor<T>>(lhs, rhs);
+	return OpMult<U, V>(lhs, rhs);
 }
 
 }
