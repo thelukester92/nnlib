@@ -1,5 +1,6 @@
 #include "tensor.h"
 #include "error.h"
+#include "random.h"
 #include <iostream>
 #include <chrono>
 using namespace nnlib;
@@ -59,10 +60,11 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 {
 	Tensor<double> weights(outs, inps);
 	Tensor<double> input(inps), bias(outs), result(outs);
+	Random r;
 	
-	weights.fillNormal();
-	input.fillNormal();
-	bias.fillNormal();
+	weights.fillNormal(r);
+	input.fillNormal(r);
+	bias.fillNormal(r);
 	result.fill(0.0);
 	
 	start();

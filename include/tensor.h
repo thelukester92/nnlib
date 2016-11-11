@@ -20,10 +20,10 @@ template <typename T>
 class TensorBase
 {
 public:
-	TensorBase() : m_sizes(1, 0), m_size(0), m_capacity(m_size), m_buffer(nullptr)
+	TensorBase() : m_sizes(2, 0), m_size(0), m_capacity(m_size), m_buffer(nullptr)
 	{}
 	
-	TensorBase(size_t n) : m_sizes(1, n), m_size(n), m_capacity(m_size), m_buffer(new T[m_capacity])
+	TensorBase(size_t n) : m_sizes({ n, 1 }), m_size(n), m_capacity(m_size), m_buffer(new T[m_capacity])
 	{}
 	
 	TensorBase(size_t rows, size_t cols) : m_sizes({ rows, cols }), m_size(rows * cols), m_capacity(m_size), m_buffer(new T[m_capacity])
@@ -33,7 +33,7 @@ public:
 	void resize(size_t n)
 	{
 		reserve(n);
-		m_sizes = { n };
+		m_sizes = { n, 1 };
 		m_size = n;
 	}
 	
@@ -83,7 +83,6 @@ public:
 	/// Element access (matrix-style).
 	T &operator()(size_t i, size_t j)
 	{
-		Assert(m_sizes.size() >= 2, "Cannot use matrix-style accessor on a vector!");
 		Assert(i < m_sizes[0] && j < m_sizes[1], "Index out-of-bounds!");
 		return m_buffer[i * m_sizes[1] + j];
 	}
@@ -117,9 +116,8 @@ public:
 	Tensor() {}
 	
 	/// Fill this tensor using a normal distribution.
-	void fillNormal(T mean = 0.0, T stddev = 1.0, T cap = 3.0)
+	void fillNormal(Random &r, T mean = 0.0, T stddev = 1.0, T cap = 3.0)
 	{
-		Random r;
 		for(size_t i = 0; i < m_size; ++i)
 			m_buffer[i] = r.normal(mean, stddev, cap);
 	}
@@ -237,6 +235,25 @@ public:
 	Tensor &operator+=(const OperatorMultiply<Tensor, Tensor> &op)
 	{
 		Assert(m_size == op.lhs.m_sizes[0], "Incompatible sizes for dot product!");
+		
+		cblas_dgemm(
+			CblasRowMajor,		// ordering
+			CblasNoTrans,		// transpose A
+			CblasNoTrans,		// transpose B
+			op.lhs.m_sizes[0],	// rows A and C
+			op.rhs.m_sizes[1],	// cols B and C
+			op.lhs.m_sizes[1],	// cols A and rows B
+			1,					// scale of A and B
+			op.lhs.m_buffer,	// A
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension A)
+			op.rhs.m_buffer,	// B
+			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B)
+			1,					// scale of C
+			m_buffer,			// C
+			m_sizes[1]			// ldc (length of continuous dimension C)
+		);
+		
+		/*
 		cblas_dgemv(
 			CblasRowMajor,		// ordering
 			CblasNoTrans,		// transpose
@@ -251,6 +268,8 @@ public:
 			m_buffer,			// y
 			1					// stride of y
 		);
+		*/
+		
 		return *this;
 	}
 	
