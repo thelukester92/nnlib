@@ -8,6 +8,7 @@
 #endif
 
 #include <vector>
+#include <type_traits>
 #include "op.h"
 #include "error.h"
 #include "random.h"
@@ -24,6 +25,13 @@ public:
 	
 	TensorBase(size_t rows, size_t cols) : m_sizes({ rows, cols }), m_size(rows * cols), m_buffer(new T[m_size])
 	{}
+	
+	/// Set all elements to the given value.
+	void fill(const T &val)
+	{
+		for(size_t i = 0; i < m_size; ++i)
+			m_buffer[i] = val;
+	}
 	
 	/// Element access.
 	T &operator[](size_t i)
@@ -77,7 +85,7 @@ public:
 		return *this;
 	}
 	
-	/// Deferred evaluation of operations.
+	/// Evaluation of deferred operations.
 	template <typename U>
 	Tensor &operator=(const OperatorAdd<Tensor, U> &op)
 	{
@@ -93,7 +101,7 @@ public:
 		return OperatorAdd<Tensor, U>(*this, other);
 	}
 	
-	/// Multiply (deferred).
+	/// Multiplication (deferred).
 	template <typename U>
 	OperatorMultiply<Tensor, U> operator*(const U &other)
 	{
@@ -132,9 +140,30 @@ public:
 		);
 		return *this;
 	}
-private:
 	
+	/// Addition with multiple operations.
+	template <typename U, typename V>
+	Tensor &operator+=(const OperatorAdd<U, V> &op)
+	{
+		*this += op.lhs;
+		*this += op.rhs;
+		return *this;
+	}
 };
+
+/// Addition (deferred).
+template <typename U, typename V>
+OperatorAdd<U, V> operator+(const U &lhs, const V &rhs)
+{
+	return OperatorAdd<U, V>(lhs, rhs);
+}
+
+/// Multiplication (deferred).
+template <typename U, typename V>
+OperatorMultiply<U, V> operator*(const U &lhs, const V &rhs)
+{
+	return OperatorMultiply<U, V>(lhs, rhs);
+}
 
 }
 
