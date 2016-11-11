@@ -1,6 +1,7 @@
 #include "tensor.h"
 #include "error.h"
 #include "random.h"
+#include "linear.h"
 #include <iostream>
 #include <chrono>
 using namespace nnlib;
@@ -29,6 +30,8 @@ int main()
 void testCorrectness()
 {
 	size_t inps = 2, outs = 3;
+	Linear<double> layer(inps, outs);
+	
 	Matrix<double> weights(outs, inps);
 	Vector<double> input(inps), bias(outs), target(outs);
 	

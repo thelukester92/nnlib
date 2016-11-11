@@ -23,6 +23,33 @@ public:
 	}
 };
 
+/// Single-precision BLAS.
+template<>
+class BLAS<float>
+{
+typedef float T;
+public:
+	static void copy(size_t n, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_scopy(n, X, strideX, Y, strideY);
+	}
+	
+	static void axpy(size_t n, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_saxpy(n, alpha, X, strideX, Y, strideY);
+	}
+	
+	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
+	{
+		cblas_sgemv(order, transA, rows, cols, alpha, A, lda, X, strideX, beta, Y, strideY);
+	}
+	
+	static void gemm(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, size_t rows, size_t cols, size_t inner, T alpha, T *A, size_t lda, T *B, size_t ldb, T beta, T *C, size_t ldc)
+	{
+		cblas_sgemm(order, transA, transB, rows, cols, inner, alpha, A, lda, B, ldb, beta, C, ldc);
+	}
+};
+
 /// Double-precision BLAS.
 template<>
 class BLAS<double>
@@ -42,6 +69,11 @@ public:
 	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
 	{
 		cblas_dgemv(order, transA, rows, cols, alpha, A, lda, X, strideX, beta, Y, strideY);
+	}
+	
+	static void gemm(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, size_t rows, size_t cols, size_t inner, T alpha, T *A, size_t lda, T *B, size_t ldb, T beta, T *C, size_t ldc)
+	{
+		cblas_dgemm(order, transA, transB, rows, cols, inner, alpha, A, lda, B, ldb, beta, C, ldc);
 	}
 };
 

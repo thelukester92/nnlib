@@ -17,7 +17,7 @@
 namespace nnlib
 {
 
-/// General n-dimensional tensor (with no specialized methods).
+/// Tensor base class (with no specialized methods).
 template <typename T>
 class Tensor
 {
@@ -95,6 +95,15 @@ public:
 	/// General-purpose constructor.
 	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
 	{}
+	
+	/// Assign a product.
+	/// \todo verify the math here, I did this in a rush.
+	Matrix &operator=(const OpMult<Vector<T>, Vector<T>> &op)
+	{
+		Assert(m_rows == op.lhs.m_size && m_cols == op.rhs.m_size, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m_rows, m_cols, 1, 1, op.lhs.m_buffer, 1, op.rhs.m_buffer, op.rhs.m_size, 0, m_buffer, m_cols);
+		return *this;
+	}
 	
 	/// Change the dimensions of the matrix.
 	void resize(size_t rows, size_t cols, const T &val = T())
