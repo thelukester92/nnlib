@@ -127,6 +127,41 @@ private:
 	size_t m_rows, m_cols;
 };
 
+template <typename T>
+class Vector : public Tensor<T>
+{
+using Tensor<T>::reserve;
+using Tensor<T>::m_size;
+using Tensor<T>::m_buffer;
+public:
+	/// General-purpose constructor.
+	Vector(size_t n) : Tensor<T>(n)
+	{}
+	
+	/// Change the dimensions of the vector.
+	void resize(size_t n, const T &val = T())
+	{
+		reserve(n);
+		size_t i = m_size;
+		m_size = n;
+		for(; i < m_size; ++i)
+			m_buffer[i] = val;
+	}
+	
+	/// Element access.
+	T &operator()(size_t i)
+	{
+		Assert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	const T &operator()(size_t i) const
+	{
+		Assert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+};
 
 /*
 template <typename T>

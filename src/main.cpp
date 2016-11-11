@@ -28,13 +28,9 @@ int main()
 
 void testCorrectness()
 {
-	Matrix<double> m(3, 5);
-	Random r;
-	m.fillNormal(r);
-	
-	/*
 	size_t inps = 2, outs = 3;
-	Tensor<double> weights(outs, inps), input(inps), bias(outs), target(outs);
+	Matrix<double> weights(outs, inps);
+	Vector<double> input(inps), bias(outs), target(outs);
 	
 	weights(0, 0) = 1;
 	weights(0, 1) = 0;
@@ -54,6 +50,10 @@ void testCorrectness()
 	target(1) = 11.0;
 	target(2) = 15.14;
 	
+	for(size_t i = 0 ; i < target.size(); ++i)
+		cout << "target(" << i << ") = " << target(i) << endl;
+	
+	/*
 	Tensor<double> result = weights * input + bias;
 	for(size_t i = 0; i < outs; ++i)
 		Assert(result(i) == target(i), "Linear::forward failed!");
