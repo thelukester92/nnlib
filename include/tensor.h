@@ -33,10 +33,26 @@ public:
 			m_buffer[i] = val;
 	}
 	
-	/// Element access.
+	/// Element access (vector-style).
 	T &operator[](size_t i)
 	{
+		Assert(i < m_size, "Index out-of-bounds!");
 		return m_buffer[i];
+	}
+	
+	/// Element access (vector-style).
+	T &operator()(size_t i)
+	{
+		Assert(i < m_size, "Index out-of-bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access (matrix-style).
+	T &operator()(size_t i, size_t j)
+	{
+		Assert(m_sizes.size() >= 2, "Cannot use matrix-style accessor on a vector!");
+		Assert(i < m_sizes[0] && j < m_sizes[1], "Index out-of-bounds!");
+		return m_buffer[i * m_sizes[1] + j];
 	}
 	
 	/// Number of elements in total.
@@ -73,7 +89,11 @@ public:
 			m_buffer[i] = r.normal(mean, stddev, cap);
 	}
 	
-	/// Direct assignment.
+	/// \todo constructors to match assignment operators below
+	/// \todo matrix-matrix multiplication, don't assume matrix-vector
+	/// \todo also, vector-vector dot product
+	
+	/// Assignment to another tensor.
 	Tensor &operator=(const Tensor &t)
 	{
 		Assert(m_size == t.m_size, "Incompatible size for assignment!");
@@ -83,29 +103,6 @@ public:
 			m_buffer, 1
 		);
 		return *this;
-	}
-	
-	/// Evaluation of deferred operations.
-	template <typename U>
-	Tensor &operator=(const OperatorAdd<Tensor, U> &op)
-	{
-		Assert(m_size == op.lhs.m_size, "Incompatible size for assignment!");
-		*this = op.lhs;
-		return *this += op.rhs;
-	}
-	
-	/// Addition (deferred).
-	template <typename U>
-	OperatorAdd<Tensor, U> operator+(const U &other)
-	{
-		return OperatorAdd<Tensor, U>(*this, other);
-	}
-	
-	/// Multiplication (deferred).
-	template <typename U>
-	OperatorMultiply<Tensor, U> operator*(const U &other)
-	{
-		return OperatorMultiply<Tensor, U>(*this, other);
 	}
 	
 	/// Addition with another tensor.
@@ -120,7 +117,29 @@ public:
 		return *this;
 	}
 	
-	/// Addition with a dot product.
+	/// Assignment to a matrix-vector multiplication (evaluation of deferred multiplication).
+	template <typename U>
+	Tensor &operator=(const OperatorMultiply<Tensor, Tensor> &op)
+	{
+		Assert(m_size == op.lhs.m_sizes[0], "Incompatible sizes for dot product!");
+		cblas_dgemv(
+			CblasRowMajor,		// ordering
+			CblasNoTrans,		// transpose
+			op.lhs.m_sizes[0],	// rows
+			op.lhs.m_sizes[1],	// cols
+			1,					// scale of A
+			op.lhs.m_buffer,	// A
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension)
+			op.rhs.m_buffer,	// x
+			1,					// stride of x
+			0,					// scale of y
+			m_buffer,			// y
+			1					// stride of y
+		);
+		return *this;
+	}
+	
+	/// Addition with a matrix-vector multiplication (evaluation of deferred multiplication).
 	Tensor &operator+=(const OperatorMultiply<Tensor, Tensor> &op)
 	{
 		Assert(m_size == op.lhs.m_sizes[0], "Incompatible sizes for dot product!");
@@ -141,13 +160,34 @@ public:
 		return *this;
 	}
 	
-	/// Addition with multiple operations.
+	/// Assignment to a sum (evaluation of deferred addition).
+	template <typename U, typename V>
+	Tensor &operator=(const OperatorAdd<U, V> &op)
+	{
+		*this += op.lhs;
+		return *this += op.rhs;
+	}
+	
+	/// Addition with a sum (i.e. more than two addends; evaluation of deferred addition).
 	template <typename U, typename V>
 	Tensor &operator+=(const OperatorAdd<U, V> &op)
 	{
 		*this += op.lhs;
-		*this += op.rhs;
-		return *this;
+		return *this += op.rhs;
+	}
+	
+	/// Addition (deferred).
+	template <typename U>
+	OperatorAdd<Tensor, U> operator+(const U &other)
+	{
+		return OperatorAdd<Tensor, U>(*this, other);
+	}
+	
+	/// Multiplication (deferred).
+	template <typename U>
+	OperatorMultiply<Tensor, U> operator*(const U &other)
+	{
+		return OperatorMultiply<Tensor, U>(*this, other);
 	}
 };
 
