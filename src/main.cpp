@@ -28,6 +28,11 @@ int main()
 
 void testCorrectness()
 {
+	Matrix<double> m(3, 5);
+	Random r;
+	m.fillNormal(r);
+	
+	/*
 	size_t inps = 2, outs = 3;
 	Tensor<double> weights(outs, inps), input(inps), bias(outs), target(outs);
 	
@@ -52,12 +57,14 @@ void testCorrectness()
 	Tensor<double> result = weights * input + bias;
 	for(size_t i = 0; i < outs; ++i)
 		Assert(result(i) == target(i), "Linear::forward failed!");
+	*/
 	
 	cout << "Passed all tests!" << endl;
 }
 
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end)
 {
+	/*
 	Tensor<double> weights(outs, inps);
 	Tensor<double> input(inps), bias(outs), result(outs);
 	Random r;
@@ -77,4 +84,7 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 		resultSum += result[i];
 	
 	return resultSum;
+	*/
+	
+	return 0.0;
 }

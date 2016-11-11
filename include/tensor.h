@@ -17,6 +17,119 @@ namespace nnlib
 {
 
 template <typename T>
+class Tensor
+{
+public:
+	/// General-purpose constructor.
+	Tensor(size_t n) : m_size(n), m_capacity(n), m_buffer(new T[n])
+	{}
+	
+	/// Reserve n elements in buffer.
+	/// Elements in excess of m_size are unused.
+	void reserve(size_t n)
+	{
+		if(n > m_capacity)
+		{
+			T *buffer = new T[m_capacity = n];
+			for(size_t i = 0; i < m_size; ++i)
+				buffer[i] = m_buffer[i];
+			delete[] m_buffer;
+			m_buffer = buffer;
+		}
+	}
+	
+	/// Set all elements to the given value.
+	void fill(const T &val)
+	{
+		for(size_t i = 0; i < m_size; ++i)
+			m_buffer[i] = val;
+	}
+	
+	/// Set all elements to random values drawn from a normal distribution.
+	/// This method only works if T is float or double.
+	typename std::enable_if<std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type fillNormal(Random &r, T mean = 0.0, T stddev = 1.0, T cap = 3.0)
+	{
+		for(size_t i = 0; i < m_size; ++i)
+			m_buffer[i] = r.normal(mean, stddev, cap);
+	}
+	
+	/// Raw element access.
+	T &operator[](size_t i)
+	{
+		Assert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Raw element access.
+	const T &operator[](size_t i) const
+	{
+		Assert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Number of elements in total.
+	size_t size() const
+	{
+		return m_size;
+	}
+protected:
+	size_t m_size, m_capacity;
+	T *m_buffer;
+};
+
+template <typename T>
+class Matrix : public Tensor<T>
+{
+using Tensor<T>::reserve;
+using Tensor<T>::m_size;
+using Tensor<T>::m_buffer;
+public:
+	/// General-purpose constructor.
+	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
+	{}
+	
+	/// Change the dimensions of the matrix.
+	void resize(size_t rows, size_t cols, const T &val = T())
+	{
+		reserve(rows * cols);
+		size_t i = m_size;
+		m_size = rows * cols;
+		for(; i < m_size; ++i)
+			m_buffer[i] = val;
+	}
+	
+	/// Element access.
+	T &operator()(size_t i, size_t j)
+	{
+		Assert(i < m_rows && j < m_cols, "Index out of bounds!");
+		return m_buffer[i * m_cols + j];
+	}
+	
+	/// Element access.
+	const T &operator()(size_t i, size_t j) const
+	{
+		Assert(i < m_rows && j < m_cols, "Index out of bounds!");
+		return m_buffer[i * m_cols + j];
+	}
+	
+	/// Number of rows.
+	size_t rows() const
+	{
+		return m_rows;
+	}
+	
+	/// Number of columns.
+	size_t cols() const
+	{
+		return m_cols;
+	}
+private:
+	size_t m_rows, m_cols;
+};
+
+
+/*
+template <typename T>
 class TensorBase
 {
 public:
@@ -319,6 +432,8 @@ OperatorMultiply<U, V> operator*(const U &lhs, const V &rhs)
 {
 	return OperatorMultiply<U, V>(lhs, rhs);
 }
+
+*/
 
 }
 
