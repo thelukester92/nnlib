@@ -69,9 +69,8 @@ void testCorrectness()
 
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end)
 {
-	/*
-	Tensor<double> weights(outs, inps);
-	Tensor<double> input(inps), bias(outs), result(outs);
+	Matrix<double> weights(outs, inps);
+	Vector<double> input(inps), bias(outs), result(outs);
 	Random r;
 	
 	weights.fillNormal(r);
@@ -89,7 +88,4 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 		resultSum += result[i];
 	
 	return resultSum;
-	*/
-	
-	return 0.0;
 }
