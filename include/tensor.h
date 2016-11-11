@@ -20,11 +20,44 @@ template <typename T>
 class TensorBase
 {
 public:
-	TensorBase(size_t n) : m_sizes(1, n), m_size(n), m_buffer(new T[m_size])
+	TensorBase() : m_sizes(1, 0), m_size(0), m_capacity(m_size), m_buffer(nullptr)
 	{}
 	
-	TensorBase(size_t rows, size_t cols) : m_sizes({ rows, cols }), m_size(rows * cols), m_buffer(new T[m_size])
+	TensorBase(size_t n) : m_sizes(1, n), m_size(n), m_capacity(m_size), m_buffer(new T[m_capacity])
 	{}
+	
+	TensorBase(size_t rows, size_t cols) : m_sizes({ rows, cols }), m_size(rows * cols), m_capacity(m_size), m_buffer(new T[m_capacity])
+	{}
+	
+	/// Change this into a 1-dimensional tensor of the given size.
+	void resize(size_t n)
+	{
+		reserve(n);
+		m_sizes = { n };
+		m_size = n;
+	}
+	
+	/// Change this into a 2-dimensional vector of the given size.
+	void resize(size_t rows, size_t cols)
+	{
+		reserve(rows * cols);
+		m_sizes = { rows, cols };
+		m_size = rows * cols;
+	}
+	
+	/// Reserve n elements in buffer.
+	/// Elements in excess of m_size are unused.
+	void reserve(size_t n)
+	{
+		if(n > m_capacity)
+		{
+			T *buffer = new T[m_capacity = n];
+			for(size_t i = 0; i < m_size; ++i)
+				buffer[i] = m_buffer[i];
+			delete[] m_buffer;
+			m_buffer = buffer;
+		}
+	}
 	
 	/// Set all elements to the given value.
 	void fill(const T &val)
@@ -62,7 +95,7 @@ public:
 	}
 protected:
 	std::vector<size_t> m_sizes;
-	size_t m_size;
+	size_t m_size, m_capacity;
 	T *m_buffer;
 };
 
@@ -89,9 +122,18 @@ public:
 			m_buffer[i] = r.normal(mean, stddev, cap);
 	}
 	
-	/// \todo constructors to match assignment operators below
 	/// \todo matrix-matrix multiplication, don't assume matrix-vector
 	/// \todo also, vector-vector dot product
+	
+	/// Construction from another tensor.
+	Tensor(const Tensor &t) : TensorBase<T>(t.m_size)
+	{
+		cblas_dcopy(
+			m_size,
+			t.m_buffer, 1,
+			m_buffer, 1
+		);
+	}
 	
 	/// Assignment to another tensor.
 	Tensor &operator=(const Tensor &t)
@@ -115,6 +157,36 @@ public:
 			m_buffer, 1
 		);
 		return *this;
+	}
+	
+	/// Addition with another tensor (safe; resizes if needed).
+	void addSafe(const Tensor &t)
+	{
+		resize(t.m_size);
+		cblas_daxpy(
+			m_size, 1,
+			t.m_buffer, 1,
+			m_buffer, 1
+		);
+	}
+	
+	/// Construction from a matrix-vector multiplication (evalulation of deferred multiplication).
+	Tensor(const OperatorMultiply<Tensor, Tensor> &op) : TensorBase<T>(op.lhs.m_sizes[0])
+	{
+		cblas_dgemv(
+			CblasRowMajor,		// ordering
+			CblasNoTrans,		// transpose
+			op.lhs.m_sizes[0],	// rows
+			op.lhs.m_sizes[1],	// cols
+			1,					// scale of A
+			op.lhs.m_buffer,	// A
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension)
+			op.rhs.m_buffer,	// x
+			1,					// stride of x
+			0,					// scale of y
+			m_buffer,			// y
+			1					// stride of y
+		);
 	}
 	
 	/// Assignment to a matrix-vector multiplication (evaluation of deferred multiplication).
@@ -160,11 +232,38 @@ public:
 		return *this;
 	}
 	
+	/// Addition with a matrix-vector multiplication (safe; resizes if needed).
+	void addSafe(const OperatorMultiply<Tensor, Tensor> &op)
+	{
+		resize(op.lhs.m_sizes[0]);
+		cblas_dgemv(
+			CblasRowMajor,		// ordering
+			CblasNoTrans,		// transpose
+			op.lhs.m_sizes[0],	// rows
+			op.lhs.m_sizes[1],	// cols
+			1,					// scale of A
+			op.lhs.m_buffer,	// A
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension)
+			op.rhs.m_buffer,	// x
+			1,					// stride of x
+			1,					// scale of y
+			m_buffer,			// y
+			1					// stride of y
+		);
+	}
+	
+	/// Construction from a sum (evalulation of deferred addition).
+	template <typename U, typename V>
+	Tensor(const OperatorAdd<U, V> &op)
+	{
+		addSafe(op);
+	}
+	
 	/// Assignment to a sum (evaluation of deferred addition).
 	template <typename U, typename V>
 	Tensor &operator=(const OperatorAdd<U, V> &op)
 	{
-		*this += op.lhs;
+		*this = op.lhs;
 		return *this += op.rhs;
 	}
 	
@@ -174,6 +273,14 @@ public:
 	{
 		*this += op.lhs;
 		return *this += op.rhs;
+	}
+	
+	/// Addition with a sum (safe; resizes if needed).
+	template <typename U, typename V>
+	void addSafe(const OperatorAdd<U, V> &op)
+	{
+		addSafe(op.lhs);
+		addSafe(op.rhs);
 	}
 	
 	/// Addition (deferred).
