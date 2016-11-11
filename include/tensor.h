@@ -182,12 +182,12 @@ public:
 			op.lhs.m_sizes[1],	// cols A and rows B
 			1,					// scale of A and B
 			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A)
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
 			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B)
+			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
 			0,					// scale of C
 			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C)
+			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
 		);
 	}
 	
@@ -205,12 +205,12 @@ public:
 			op.lhs.m_sizes[1],	// cols A and rows B
 			1,					// scale of A and B
 			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A)
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
 			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B)
+			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
 			0,					// scale of C
 			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C)
+			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
 		);
 		return *this;
 	}
@@ -219,19 +219,21 @@ public:
 	void assignSafe(const OperatorMultiply<Tensor, Tensor> &op)
 	{
 		resize(op.lhs.m_sizes[0]);
-		cblas_dgemv(
+		cblas_dgemm(
 			CblasRowMajor,		// ordering
-			CblasNoTrans,		// transpose
-			op.lhs.m_sizes[0],	// rows
-			op.lhs.m_sizes[1],	// cols
-			1,					// scale of A
+			CblasNoTrans,		// transpose A
+			CblasNoTrans,		// transpose B
+			op.lhs.m_sizes[0],	// rows A and C
+			op.rhs.m_sizes[1],	// cols B and C
+			op.lhs.m_sizes[1],	// cols A and rows B
+			1,					// scale of A and B
 			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension)
-			op.rhs.m_buffer,	// x
-			1,					// stride of x
-			0,					// scale of y
-			m_buffer,			// y
-			1					// stride of y
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
+			op.rhs.m_buffer,	// B
+			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
+			0,					// scale of C
+			m_buffer,			// C
+			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
 		);
 	}
 	
@@ -248,12 +250,12 @@ public:
 			op.lhs.m_sizes[1],	// cols A and rows B
 			1,					// scale of A and B
 			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension A)
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension A -- i.e. the y-stride)
 			op.rhs.m_buffer,	// B
-			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B)
+			op.rhs.m_sizes[1],	// ldb (length of continuous dimension B -- i.e. the y-stride)
 			1,					// scale of C
 			m_buffer,			// C
-			m_sizes[1]			// ldc (length of continuous dimension C)
+			m_sizes[1]			// ldc (length of continuous dimension C -- i.e. the y-stride)
 		);
 		return *this;
 	}
