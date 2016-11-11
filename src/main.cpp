@@ -27,8 +27,7 @@ int main()
 	target(1) = 11.0;
 	target(2) = 15.14;
 	
-	Tensor<double> result(outs);
-	result = weights * input + bias;
+	Tensor<double> result = weights * input + bias;
 	
 	for(size_t i = 0; i < outs; ++i)
 		Assert(result(i) == target(i), "Linear::forward failed!");

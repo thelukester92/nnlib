@@ -29,7 +29,7 @@ public:
 	TensorBase(size_t rows, size_t cols) : m_sizes({ rows, cols }), m_size(rows * cols), m_capacity(m_size), m_buffer(new T[m_capacity])
 	{}
 	
-	/// Change this into a 1-dimensional tensor of the given size.
+	/// Change this into a 1-dimensional tensor of the given size and default value.
 	void resize(size_t n)
 	{
 		reserve(n);
@@ -37,7 +37,7 @@ public:
 		m_size = n;
 	}
 	
-	/// Change this into a 2-dimensional vector of the given size.
+	/// Change this into a 2-dimensional vector of the given size and default value.
 	void resize(size_t rows, size_t cols)
 	{
 		reserve(rows * cols);
@@ -114,6 +114,8 @@ using TensorBase<double>::TensorBase;
 public:
 	typedef double T;
 	
+	Tensor() {}
+	
 	/// Fill this tensor using a normal distribution.
 	void fillNormal(T mean = 0.0, T stddev = 1.0, T cap = 3.0)
 	{
@@ -147,6 +149,17 @@ public:
 		return *this;
 	}
 	
+	/// Safe assignment to another tensor.
+	void assignSafe(const Tensor &t)
+	{
+		resize(t.m_size);
+		cblas_dcopy(
+			m_size,
+			t.m_buffer, 1,
+			m_buffer, 1
+		);
+	}
+	
 	/// Addition with another tensor.
 	Tensor &operator+=(const Tensor &t)
 	{
@@ -157,17 +170,6 @@ public:
 			m_buffer, 1
 		);
 		return *this;
-	}
-	
-	/// Addition with another tensor (safe; resizes if needed).
-	void addSafe(const Tensor &t)
-	{
-		resize(t.m_size);
-		cblas_daxpy(
-			m_size, 1,
-			t.m_buffer, 1,
-			m_buffer, 1
-		);
 	}
 	
 	/// Construction from a matrix-vector multiplication (evalulation of deferred multiplication).
@@ -211,6 +213,26 @@ public:
 		return *this;
 	}
 	
+	/// Safe assignment to a matrix-vector multiplication (evaluation of deferred multiplication).
+	void assignSafe(const OperatorMultiply<Tensor, Tensor> &op)
+	{
+		resize(op.lhs.m_sizes[0]);
+		cblas_dgemv(
+			CblasRowMajor,		// ordering
+			CblasNoTrans,		// transpose
+			op.lhs.m_sizes[0],	// rows
+			op.lhs.m_sizes[1],	// cols
+			1,					// scale of A
+			op.lhs.m_buffer,	// A
+			op.lhs.m_sizes[1],	// lda (length of continuous dimension)
+			op.rhs.m_buffer,	// x
+			1,					// stride of x
+			0,					// scale of y
+			m_buffer,			// y
+			1					// stride of y
+		);
+	}
+	
 	/// Addition with a matrix-vector multiplication (evaluation of deferred multiplication).
 	Tensor &operator+=(const OperatorMultiply<Tensor, Tensor> &op)
 	{
@@ -232,31 +254,11 @@ public:
 		return *this;
 	}
 	
-	/// Addition with a matrix-vector multiplication (safe; resizes if needed).
-	void addSafe(const OperatorMultiply<Tensor, Tensor> &op)
-	{
-		resize(op.lhs.m_sizes[0]);
-		cblas_dgemv(
-			CblasRowMajor,		// ordering
-			CblasNoTrans,		// transpose
-			op.lhs.m_sizes[0],	// rows
-			op.lhs.m_sizes[1],	// cols
-			1,					// scale of A
-			op.lhs.m_buffer,	// A
-			op.lhs.m_sizes[1],	// lda (length of continuous dimension)
-			op.rhs.m_buffer,	// x
-			1,					// stride of x
-			1,					// scale of y
-			m_buffer,			// y
-			1					// stride of y
-		);
-	}
-	
 	/// Construction from a sum (evalulation of deferred addition).
 	template <typename U, typename V>
 	Tensor(const OperatorAdd<U, V> &op)
 	{
-		addSafe(op);
+		assignSafe(op);
 	}
 	
 	/// Assignment to a sum (evaluation of deferred addition).
@@ -267,20 +269,20 @@ public:
 		return *this += op.rhs;
 	}
 	
+	/// Safe assignment to a sum (evaluation of deferred addition).
+	template <typename U, typename V>
+	void assignSafe(const OperatorAdd<U, V> &op)
+	{
+		assignSafe(op.lhs);
+		*this += op.rhs;
+	}
+	
 	/// Addition with a sum (i.e. more than two addends; evaluation of deferred addition).
 	template <typename U, typename V>
 	Tensor &operator+=(const OperatorAdd<U, V> &op)
 	{
 		*this += op.lhs;
 		return *this += op.rhs;
-	}
-	
-	/// Addition with a sum (safe; resizes if needed).
-	template <typename U, typename V>
-	void addSafe(const OperatorAdd<U, V> &op)
-	{
-		addSafe(op.lhs);
-		addSafe(op.rhs);
 	}
 	
 	/// Addition (deferred).
