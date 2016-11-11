@@ -259,7 +259,7 @@ public:
 
 /// Deferred element-wise addition.
 template <typename U, typename V>
-OpAdd<U, V> operator+(const U &lhs, V &rhs)
+OpAdd<U, V> operator+(const U &lhs, const V &rhs)
 {
 	return OpAdd<U, V>(lhs, rhs);
 }
