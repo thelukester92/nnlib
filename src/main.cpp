@@ -3,6 +3,7 @@
 #include "random.h"
 #include "linear.h"
 #include "tanh.h"
+#include "sequential.h"
 #include <iostream>
 #include <chrono>
 using namespace nnlib;
@@ -88,6 +89,24 @@ void testCorrectness()
 	Vector<double> &tanhBlame = activation.backward(layer.output(), target);
 	for(size_t i = 0; i < tanhBlame.size(); ++i)
 		Assert(tanhBlame[i] == (1.0 - act[i] * act[i]), "tanh backward failed!");
+	
+	Sequential<double> nn;
+	nn.add(&layer);
+	nn.add(&activation);
+	
+	Vector<double> tanOut = activation.forward(layer.forward(input));
+	Vector<double> seqOut = nn.forward(input);
+	for(size_t i = 0; i < seqOut.size(); ++i)
+		Assert(tanOut(i) == seqOut(i), "sequential forward failed!");
+	
+	Vector<double> layIn = layer.backward(input, activation.backward(layer.output(), target));
+	Vector<double> seqIn = nn.backward(input, target);
+	for(size_t i = 0; i < seqIn.size(); ++i)
+		Assert(layIn(i) == seqIn(i), "sequential backward failed!");
+	
+	// release the layers, since they weren't dynamically allocated!
+	nn.release(1);
+	nn.release(0);
 	
 	cout << "Passed all tests!" << endl;
 }

@@ -12,6 +12,8 @@ template <typename T>
 class Module
 {
 public:
+	virtual ~Module() {}
+	
 	size_t inputCount() const
 	{
 		return inputBlame().size();

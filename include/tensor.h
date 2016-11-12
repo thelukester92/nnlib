@@ -91,6 +91,15 @@ public:
 			m_buffer[i] = r.normal(mean, stddev, cap);
 	}
 	
+	/// Erase element i from this tensor.
+	void erase(size_t i)
+	{
+		Assert(i < m_size, "Invalid erase index!");
+		for(; i < m_size - 1; ++i)
+			m_buffer[i] = m_buffer[i + 1];
+		--m_size;
+	}
+	
 	/// Raw element access.
 	T &operator[](size_t i)
 	{
@@ -117,6 +126,27 @@ public:
 	{
 		Assert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
+	}
+	
+	/// Get the last element. There must be at least one element in this tensor.
+	T &back()
+	{
+		Assert(m_size > 0, "Cannot get the back element of an empty tensor!");
+		return m_buffer[m_size - 1];
+	}
+	
+	/// Get the last element. There must be at least one element in this tensor.
+	const T &back() const
+	{
+		Assert(m_size > 0, "Cannot get the back element of an empty tensor!");
+		return m_buffer[m_size - 1];
+	}
+	
+	/// Insert an element at the end, resizing if necessary.
+	void push_back(const T &val)
+	{
+		reserve(m_size + 1);
+		m_buffer[m_size++] = val;
 	}
 	
 	/// Number of elements in total.
