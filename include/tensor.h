@@ -106,6 +106,20 @@ public:
 		return m_buffer[i];
 	}
 	
+	/// Raw element access.
+	T &at(size_t i)
+	{
+		Assert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Raw element access.
+	const T &at(size_t i) const
+	{
+		Assert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
 	/// Number of elements in total.
 	size_t size() const
 	{
@@ -194,12 +208,21 @@ public:
 	/// Create a new vector that manages data for the given Tensors.
 	static Vector flatten(const std::vector<Tensor<T> *> &tensors)
 	{
-		size_t n = 0;
+		size_t n = 0, offset = 0;
 		for(auto t : tensors)
 			n += t->size();
 		
 		Vector v(n);
-		
+		for(auto t : tensors)
+		{
+			/// copy data from old buffer
+			for(size_t i = 0; i < t->size(); ++i)
+				v[offset + i] = t->at(i);
+			
+			/// assign new buffer
+			t->shareBuffer(v, t->size(), offset);
+			offset += t->size();
+		}
 		
 		return v;
 	}

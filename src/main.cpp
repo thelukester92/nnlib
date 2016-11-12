@@ -31,24 +31,26 @@ void testCorrectness()
 {
 	size_t inps = 2, outs = 3;
 	Linear<double> layer(inps, outs);
-	
-	Matrix<double> &weights = layer.weights();
-	Vector<double> &bias = layer.bias();
 	Vector<double> input(inps), target(outs);
 	
-	weights(0, 0) = 1;
-	weights(0, 1) = 0;
-	weights(1, 0) = 0;
-	weights(1, 1) = 1;
-	weights(2, 0) = 1;
-	weights(2, 1) = 1;
+	Vector<double> allWeights = Vector<double>::flatten({ &layer.weights(), &layer.bias() });
+	size_t i = 0;
+	
+	// weights
+	allWeights(i++) = 1;
+	allWeights(i++) = 0;
+	allWeights(i++) = 0;
+	allWeights(i++) = 1;
+	allWeights(i++) = 1;
+	allWeights(i++) = 1;
+	
+	// bias
+	allWeights(i++) = 0;
+	allWeights(i++) = 1;
+	allWeights(i++) = 2;
 	
 	input(0) = 3.14;
 	input(1) = 10.0;
-	
-	bias(0) = 0;
-	bias(1) = 1;
-	bias(2) = 2;
 	
 	target(0) = 3.14;
 	target(1) = 11.0;
