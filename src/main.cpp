@@ -59,7 +59,21 @@ void testCorrectness()
 		Assert(result(i) == target(i), "forward failed!");
 	
 	Vector<double> &blame = layer.backward(input, target);
-	Assert(blame(0) == 18.28 && blame(1) == 26.14, "backward failed!");
+	Assert(blame(0) == 18.28 && blame(1) == 26.14, "backward failed to assign correct input blame!");
+	
+	for(size_t i = 0; i < outs; ++i)
+		Assert(layer.biasBlame()(i) == target(i), "backward failed to assign correct bias blame!");
+	
+	Matrix<double> expectedBlame(outs, inps);
+	expectedBlame[0] = 9.8596;
+	expectedBlame[1] = 31.4;
+	expectedBlame[2] = 34.54;
+	expectedBlame[3] = 110.0;
+	expectedBlame[4] = 47.5396;
+	expectedBlame[5] = 151.4;
+	
+	for(size_t i = 0; i < expectedBlame.size(); ++i)
+		Assert(fabs(layer.weightsBlame()[i] - expectedBlame[i]) < 1e-12, "backward failed to assign correct weights blame!");
 	
 	cout << "Passed all tests!" << endl;
 }
