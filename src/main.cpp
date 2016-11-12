@@ -85,6 +85,10 @@ void testCorrectness()
 	for(size_t i = 0; i < act.size(); ++i)
 		Assert(act[i] == tanh(layer.output()[i]), "tanh forward failed!");
 	
+	Vector<double> &tanhBlame = activation.backward(layer.output(), target);
+	for(size_t i = 0; i < tanhBlame.size(); ++i)
+		Assert(tanhBlame[i] == (1.0 - act[i] * act[i]), "tanh backward failed!");
+	
 	cout << "Passed all tests!" << endl;
 }
 
