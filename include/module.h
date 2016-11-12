@@ -12,8 +12,23 @@ template <typename T>
 class Module
 {
 public:
+	/// Feed in an input vector and return a cached output vector.
 	virtual Vector<T> &forward(const Vector<T> &input) = 0;
+	
+	/// Feed in an input and output blame (gradient) and return a cached input blame vector.
 	virtual Vector<T> &backward(const Vector<T> &input, const Vector<T> &blame) = 0;
+	
+	/// Return pointers to all parameters (i.e. for flattening).
+	virtual Vector<Tensor<T> *> parameters()
+	{
+		return Vector<Tensor<T> *>(0);
+	}
+	
+	/// Return pointers to parameter blame buffers (i.e. for flattening).
+	virtual Vector<Tensor<T> *> blame()
+	{
+		return Vector<Tensor<T> *>(0);
+	}
 };
 
 }

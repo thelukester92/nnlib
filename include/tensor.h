@@ -1,7 +1,6 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
-#include <vector>
 #include <type_traits>
 #include "op.h"
 #include "error.h"
@@ -125,6 +124,30 @@ public:
 	{
 		return m_size;
 	}
+	
+	/// std-like iterator begin.
+	T *begin()
+	{
+		return m_buffer;
+	}
+	
+	/// std-like iterator begin.
+	const T *begin() const
+	{
+		return m_buffer;
+	}
+	
+	/// std-like iterator end.
+	T *end()
+	{
+		return m_buffer + m_size;
+	}
+	
+	/// std-like iterator end.
+	const T *end() const
+	{
+		return m_buffer + m_size;
+	}
 protected:
 	size_t m_size, m_capacity;			///< number of elements and size of the buffer (minus offset)
 	T *m_buffer;						///< pointer to the buffer (with offset).
@@ -206,7 +229,7 @@ using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
 	/// Create a new vector that manages data for the given Tensors.
-	static Vector flatten(const std::vector<Tensor<T> *> &tensors)
+	static Vector flatten(const Vector<Tensor<T> *> &tensors)
 	{
 		size_t n = 0, offset = 0;
 		for(auto t : tensors)
@@ -235,6 +258,14 @@ public:
 	Vector(const Vector &v) : Tensor<T>(v.m_size)
 	{
 		BLAS<T>::copy(m_size, v.m_buffer, 1, m_buffer, 1);
+	}
+	
+	/// Construct from an initializer list.
+	Vector(const std::initializer_list<T> &list) : Tensor<T>(list.size())
+	{
+		size_t i = 0;
+		for(auto &val : list)
+			m_buffer[i++] = val;
 	}
 	
 	/// Construct from a sum.

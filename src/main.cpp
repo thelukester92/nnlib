@@ -33,7 +33,7 @@ void testCorrectness()
 	Linear<double> layer(inps, outs);
 	Vector<double> input(inps), target(outs);
 	
-	Vector<double> allWeights = Vector<double>::flatten({ &layer.weights(), &layer.bias() });
+	Vector<double> allWeights = Vector<double>::flatten(layer.parameters());
 	size_t i = 0;
 	
 	// weights
@@ -63,8 +63,9 @@ void testCorrectness()
 	Vector<double> &blame = layer.backward(input, target);
 	Assert(blame(0) == 18.28 && blame(1) == 26.14, "backward failed to assign correct input blame!");
 	
+	Vector<double> &biasBlame = *(Vector<double> *)layer.blame()[1];
 	for(size_t i = 0; i < outs; ++i)
-		Assert(layer.biasBlame()(i) == target(i), "backward failed to assign correct bias blame!");
+		Assert(biasBlame(i) == target(i), "backward failed to assign correct bias blame!");
 	
 	Matrix<double> expectedBlame(outs, inps);
 	expectedBlame[0] = 9.8596;
@@ -74,8 +75,9 @@ void testCorrectness()
 	expectedBlame[4] = 47.5396;
 	expectedBlame[5] = 151.4;
 	
+	Matrix<double> &weightsBlame = *(Matrix<double> *)layer.blame()[0];
 	for(size_t i = 0; i < expectedBlame.size(); ++i)
-		Assert(fabs(layer.weightsBlame()[i] - expectedBlame[i]) < 1e-12, "backward failed to assign correct weights blame!");
+		Assert(fabs(weightsBlame[i] - expectedBlame[i]) < 1e-12, "backward failed to assign correct weights blame!");
 	
 	cout << "Passed all tests!" << endl;
 }
