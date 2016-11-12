@@ -17,20 +17,62 @@ class Tensor
 {
 public:
 	/// General-purpose constructor.
-	Tensor(size_t n) : m_size(n), m_capacity(n), m_buffer(new T[n]), m_sharedBuffer(m_buffer)
+	Tensor(size_t n)
+	: m_size(n), m_capacity(n), m_buffer(new T[n]), m_sharedBuffer(m_buffer), m_sharedSize(0)
 	{}
+	
+	/// Create a shared-memory tensor.
+	Tensor(std::shared_ptr<T> buffer, size_t bufSize, size_t n, size_t offset = 0)
+	: m_size(n), m_capacity(n), m_buffer(&*buffer + offset), m_sharedBuffer(buffer), m_sharedSize(bufSize)
+	{}
+	
+	/// Create a new shared-memory tensor from another Tensor.
+	Tensor(Tensor &t, size_t n, size_t offset = 0)
+	: m_buffer(t.m_buffer + offset), m_size(n), m_capacity(n), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
+	{}
+	
+	/// Assign a new shared-memory buffer.
+	void shareBuffer(std::shared_ptr<T> buffer, size_t bufSize, size_t n, size_t offset = 0)
+	{
+		m_buffer = &*buffer + offset;
+		m_size = n;
+		m_capacity = n;
+		m_sharedBuffer = buffer;
+		m_sharedSize = bufSize;
+	}
+	
+	/// Assign a new shared-memory buffer from another Tensor.
+	void shareBuffer(Tensor &t, size_t n, size_t offset = 0)
+	{
+		m_buffer = t.m_buffer + offset;
+		m_size = n;
+		m_capacity = n;
+		m_sharedBuffer = t.m_sharedBuffer;
+		m_sharedSize = t.m_sharedSize;
+	}
+	
+	/// Set a new data offset from the actual buffer.
+	void offsetBuffer(size_t n)
+	{
+		Assert(n < m_sharedSize, "Cannot offset beyond the end of the Tensor storage!");
+		m_buffer = &*m_sharedBuffer + n;
+		m_size = m_sharedSize - n;
+		m_capacity = m_sharedSize - n;
+	}
 	
 	/// Reserve n elements in buffer.
 	/// Elements in excess of m_size are unused.
+	/// This is not allowed for a shared Tensor.
 	void reserve(size_t n)
 	{
 		if(n > m_capacity)
 		{
+			Assert(m_sharedSize == 0, "Cannot reserve more space in a shared Tensor!");
 			T *buffer = new T[m_capacity = n];
 			for(size_t i = 0; i < m_size; ++i)
 				buffer[i] = m_buffer[i];
-			delete[] m_buffer;
 			m_buffer = buffer;
+			m_sharedBuffer.reset(m_buffer); // this will delete the old buffer
 		}
 	}
 	
@@ -70,9 +112,10 @@ public:
 		return m_size;
 	}
 protected:
-	size_t m_size, m_capacity;
-	T *m_buffer;
-	std::shared_ptr<T> m_sharedBuffer;
+	size_t m_size, m_capacity;			///< number of elements and size of the buffer (minus offset)
+	T *m_buffer;						///< pointer to the buffer (with offset).
+	std::shared_ptr<T> m_sharedBuffer;	///< the original allocated buffer; this handles deleting m_buffer.
+	size_t m_sharedSize;				///< the size of the shared buffer, if shared, or 0 if not shared.
 };
 
 template <typename T> class Vector;
@@ -148,6 +191,19 @@ using Tensor<T>::reserve;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
+	/// Create a new vector that manages data for the given Tensors.
+	static Vector flatten(const std::vector<Tensor<T> *> &tensors)
+	{
+		size_t n = 0;
+		for(auto t : tensors)
+			n += t->size();
+		
+		Vector v(n);
+		
+		
+		return v;
+	}
+	
 	/// General-purpose constructor.
 	Vector(size_t n) : Tensor<T>(n)
 	{}
