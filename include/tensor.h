@@ -1,12 +1,6 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
-#ifdef APPLE
-	#include <Accelerate/Accelerate.h>
-#else
-	#include <cblas.h>
-#endif
-
 #include <vector>
 #include <type_traits>
 #include "op.h"
@@ -23,7 +17,7 @@ class Tensor
 {
 public:
 	/// General-purpose constructor.
-	Tensor(size_t n) : m_size(n), m_capacity(n), m_buffer(new T[n])
+	Tensor(size_t n) : m_size(n), m_capacity(n), m_buffer(new T[n]), m_sharedBuffer(m_buffer)
 	{}
 	
 	/// Reserve n elements in buffer.
@@ -78,6 +72,7 @@ public:
 protected:
 	size_t m_size, m_capacity;
 	T *m_buffer;
+	std::shared_ptr<T> m_sharedBuffer;
 };
 
 template <typename T> class Vector;

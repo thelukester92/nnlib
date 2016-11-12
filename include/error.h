@@ -20,12 +20,6 @@ namespace nnlib
 	}															\
 }
 
-#ifdef DEBUG
-	#define DebugAssert(x, m) NNLibAssert(x, m)
-#else
-	#define DebugAssert(x, m) (void) 0
-#endif
-
 #ifndef OPTIMIZE
 	#define Assert(x, m) NNLibAssert(x, m)
 #else

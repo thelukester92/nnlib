@@ -1,6 +1,12 @@
 #ifndef BLAS_H
 #define BLAS_H
 
+#ifdef APPLE
+	#include <Accelerate/Accelerate.h>
+#else
+	#include <cblas.h>
+#endif
+
 namespace nnlib
 {
 
