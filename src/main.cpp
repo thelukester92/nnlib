@@ -2,6 +2,7 @@
 #include "error.h"
 #include "random.h"
 #include "linear.h"
+#include "tanh.h"
 #include <iostream>
 #include <chrono>
 using namespace nnlib;
@@ -78,6 +79,11 @@ void testCorrectness()
 	Matrix<double> &weightsBlame = *(Matrix<double> *)layer.blame()[0];
 	for(size_t i = 0; i < expectedBlame.size(); ++i)
 		Assert(fabs(weightsBlame[i] - expectedBlame[i]) < 1e-12, "backward failed to assign correct weights blame!");
+	
+	Tanh<double> activation(outs);
+	Vector<double> &act = activation.forward(layer.output());
+	for(size_t i = 0; i < act.size(); ++i)
+		Assert(act[i] == tanh(layer.output()[i]), "tanh forward failed!");
 	
 	cout << "Passed all tests!" << endl;
 }
