@@ -178,6 +178,13 @@ public:
 		BLAS<T>::gemv(CblasRowMajor, CblasNoTrans, op.lhs.m_rows, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, 1, 0, m_buffer, 1);
 	}
 	
+	/// Construct from a product.
+	Vector(const OpMult<Vector, Matrix<T>> &op) : Tensor<T>(op.rhs.m_rows)
+	{
+		Assert(op.lhs.m_size == op.rhs.m_rows, "Incompatible multiplicands!");
+		BLAS<T>::gemv(CblasRowMajor, CblasTrans, op.rhs.m_rows, op.rhs.m_cols, 1, op.rhs.m_buffer, op.rhs.m_cols, op.lhs.m_buffer, 1, 0, m_buffer, 1);
+	}
+	
 	/// Assign a vector.
 	Vector &operator=(const Vector &v)
 	{
@@ -199,6 +206,14 @@ public:
 	{
 		Assert(m_size == op.lhs.m_rows && op.lhs.m_cols == op.rhs.m_size, "Incompatible multiplicands!");
 		BLAS<T>::gemv(CblasRowMajor, CblasNoTrans, op.lhs.m_rows, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, 1, 0, m_buffer, 1);
+		return *this;
+	}
+	
+	/// Assign a product.
+	Vector &operator=(const OpMult<Vector, Matrix<T>> &op)
+	{
+		Assert(op.lhs.m_size == op.rhs.m_rows, "Incompatible multiplicands!");
+		BLAS<T>::gemv(CblasRowMajor, CblasTrans, op.rhs.m_rows, op.rhs.m_cols, 1, op.rhs.m_buffer, op.rhs.m_cols, op.lhs.m_buffer, 1, 0, m_buffer, 1);
 		return *this;
 	}
 	

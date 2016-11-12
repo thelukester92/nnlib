@@ -32,8 +32,9 @@ void testCorrectness()
 	size_t inps = 2, outs = 3;
 	Linear<double> layer(inps, outs);
 	
-	Matrix<double> weights(outs, inps);
-	Vector<double> input(inps), bias(outs), target(outs);
+	Matrix<double> &weights = layer.weights();
+	Vector<double> &bias = layer.bias();
+	Vector<double> input(inps), target(outs);
 	
 	weights(0, 0) = 1;
 	weights(0, 1) = 0;
@@ -53,19 +54,12 @@ void testCorrectness()
 	target(1) = 11.0;
 	target(2) = 15.14;
 	
-	Vector<double> temp(outs), temp2(outs);
-	for(size_t i = 0; i < temp.size(); ++i)
-		temp(i) = bias(i) + target(i);
-	temp2 = bias + target;
-	for(size_t i = 0; i < temp.size(); ++i)
-		Assert(temp(i) == temp2(i), "Vector addition failed!");
-	
-	Vector<size_t> a(5), b(5);
-	a = b;
-	
-	Vector<double> result = bias + weights * input;
+	Vector<double> &result = layer.forward(input);
 	for(size_t i = 0; i < outs; ++i)
 		Assert(result(i) == target(i), "forward failed!");
+	
+	Vector<double> &blame = layer.backward(input, target);
+	Assert(blame(0) == 18.28 && blame(1) == 26.14, "backward failed!");
 	
 	cout << "Passed all tests!" << endl;
 }
