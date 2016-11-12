@@ -12,27 +12,14 @@ template <typename T>
 class Module
 {
 public:
-	Module(size_t inps, size_t outs) : m_output(outs), m_inputBlame(inps)
-	{}
-	
-	Vector<T> &output()
-	{
-		return m_output;
-	}
-	
-	Vector<T> &inputBlame()
-	{
-		return m_inputBlame;
-	}
-	
 	size_t inputCount() const
 	{
-		return m_inputBlame.size();
+		return inputBlame().size();
 	}
 	
 	size_t outputCount() const
 	{
-		return m_output.size();
+		return output().size();
 	}
 	
 	/// Feed in an input vector and return a cached output vector.
@@ -40,6 +27,12 @@ public:
 	
 	/// Feed in an input and output blame (gradient) and return a cached input blame vector.
 	virtual Vector<T> &backward(const Vector<T> &input, const Vector<T> &blame) = 0;
+	
+	/// Get the input blame (gradient) buffer.
+	virtual Vector<T> &inputBlame() = 0;
+	
+	/// Get the output buffer.
+	virtual Vector<T> &output() = 0;
 	
 	/// Return pointers to all parameters (i.e. for flattening).
 	virtual Vector<Tensor<T> *> parameters()
@@ -52,9 +45,6 @@ public:
 	{
 		return Vector<Tensor<T> *>(0);
 	}
-protected:
-	Vector<T> m_output;
-	Vector<T> m_inputBlame;
 };
 
 }

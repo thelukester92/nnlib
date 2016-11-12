@@ -9,11 +9,9 @@ namespace nnlib
 template <typename T>
 class Linear : public Module<T>
 {
-using Module<T>::m_output;
-using Module<T>::m_inputBlame;
 public:
 	Linear(size_t inps, size_t outs)
-	: Module<T>(inps, outs), m_weights(outs, inps), m_bias(outs), m_weightsBlame(outs, inps), m_biasBlame(outs)
+	: m_weights(outs, inps), m_bias(outs), m_weightsBlame(outs, inps), m_biasBlame(outs), m_inputBlame(inps), m_output(outs)
 	{}
 	
 	/// Feed in an input vector and return a cached output vector.
@@ -31,6 +29,18 @@ public:
 		m_weightsBlame		= blame * input;
 		m_biasBlame			= blame;
 		return m_inputBlame	= blame * m_weights;
+	}
+	
+	/// Get the input blame (gradient) buffer.
+	virtual Vector<T> &inputBlame() override
+	{
+		return m_inputBlame;
+	}
+	
+	/// Get the output buffer.
+	virtual Vector<T> &output() override
+	{
+		return m_output;
 	}
 	
 	/// Return pointers to all parameters (i.e. for flattening).
@@ -53,6 +63,8 @@ private:
 	// buffers
 	Matrix<T> m_weightsBlame;
 	Vector<T> m_biasBlame;
+	Vector<T> m_inputBlame;
+	Vector<T> m_output;
 };
 
 }
