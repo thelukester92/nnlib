@@ -173,9 +173,31 @@ void testMNIST()
 	Vector<double> parameters = Vector<double>::flatten(nn.parameters());
 	Vector<double> blame = Vector<double>::flatten(nn.blame());
 	
+	Random r;
+	r.fillNormal(parameters);
+	
 	RandomIterator ri(train.rows());
 	Vector<double> feat, lab;
 	size_t n = 0;
+	
+	size_t misclassified = 0;
+	for(size_t k = 0; k < test.rows(); ++k)
+	{
+		testFeat.row(k, feat);
+		testLab.row(k, lab);
+		nn.forward(feat);
+		size_t indexOfMax = 0, actualMax = 0;
+		for(size_t l = 1; l < 10; ++l)
+		{
+			if(nn.output()(l) > nn.output()(indexOfMax))
+				indexOfMax = l;
+			if(lab[l] > lab[actualMax])
+				actualMax = l;
+		}
+		if(indexOfMax != actualMax)
+			++misclassified;
+	}
+	cout << "Begin: " << misclassified << endl;
 	
 	for(auto i : ri)
 	{
@@ -191,7 +213,26 @@ void testMNIST()
 		for(; p != parameters.end(); ++p, ++b)
 			*p -= 0.01 * *b;
 		
-		if(++n > 1000)
+		if(++n > 10000)
 			break;
 	}
+	
+	misclassified = 0;
+	for(size_t k = 0; k < test.rows(); ++k)
+	{
+		testFeat.row(k, feat);
+		testLab.row(k, lab);
+		nn.forward(feat);
+		size_t indexOfMax = 0, actualMax = 0;
+		for(size_t l = 1; l < 10; ++l)
+		{
+			if(nn.output()(l) > nn.output()(indexOfMax))
+				indexOfMax = l;
+			if(lab[l] > lab[actualMax])
+				actualMax = l;
+		}
+		if(indexOfMax != actualMax)
+			++misclassified;
+	}
+	cout << "End: " << misclassified << endl;
 }
