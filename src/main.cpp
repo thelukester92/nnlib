@@ -211,7 +211,7 @@ void testMNIST()
 		auto b = blame.begin();
 		
 		for(; p != parameters.end(); ++p, ++b)
-			*p -= 0.01 * *b;
+			*p -= 0.001 * *b;
 		
 		if(++n > 10000)
 			break;
