@@ -1,6 +1,7 @@
 #include "tensor.h"
 #include "error.h"
 #include "random.h"
+#include "loader.h"
 #include "linear.h"
 #include "tanh.h"
 #include "sequential.h"
@@ -11,12 +12,13 @@ using namespace std;
 
 void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
+void testMNIST();
 
 int main()
 {
-	size_t inps				= 100000;
+	size_t inps				= 10000;
 	size_t outs				= 1000;
-	size_t epochs			= 10;
+	size_t epochs			= 100;
 	
 	using clock = chrono::high_resolution_clock;
 	clock::time_point start;
@@ -25,6 +27,7 @@ int main()
 	
 	testCorrectness();
 	testEfficiency(inps, outs, epochs, startFn, endFn);
+	testMNIST();
 	
 	return 0;
 }
@@ -117,9 +120,9 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 	Vector<double> input(inps), bias(outs), result(outs);
 	Random r;
 	
-	weights.fillNormal(r);
-	input.fillNormal(r);
-	bias.fillNormal(r);
+	r.fillNormal(weights);
+	r.fillNormal(bias);
+	r.fillNormal(input);
 	result.fill(0.0);
 	
 	start();
@@ -132,4 +135,42 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 		resultSum += result[i];
 	
 	return resultSum;
+}
+
+void testMNIST()
+{
+	Sequential<double> nn;
+	nn.add(
+		new Linear<double>(784, 300), new Tanh<double>(300),
+		new Linear<double>(300, 100), new Tanh<double>(100),
+		new Linear<double>(100, 10), new Tanh<double>(10)
+	);
+	
+	Matrix<double> train = Loader<double>::loadRaw("../datasets/mnist/train.raw");
+	Matrix<double> test = Loader<double>::loadRaw("../datasets/mnist/test.raw");
+	
+	Matrix<double> trainFeat(train.rows(), train.cols() - 1), trainLab(train.rows(), 1);
+	Matrix<double> testFeat(test.rows(), test.cols() - 1), testLab(test.rows(), 1);
+	
+	for(size_t i = 0; i < train.rows(); ++i)
+	{
+		for(size_t j = 0; j < trainFeat.cols(); ++j)
+			trainFeat(i, j) = train(i, j);
+		trainLab(i, 0) = train(i, trainFeat.cols());
+	}
+	
+	for(size_t i = 0; i < test.rows(); ++i)
+	{
+		for(size_t j = 0; j < testFeat.cols(); ++j)
+			testFeat(i, j) = test(i, j);
+		testLab(i, 0) = test(i, testFeat.cols());
+	}
+	
+	RandomIterator ri(train.rows());
+	Vector<double> feat, lab;
+	for(auto i : ri)
+	{
+		trainFeat.row(i, feat);
+		trainLab.row(i, lab);
+	}
 }

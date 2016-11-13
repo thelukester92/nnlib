@@ -28,6 +28,14 @@ public:
 		m_modules.push_back(module);
 	}
 	
+	/// Add multiple modules at once.
+	template <typename ... Ts>
+	void add(Module<T> *module, Ts*... more)
+	{
+		add(module);
+		add(more...);
+	}
+	
 	/// Release the module at index i from ownership.
 	/// Caller becomes responsible for deleting the module.
 	Module<T> *release(size_t i)

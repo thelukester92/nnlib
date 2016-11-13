@@ -4,11 +4,12 @@
 #include <type_traits>
 #include "op.h"
 #include "error.h"
-#include "random.h"
 #include "blas.h"
 
 namespace nnlib
 {
+
+/// \todo use ld instead of m_cols for y-stride.
 
 /// Tensor base class (with no specialized methods).
 template <typename T>
@@ -80,15 +81,6 @@ public:
 	{
 		for(size_t i = 0; i < m_size; ++i)
 			m_buffer[i] = val;
-	}
-	
-	/// Set all elements to random values drawn from a normal distribution.
-	/// This method only works if T is float or double.
-	template <typename U = T>
-	typename std::enable_if<std::is_same<U, float>::value || std::is_same<U, double>::value, void>::type fillNormal(Random &r, T mean = 0.0, T stddev = 1.0, T cap = 3.0)
-	{
-		for(size_t i = 0; i < m_size; ++i)
-			m_buffer[i] = r.normal(mean, stddev, cap);
 	}
 	
 	/// Erase element i from this tensor.
@@ -220,6 +212,19 @@ public:
 			m_buffer[i] = val;
 	}
 	
+	/// Vector access.
+	/// \todo add column access.
+	Vector<T> row(size_t i)
+	{
+		return Vector<T>(*this, m_cols, m_cols * i);
+	}
+	
+	/// Vector access.
+	void row(size_t i, Vector<T> &r)
+	{
+		r.shareBuffer(*this, m_cols, m_cols * i);
+	}
+	
 	/// Element access.
 	T &operator()(size_t i, size_t j)
 	{
@@ -281,7 +286,7 @@ public:
 	}
 	
 	/// General-purpose constructor.
-	Vector(size_t n) : Tensor<T>(n)
+	explicit Vector(size_t n = 0) : Tensor<T>(n)
 	{}
 	
 	/// Construct from a vector.
@@ -297,6 +302,10 @@ public:
 		for(auto &val : list)
 			m_buffer[i++] = val;
 	}
+	
+	/// Construct a shared-memory vector from another Tensor.
+	Vector(Tensor<T> &t, size_t n, size_t offset = 0) : Tensor<T>(t, n, offset)
+	{}
 	
 	/// Construct from a sum.
 	template <typename U, typename V>
