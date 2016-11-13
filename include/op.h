@@ -19,6 +19,12 @@ using BinOp<T, U>::BinOp;
 };
 
 template <typename T, typename U>
+struct OpSub : public BinOp<T, U>
+{
+using BinOp<T, U>::BinOp;
+};
+
+template <typename T, typename U>
 struct OpMult : public BinOp<T, U>
 {
 using BinOp<T, U>::BinOp;

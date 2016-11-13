@@ -5,6 +5,7 @@
 #include "linear.h"
 #include "tanh.h"
 #include "sequential.h"
+#include "squared_error.h"
 #include <iostream>
 #include <chrono>
 using namespace nnlib;
@@ -145,26 +146,32 @@ void testMNIST()
 		new Linear<double>(300, 100), new Tanh<double>(100),
 		new Linear<double>(100, 10), new Tanh<double>(10)
 	);
+	SquaredError<double> critic(10);
 	
 	Matrix<double> train = Loader<double>::loadRaw("../datasets/mnist/train.raw");
 	Matrix<double> test = Loader<double>::loadRaw("../datasets/mnist/test.raw");
 	
-	Matrix<double> trainFeat(train.rows(), train.cols() - 1), trainLab(train.rows(), 1);
-	Matrix<double> testFeat(test.rows(), test.cols() - 1), testLab(test.rows(), 1);
+	Matrix<double> trainFeat(train.rows(), train.cols() - 1), trainLab(train.rows(), 10);
+	Matrix<double> testFeat(test.rows(), test.cols() - 1), testLab(test.rows(), 10);
 	
+	trainLab.fill(0);
 	for(size_t i = 0; i < train.rows(); ++i)
 	{
 		for(size_t j = 0; j < trainFeat.cols(); ++j)
 			trainFeat(i, j) = train(i, j);
-		trainLab(i, 0) = train(i, trainFeat.cols());
+		trainLab(i, train(i, trainFeat.cols())) = 1;
 	}
 	
+	testLab.fill(0);
 	for(size_t i = 0; i < test.rows(); ++i)
 	{
 		for(size_t j = 0; j < testFeat.cols(); ++j)
 			testFeat(i, j) = test(i, j);
-		testLab(i, 0) = test(i, testFeat.cols());
+		testLab(i, test(i, testFeat.cols())) = 1;
 	}
+	
+	Vector<double> parameters = Vector<double>::flatten(nn.parameters());
+	Vector<double> blame = Vector<double>::flatten(nn.blame());
 	
 	RandomIterator ri(train.rows());
 	Vector<double> feat, lab;

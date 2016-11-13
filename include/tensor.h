@@ -315,6 +315,14 @@ public:
 		*this += op.rhs;
 	}
 	
+	/// Construct from a difference.
+	template <typename U, typename V>
+	Vector(const OpSub<U, V> &op) : Tensor<T>(0)
+	{
+		safeAssign(op.lhs);
+		*this -= op.rhs;
+	}
+	
 	/// Construct from a product.
 	Vector(const OpMult<Matrix<T>, Vector> &op) : Tensor<T>(op.lhs.m_rows)
 	{
@@ -343,6 +351,14 @@ public:
 	{
 		*this = op.lhs;
 		return *this += op.rhs;
+	}
+	
+	/// Assign a difference.
+	template <typename U, typename V>
+	Vector &operator=(const OpSub<U, V> &op)
+	{
+		*this = op.lhs;
+		return *this -= op.rhs;
 	}
 	
 	/// Assign a product.
@@ -423,6 +439,22 @@ public:
 		*this += op.lhs;
 		return *this += op.rhs;
 	}
+	
+	/// Element-wise subtraction.
+	Vector &operator-=(const Vector &v)
+	{
+		Assert(m_size == v.m_size, "Incompatible size!");
+		BLAS<T>::axpy(m_size, -1, v.m_buffer, 1, m_buffer, 1);
+		return *this;
+	}
+	
+	/// Element-wise subtraction.
+	template <typename U, typename V>
+	Vector &operator-=(const OpAdd<U, V> &op)
+	{
+		*this -= op.lhs;
+		return *this -= op.rhs;
+	}
 };
 
 /// Deferred element-wise addition.
@@ -430,6 +462,13 @@ template <typename U, typename V>
 OpAdd<U, V> operator+(const U &lhs, const V &rhs)
 {
 	return OpAdd<U, V>(lhs, rhs);
+}
+
+/// Deferred element-wise subtraction.
+template <typename U, typename V>
+OpSub<U, V> operator-(const U &lhs, const V &rhs)
+{
+	return OpSub<U, V>(lhs, rhs);
 }
 
 /// Deferred tensor multiplication.

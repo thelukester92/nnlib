@@ -12,6 +12,9 @@ template <typename T>
 class SquaredError : public Critic<T>
 {
 public:
+	SquaredError(size_t inps) : m_loss(inps), m_blame(inps)
+	{}
+	
 	/// Feed in input and target vectors and return a cached error (loss) vector.
 	virtual Vector<T> &forward(const Vector<T> &input, const Vector<T> &target) override
 	{
