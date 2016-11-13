@@ -6,6 +6,8 @@
 namespace nnlib
 {
 
+/// \todo allow a critic as the last "layer"
+
 /// A feed-forward neural network.
 /// Takes ownership of all modules added to it.
 template <typename T>

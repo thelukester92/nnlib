@@ -175,9 +175,23 @@ void testMNIST()
 	
 	RandomIterator ri(train.rows());
 	Vector<double> feat, lab;
+	size_t n = 0;
+	
 	for(auto i : ri)
 	{
 		trainFeat.row(i, feat);
 		trainLab.row(i, lab);
+		
+		nn.forward(feat);
+		nn.backward(feat, critic.backward(nn.output(), lab));
+		
+		auto p = parameters.begin();
+		auto b = blame.begin();
+		
+		for(; p != parameters.end(); ++p, ++b)
+			*p -= 0.01 * *b;
+		
+		if(++n > 1000)
+			break;
 	}
 }
