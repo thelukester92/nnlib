@@ -31,7 +31,7 @@ public:
 		Assert(n == m_inputBlame.size(), "Incompatible input!");
 		Assert(n == blame.size(), "Incompatible blame!");
 		for(size_t i = 0; i < n; ++i)
-			m_inputBlame[i] = 1.0 - m_output[i] * m_output[i];
+			m_inputBlame[i] = blame[i] * (1.0 - m_output[i] * m_output[i]);
 		return m_inputBlame;
 	}
 	

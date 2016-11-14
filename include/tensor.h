@@ -28,13 +28,13 @@ public:
 	
 	/// Create a new shared-memory tensor from another Tensor.
 	Tensor(Tensor &t, size_t n, size_t offset = 0)
-	: m_buffer(t.m_buffer + offset), m_size(n), m_capacity(n), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
+	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
 	{}
 	
 	/// Assign a new shared-memory buffer.
 	void shareBuffer(std::shared_ptr<T> buffer, size_t bufSize, size_t n, size_t offset = 0)
 	{
-		m_buffer = &*buffer + offset;
+		m_buffer = buffer.get() + offset;
 		m_size = n;
 		m_capacity = n;
 		m_sharedBuffer = buffer;

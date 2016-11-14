@@ -38,6 +38,18 @@ public:
 		add(more...);
 	}
 	
+	/// Get the module at index i.
+	Module<T> &module(size_t i)
+	{
+		return *m_modules[i];
+	}
+	
+	/// Get the number of modules.
+	size_t modules() const
+	{
+		return m_modules.size();
+	}
+	
 	/// Release the module at index i from ownership.
 	/// Caller becomes responsible for deleting the module.
 	Module<T> *release(size_t i)

@@ -30,9 +30,8 @@ public:
 	/// Feed in input and target vectors and return a cached blame (gradient) vector.
 	virtual Vector<T> &backward(const Vector<T> &input, const Vector<T> &target) override
 	{
-		size_t n = input.size();
-		Assert(n == m_loss.size(), "Incompatible input to error function!");
-		Assert(n == target.size(), "Incompatible operands to error function!");
+		Assert(input.size() == m_loss.size(), "Incompatible input to error function!");
+		Assert(input.size() == target.size(), "Incompatible operands to error function!");
 		return m_blame = target - input; // technically, this should be multiplied by 2; this is absorbed as a constant.
 	}
 	

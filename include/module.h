@@ -7,6 +7,8 @@ namespace nnlib
 {
 
 /// \todo what if the module feeds forward a Matrix instead of a Vector?
+/// \todo Matrix-Matrix feed-in and Matrix-Vector feed-in.
+/// \todo inputBlame and output protected parameters.
 
 template <typename T>
 class Module
@@ -22,6 +24,16 @@ public:
 	size_t outputCount() const
 	{
 		return output().size();
+	}
+	
+	const Vector<T> &inputBlame() const
+	{
+		return const_cast<Module *>(this)->inputBlame();
+	}
+	
+	const Vector<T> &output() const
+	{
+		return const_cast<Module *>(this)->output();
 	}
 	
 	/// Feed in an input vector and return a cached output vector.

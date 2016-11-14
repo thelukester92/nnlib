@@ -13,6 +13,7 @@ using namespace std;
 
 void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
+void testLine();
 void testMNIST();
 
 int main()
@@ -28,6 +29,7 @@ int main()
 	
 	testCorrectness();
 	testEfficiency(inps, outs, epochs, startFn, endFn);
+	testLine();
 	testMNIST();
 	
 	return 0;
@@ -35,6 +37,7 @@ int main()
 
 void testCorrectness()
 {
+#ifndef OPTIMIZE
 	size_t inps = 2, outs = 3;
 	Linear<double> layer(inps, outs);
 	Vector<double> input(inps), target(outs);
@@ -92,7 +95,7 @@ void testCorrectness()
 	
 	Vector<double> &tanhBlame = activation.backward(layer.output(), target);
 	for(size_t i = 0; i < tanhBlame.size(); ++i)
-		Assert(tanhBlame[i] == (1.0 - act[i] * act[i]), "tanh backward failed!");
+		Assert(tanhBlame[i] == target[i] * (1.0 - act[i] * act[i]), "tanh backward failed!");
 	
 	Sequential<double> nn;
 	nn.add(&layer);
@@ -111,6 +114,7 @@ void testCorrectness()
 	// release the layers, since they weren't dynamically allocated!
 	nn.release(1);
 	nn.release(0);
+#endif
 	
 	cout << "Passed all tests!" << endl;
 }
@@ -138,13 +142,56 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 	return resultSum;
 }
 
+void testLine()
+{
+	Sequential<double> nn;
+	nn.add(new Linear<double>(1, 1), new Tanh<double>(1));
+	
+	Matrix<double> data(1000, 1), lab(1000, 1);
+	for(size_t i = 0; i < data.size(); ++i)
+	{
+		data[i] = i / 1000.0;
+		lab[i] = i / 1000.0;
+	}
+	
+	Vector<double> param = Vector<double>::flatten(nn.parameters());
+	Vector<double> blame = Vector<double>::flatten(nn.blame());
+	
+	Random r;
+	r.fillNormal(param, 0.0, 0.03, 0.1);
+	
+	RandomIterator ri(1000);
+	for(size_t i = 0; i < 100; ++i)
+	{
+		ri.reset();
+		for(auto i : ri)
+		{
+			Vector<double> row = data.row(i);
+			nn.forward(row);
+			nn.backward(row, lab.row(i) - nn.output());
+			auto p = param.begin();
+			auto b = blame.begin();
+			for(; p != param.end(); ++p, ++b)
+				*p += 0.01 * *b;
+		}
+	}
+	
+	double sse = 0;
+	for(size_t i = 0; i < 1000; ++i)
+	{
+		nn.forward(data.row(i));
+		sse += (lab(i, 0) - nn.output()(0)) * (lab(i, 0) - nn.output()(0));
+	}
+	Assert(sse < 5, "Linear regression failed!");
+}
+
 void testMNIST()
 {
 	Sequential<double> nn;
 	nn.add(
-		new Linear<double>(784, 300), new Tanh<double>(300),
-		new Linear<double>(300, 100), new Tanh<double>(100),
-		new Linear<double>(100, 10), new Tanh<double>(10)
+		new Linear<double>(784, 80), new Tanh<double>(80),
+		new Linear<double>(80, 30), new Tanh<double>(30),
+		new Linear<double>(30, 10), new Tanh<double>(10)
 	);
 	SquaredError<double> critic(10);
 	
@@ -158,7 +205,7 @@ void testMNIST()
 	for(size_t i = 0; i < train.rows(); ++i)
 	{
 		for(size_t j = 0; j < trainFeat.cols(); ++j)
-			trainFeat(i, j) = train(i, j);
+			trainFeat(i, j) = train(i, j) / 255.0;
 		trainLab(i, train(i, trainFeat.cols())) = 1;
 	}
 	
@@ -166,7 +213,7 @@ void testMNIST()
 	for(size_t i = 0; i < test.rows(); ++i)
 	{
 		for(size_t j = 0; j < testFeat.cols(); ++j)
-			testFeat(i, j) = test(i, j);
+			testFeat(i, j) = test(i, j) / 255.0;
 		testLab(i, test(i, testFeat.cols())) = 1;
 	}
 	
@@ -174,11 +221,13 @@ void testMNIST()
 	Vector<double> blame = Vector<double>::flatten(nn.blame());
 	
 	Random r;
-	r.fillNormal(parameters);
+	for(size_t i = 0; i < nn.modules(); ++i)
+		for(auto j : nn.module(i).parameters())
+			r.fillNormal(*j, 0.0, std::max(0.03, 1.0 / nn.module(i).inputCount()));
 	
 	RandomIterator ri(train.rows());
 	Vector<double> feat, lab;
-	size_t n = 0;
+	double learningRate = 1e-2;
 	
 	size_t misclassified = 0;
 	for(size_t k = 0; k < test.rows(); ++k)
@@ -199,40 +248,45 @@ void testMNIST()
 	}
 	cout << "Begin: " << misclassified << endl;
 	
-	for(auto i : ri)
-	{
-		trainFeat.row(i, feat);
-		trainLab.row(i, lab);
-		
-		nn.forward(feat);
-		nn.backward(feat, critic.backward(nn.output(), lab));
-		
-		auto p = parameters.begin();
-		auto b = blame.begin();
-		
-		for(; p != parameters.end(); ++p, ++b)
-			*p -= 0.001 * *b;
-		
-		if(++n > 10000)
-			break;
-	}
+	auto prms = nn.parameters();
+	auto blam = nn.blame();
 	
-	misclassified = 0;
-	for(size_t k = 0; k < test.rows(); ++k)
+	for(size_t epoch = 0; epoch < 5; ++epoch)
 	{
-		testFeat.row(k, feat);
-		testLab.row(k, lab);
-		nn.forward(feat);
-		size_t indexOfMax = 0, actualMax = 0;
-		for(size_t l = 1; l < 10; ++l)
+		ri.reset();
+		for(auto i : ri)
 		{
-			if(nn.output()(l) > nn.output()(indexOfMax))
-				indexOfMax = l;
-			if(lab[l] > lab[actualMax])
-				actualMax = l;
+			trainFeat.row(i, feat);
+			trainLab.row(i, lab);
+			
+			nn.forward(feat);
+			nn.backward(feat, critic.backward(nn.output(), lab));
+			
+			auto p = parameters.begin();
+			auto b = blame.begin();
+			
+			for(; p != parameters.end(); ++p, ++b)
+				*p += learningRate * *b;
 		}
-		if(indexOfMax != actualMax)
-			++misclassified;
+		
+		misclassified = 0;
+		for(size_t k = 0; k < test.rows(); ++k)
+		{
+			testFeat.row(k, feat);
+			testLab.row(k, lab);
+			nn.forward(feat);
+			size_t indexOfMax = 0, actualMax = 0;
+			for(size_t l = 1; l < 10; ++l)
+			{
+				if(nn.output()(l) > nn.output()(indexOfMax))
+					indexOfMax = l;
+				if(lab[l] > lab[actualMax])
+					actualMax = l;
+			}
+			if(indexOfMax != actualMax)
+				++misclassified;
+		}
+		cout << "\rStep " << epoch << ": " << misclassified << "     " << flush;
 	}
-	cout << "End: " << misclassified << endl;
+	cout << endl;
 }
