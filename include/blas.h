@@ -101,7 +101,11 @@ public:
 	
 	static void gemm(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, size_t rows, size_t cols, size_t inner, T alpha, T *A, size_t lda, T *B, size_t ldb, T beta, T *C, size_t ldc)
 	{
-		cblas_dgemm(order, transA, transB, rows, cols, inner, alpha, A, lda, B, ldb, beta, C, ldc);
+		// cblas_dgemm(order, transA, transB, rows, cols, inner, alpha, A, lda, B, ldb, beta, C, ldc);
+		size_t idx = 0;
+		for(size_t i = 0; i < rows; ++i)
+			for(size_t j = 0; j < cols; ++j, ++idx)
+				C[idx] = alpha * A[i] * B[j] + beta * C[idx];
 	}
 };
 

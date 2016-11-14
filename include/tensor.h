@@ -194,7 +194,6 @@ public:
 	{}
 	
 	/// Assign a product.
-	/// \todo verify the math here, I did this in a rush.
 	Matrix &operator=(const OpMult<Vector<T>, Vector<T>> &op)
 	{
 		Assert(m_rows == op.lhs.m_size && m_cols == op.rhs.m_size, "Incompatible multiplicands!");

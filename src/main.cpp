@@ -14,7 +14,7 @@ using namespace std;
 void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
 void testLine();
-void testMNIST();
+void testMNIST(function<void()> &start, function<void()> &end);
 
 int main()
 {
@@ -26,11 +26,12 @@ int main()
 	clock::time_point start;
 	function<void()> startFn = [&](void) { start = clock::now(); };
 	function<void()> endFn = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() / epochs << " seconds per epoch" << endl; };
+	function<void()> endFn2 = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() << " seconds" << endl; };
 	
 	testCorrectness();
 	testEfficiency(inps, outs, epochs, startFn, endFn);
 	testLine();
-	testMNIST();
+	testMNIST(startFn, endFn2);
 	
 	return 0;
 }
@@ -91,7 +92,7 @@ void testCorrectness()
 	Tanh<double> activation(outs);
 	Vector<double> &act = activation.forward(layer.output());
 	for(size_t i = 0; i < act.size(); ++i)
-		Assert(act[i] == tanh(layer.output()[i]), "tanh forward failed!");
+		Assert(fabs(act[i] - tanh(layer.output()[i])) < 1e-9, "tanh forward failed!");
 	
 	Vector<double> &tanhBlame = activation.backward(layer.output(), target);
 	for(size_t i = 0; i < tanhBlame.size(); ++i)
@@ -185,8 +186,10 @@ void testLine()
 	Assert(sse < 5, "Linear regression failed!");
 }
 
-void testMNIST()
+void testMNIST(function<void()> &start, function<void()> &end)
 {
+	cout << "==================== MNIST ====================" << endl;
+	
 	Sequential<double> nn;
 	nn.add(
 		new Linear<double>(784, 80), new Tanh<double>(80),
@@ -248,12 +251,12 @@ void testMNIST()
 	}
 	cout << "Begin: " << misclassified << endl;
 	
-	auto prms = nn.parameters();
-	auto blam = nn.blame();
+	auto pe = parameters.end();
 	
-	for(size_t epoch = 0; epoch < 5; ++epoch)
+	for(size_t epoch = 0; epoch < 1; ++epoch)
 	{
-		ri.reset();
+		// ri.reset();
+		start();
 		for(auto i : ri)
 		{
 			trainFeat.row(i, feat);
@@ -265,9 +268,10 @@ void testMNIST()
 			auto p = parameters.begin();
 			auto b = blame.begin();
 			
-			for(; p != parameters.end(); ++p, ++b)
+			for(; p != pe; ++p, ++b)
 				*p += learningRate * *b;
 		}
+		end();
 		
 		misclassified = 0;
 		for(size_t k = 0; k < test.rows(); ++k)
@@ -286,7 +290,6 @@ void testMNIST()
 			if(indexOfMax != actualMax)
 				++misclassified;
 		}
-		cout << "\rStep " << epoch << ": " << misclassified << "     " << flush;
+		cout << "Step " << epoch << ": " << misclassified << "     " << endl;
 	}
-	cout << endl;
 }
