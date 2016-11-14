@@ -102,10 +102,21 @@ public:
 	static void gemm(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, size_t rows, size_t cols, size_t inner, T alpha, T *A, size_t lda, T *B, size_t ldb, T beta, T *C, size_t ldc)
 	{
 		// cblas_dgemm(order, transA, transB, rows, cols, inner, alpha, A, lda, B, ldb, beta, C, ldc);
+		/*
+		for(size_t i = 0; i < rows; ++i)
+		{
+			cblas_dcopy(cols, B, 1, C + i * cols, 1);
+			cblas_dscal(cols, A[i], C + i * cols, 1);
+		}
+		*/
+		/*
 		size_t idx = 0;
 		for(size_t i = 0; i < rows; ++i)
 			for(size_t j = 0; j < cols; ++j, ++idx)
 				C[idx] = alpha * A[i] * B[j] + beta * C[idx];
+		*/
+		for(size_t i = 0; i < rows; ++i, C += cols)
+			catlas_daxpby(cols, A[i], B, 1, 0, C, 1);
 	}
 };
 
