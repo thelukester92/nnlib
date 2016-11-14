@@ -27,6 +27,28 @@ public:
 		for(size_t i = 0; i < N; ++i)
 			Y[i * strideY] += alpha * X[i * strideX];
 	}
+	
+	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
+	{
+		if(transA == CblasNoTrans)
+		{
+			for(size_t i = 0; i < rows; ++i)
+			{
+				Y[i * strideY] *= beta;
+				for(size_t j = 0; j < cols; ++j)
+					Y[i * strideY] += alpha * A[i * lda + j] * X[j * strideX];
+			}
+		}
+		else
+		{
+			for(size_t i = 0; i < cols; ++i)
+			{
+				Y[i * strideY] *= beta;
+				for(size_t j = 0; j < rows; ++j)
+					Y[i * strideY] += alpha * A[j * lda + i] * X[j * strideX];
+			}
+		}
+	}
 };
 
 /// Single-precision BLAS.
