@@ -11,6 +11,13 @@
 using namespace nnlib;
 using namespace std;
 
+int main()
+{
+	size_t inps = 2, outs = 3, batch = 5;
+	Linear<double> layer(inps, outs, batch);
+}
+
+/*
 void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
 void testLine();
@@ -293,3 +300,4 @@ void testMNIST(function<void()> &start, function<void()> &end)
 	}
 	cout << "End: " << misclassified << "     " << endl;
 }
+*/

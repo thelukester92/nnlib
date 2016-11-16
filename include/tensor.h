@@ -9,7 +9,8 @@
 namespace nnlib
 {
 
-/// \todo use ld instead of m_cols for y-stride.
+/// \todo give operations a size for the result to make safeAssign only need one version
+/// \todo use lda/ldb/ldc instead of m_cols, since m_cols may be less if looking at a shared part of the matrix
 
 /// Tensor base class (with no specialized methods).
 template <typename T>
@@ -170,6 +171,18 @@ public:
 	{
 		return m_buffer + m_size;
 	}
+	
+	/// Raw buffer.
+	T *buffer()
+	{
+		return m_buffer;
+	}
+	
+	/// Raw buffer.
+	const T *buffer() const
+	{
+		return m_buffer;
+	}
 protected:
 	size_t m_size, m_capacity;			///< number of elements and size of the buffer (minus offset)
 	T *m_buffer;						///< pointer to the buffer (with offset).
@@ -193,12 +206,86 @@ public:
 	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
 	{}
 	
-	/// Assign a product.
-	Matrix &operator=(const OpMult<Vector<T>, Vector<T>> &op)
+	/// Construct from an operation.
+	Matrix(const Op &op) : Tensor<T>(0), m_rows(0), m_cols(0)
 	{
-		Assert(m_rows == op.lhs.m_size && m_cols == op.rhs.m_size, "Incompatible multiplicands!");
-		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m_rows, m_cols, 1, 1, op.lhs.m_buffer, 1, op.rhs.m_buffer, op.rhs.m_size, 0, m_buffer, m_cols);
+		safeAssign(op);
+	}
+	
+	/// Assign a product.
+	Matrix &operator=(const OpMult<Matrix, Matrix> &op)
+	{
+		Assert(m_rows == op.lhs.m_rows && m_cols == op.rhs.m_cols && op.lhs.m_cols == op.rhs.m_rows, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m_rows, m_cols, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.m_buffer, op.rhs.m_cols, 0, m_buffer, m_cols);
 		return *this;
+	}
+	
+	/// Assign a product (with transposition on LHS).
+	Matrix &operator=(const OpMult<OpTrans<Matrix>, Matrix> &op)
+	{
+		Assert(m_rows == op.lhs.target.m_cols && m_cols == op.rhs.m_cols && op.lhs.target.m_rows == op.rhs.m_rows, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasTrans, CblasNoTrans, m_rows, m_cols, op.lhs.target.m_rows, 1, op.lhs.target.m_buffer, op.lhs.target.m_cols, op.rhs.m_buffer, op.rhs.m_cols, 0, m_buffer, m_cols);
+		return *this;
+	}
+	
+	/// Assign a product (with transposition on RHS).
+	Matrix &operator=(const OpMult<Matrix, OpTrans<Matrix>> &op)
+	{
+		Assert(m_rows == op.lhs.m_rows && m_cols == op.rhs.target.m_rows && op.lhs.m_cols == op.rhs.target.m_cols, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasTrans, m_rows, m_cols, op.lhs.m_cols, 1, op.lhs.m_buffer, op.lhs.m_cols, op.rhs.target.m_buffer, op.rhs.target.m_cols, 0, m_buffer, m_cols);
+		return *this;
+	}
+	
+	/// Assign a product (with transposition on LHS and RHS).
+	Matrix &operator=(const OpMult<OpTrans<Matrix>, OpTrans<Matrix>> &op)
+	{
+		Assert(m_rows == op.lhs.target.m_cols && m_cols == op.rhs.target.m_rows && op.lhs.target.m_rows == op.rhs.target.m_cols, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasTrans, CblasTrans, m_rows, m_cols, op.lhs.target.m_rows, 1, op.lhs.target.m_buffer, op.lhs.target.m_cols, op.rhs.target.m_buffer, op.rhs.target.m_cols, 0, m_buffer, m_cols);
+		return *this;
+	}
+	
+	/// Assign a sum.
+	template <typename U, typename V>
+	Matrix &operator=(const OpAdd<U, V> &op)
+	{
+		*this = op.lhs;
+		return *this += op.rhs;
+	}
+	
+	/// Assign-and-resize a product.
+	void safeAssign(const OpMult<Matrix, Matrix> &op)
+	{
+		resize(op.lhs.m_rows, op.rhs.m_cols);
+		*this = op;
+	}
+	
+	/// Assign-and-resize a product (with transposition on LHS).
+	void safeAssign(const OpMult<OpTrans<Matrix>, Matrix> &op)
+	{
+		resize(op.lhs.target.m_cols, op.rhs.m_cols);
+		*this = op;
+	}
+	
+	/// Assign-and-resize a product (with transposition on RHS).
+	void safeAssign(const OpMult<Matrix, OpTrans<Matrix>> &op)
+	{
+		resize(op.lhs.m_rows, op.rhs.target.m_rows);
+		*this = op;
+	}
+	
+	/// Assign-and-resize a product (with transposition on LHS and RHS).
+	void safeAssign(const OpMult<OpTrans<Matrix>, OpTrans<Matrix>> &op)
+	{
+		resize(op.lhs.target.m_cols, op.rhs.target.m_rows);
+		*this = op;
+	}
+	
+	/// Assign-and-resize a sum.
+	template <typename U, typename V>
+	void safeAssign(const OpAdd<U, V> &op)
+	{
+		safeAssign(op.lhs);
+		*this += op.rhs;
 	}
 	
 	/// Change the dimensions of the matrix.
@@ -248,6 +335,32 @@ public:
 	size_t cols() const
 	{
 		return m_cols;
+	}
+	
+	/// Element-wise addition.
+	Matrix &operator+=(const Matrix &m)
+	{
+		Assert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible size!");
+		BLAS<T>::axpy(m_size, 1, m.m_buffer, 1, m_buffer, 1);
+		return *this;
+	}
+	
+	/// Element-wise addition (repeating v for each row).
+	Matrix &operator+=(const Vector<T> &v)
+	{
+		Assert(m_cols == v.m_size, "Incompatible size!");
+		T *buffer = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, buffer += m_cols)
+			BLAS<T>::axpy(m_cols, 1, v.m_buffer, 1, buffer, 1);
+		return *this;
+	}
+	
+	/// Element-wise addition.
+	template <typename U, typename V>
+	Matrix &operator+=(const OpAdd<U, V> &op)
+	{
+		*this += op.lhs;
+		return *this += op.rhs;
 	}
 private:
 	size_t m_rows, m_cols;
@@ -376,6 +489,30 @@ public:
 		return *this;
 	}
 	
+	/// Assign a collapsed matrix.
+	Vector &operator=(const OpCollapse<Matrix<T>> &op)
+	{
+		if(op.collapseCols)
+		{
+			Assert(m_size == op.target.m_rows, "Incompatible size!");
+			T *buffer = op.target.m_buffer;
+			BLAS<T>::copy(m_size, buffer, op.target.m_cols, m_buffer, 1);
+			buffer += op.target.m_rows;
+			for(size_t i = 1; i < op.target.m_cols; ++i, buffer += op.target.m_rows)
+				BLAS<T>::axpy(m_size, 1, buffer, op.target.m_cols, m_buffer, 1);
+		}
+		else
+		{
+			Assert(m_size == op.target.m_cols, "Incompatible size!");
+			T *buffer = op.target.m_buffer;
+			BLAS<T>::copy(m_size, buffer, 1, m_buffer, 1);
+			buffer += op.target.m_cols;
+			for(size_t i = 1; i < op.target.m_rows; ++i, buffer += op.target.m_cols)
+				BLAS<T>::axpy(m_size, 1, buffer, 1, m_buffer, 1);
+		}
+		return *this;
+	}
+	
 	/// Assign-and-resize a vector.
 	void safeAssign(const Vector &v)
 	{
@@ -475,6 +612,13 @@ template <typename U, typename V>
 OpMult<U, V> operator*(const U &lhs, const V &rhs)
 {
 	return OpMult<U, V>(lhs, rhs);
+}
+
+/// Deferred matrix transposition.
+template <typename U>
+OpTrans<U> operator~(const U &target)
+{
+	return OpTrans<U>(target);
 }
 
 }

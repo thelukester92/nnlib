@@ -8,45 +8,59 @@ namespace nnlib
 
 /// \todo what if the module feeds forward a Matrix instead of a Vector?
 /// \todo Matrix-Matrix feed-in and Matrix-Vector feed-in.
-/// \todo inputBlame and output protected parameters.
 
 template <typename T>
 class Module
 {
 public:
+	Module(size_t inps, size_t outs, size_t batchSize)
+	: m_inputBlame(batchSize, inps), m_output(batchSize, outs)
+	{}
+	
 	virtual ~Module() {}
 	
 	size_t inputCount() const
 	{
-		return inputBlame().size();
+		return m_inputBlame.cols();
 	}
 	
 	size_t outputCount() const
 	{
-		return output().size();
+		return m_output.cols();
 	}
 	
-	const Vector<T> &inputBlame() const
+	Matrix<T> &inputBlame()
 	{
-		return const_cast<Module *>(this)->inputBlame();
+		return m_inputBlame;
 	}
 	
-	const Vector<T> &output() const
+	const Matrix<T> &inputBlame() const
 	{
-		return const_cast<Module *>(this)->output();
+		return m_inputBlame;
 	}
 	
-	/// Feed in an input vector and return a cached output vector.
-	virtual Vector<T> &forward(const Vector<T> &input) = 0;
+	Matrix<T> &output()
+	{
+		return m_output;
+	}
 	
-	/// Feed in an input and output blame (gradient) and return a cached input blame vector.
-	virtual Vector<T> &backward(const Vector<T> &input, const Vector<T> &blame) = 0;
+	const Matrix<T> &output() const
+	{
+		return m_output;
+	}
 	
-	/// Get the input blame (gradient) buffer.
-	virtual Vector<T> &inputBlame() = 0;
+	/// Resize this module.
+	virtual void resize(size_t inps, size_t outs, size_t batchSize)
+	{
+		m_inputBlame.resize(batchSize, inps);
+		m_output.resize(batchSize, outs);
+	}
 	
-	/// Get the output buffer.
-	virtual Vector<T> &output() = 0;
+	/// Feed in input vectors and return cached output vectors.
+	virtual Matrix<T> &forward(const Matrix<T> &input) = 0;
+	
+	/// Feed in inputs and output blames (gradient) and return cached input blame vectors.
+	virtual Matrix<T> &backward(const Matrix<T> &input, const Matrix<T> &blame) = 0;
 	
 	/// Return pointers to all parameters (i.e. for flattening).
 	virtual Vector<Tensor<T> *> parameters()
@@ -59,6 +73,10 @@ public:
 	{
 		return Vector<Tensor<T> *>(0);
 	}
+
+protected:
+	Matrix<T> m_inputBlame;
+	Matrix<T> m_output;
 };
 
 }
