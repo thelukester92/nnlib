@@ -21,7 +21,7 @@ double Random::normal(double mean, double stddev)
 double Random::normal(double mean, double stddev, double cap)
 {
 	double n;
-	std::normal_distribution<double> dist(mean, stddev)
+	std::normal_distribution<double> dist(mean, stddev);
 	do
 	{
 		n = dist(m_engine);
