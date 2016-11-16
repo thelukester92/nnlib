@@ -21,9 +21,10 @@ double Random::normal(double mean, double stddev)
 double Random::normal(double mean, double stddev, double cap)
 {
 	double n;
+	std::normal_distribution<double> dist(mean, stddev)
 	do
 	{
-		n = std::normal_distribution<double>(mean, stddev)(m_engine);
+		n = dist(m_engine);
 	}
 	while(fabs(n - mean) > cap);
 	return n;

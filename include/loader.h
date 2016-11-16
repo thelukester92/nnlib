@@ -30,8 +30,17 @@ public:
 	/// \todo allow non-continuous attributes
 	static Matrix<T> loadArff(const char *filename)
 	{
+		size_t cols = 0;
+		std::string line;
 		std::ifstream fin(filename);
 		Assert(!fin.fail(), "Could not load file!");
+		std::getline(cin, line);
+		while(!fin.fail())
+		{
+			if
+			std::getline(cin, line);
+		}
+		
 		
 		fin.close();
 		return m;
