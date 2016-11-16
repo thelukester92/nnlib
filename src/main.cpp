@@ -253,10 +253,10 @@ void testMNIST(function<void()> &start, function<void()> &end)
 	
 	auto pe = parameters.end();
 	
+	start();
 	for(size_t epoch = 0; epoch < 1; ++epoch)
 	{
-		// ri.reset();
-		start();
+		ri.reset();
 		for(auto i : ri)
 		{
 			trainFeat.row(i, feat);
@@ -271,25 +271,25 @@ void testMNIST(function<void()> &start, function<void()> &end)
 			for(; p != pe; ++p, ++b)
 				*p += learningRate * *b;
 		}
-		end();
-		
-		misclassified = 0;
-		for(size_t k = 0; k < test.rows(); ++k)
-		{
-			testFeat.row(k, feat);
-			testLab.row(k, lab);
-			nn.forward(feat);
-			size_t indexOfMax = 0, actualMax = 0;
-			for(size_t l = 1; l < 10; ++l)
-			{
-				if(nn.output()(l) > nn.output()(indexOfMax))
-					indexOfMax = l;
-				if(lab[l] > lab[actualMax])
-					actualMax = l;
-			}
-			if(indexOfMax != actualMax)
-				++misclassified;
-		}
-		cout << "Step " << epoch << ": " << misclassified << "     " << endl;
 	}
+	end();
+	
+	misclassified = 0;
+	for(size_t k = 0; k < test.rows(); ++k)
+	{
+		testFeat.row(k, feat);
+		testLab.row(k, lab);
+		nn.forward(feat);
+		size_t indexOfMax = 0, actualMax = 0;
+		for(size_t l = 1; l < 10; ++l)
+		{
+			if(nn.output()(l) > nn.output()(indexOfMax))
+				indexOfMax = l;
+			if(lab[l] > lab[actualMax])
+				actualMax = l;
+		}
+		if(indexOfMax != actualMax)
+			++misclassified;
+	}
+	cout << "End: " << misclassified << "     " << endl;
 }

@@ -1,42 +1,63 @@
-BIN=../bin
-OBJ=../obj
-INC=../include
-OUT=nnlib_test
-CFLAGS=-Wall -std=c++11 -I$(INC)
-LFLAGS=
-CXX=g++
-UNAME=$(shell uname -s)
+BIN:=../bin
+OBJ:=../obj
+INC:=../include
+OUT:=nnlib_test
+CFLAGS:=-Wall -std=c++11 -I$(INC)
+LFLAGS:=
+CXX:=g++
+UNAME:=$(shell uname -s)
+
+prefix?=/usr/local
+INSTALL_BIN:=$(prefix)/bin
+INSTALL_LIB:=$(prefix)/lib/libnnlib.so
+INSTALL_INC:=$(prefix)/include/nnlib
+INSTALL_FLAGS:=-fPIC -shared
+INSTALL_INC_FILES:=$(wildcard $(INC)/*)
+INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
 
 ifeq ($(UNAME),Darwin)
 	LFLAGS+=-framework Accelerate
 	CFLAGS+=-DAPPLE
+	INSTALL_LIB:=$(INSTALL_LIB:%.so=%.dylib)
 else
 	LFLAGS+=-lblas
 endif
 
-CFLAGS_OPT=$(CFLAGS) -O3 -DOPTIMIZE
-CFLAGS_DBG=$(CFLAGS) -g -DDEBUG
+CFLAGS_OPT:=$(CFLAGS) -O3 -DOPTIMIZE
+CFLAGS_DBG:=$(CFLAGS) -g -DDEBUG
 
-LFLAGS_OPT=$(LFLAGS)
-LFLAGS_DBG=$(LFLAGS)
+LFLAGS_OPT:=$(LFLAGS)
+LFLAGS_DBG:=$(LFLAGS)
 
-CPP_FILES=$(wildcard *.cpp) $(wildcard **/*.cpp)
-DEP_FILES=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.d) $(CPP_FILES:%.cpp=$(OBJ)/dbg/%.d)
-OBJ_FILES=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.o)
-DBG_FILES=$(CPP_FILES:%.cpp=$(OBJ)/dbg/%.o)
-DBG_OUT=$(OUT)_dbg
+CPP_FILES:=$(wildcard *.cpp) $(wildcard **/*.cpp)
+DEP_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.d) $(CPP_FILES:%.cpp=$(OBJ)/dbg/%.d)
+OBJ_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.o)
+DBG_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/dbg/%.o)
+DBG_OUT:=$(OUT)_dbg
+INSTALL_OBJ_FILES:=$(filter-out $(OBJ)/opt/main.o, $(OBJ_FILES))
 
 dbg: $(BIN)/$(DBG_OUT)
 opt: $(BIN)/$(OUT)
+install: $(INSTALL_LIB) $(INSTALL_INC_FILES)
 clean:
 	rm -rf $(BIN)/*
 	rm -rf $(OBJ)/*
+uninstall:
+	rm -rf $(INSTALL_INC)
+	rm -f $(INSTALL_LIB)
 
 $(BIN)/$(OUT): $(BIN) $(OBJ) $(OBJ_FILES)
 	$(CXX) $(OBJ_FILES) $(CFLAGS_OPT) $(LFLAGS_OPT) -o $@
 
 $(BIN)/$(DBG_OUT): $(BIN) $(OBJ) $(DBG_FILES)
 	$(CXX) $(DBG_FILES) $(CFLAGS_DBG) $(LFLAGS_DBG) -o $@
+
+$(INSTALL_LIB): $(INSTALL_OBJ_FILES)
+	$(CXX) $< $(INSTALL_FLAGS) -o $@
+
+$(INSTALL_INC)/%.h: $(INC)/%.h
+	mkdir -p $(dir $@)
+	cp $< $@
 
 $(OBJ)/opt/%.o: %.cpp
 	mkdir -p $(dir $@)
@@ -54,4 +75,4 @@ $(OBJ):
 
 -include $(DEP_FILES)
 
-.PHONY: opt dbg clean
+.PHONY: dbg opt install clean uninstall
