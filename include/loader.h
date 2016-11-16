@@ -15,6 +15,19 @@ template <typename T>
 class Loader
 {
 public:
+	static Matrix<T> load(const char *filename)
+	{
+		std::string f(filename);
+		std::string ext = f.substr(f.find_last_of(".") + 1);
+		std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+		if(ext == "raw")
+			return loadRaw(filename);
+		else if(ext == "arff")
+			return loadArff(filename);
+		else
+			throw std::runtime_error("Unrecognized file format!");
+	}
+	
 	static Matrix<T> loadRaw(const char *filename)
 	{
 		size_t r, c;

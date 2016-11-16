@@ -198,8 +198,8 @@ void testMNIST(function<void()> &start, function<void()> &end)
 	);
 	SquaredError<double> critic(10);
 	
-	Matrix<double> train = Loader<double>::loadRaw("../datasets/mnist/train.raw");
-	Matrix<double> test = Loader<double>::loadRaw("../datasets/mnist/test.raw");
+	Matrix<double> train = Loader<double>::load("../datasets/mnist/train.raw");
+	Matrix<double> test = Loader<double>::load("../datasets/mnist/test.raw");
 	
 	Matrix<double> trainFeat(train.rows(), train.cols() - 1), trainLab(train.rows(), 10);
 	Matrix<double> testFeat(test.rows(), test.cols() - 1), testLab(test.rows(), 10);
