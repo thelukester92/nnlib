@@ -20,7 +20,7 @@ ifeq ($(UNAME),Darwin)
 	CFLAGS+=-DAPPLE
 	INSTALL_LIB:=$(INSTALL_LIB:%.so=%.dylib)
 else
-	LFLAGS+=-lblas -latlas
+	LFLAGS+=-lblas -llapack
 endif
 
 CFLAGS_OPT:=$(CFLAGS) -O3 -DOPTIMIZE

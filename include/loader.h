@@ -4,6 +4,7 @@
 #include "error.h"
 #include "tensor.h"
 #include <fstream>
+#include <sstream>
 
 namespace nnlib
 {
@@ -22,6 +23,16 @@ public:
 		Matrix<T> m(r, c);
 		for(auto i = m.begin(); i != m.end(); ++i)
 			fin.read((char *) i, sizeof(T));
+		fin.close();
+		return m;
+	}
+	
+	/// \todo allow non-continuous attributes
+	static Matrix<T> loadArff(const char *filename)
+	{
+		std::ifstream fin(filename);
+		Assert(!fin.fail(), "Could not load file!");
+		
 		fin.close();
 		return m;
 	}
