@@ -9,7 +9,7 @@
 namespace nnlib
 {
 
-/// Tensor base class.
+/// Tensor base class (abstract).
 template <typename T>
 class Tensor
 {
@@ -24,34 +24,8 @@ public:
 	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
 	{}
 	
-	/// Copy constructor.
-	Tensor(const Tensor &t)
-	: m_size(t.m_size), m_capacity(t.m_capacity), m_buffer(new T[m_capacity]), m_sharedBuffer(m_buffer), m_sharedSize(t.m_size)
-	{
-		copy(t);
-	}
-	
-	/// Move constructor.
-	Tensor(Tensor &&t)
-	: m_size(t.m_size), m_capacity(t.m_capacity), m_buffer(t.m_buffer), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
-	{}
-	
-	/// Copy assignment.
-	Tensor &operator=(const Tensor &t)
-	{
-		copy(t);
-		return *this;
-	}
-	
-	/// Move assignment.
-	Tensor &operator=(Tensor &&t)
-	{
-		m_size			= t.m_size;
-		m_capacity		= t.m_capacity;
-		m_buffer		= t.m_buffer;
-		m_sharedBuffer	= t.m_sharedBuffer;
-		m_sharedSize	= t.m_sharedSize;
-	}
+	/// Pure virtual destructor (implementation below); cannot use Tensor directly.
+	virtual ~Tensor() = 0;
 	
 	/// The number of elements in this tensor.
 	size_t size() const
@@ -71,6 +45,44 @@ public:
 		NNAssert(t.m_size == m_size, "Invalid size!");
 		BLAS<T>::copy(m_size, t.m_buffer, 1, m_buffer, 1);
 	}
+protected:
+	size_t m_size, m_capacity;
+	T *m_buffer;
+	std::shared_ptr<T> m_sharedBuffer;
+	size_t m_sharedSize;
+};
+
+/// Pure virtual implementation (makes Tensor abstract).
+inline Tensor::~Tensor() {}
+
+/// 2-dimensional tensor.
+template <typename T>
+class Matrix : public Tensor<T>
+{
+public:
+	/// General-purpose constructor.
+	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
+	{}
+	
+	/// Shared-data constructor.
+	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0) : Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols)
+	{}
+private:
+	size_t m_rows, m_cols;
+};
+
+/// 1-dimensional tensor.
+template <typename T>
+class Vector : public Tensor<T>
+{
+public:
+	/// General purpose constructor.
+	Vector(size_t size) : Tensor<T>(size)
+	{}
+	
+	/// Shared-data constructor.
+	Vector(Tensor<T> &t, size_t n, size_t offset = 0) : Tensor<T>(t, n, offset)
+	{}
 	
 	/// Element access.
 	T &at(size_t i)
@@ -113,43 +125,6 @@ public:
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
 	}
-protected:
-	size_t m_size, m_capacity;
-	T *m_buffer;
-	std::shared_ptr<T> m_sharedBuffer;
-	size_t m_sharedSize;
-};
-
-/// 2-dimensional tensor.
-template <typename T>
-class Matrix : public Tensor<T>
-{
-public:
-	/// General-purpose constructor.
-	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
-	{}
-	
-	/// Shared-data constructor.
-	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0) : Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols)
-	{}
-private:
-	size_t m_rows, m_cols;
-};
-
-/// 1-dimensional tensor.
-template <typename T>
-class Vector : public Tensor<T>
-{
-public:
-	/// General purpose constructor.
-	Vector(size_t size) : Tensor<T>(size)
-	{}
-	
-	/// Shared-data constructor.
-	Vector(Tensor<T> &t, size_t n, size_t offset = 0) : Tensor<T>(t, n, offset)
-	{}
-	
-	
 };
 
 

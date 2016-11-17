@@ -32,7 +32,7 @@ int main()
 
 void testTensor()
 {
-	Tensor<size_t> basicTensor(5);
+	Vector<size_t> basicTensor(5);
 	basicTensor.fill(0);
 	
 	vector<size_t> vec(5);
