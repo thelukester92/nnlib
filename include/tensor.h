@@ -43,6 +43,15 @@ public:
 		}
 	}
 	
+	/// Actually change the number of elements in this tensor.
+	void resize(size_t n, const T &val = T())
+	{
+		reserve(n);
+		if(int(n) - int(m_size) > 0)
+			BLAS<T>::set(n - m_size, val, m_buffer + m_size, 1);
+		m_size = n;
+	}
+	
 	/// The number of elements in this tensor.
 	size_t size() const
 	{
@@ -197,7 +206,6 @@ class Matrix : public Tensor<T>
 {
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
-using Tensor<T>::reserve;
 public:
 	/// General-purpose constructor.
 	Matrix(size_t rows, size_t cols)
@@ -218,6 +226,7 @@ public:
 	
 	/// Operation constructor.
 	Matrix(const Operation<Matrix> &op)
+	: Tensor<T>(0), m_rows(0), m_cols(0), m_ld(0)
 	{
 		op.assign(*this);
 	}
@@ -239,7 +248,8 @@ public:
 	/// Resize this matrix.
 	void resize(size_t rows, size_t cols)
 	{
-		reserve(rows * cols);
+		Tensor<T>::resize(rows * cols);
+		m_size = rows * cols;
 		if(m_ld == m_cols)
 			m_ld = cols;
 		m_rows = rows;
