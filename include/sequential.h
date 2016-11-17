@@ -13,8 +13,10 @@ namespace nnlib
 template <typename T>
 class Sequential : public Module<T>
 {
+using Module<T>::m_inputBlame;
+using Module<T>::m_output;
 public:
-	Sequential() : m_modules(0)
+	Sequential() : Module<T>(0, 0, 0), m_modules(0)
 	{}
 	
 	~Sequential()
@@ -28,6 +30,8 @@ public:
 	void add(Module<T> *module)
 	{
 		m_modules.push_back(module);
+		m_inputBlame = Matrix<T>(m_modules.front()->inputBlame(), m_modules.front()->inputBlame().rows(), m_modules.front()->inputBlame().cols());
+		m_output = Matrix<T>(m_modules.back()->output(), m_modules.back()->output().rows(), m_modules.back()->output().cols());
 	}
 	
 	/// Add multiple modules at once.
@@ -56,11 +60,21 @@ public:
 	{
 		Module<T> *module = m_modules[i];
 		m_modules.erase(i);
+		if(m_modules.size() > 0)
+		{
+			m_inputBlame = Matrix<T>(m_modules.front()->inputBlame(), m_modules.front()->inputBlame().rows(), m_modules.front()->inputBlame().cols());
+			m_output = Matrix<T>(m_modules.back()->output(), m_modules.back()->output().rows(), m_modules.back()->output().cols());
+		}
+		else
+		{
+			m_inputBlame.resize(0, 0);
+			m_output.resize(0, 0);
+		}
 		return module;
 	}
 	
-	/// Feed in an input vector and return a cached output vector.
-	virtual Vector<T> &forward(const Vector<T> &input) override
+	/// Feed in input vectors and return cached output vectors.
+	virtual Matrix<T> &forward(const Matrix<T> &input) override
 	{
 		Assert(m_modules.size() > 0, "Cannot forward propagate in an empty network!");
 		const Vector<T> *in = &input;
@@ -69,26 +83,14 @@ public:
 		return m_modules.back()->output();
 	}
 	
-	/// Feed in an input and output blame (gradient) and return a cached input blame vector.
-	virtual Vector<T> &backward(const Vector<T> &input, const Vector<T> &blame) override
+	/// Feed in inputs and output blames (gradient) and return cached input blame vectors.
+	virtual Matrix<T> &backward(const Matrix<T> &input, const Matrix<T> &blame) override
 	{
 		Assert(m_modules.size() > 0, "Cannot backpropagate in an empty network!");
 		const Vector<T> *bl = &blame;
 		for(size_t i = m_modules.size() - 1; i > 0; --i)
 			bl = &m_modules[i]->backward(m_modules[i - 1]->output(), *bl);
 		return m_modules[0]->backward(input, *bl);
-	}
-	
-	/// Get the input blame (gradient) buffer.
-	virtual Vector<T> &inputBlame() override
-	{
-		return m_modules[0]->inputBlame();
-	}
-	
-	/// Get the output buffer.
-	virtual Vector<T> &output() override
-	{
-		return m_modules.back()->output();
 	}
 	
 	/// Return pointers to all parameters (i.e. for flattening).

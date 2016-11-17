@@ -9,8 +9,78 @@
 namespace nnlib
 {
 
+/// Tensor base class.
+template <typename T>
+class Tensor
+{
+public:
+	/// General-purpose constructor.
+	Tensor(size_t n)
+	: m_size(n), m_capacity(n), m_buffer(new T[m_capacity]), m_sharedBuffer(m_buffer), m_sharedSize(n)
+	{}
+	
+	/// Shared-data constructor.
+	Tensor(Tensor &t, size_t n, size_t offset = 0)
+	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
+	{}
+	
+	/// Fill this tensor with the given value.
+	void fill(const T &val)
+	{
+		BLAS<T>::set(m_size, val, m_buffer, 1);
+	}
+protected:
+	size_t m_size, m_capacity;
+	T *m_buffer;
+	std::shared_ptr<T> m_sharedBuffer;
+	size_t m_sharedSize;
+};
+
+/// 2-dimensional tensor.
+template <typename T>
+class Matrix : public Tensor<T>
+{
+public:
+	/// General-purpose constructor.
+	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
+	{}
+	
+	/// Shared-data constructor.
+	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0) : Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols)
+	{}
+private:
+	size_t m_rows, m_cols;
+};
+
+/// 1-dimensional tensor.
+template <typename T>
+class Vector : public Tensor<T>
+{
+public:
+	/// General purpose constructor.
+	Vector(size_t size) : Tensor<T>(size)
+	{}
+	
+	/// Shared-data constructor.
+	Vector(Tensor<T> &t, size_t n, size_t offset = 0) : Tensor<T>(t, n, offset)
+	{}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 /// \todo give operations a size for the result to make safeAssign only need one version
 /// \todo use lda/ldb/ldc instead of m_cols, since m_cols may be less if looking at a shared part of the matrix
+/// \todo Vector = Matrix with one row
 
 /// Tensor base class (with no specialized methods).
 template <typename T>
@@ -206,6 +276,10 @@ public:
 	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
 	{}
 	
+	/// Construct a shared-data matrix.
+	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0) : Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols)
+	{}
+	
 	/// Construct from an operation.
 	Matrix(const Op &op) : Tensor<T>(0), m_rows(0), m_cols(0)
 	{
@@ -288,12 +362,26 @@ public:
 		*this += op.rhs;
 	}
 	
+	/// Assign a new shared-memory buffer from another Tensor.
+	void share(Matrix &m)
+	{
+		m_buffer = m.m_buffer;
+		m_size = m.m_size;
+		m_capacity = m.m_capacity;
+		m_sharedBuffer = m.m_sharedBuffer;
+		m_sharedSize = m.m_sharedSize;
+		m_rows = m.m_rows;
+		m_cols = m.m_cols;
+	}
+	
 	/// Change the dimensions of the matrix.
 	void resize(size_t rows, size_t cols, const T &val = T())
 	{
 		reserve(rows * cols);
 		size_t i = m_size;
 		m_size = rows * cols;
+		m_rows = rows;
+		m_cols = cols;
 		for(; i < m_size; ++i)
 			m_buffer[i] = val;
 	}
@@ -620,6 +708,7 @@ OpTrans<U> operator~(const U &target)
 {
 	return OpTrans<U>(target);
 }
+*/
 
 }
 

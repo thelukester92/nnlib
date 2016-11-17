@@ -12,7 +12,7 @@ class Linear : public Module<T>
 using Module<T>::m_inputBlame;
 using Module<T>::m_output;
 public:
-	Linear(size_t inps, size_t outs, size_t batchSize)
+	Linear(size_t inps, size_t outs, size_t batchSize = 1)
 	: Module<T>(inps, outs, batchSize), m_weights(outs, inps), m_bias(outs), m_weightsBlame(outs, inps), m_biasBlame(outs)
 	{}
 	

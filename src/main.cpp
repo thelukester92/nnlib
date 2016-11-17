@@ -11,10 +11,22 @@
 using namespace nnlib;
 using namespace std;
 
+void testTensor();
+
 int main()
 {
-	size_t inps = 2, outs = 3, batch = 5;
-	Linear<double> layer(inps, outs, batch);
+	testTensor();
+	return 0;
+}
+
+void testTensor()
+{
+	using real_t = double;
+	
+	Tensor<real_t> basicTensor(5);
+	basicTensor.fill(0);
+	
+	
 }
 
 /*
@@ -39,7 +51,6 @@ int main()
 	testEfficiency(inps, outs, epochs, startFn, endFn);
 	testLine();
 	testMNIST(startFn, endFn2);
-	
 	return 0;
 }
 
@@ -73,7 +84,7 @@ void testCorrectness()
 	target(1) = 11.0;
 	target(2) = 15.14;
 	
-	Vector<double> &result = layer.forward(input);
+	Vector<double> result = layer.forward(input);
 	for(size_t i = 0; i < outs; ++i)
 		Assert(result(i) == target(i), "forward failed!");
 	

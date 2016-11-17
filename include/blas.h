@@ -12,10 +12,18 @@ namespace nnlib
 
 /// Fallback methods to mimic BLAS for non-floating types.
 /// \todo determine if this should be renamed.
+/// \todo gemm in the fallback
+
 template <typename T>
 class BLAS
 {
 public:
+	static void set(size_t N, T alpha, T *X, size_t strideX)
+	{
+		for(size_t i = 0; i < N; ++i)
+			X[i * strideX] = alpha;
+	}
+	
 	static void copy(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
 	{
 		for(size_t i = 0; i < N; ++i)
@@ -57,14 +65,19 @@ class BLAS<float>
 {
 typedef float T;
 public:
-	static void copy(size_t n, T *X, size_t strideX, T *Y, size_t strideY)
+	static void set(size_t N, T alpha, T *X, size_t strideX)
 	{
-		cblas_scopy(n, X, strideX, Y, strideY);
+		catlas_sset(N, alpha, X, strideX);
 	}
 	
-	static void axpy(size_t n, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	static void copy(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
 	{
-		cblas_saxpy(n, alpha, X, strideX, Y, strideY);
+		cblas_scopy(N, X, strideX, Y, strideY);
+	}
+	
+	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_saxpy(N, alpha, X, strideX, Y, strideY);
 	}
 	
 	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
@@ -84,14 +97,19 @@ class BLAS<double>
 {
 typedef double T;
 public:
-	static void copy(size_t n, T *X, size_t strideX, T *Y, size_t strideY)
+	static void set(size_t N, T alpha, T *X, size_t strideX)
 	{
-		cblas_dcopy(n, X, strideX, Y, strideY);
+		catlas_dset(N, alpha, X, strideX);
 	}
 	
-	static void axpy(size_t n, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	static void copy(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
 	{
-		cblas_daxpy(n, alpha, X, strideX, Y, strideY);
+		cblas_dcopy(N, X, strideX, Y, strideY);
+	}
+	
+	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_daxpy(N, alpha, X, strideX, Y, strideY);
 	}
 	
 	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
