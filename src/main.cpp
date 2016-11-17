@@ -58,6 +58,19 @@ void testTensor()
 	
 	for(size_t i = 0; i < matrix.size(); ++i)
 		NNLibAssert(matrix[i] == (i + 1) * 3.14, "Matrix scaling failed!");
+	
+	Matrix<double> A(3, 3), B(3, 3);
+	for(size_t i = 0; i < A.size(); ++i)
+		A[i] = i, B[i] = B.size() - i;
+	
+	Matrix<double> C(3, 3);
+	C = A;
+	C += B;
+	for(size_t i = 0; i < C.size(); ++i)
+	{
+		cout << A[i] << " + " << B[i] << " = " << C[i] << endl;
+		NNLibAssert(C[i] == A[i] + B[i], "Matrix addition failed!");
+	}
 }
 
 /*

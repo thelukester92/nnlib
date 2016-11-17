@@ -11,23 +11,26 @@ namespace nnlib
 
 class Operation;
 
-/// Tensor base class (abstract).
+/// An ordered collection of elements of type T.
+/// Abstract base class for other tensors.
 template <typename T>
 class Tensor
 {
 friend class Operation;
 public:
 	/// General-purpose constructor.
-	Tensor(size_t n)
-	: m_size(n), m_capacity(n), m_buffer(new T[m_capacity]), m_sharedBuffer(m_buffer), m_sharedSize(n)
-	{}
+	Tensor(size_t n, const T &val = T())
+	: m_size(n), m_capacity(n), m_buffer(new T[m_capacity]), m_sharedSize(n), m_sharedBuffer(m_buffer)
+	{
+		fill(val);
+	}
 	
 	/// Shared-data constructor.
 	Tensor(Tensor &t, size_t n, size_t offset = 0)
-	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
+	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedSize(t.m_sharedSize), m_sharedBuffer(t.m_sharedBuffer)
 	{}
 	
-	/// Pure virtual destructor (implementation below); cannot use Tensor directly.
+	/// Destructor; pure virtual to make this an abstract class.
 	virtual ~Tensor() = 0;
 	
 	/// The number of elements in this tensor.
@@ -37,27 +40,20 @@ public:
 	}
 	
 	/// Fill this tensor with the given value.
-	void fill(const T &val)
+	virtual void fill(const T &val)
 	{
 		BLAS<T>::set(m_size, val, m_buffer, 1);
 	}
 	
-	/// Copy the elements from t into this.
-	void copy(const Tensor &t)
-	{
-		NNAssert(t.m_size == m_size, "Invalid size!");
-		BLAS<T>::copy(m_size, t.m_buffer, 1, m_buffer, 1);
-	}
-	
 	/// Element access.
-	T &operator[](size_t i)
+	virtual T &operator[](size_t i)
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
 	}
 	
 	/// Element access.
-	const T &operator[](size_t i) const
+	virtual const T &operator[](size_t i) const
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
@@ -65,15 +61,148 @@ public:
 protected:
 	size_t m_size, m_capacity;
 	T *m_buffer;
-	std::shared_ptr<T> m_sharedBuffer;
 	size_t m_sharedSize;
+	std::shared_ptr<T> m_sharedBuffer;
 };
 
-/// Pure virtual implementation (makes Tensor abstract).
 template <typename T>
 inline Tensor<T>::~Tensor() {}
 
-/// 2-dimensional tensor.
+/// A 1-dimensional tensor; may not be dense.
+template <typename T>
+class Vector : public Tensor<T>
+{
+friend class Operation;
+using Tensor<T>::m_size;
+using Tensor<T>::m_buffer;
+using Tensor<T>::m_sharedBuffer;
+using Tensor<T>::m_sharedSize;
+public:
+	/// General purpose constructor.
+	Vector(size_t size = 0, const T &val = T())
+	: Tensor<T>(size, val), m_stride(1)
+	{}
+	
+	/// Copy constructor.
+	Vector(const Vector &v)
+	: Tensor<T>(v.m_size), m_stride(1)
+	{
+		copy(v);
+	}
+	
+	/// Shared-data constructor.
+	Vector(Vector<T> &v, size_t n, size_t offset = 0)
+	: Tensor<T>(v, n, offset), m_stride(v.m_stride)
+	{}
+	
+	/// Shared-data constructor.
+	Vector(Tensor<T> &t, size_t n, size_t offset = 0)
+	: Tensor<T>(t, n, offset), m_stride(1)
+	{}
+	
+	/// Copy assignment.
+	Vector &operator=(const Vector &v)
+	{
+		copy(v);
+		return *this;
+	}
+	
+	/// Copy the elements from v into this.
+	void copy(const Vector &v)
+	{
+		NNAssert(v.m_size == m_size, "Invalid size!");
+		BLAS<T>::copy(m_size, v.m_buffer, v.m_stride, m_buffer, m_stride);
+	}
+	
+	/// Set the offset of this vector.
+	void setOffset(size_t n)
+	{
+		NNAssert(n + m_size <= m_sharedSize, "Invalid offset!");
+		m_buffer = m_sharedBuffer.get() + n;
+	}
+	
+	/// Fill this tensor with the given value.
+	virtual void fill(const T &val) override
+	{
+		BLAS<T>::set(m_size, val, m_buffer, m_stride);
+	}
+	
+	/// Element access.
+	virtual T &operator[](size_t i) override
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i * m_stride];
+	}
+	
+	/// Element access.
+	virtual const T &operator[](size_t i) const override
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i * m_stride];
+	}
+	
+	/// Element access.
+	T &at(size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i * m_stride];
+	}
+	
+	/// Element access.
+	const T &at(size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i * m_stride];
+	}
+	
+	/// Element access.
+	T &operator()(size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i * m_stride];
+	}
+	
+	/// Element access.
+	const T &operator()(size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i * m_stride];
+	}
+	
+	/// Element-wise addition.
+	void add(const Vector &v)
+	{
+		NNAssert(m_size == v.m_size, "Incompatible addends!");
+		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+	}
+	
+	/// Element-wise addition.
+	Vector &operator+=(const Vector &v)
+	{
+		NNAssert(m_size == v.m_size, "Incompatible addends!");
+		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+		return *this;
+	}
+	
+	/// Element-wise scaling.
+	void scale(const T &scalar)
+	{
+		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
+	}
+	
+	/// Element-wise scaling.
+	Vector &operator*=(const T &scalar)
+	{
+		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
+		return *this;
+	}
+
+private:
+	size_t m_stride;
+};
+
+/// A 2-dimensional tensor.
+/// Adjacent columns are contiguous, but rows may be separated by more than cols.
 template <typename T>
 class Matrix : public Tensor<T>
 {
@@ -86,15 +215,41 @@ public:
 	: Tensor<T>(rows * cols), m_rows(rows), m_cols(cols), m_ld(cols)
 	{}
 	
-	/// Shared-data constructor (from a Matrix).
+	/// Copy constructor.
+	Matrix(const Matrix &m)
+	: Tensor<T>(m.m_size), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_cols)
+	{
+		copy(m);
+	}
+	
+	/// Shared-data constructor.
 	Matrix(Matrix &m, size_t rows, size_t cols, size_t rowOffset = 0, size_t colOffset = 0)
 	: Tensor<T>(m, rows * cols, m.m_ld * rowOffset + colOffset), m_rows(rows), m_cols(cols), m_ld(m.m_ld)
 	{}
 	
-	/// Shared-data constructor (from any Tensor).
-	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0)
-	: Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols), m_ld(cols)
-	{}
+	/// Copy assignment.
+	Matrix &operator=(const Matrix &m)
+	{
+		copy(m);
+		return *this;
+	}
+	
+	/// Copy the elements from m into this.
+	void copy(const Matrix &m)
+	{
+		NNAssert(m.m_rows == m_rows && m.m_cols == m_cols, "Invalid size!");
+		T *from = m.m_buffer, *to = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
+			BLAS<T>::copy(m_cols, from, 1, to, 1);
+	}
+	
+	/// Fill this tensor with the given value.
+	virtual void fill(const T &val) override
+	{
+		T *buffer = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, buffer += m_ld)
+			BLAS<T>::set(m_cols, val, buffer, 1);
+	}
 	
 	/// Element access.
 	T &at(size_t i, size_t j)
@@ -162,84 +317,6 @@ public:
 	
 private:
 	size_t m_rows, m_cols, m_ld;
-};
-
-/// 1-dimensional tensor.
-template <typename T>
-class Vector : public Tensor<T>
-{
-friend class Operation;
-using Tensor<T>::m_size;
-using Tensor<T>::m_buffer;
-public:
-	/// General purpose constructor.
-	Vector(size_t size)
-	: Tensor<T>(size), m_stride(1)
-	{}
-	
-	/// Shared-data constructor.
-	Vector(Tensor<T> &t, size_t n, size_t offset = 0)
-	: Tensor<T>(t, n, offset), m_stride(t.m_stride)
-	{}
-	
-	/// Element access.
-	T &at(size_t i)
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access.
-	const T &at(size_t i) const
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access.
-	T &operator()(size_t i)
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access.
-	const T &operator()(size_t i) const
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element-wise addition.
-	void add(const Vector &v)
-	{
-		NNAssert(m_size == v.m_size, "Incompatible addends!");
-		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
-	}
-	
-	/// Element-wise addition.
-	Vector &operator+=(const Vector &v)
-	{
-		NNAssert(m_size == v.m_size, "Incompatible addends!");
-		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
-		return *this;
-	}
-	
-	/// Element-wise scaling.
-	void scale(const T &scalar)
-	{
-		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
-	}
-	
-	/// Element-wise scaling.
-	Vector &operator*=(const T &scalar)
-	{
-		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
-		return *this;
-	}
-
-private:
-	size_t m_stride;
 };
 
 

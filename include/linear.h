@@ -5,7 +5,7 @@
 
 namespace nnlib
 {
-
+/*
 template <typename T>
 class Linear : public Module<T>
 {
@@ -60,6 +60,7 @@ private:
 	Matrix<T> m_weightsBlame;
 	Vector<T> m_biasBlame;
 };
+*/
 
 }
 
