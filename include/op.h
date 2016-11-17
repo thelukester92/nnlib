@@ -1,57 +1,27 @@
 #ifndef OP_H
 #define OP_H
 
+#include "tensor.h"
+
 namespace nnlib
 {
 
-struct Op
+class Operation
 {};
 
-template <typename T>
-struct UnaryOp : public Op
+template <typename T, typename U, typename V>
+class BinaryOperation : public Operation
 {
-	UnaryOp(const T &_target) : target(_target) {}
-	const T &target;
+public:
+	BinaryOperation(const U &lhs, const V &rhs) : m_lhs(lhs), m_rhs(rhs) {}
+	virtual void apply(T &dest) = 0;
+private:
+	const U &m_lhs;
+	const V &m_rhs;
 };
 
-template <typename T>
-struct OpTrans : public UnaryOp<T>
-{
-using UnaryOp<T>::UnaryOp;
-};
-
-template <typename T>
-struct OpCollapse : public UnaryOp<T>
-{
-	OpCollapse(const T &_target, bool _collapseCols = false) : UnaryOp<T>(_target), collapseCols(_collapseCols) {}
-	bool collapseCols;
-};
-
-template <typename T, typename U>
-struct BinaryOp : public Op
-{
-	BinaryOp(const T &_lhs, const U &_rhs) : lhs(_lhs), rhs(_rhs) {}
-	const T &lhs;
-	const U &rhs;
-};
-
-template <typename T, typename U>
-struct OpAdd : public BinaryOp<T, U>
-{
-using BinaryOp<T, U>::BinaryOp;
-};
-
-template <typename T, typename U>
-struct OpSub : public BinaryOp<T, U>
-{
-using BinaryOp<T, U>::BinaryOp;
-};
-
-template <typename T, typename U>
-struct OpMult : public BinaryOp<T, U>
-{
-using BinaryOp<T, U>::BinaryOp;
-};
+template <typename T, typename U, typename V>
+class foo;
 
 }
 

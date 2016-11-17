@@ -9,10 +9,13 @@
 namespace nnlib
 {
 
+class Operation;
+
 /// Tensor base class (abstract).
 template <typename T>
 class Tensor
 {
+friend class Operation;
 public:
 	/// General-purpose constructor.
 	Tensor(size_t n)
@@ -74,6 +77,7 @@ inline Tensor<T>::~Tensor() {}
 template <typename T>
 class Matrix : public Tensor<T>
 {
+friend class Operation;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
@@ -164,6 +168,7 @@ private:
 template <typename T>
 class Vector : public Tensor<T>
 {
+friend class Operation;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
