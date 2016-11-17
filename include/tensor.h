@@ -9,20 +9,17 @@
 namespace nnlib
 {
 
-class Operation;
-
 /// An ordered collection of elements of type T.
 /// Abstract base class for other tensors.
 template <typename T>
 class Tensor
 {
-friend class Operation;
 public:
 	/// General-purpose constructor.
 	Tensor(size_t n, const T &val = T())
 	: m_size(n), m_capacity(n), m_buffer(new T[m_capacity]), m_sharedSize(n), m_sharedBuffer(m_buffer)
 	{
-		fill(val);
+		BLAS<T>::set(n, val, m_buffer, 1);
 	}
 	
 	/// Shared-data constructor.
@@ -33,30 +30,23 @@ public:
 	/// Destructor; pure virtual to make this an abstract class.
 	virtual ~Tensor() = 0;
 	
+	/// Reserve more space in this tensor.
+	void reserve(size_t n)
+	{
+		if(n > m_capacity)
+		{
+			T *buffer = new T[m_capacity = n];
+			for(size_t i = 0; i < m_size; ++i)
+				buffer[i] = m_buffer[i];
+			m_buffer = buffer;
+			m_sharedBuffer.reset(m_buffer); // this will delete the old buffer
+		}
+	}
+	
 	/// The number of elements in this tensor.
 	size_t size() const
 	{
 		return m_size;
-	}
-	
-	/// Fill this tensor with the given value.
-	virtual void fill(const T &val)
-	{
-		BLAS<T>::set(m_size, val, m_buffer, 1);
-	}
-	
-	/// Element access.
-	virtual T &operator[](size_t i)
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access.
-	virtual const T &operator[](size_t i) const
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
 	}
 protected:
 	size_t m_size, m_capacity;
@@ -72,7 +62,6 @@ inline Tensor<T>::~Tensor() {}
 template <typename T>
 class Vector : public Tensor<T>
 {
-friend class Operation;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 using Tensor<T>::m_sharedBuffer;
@@ -122,20 +111,20 @@ public:
 	}
 	
 	/// Fill this tensor with the given value.
-	virtual void fill(const T &val) override
+	void fill(const T &val)
 	{
 		BLAS<T>::set(m_size, val, m_buffer, m_stride);
 	}
 	
 	/// Element access.
-	virtual T &operator[](size_t i) override
+	T &operator[](size_t i)
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i * m_stride];
 	}
 	
 	/// Element access.
-	virtual const T &operator[](size_t i) const override
+	const T &operator[](size_t i) const
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i * m_stride];
@@ -206,9 +195,9 @@ private:
 template <typename T>
 class Matrix : public Tensor<T>
 {
-friend class Operation;
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
+using Tensor<T>::reserve;
 public:
 	/// General-purpose constructor.
 	Matrix(size_t rows, size_t cols)
@@ -227,6 +216,19 @@ public:
 	: Tensor<T>(m, rows * cols, m.m_ld * rowOffset + colOffset), m_rows(rows), m_cols(cols), m_ld(m.m_ld)
 	{}
 	
+	/// Operation constructor.
+	Matrix(const Operation<Matrix> &op)
+	{
+		op.assign(*this);
+	}
+	
+	/// Operation assignment.
+	Matrix &operator=(const Operation<Matrix> &op)
+	{
+		op.assign(*this);
+		return *this;
+	}
+	
 	/// Copy assignment.
 	Matrix &operator=(const Matrix &m)
 	{
@@ -234,17 +236,27 @@ public:
 		return *this;
 	}
 	
+	/// Resize this matrix.
+	void resize(size_t rows, size_t cols)
+	{
+		reserve(rows * cols);
+		if(m_ld == m_cols)
+			m_ld = cols;
+		m_rows = rows;
+		m_cols = cols;
+	}
+	
 	/// Copy the elements from m into this.
 	void copy(const Matrix &m)
 	{
-		NNAssert(m.m_rows == m_rows && m.m_cols == m_cols, "Invalid size!");
+		resize(m.m_rows, m.m_cols);
 		T *from = m.m_buffer, *to = m_buffer;
 		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
 			BLAS<T>::copy(m_cols, from, 1, to, 1);
 	}
 	
 	/// Fill this tensor with the given value.
-	virtual void fill(const T &val) override
+	void fill(const T &val)
 	{
 		T *buffer = m_buffer;
 		for(size_t i = 0; i < m_rows; ++i, buffer += m_ld)
@@ -277,6 +289,20 @@ public:
 	{
 		NNAssert(i < m_rows && j < m_cols, "Index out of bounds!");
 		return m_buffer[i * m_ld + j];
+	}
+	
+	/// Element access.
+	T &operator[](size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	const T &operator[](size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
 	}
 	
 	/// Element-wise addition.
@@ -319,7 +345,12 @@ private:
 	size_t m_rows, m_cols, m_ld;
 };
 
-
+/// Addition operator overload.
+template <typename T>
+OperationAdd<T> operator+(const T &lhs, const T &rhs)
+{
+	return OperationAdd<T>(lhs, rhs);
+}
 
 
 

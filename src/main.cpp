@@ -64,8 +64,7 @@ void testTensor()
 		A[i] = i, B[i] = B.size() - i;
 	
 	Matrix<double> C(3, 3);
-	C = A;
-	C += B;
+	C = A + B;
 	for(size_t i = 0; i < C.size(); ++i)
 	{
 		cout << A[i] << " + " << B[i] << " = " << C[i] << endl;
