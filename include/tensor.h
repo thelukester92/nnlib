@@ -53,28 +53,68 @@ protected:
 };
 
 /// Pure virtual implementation (makes Tensor abstract).
-inline Tensor::~Tensor() {}
+template <typename T>
+inline Tensor<T>::~Tensor() {}
 
 /// 2-dimensional tensor.
 template <typename T>
 class Matrix : public Tensor<T>
 {
+using Tensor<T>::m_size;
+using Tensor<T>::m_buffer;
 public:
 	/// General-purpose constructor.
-	Matrix(size_t rows, size_t cols) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols)
+	Matrix(size_t rows, size_t cols)
+	: Tensor<T>(rows * cols), m_rows(rows), m_cols(cols), m_ld(cols)
 	{}
 	
-	/// Shared-data constructor.
-	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0) : Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols)
+	/// Shared-data constructor (from a Matrix).
+	Matrix(Matrix &m, size_t rows, size_t cols, size_t rowOffset, size_t colOffset)
+	: Tensor<T>(m, rows * cols, m.m_ld * rowOffset + colOffset), m_rows(rows), m_cols(cols), m_ld(m.m_ld)
 	{}
+	
+	/// Shared-data constructor (from any Tensor).
+	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0)
+	: Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols), m_ld(cols)
+	{}
+	
+	/// Element access.
+	T &at(size_t i, size_t j)
+	{
+		NNAssert(i < m_rows && j < m_cols, "Index out of bounds!");
+		return m_buffer[i * m_ld + j];
+	}
+	
+	/// Element access.
+	const T &at(size_t i, size_t j) const
+	{
+		NNAssert(i < m_rows && j < m_cols, "Index out of bounds!");
+		return m_buffer[i * m_ld + j];
+	}
+	
+	/// Element access.
+	T &operator()(size_t i, size_t j)
+	{
+		NNAssert(i < m_rows && j < m_cols, "Index out of bounds!");
+		return m_buffer[i * m_ld + j];
+	}
+	
+	/// Element access.
+	const T &operator()(size_t i, size_t j) const
+	{
+		NNAssert(i < m_rows && j < m_cols, "Index out of bounds!");
+		return m_buffer[i * m_ld + j];
+	}
 private:
-	size_t m_rows, m_cols;
+	size_t m_rows, m_cols, m_ld;
 };
 
 /// 1-dimensional tensor.
 template <typename T>
 class Vector : public Tensor<T>
 {
+using Tensor<T>::m_size;
+using Tensor<T>::m_buffer;
 public:
 	/// General purpose constructor.
 	Vector(size_t size) : Tensor<T>(size)

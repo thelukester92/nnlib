@@ -47,7 +47,13 @@ void testTensor()
 	for(size_t i = 0; i < basicTensor.size(); ++i)
 		NNLibAssert(basicTensor[i] == vec[i], "Setting via operator[] failed!");
 	
-	
+	Matrix<double> matrix(2, 3);
+	matrix(0, 0) = 1;
+	matrix(0, 1) = 0;
+	matrix(0, 2) = 0;
+	matrix(1, 0) = 0;
+	matrix(1, 1) = 1;
+	matrix(1, 2) = 0;
 }
 
 /*
