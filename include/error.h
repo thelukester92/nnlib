@@ -20,10 +20,18 @@ namespace nnlib
 	}															\
 }
 
-#ifndef OPTIMIZE
-	#define Assert(x, m) NNLibAssert(x, m)
+/// In-library asserts commonly optimized out.
+#ifdef DEBUG
+	#define NNDebugAssert(x, m) NNLibAssert(x, m)
 #else
-	#define Assert(x, m) (void) 0
+	#define NNDebugAssert(x, m) (void) 0
+#endif
+
+/// General asserts that should only be optimized out after verifying the code works.
+#ifndef OPTIMIZE
+	#define NNAssert(x, m) NNLibAssert(x, m)
+#else
+	#define NNAssert(x, m) (void) 0
 #endif
 
 }

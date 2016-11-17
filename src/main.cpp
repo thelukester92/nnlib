@@ -7,7 +7,9 @@
 #include "sequential.h"
 #include "squared_error.h"
 #include <iostream>
+#include <vector>
 #include <chrono>
+#include <algorithm>
 using namespace nnlib;
 using namespace std;
 
@@ -15,16 +17,35 @@ void testTensor();
 
 int main()
 {
-	testTensor();
+	try
+	{
+		testTensor();
+	}
+	catch(exception &e)
+	{
+		cerr << "A test failed! " << e.what() << endl;
+		return 1;
+	}
+	cout << "All tests passed!" << endl;
 	return 0;
 }
 
 void testTensor()
 {
-	using real_t = double;
-	
-	Tensor<real_t> basicTensor(5);
+	Tensor<size_t> basicTensor(5);
 	basicTensor.fill(0);
+	
+	vector<size_t> vec(5);
+	fill(vec.begin(), vec.end(), 0);
+	
+	for(size_t i = 0; i < basicTensor.size(); ++i)
+		NNLibAssert(basicTensor[i] == vec[i], "Fill failed!");
+	
+	for(size_t i = 0; i < basicTensor.size(); ++i)
+		basicTensor[i] = vec[i] = i;
+	
+	for(size_t i = 0; i < basicTensor.size(); ++i)
+		NNLibAssert(basicTensor[i] == vec[i], "Setting via operator[] failed!");
 	
 	
 }

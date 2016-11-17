@@ -24,10 +24,66 @@ public:
 	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
 	{}
 	
+	/// Copy constructor.
+	Tensor(const Tensor &t)
+	: m_size(t.m_size), m_capacity(t.m_capacity), m_buffer(new T[m_capacity]), m_sharedBuffer(m_buffer), m_sharedSize(t.m_size)
+	{
+		copy(t);
+	}
+	
+	/// Move constructor.
+	Tensor(Tensor &&t)
+	: m_size(t.m_size), m_capacity(t.m_capacity), m_buffer(t.m_buffer), m_sharedBuffer(t.m_sharedBuffer), m_sharedSize(t.m_sharedSize)
+	{}
+	
+	/// Copy assignment.
+	Tensor &operator=(const Tensor &t)
+	{
+		copy(t);
+		return *this;
+	}
+	
+	/// Move assignment.
+	Tensor &operator=(Tensor &&t)
+	{
+		m_size			= t.m_size;
+		m_capacity		= t.m_capacity;
+		m_buffer		= t.m_buffer;
+		m_sharedBuffer	= t.m_sharedBuffer;
+		m_sharedSize	= t.m_sharedSize;
+	}
+	
+	/// The number of elements in this tensor.
+	size_t size() const
+	{
+		return m_size;
+	}
+	
 	/// Fill this tensor with the given value.
 	void fill(const T &val)
 	{
 		BLAS<T>::set(m_size, val, m_buffer, 1);
+	}
+	
+	/// Copy the elements from t into this.
+	void copy(const Tensor &t)
+	{
+		NNAssert(t.m_size == m_size, "Invalid size!");
+		BLAS<T>::copy(m_size, t.m_buffer, 1, m_buffer, 1);
+	}
+	
+	/// Element access.
+	T &operator[](size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	const T &operator[](size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
 	}
 protected:
 	size_t m_size, m_capacity;
@@ -64,6 +120,8 @@ public:
 	/// Shared-data constructor.
 	Vector(Tensor<T> &t, size_t n, size_t offset = 0) : Tensor<T>(t, n, offset)
 	{}
+	
+	
 };
 
 

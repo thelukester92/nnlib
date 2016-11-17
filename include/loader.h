@@ -32,7 +32,7 @@ public:
 	{
 		size_t r, c;
 		std::ifstream fin(filename, std::ios::in | std::ios::binary);
-		Assert(!fin.fail(), "Could not load file!");
+		NNAssert(!fin.fail(), "Could not load file!");
 		fin.read((char *) &r, sizeof(size_t));
 		fin.read((char *) &c, sizeof(size_t));
 		Matrix<T> m(r, c);
@@ -50,7 +50,7 @@ public:
 		T val;
 		std::string line, piece;
 		std::ifstream fin(filename);
-		Assert(!fin.fail(), "Could not load file!");
+		NNAssert(!fin.fail(), "Could not load file!");
 		std::list<Vector<T>> vectors;
 		std::getline(fin, line);
 		while(!fin.fail())
@@ -82,7 +82,7 @@ public:
 					vectors.back()[i] = val;
 					std::getline(iss, piece, ',');
 				}
-				Assert(i == cols, "Incomplete row in arff file!");
+				NNAssert(i == cols, "Incomplete row in arff file!");
 				
 			}
 			std::getline(fin, line);

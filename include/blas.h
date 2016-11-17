@@ -11,7 +11,6 @@ namespace nnlib
 {
 
 /// Fallback methods to mimic BLAS for non-floating types.
-/// \todo determine if this should be renamed.
 /// \todo gemm in the fallback
 
 template <typename T>
