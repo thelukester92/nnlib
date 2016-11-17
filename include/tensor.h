@@ -69,7 +69,7 @@ public:
 	{}
 	
 	/// Shared-data constructor (from a Matrix).
-	Matrix(Matrix &m, size_t rows, size_t cols, size_t rowOffset, size_t colOffset)
+	Matrix(Matrix &m, size_t rows, size_t cols, size_t rowOffset = 0, size_t colOffset = 0)
 	: Tensor<T>(m, rows * cols, m.m_ld * rowOffset + colOffset), m_rows(rows), m_cols(cols), m_ld(m.m_ld)
 	{}
 	
@@ -105,6 +105,43 @@ public:
 		NNAssert(i < m_rows && j < m_cols, "Index out of bounds!");
 		return m_buffer[i * m_ld + j];
 	}
+	
+	/// Element-wise addition.
+	void add(const Matrix &m)
+	{
+		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
+		T *from = m.m_buffer, *to = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
+			BLAS<T>::axpy(m_cols, 1, from, 1, to, 1);
+	}
+	
+	/// Element-wise addition.
+	Matrix &operator+=(const Matrix &m)
+	{
+		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
+		T *from = m.m_buffer, *to = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
+			BLAS<T>::axpy(m_cols, 1, from, 1, to, 1);
+		return *this;
+	}
+	
+	/// Element-wise scaling.
+	void scale(const T &scalar)
+	{
+		T *buffer = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, buffer += m_ld)
+			BLAS<T>::scal(m_cols, scalar, buffer, 1);
+	}
+	
+	/// Element-wise scaling.
+	Matrix &operator*=(const T &scalar)
+	{
+		T *buffer = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, buffer += m_ld)
+			BLAS<T>::scal(m_cols, scalar, buffer, 1);
+		return *this;
+	}
+	
 private:
 	size_t m_rows, m_cols, m_ld;
 };
@@ -117,11 +154,13 @@ using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
 	/// General purpose constructor.
-	Vector(size_t size) : Tensor<T>(size)
+	Vector(size_t size)
+	: Tensor<T>(size), m_stride(1)
 	{}
 	
 	/// Shared-data constructor.
-	Vector(Tensor<T> &t, size_t n, size_t offset = 0) : Tensor<T>(t, n, offset)
+	Vector(Tensor<T> &t, size_t n, size_t offset = 0)
+	: Tensor<T>(t, n, offset), m_stride(t.m_stride)
 	{}
 	
 	/// Element access.
@@ -165,6 +204,37 @@ public:
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
 	}
+	
+	/// Element-wise addition.
+	void add(const Vector &v)
+	{
+		NNAssert(m_size == v.m_size, "Incompatible addends!");
+		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+	}
+	
+	/// Element-wise addition.
+	Vector &operator+=(const Vector &v)
+	{
+		NNAssert(m_size == v.m_size, "Incompatible addends!");
+		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+		return *this;
+	}
+	
+	/// Element-wise scaling.
+	void scale(const T &scalar)
+	{
+		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
+	}
+	
+	/// Element-wise scaling.
+	Vector &operator*=(const T &scalar)
+	{
+		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
+		return *this;
+	}
+
+private:
+	size_t m_stride;
 };
 
 

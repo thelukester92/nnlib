@@ -49,11 +49,19 @@ void testTensor()
 	
 	Matrix<double> matrix(2, 3);
 	matrix(0, 0) = 1;
-	matrix(0, 1) = 0;
-	matrix(0, 2) = 0;
-	matrix(1, 0) = 0;
-	matrix(1, 1) = 1;
-	matrix(1, 2) = 0;
+	matrix(0, 1) = 2;
+	matrix(0, 2) = 3;
+	matrix(1, 0) = 4;
+	matrix(1, 1) = 5;
+	matrix(1, 2) = 6;
+	matrix *= 3.14;
+	
+	for(size_t i = 0; i < 2; ++i)
+	{
+		for(size_t j = 0; j < 3; ++j)
+			cout << matrix(i, j) << "\t";
+		cout << endl;
+	}
 }
 
 /*

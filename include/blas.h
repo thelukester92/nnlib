@@ -29,6 +29,12 @@ public:
 			Y[i * strideY] = X[i * strideX];
 	}
 	
+	static void scal(size_t N, T scalar, T *X, size_t strideX)
+	{
+		for(size_t i = 0; i < N; ++i)
+			X[i * strideX] *= scalar;
+	}
+	
 	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
 	{
 		for(size_t i = 0; i < N; ++i)
@@ -74,6 +80,11 @@ public:
 		cblas_scopy(N, X, strideX, Y, strideY);
 	}
 	
+	static void scal(size_t N, T scalar, T *X, size_t strideX)
+	{
+		cblas_sscal(N, scalar, X, strideX);
+	}
+	
 	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
 	{
 		cblas_saxpy(N, alpha, X, strideX, Y, strideY);
@@ -104,6 +115,11 @@ public:
 	static void copy(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
 	{
 		cblas_dcopy(N, X, strideX, Y, strideY);
+	}
+	
+	static void scal(size_t N, T scalar, T *X, size_t strideX)
+	{
+		cblas_dscal(N, scalar, X, strideX);
 	}
 	
 	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
