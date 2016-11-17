@@ -73,6 +73,34 @@ public:
 	}
 	
 	/// Element access.
+	T &at(size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	const T &at(size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	T &operator()(size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	const T &operator()(size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
 	T &operator[](size_t i)
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
