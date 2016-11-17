@@ -56,12 +56,8 @@ void testTensor()
 	matrix(1, 2) = 6;
 	matrix *= 3.14;
 	
-	for(size_t i = 0; i < 2; ++i)
-	{
-		for(size_t j = 0; j < 3; ++j)
-			cout << matrix(i, j) << "\t";
-		cout << endl;
-	}
+	for(size_t i = 0; i < matrix.size(); ++i)
+		NNLibAssert(matrix[i] == (i + 1) * 3.14, "Matrix scaling failed!");
 }
 
 /*

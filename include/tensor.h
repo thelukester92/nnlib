@@ -45,6 +45,20 @@ public:
 		NNAssert(t.m_size == m_size, "Invalid size!");
 		BLAS<T>::copy(m_size, t.m_buffer, 1, m_buffer, 1);
 	}
+	
+	/// Element access.
+	T &operator[](size_t i)
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
+	
+	/// Element access.
+	const T &operator[](size_t i) const
+	{
+		NNAssert(i < m_size, "Index out of bounds!");
+		return m_buffer[i];
+	}
 protected:
 	size_t m_size, m_capacity;
 	T *m_buffer;
@@ -186,20 +200,6 @@ public:
 	
 	/// Element access.
 	const T &operator()(size_t i) const
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access.
-	T &operator[](size_t i)
-	{
-		NNAssert(i < m_size, "Index out of bounds!");
-		return m_buffer[i];
-	}
-	
-	/// Element access.
-	const T &operator[](size_t i) const
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
