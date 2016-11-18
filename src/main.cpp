@@ -16,6 +16,7 @@ using namespace std;
 void testTensor();
 void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
+void testLine();
 
 int main()
 {
@@ -33,6 +34,7 @@ int main()
 		testTensor();
 		testCorrectness();
 		testEfficiency(inps, outs, epochs, startFn, endFn);
+		testLine();
 	}
 	catch(exception &e)
 	{
@@ -207,15 +209,27 @@ void testCorrectness()
 	nn.add(&layer);
 	nn.add(&activation);
 	
-	Matrix<double> tanOut = activation.forward(layer.forward(input));
-	Matrix<double> seqOut = nn.forward(input);
-	for(size_t i = 0; i < seqOut.size(); ++i)
-		NNLibAssert(tanOut[i] == seqOut[i], "sequential forward failed!");
-	
-	Matrix<double> layIn = layer.backward(input, activation.backward(layer.output(), target));
-	Matrix<double> seqIn = nn.backward(input, target);
-	for(size_t i = 0; i < seqIn.size(); ++i)
-		NNLibAssert(layIn[i] == seqIn[i], "sequential backward failed!");
+	try
+	{
+		NNLibAssert(layer.inputBlame().begin() == nn.inputBlame().begin(), "Sequential failed to share input blame buffer!");
+		NNLibAssert(activation.output().begin() == nn.output().begin(), "Sequential failed to share output buffer!");
+		
+		Matrix<double> tanOut = activation.forward(layer.forward(input));
+		Matrix<double> seqOut = nn.forward(input);
+		for(size_t i = 0; i < seqOut.size(); ++i)
+			NNLibAssert(tanOut[i] == seqOut[i], "sequential forward failed!");
+		
+		Matrix<double> layIn = layer.backward(input, activation.backward(layer.output(), target));
+		Matrix<double> seqIn = nn.backward(input, target);
+		for(size_t i = 0; i < seqIn.size(); ++i)
+			NNLibAssert(layIn[i] == seqIn[i], "sequential backward failed!");
+	}
+	catch(runtime_error &e)
+	{
+		nn.release(1);
+		nn.release(0);
+		throw e;
+	}
 	
 	// release the layers, since they weren't dynamically allocated!
 	nn.release(1);
@@ -246,30 +260,6 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 	return resultSum;
 }
 
-/*
-
-void testLine();
-void testMNIST(function<void()> &start, function<void()> &end);
-
-int main()
-{
-	size_t inps				= 10000;
-	size_t outs				= 1000;
-	size_t epochs			= 100;
-	
-	using clock = chrono::high_resolution_clock;
-	clock::time_point start;
-	function<void()> startFn = [&](void) { start = clock::now(); };
-	function<void()> endFn = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() / epochs << " seconds per epoch" << endl; };
-	function<void()> endFn2 = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() << " seconds" << endl; };
-	
-	testCorrectness();
-	testEfficiency(inps, outs, epochs, startFn, endFn);
-	testLine();
-	testMNIST(startFn, endFn2);
-	return 0;
-}
-
 void testLine()
 {
 	Sequential<double> nn;
@@ -294,9 +284,14 @@ void testLine()
 		ri.reset();
 		for(auto i : ri)
 		{
-			Vector<double> row = data.row(i);
+			Vector<double> _row = data.row(i);
+			Matrix<double> row(_row, 1, data.cols());
 			nn.forward(row);
-			nn.backward(row, lab.row(i) - nn.output());
+			
+			Vector<double> _res = lab.row(i) - nn.module(1).output().row(0); // nn.output().row(0);
+			Matrix<double> res(_res, 1, _res.size());
+			nn.backward(row, res);
+			
 			auto p = param.begin();
 			auto b = blame.begin();
 			for(; p != param.end(); ++p, ++b)
@@ -307,10 +302,35 @@ void testLine()
 	double sse = 0;
 	for(size_t i = 0; i < 1000; ++i)
 	{
-		nn.forward(data.row(i));
-		sse += (lab(i, 0) - nn.output()(0)) * (lab(i, 0) - nn.output()(0));
+		Vector<double> _row = data.row(i);
+		Matrix<double> row(_row, 1, data.cols());
+		nn.forward(row);
+		sse += (lab(i, 0) - nn.module(1).output()[0]) * (lab(i, 0) - nn.module(1).output()[0]);
 	}
-	Assert(sse < 5, "Linear regression failed!");
+	NNAssert(sse < 5, "Linear regression failed!");
+}
+
+/*
+
+void testMNIST(function<void()> &start, function<void()> &end);
+
+int main()
+{
+	size_t inps				= 10000;
+	size_t outs				= 1000;
+	size_t epochs			= 100;
+	
+	using clock = chrono::high_resolution_clock;
+	clock::time_point start;
+	function<void()> startFn = [&](void) { start = clock::now(); };
+	function<void()> endFn = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() / epochs << " seconds per epoch" << endl; };
+	function<void()> endFn2 = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() << " seconds" << endl; };
+	
+	testCorrectness();
+	testEfficiency(inps, outs, epochs, startFn, endFn);
+	testLine();
+	testMNIST(startFn, endFn2);
+	return 0;
 }
 
 void testMNIST(function<void()> &start, function<void()> &end)

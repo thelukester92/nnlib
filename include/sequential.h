@@ -30,8 +30,8 @@ public:
 	void add(Module<T> *module)
 	{
 		m_modules.push_back(module);
-		m_inputBlame = Matrix<T>(m_modules.front()->inputBlame(), m_modules.front()->inputBlame().rows(), m_modules.front()->inputBlame().cols());
-		m_output = Matrix<T>(m_modules.back()->output(), m_modules.back()->output().rows(), m_modules.back()->output().cols());
+		m_inputBlame.share(m_modules.front()->inputBlame());
+		m_output.share(m_modules.back()->output());
 	}
 	
 	/// Add multiple modules at once.
@@ -62,8 +62,8 @@ public:
 		m_modules.erase(i);
 		if(m_modules.size() > 0)
 		{
-			m_inputBlame = Matrix<T>(m_modules.front()->inputBlame(), m_modules.front()->inputBlame().rows(), m_modules.front()->inputBlame().cols());
-			m_output = Matrix<T>(m_modules.back()->output(), m_modules.back()->output().rows(), m_modules.back()->output().cols());
+			m_inputBlame.share(m_modules.front()->inputBlame());
+			m_output.share(m_modules.back()->output());
 		}
 		else
 		{

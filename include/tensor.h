@@ -374,6 +374,8 @@ class Matrix : public Tensor<T>
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
+	using Tensor<T>::shareBuffer;
+	
 	/// Identity matrix.
 	static Matrix identity(size_t rows, size_t cols)
 	{
@@ -399,6 +401,11 @@ public:
 	/// Shared-data constructor.
 	Matrix(Matrix &m, size_t rows, size_t cols, size_t rowOffset = 0, size_t colOffset = 0)
 	: Tensor<T>(m, rows * cols, m.m_ld * rowOffset + colOffset), m_rows(rows), m_cols(cols), m_ld(m.m_ld)
+	{}
+	
+	/// Shared-data constructor.
+	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0)
+	: Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols), m_ld(cols)
 	{}
 	
 	/// Operation constructor.
@@ -440,6 +447,13 @@ public:
 		T *from = m.m_buffer, *to = m_buffer;
 		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
 			BLAS<T>::copy(m_cols, from, 1, to, 1);
+	}
+	
+	/// Share data with the given Matrix.
+	void share(Matrix &m)
+	{
+		shareBuffer(m, m.m_size);
+		resize(m.m_rows, m.m_cols);
 	}
 	
 	/// Fill this tensor with the given value.
