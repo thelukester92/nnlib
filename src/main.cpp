@@ -92,6 +92,24 @@ void testTensor()
 	for(size_t i = 0; i < Z.rows(); ++i)
 		for(size_t j = 0; j < Z.cols(); ++j)
 			NNLibAssert(Z(i, j) == Y(i, j), "Identity matrix multiplication failed!");
+	
+	X(0, 0) = 3;
+	X(0, 1) = 2;
+	X(1, 0) = 9;
+	X(1, 1) = -7;
+	Z -= X * Y;
+	
+	Matrix<double> Q(2, 3);
+	Q(0, 0) = 34;
+	Q(0, 1) = 24;
+	Q(0, 2) = 21;
+	Q(1, 0) = 37;
+	Q(1, 1) = 33;
+	Q(1, 2) = 63;
+	
+	for(size_t i = 0; i < Z.rows(); ++i)
+		for(size_t j = 0; j < Z.cols(); ++j)
+			NNLibAssert(Z(i, j) == Y(i, j) - Q(i, j), "Matrix multiplication+subtraction failed!");
 }
 
 /*
