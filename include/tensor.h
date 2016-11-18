@@ -499,7 +499,7 @@ public:
 			BLAS<T>::axpy(m_cols, scalar, from, 1, to, 1);
 	}
 	
-	/// Element-wise addition.
+	/// Element-wise addition (repeat the vector for each row).
 	void add(const Vector<T> &v, const T &scalar = 1)
 	{
 		NNAssert(m_cols == v.m_size && v.m_stride == 1, "Incompatible addends!");
@@ -515,7 +515,7 @@ public:
 		return *this;
 	}
 	
-	/// Element-wise addition.
+	/// Element-wise addition (repeat the vector for each row).
 	Matrix &operator+=(const Vector<T> &v)
 	{
 		add(v, 1);
@@ -536,7 +536,7 @@ public:
 		return *this;
 	}
 	
-	/// Element-wise subtraction.
+	/// Element-wise subtraction (repeat the vector for each row).
 	Matrix &operator-=(const Vector<T> &v)
 	{
 		add(v, -1);
