@@ -14,12 +14,14 @@ using namespace nnlib;
 using namespace std;
 
 void testTensor();
+void testCorrectness();
 
 int main()
 {
 	try
 	{
 		testTensor();
+		testCorrectness();
 	}
 	catch(exception &e)
 	{
@@ -125,8 +127,87 @@ void testTensor()
 			NNLibAssert(U(i, j) == T(i, j), "Matrix transposition failed!");
 }
 
+void testCorrectness()
+{
+	size_t inps = 2, outs = 3;
+	Linear<double> layer(inps, outs);
+	Matrix<double> input(1, inps), target(1, outs);
+	
+	Vector<double> allWeights = Vector<double>::flatten(layer.parameters());
+	size_t i = 0;
+	
+	// weights
+	allWeights(i++) = 1;
+	allWeights(i++) = 0;
+	allWeights(i++) = 0;
+	allWeights(i++) = 1;
+	allWeights(i++) = 1;
+	allWeights(i++) = 1;
+	
+	// bias
+	allWeights(i++) = 0;
+	allWeights(i++) = 1;
+	allWeights(i++) = 2;
+	
+	input[0] = 3.14;
+	input[1] = 10.0;
+	
+	target[0] = 3.14;
+	target[1] = 11.0;
+	target[2] = 15.14;
+	
+	Matrix<double> &result = layer.forward(input);
+	for(size_t i = 0; i < outs; ++i)
+		NNLibAssert(result[i] == target[i], "forward failed!");
+	
+	Matrix<double> &blame = layer.backward(input, target);
+	NNLibAssert(blame[0] == 18.28 && blame[1] == 26.14, "backward failed to assign correct input blame!");
+	
+	Vector<double> &biasBlame = *(Vector<double> *)layer.blame()[1];
+	for(size_t i = 0; i < outs; ++i)
+		NNLibAssert(biasBlame(i) == target[i], "backward failed to assign correct bias blame!");
+	
+	Matrix<double> expectedBlame(outs, inps);
+	expectedBlame[0] = 9.8596;
+	expectedBlame[1] = 31.4;
+	expectedBlame[2] = 34.54;
+	expectedBlame[3] = 110.0;
+	expectedBlame[4] = 47.5396;
+	expectedBlame[5] = 151.4;
+	
+	Matrix<double> &weightsBlame = *(Matrix<double> *)layer.blame()[0];
+	for(size_t i = 0; i < expectedBlame.size(); ++i)
+		NNLibAssert(fabs(weightsBlame[i] - expectedBlame[i]) < 1e-12, "backward failed to assign correct weights blame!");
+	
+	Tanh<double> activation(outs);
+	Matrix<double> &act = activation.forward(layer.output());
+	for(size_t i = 0; i < act.size(); ++i)
+		NNLibAssert(fabs(act[i] - tanh(layer.output()[i])) < 1e-9, "tanh forward failed!");
+	
+	Matrix<double> &tanhBlame = activation.backward(layer.output(), target);
+	for(size_t i = 0; i < tanhBlame.size(); ++i)
+		NNLibAssert(tanhBlame[i] == target[i] * (1.0 - act[i] * act[i]), "tanh backward failed!");
+	
+	Sequential<double> nn;
+	nn.add(&layer);
+	nn.add(&activation);
+	
+	Matrix<double> tanOut = activation.forward(layer.forward(input));
+	Matrix<double> seqOut = nn.forward(input);
+	for(size_t i = 0; i < seqOut.size(); ++i)
+		NNLibAssert(tanOut[i] == seqOut[i], "sequential forward failed!");
+	
+	Matrix<double> layIn = layer.backward(input, activation.backward(layer.output(), target));
+	Matrix<double> seqIn = nn.backward(input, target);
+	for(size_t i = 0; i < seqIn.size(); ++i)
+		NNLibAssert(layIn[i] == seqIn[i], "sequential backward failed!");
+	
+	// release the layers, since they weren't dynamically allocated!
+	nn.release(1);
+	nn.release(0);
+}
+
 /*
-void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
 void testLine();
 void testMNIST(function<void()> &start, function<void()> &end);
@@ -148,90 +229,6 @@ int main()
 	testLine();
 	testMNIST(startFn, endFn2);
 	return 0;
-}
-
-void testCorrectness()
-{
-#ifndef OPTIMIZE
-	size_t inps = 2, outs = 3;
-	Linear<double> layer(inps, outs);
-	Vector<double> input(inps), target(outs);
-	
-	Vector<double> allWeights = Vector<double>::flatten(layer.parameters());
-	size_t i = 0;
-	
-	// weights
-	allWeights(i++) = 1;
-	allWeights(i++) = 0;
-	allWeights(i++) = 0;
-	allWeights(i++) = 1;
-	allWeights(i++) = 1;
-	allWeights(i++) = 1;
-	
-	// bias
-	allWeights(i++) = 0;
-	allWeights(i++) = 1;
-	allWeights(i++) = 2;
-	
-	input(0) = 3.14;
-	input(1) = 10.0;
-	
-	target(0) = 3.14;
-	target(1) = 11.0;
-	target(2) = 15.14;
-	
-	Vector<double> result = layer.forward(input);
-	for(size_t i = 0; i < outs; ++i)
-		Assert(result(i) == target(i), "forward failed!");
-	
-	Vector<double> &blame = layer.backward(input, target);
-	Assert(blame(0) == 18.28 && blame(1) == 26.14, "backward failed to assign correct input blame!");
-	
-	Vector<double> &biasBlame = *(Vector<double> *)layer.blame()[1];
-	for(size_t i = 0; i < outs; ++i)
-		Assert(biasBlame(i) == target(i), "backward failed to assign correct bias blame!");
-	
-	Matrix<double> expectedBlame(outs, inps);
-	expectedBlame[0] = 9.8596;
-	expectedBlame[1] = 31.4;
-	expectedBlame[2] = 34.54;
-	expectedBlame[3] = 110.0;
-	expectedBlame[4] = 47.5396;
-	expectedBlame[5] = 151.4;
-	
-	Matrix<double> &weightsBlame = *(Matrix<double> *)layer.blame()[0];
-	for(size_t i = 0; i < expectedBlame.size(); ++i)
-		Assert(fabs(weightsBlame[i] - expectedBlame[i]) < 1e-12, "backward failed to assign correct weights blame!");
-	
-	Tanh<double> activation(outs);
-	Vector<double> &act = activation.forward(layer.output());
-	for(size_t i = 0; i < act.size(); ++i)
-		Assert(fabs(act[i] - tanh(layer.output()[i])) < 1e-9, "tanh forward failed!");
-	
-	Vector<double> &tanhBlame = activation.backward(layer.output(), target);
-	for(size_t i = 0; i < tanhBlame.size(); ++i)
-		Assert(tanhBlame[i] == target[i] * (1.0 - act[i] * act[i]), "tanh backward failed!");
-	
-	Sequential<double> nn;
-	nn.add(&layer);
-	nn.add(&activation);
-	
-	Vector<double> tanOut = activation.forward(layer.forward(input));
-	Vector<double> seqOut = nn.forward(input);
-	for(size_t i = 0; i < seqOut.size(); ++i)
-		Assert(tanOut(i) == seqOut(i), "sequential forward failed!");
-	
-	Vector<double> layIn = layer.backward(input, activation.backward(layer.output(), target));
-	Vector<double> seqIn = nn.backward(input, target);
-	for(size_t i = 0; i < seqIn.size(); ++i)
-		Assert(layIn(i) == seqIn(i), "sequential backward failed!");
-	
-	// release the layers, since they weren't dynamically allocated!
-	nn.release(1);
-	nn.release(0);
-#endif
-	
-	cout << "Passed all tests!" << endl;
 }
 
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end)

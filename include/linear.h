@@ -5,7 +5,7 @@
 
 namespace nnlib
 {
-/*
+
 template <typename T>
 class Linear : public Module<T>
 {
@@ -35,7 +35,7 @@ public:
 	virtual Matrix<T> &backward(const Matrix<T> &input, const Matrix<T> &blame) override
 	{
 		m_weightsBlame = ~blame * input;
-		m_biasBlame = OpCollapse<Matrix<T>>(blame);
+		m_biasBlame = OperationSumRows<Vector<T>, Matrix<T>>(blame);
 		return m_inputBlame = blame * m_weights;
 	}
 	
@@ -60,7 +60,6 @@ private:
 	Matrix<T> m_weightsBlame;
 	Vector<T> m_biasBlame;
 };
-*/
 
 }
 

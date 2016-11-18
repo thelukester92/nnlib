@@ -20,7 +20,7 @@ public:
 	virtual Matrix<T> &forward(const Matrix<T> &input) override
 	{
 		size_t n = input.size();
-		Assert(n == m_inputBlame.size(), "Incompatible input!");
+		NNAssert(n == m_inputBlame.size(), "Incompatible input!");
 		for(size_t i = 0; i < n; ++i)
 			m_output[i] = tanh(input[i]);
 		return m_output;
@@ -30,8 +30,8 @@ public:
 	virtual Matrix<T> &backward(const Matrix<T> &input, const Matrix<T> &blame) override
 	{
 		size_t n = input.size();
-		Assert(n == m_inputBlame.size(), "Incompatible input!");
-		Assert(n == blame.size(), "Incompatible blame!");
+		NNAssert(n == m_inputBlame.size(), "Incompatible input!");
+		NNAssert(n == blame.size(), "Incompatible blame!");
 		for(size_t i = 0; i < n; ++i)
 			m_inputBlame[i] = blame[i] * (1.0 - m_output[i] * m_output[i]);
 		return m_inputBlame;

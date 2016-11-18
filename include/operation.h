@@ -1,25 +1,35 @@
 #ifndef OP_H
 #define OP_H
 
-#include "tensor.h"
+#include <type_traits>
 
 namespace nnlib
 {
 
 template <typename T>
-struct OperationResult
-{
-	typedef T type;
-};
+class Matrix;
 
 template <typename T>
 class Operation
 {
 public:
+	typedef T type;
 	virtual ~Operation() {}
 	virtual void assign(T &dest) const = 0;
 	virtual void add(T &dest) const = 0;
 	virtual void sub(T &dest) const = 0;
+};
+
+template <typename T>
+struct OperationResult
+{
+	typedef typename OperationResult<typename T::type>::type type;
+};
+
+template <typename T>
+struct OperationResult<Matrix<T>>
+{
+	typedef Matrix<T> type;
 };
 
 template <typename T, typename U, typename V>
@@ -202,6 +212,48 @@ OperationTrans<typename OperationResult<U>::type, U> operator~(const U &target)
 {
 	return OperationTrans<typename OperationResult<U>::type, U>(target);
 }
+
+template <typename T, typename U = T>
+class OperationSumRows : public UnaryOperation<T, U>
+{
+using UnaryOperation<T, U>::UnaryOperation;
+using UnaryOperation<T, U>::m_target;
+public:
+	virtual void assign(T &dest) const override
+	{
+		T row = m_target.row(0);
+		size_t ld = m_target.ld(), n = m_target.rows();
+		size_t offset = ld;
+		dest.copy(row);
+		for(size_t i = 1; i < n; ++i, offset += ld)
+		{
+			row.setOffset(offset);
+			dest += row;
+		}
+	}
+	
+	virtual void add(T &dest) const override
+	{
+		T row = m_target.row(0);
+		size_t ld = m_target.ld(), n = m_target.rows(), offset = 0;
+		for(size_t i = 0; i < n; ++i, offset += ld)
+		{
+			row.setOffset(offset);
+			dest += row;
+		}
+	}
+	
+	virtual void sub(T &dest) const override
+	{
+		T row = m_target.row(0);
+		size_t ld = m_target.ld(), n = m_target.rows(), offset = 0;
+		for(size_t i = 0; i < n; ++i, offset += ld)
+		{
+			row.setOffset(offset);
+			dest -= row;
+		}
+	}
+};
 
 }
 

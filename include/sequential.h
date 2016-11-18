@@ -76,8 +76,8 @@ public:
 	/// Feed in input vectors and return cached output vectors.
 	virtual Matrix<T> &forward(const Matrix<T> &input) override
 	{
-		Assert(m_modules.size() > 0, "Cannot forward propagate in an empty network!");
-		const Vector<T> *in = &input;
+		NNAssert(m_modules.size() > 0, "Cannot forward propagate in an empty network!");
+		const Matrix<T> *in = &input;
 		for(auto i : m_modules)
 			in = &i->forward(*in);
 		return m_modules.back()->output();
@@ -86,8 +86,8 @@ public:
 	/// Feed in inputs and output blames (gradient) and return cached input blame vectors.
 	virtual Matrix<T> &backward(const Matrix<T> &input, const Matrix<T> &blame) override
 	{
-		Assert(m_modules.size() > 0, "Cannot backpropagate in an empty network!");
-		const Vector<T> *bl = &blame;
+		NNAssert(m_modules.size() > 0, "Cannot backpropagate in an empty network!");
+		const Matrix<T> *bl = &blame;
 		for(size_t i = m_modules.size() - 1; i > 0; --i)
 			bl = &m_modules[i]->backward(m_modules[i - 1]->output(), *bl);
 		return m_modules[0]->backward(input, *bl);

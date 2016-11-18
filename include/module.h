@@ -56,13 +56,6 @@ public:
 		m_output.resize(batchSize, outs);
 	}
 	
-	/// Feed in a single input vector and return the output vector.
-	virtual Vector<T> forward(const Vector<T> &input)
-	{
-		forward(Matrix<T>(input, 1, input.size()));
-		return m_output.row(0);
-	}
-	
 	/// Feed in input vectors and return cached output vectors.
 	virtual Matrix<T> &forward(const Matrix<T> &input) = 0;
 	
