@@ -16,6 +16,7 @@ class Tensor
 {
 public:
 	/// General-purpose constructor.
+	/// \todo handle zero-length as a special case.
 	Tensor(size_t n, const T &val = T())
 	: m_size(n), m_capacity(n), m_buffer(new T[m_capacity]), m_sharedSize(n), m_sharedBuffer(m_buffer)
 	{
@@ -362,11 +363,25 @@ public:
 		return *this;
 	}
 	
+	/// Operation addition.
+	Matrix &operator+=(const Operation<Matrix> &op)
+	{
+		op.add(*this);
+		return *this;
+	}
+	
 	/// Element-wise subtraction.
 	Matrix &operator-=(const Matrix &m)
 	{
 		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
 		add(m, -1);
+		return *this;
+	}
+	
+	/// Operation subtraction.
+	Matrix &operator-=(const Operation<Matrix> &op)
+	{
+		op.sub(*this);
 		return *this;
 	}
 	
@@ -393,6 +408,22 @@ public:
 		resize(lhs.m_rows, rhs.m_cols);
 		NNAssert(lhs.m_cols == rhs.m_rows, "Incompatible multiplicands!");
 		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, lhs.m_rows, rhs.m_cols, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
+	}
+	
+	/// Matrix multiplication (with transposition on the LHS).
+	void multiply(const OperationTrans<Matrix> &lhs, const Matrix &rhs, const T &alpha = 1, const T &beta = 0)
+	{
+		resize(lhs.m_target.m_cols, rhs.m_cols);
+		NNAssert(lhs.m_target.m_rows == rhs.m_rows, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasTrans, CblasNoTrans, lhs.m_rows, rhs.m_cols, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
+	}
+	
+	/// Matrix multiplication (with transposition on the RHS).
+	void multiply(const Matrix &lhs, const OperationTrans<Matrix> &rhs, const T &alpha = 1, const T &beta = 0)
+	{
+		resize(lhs.m_rows, rhs.m_target.m_rows);
+		NNAssert(lhs.m_cols == rhs.m_target.m_cols, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasTrans, lhs.m_rows, rhs.m_cols, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
 	}
 	
 private:

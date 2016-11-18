@@ -7,6 +7,12 @@ namespace nnlib
 {
 
 template <typename T>
+struct OperationResult
+{
+	typedef T type;
+};
+
+template <typename T>
 class Operation
 {
 public:
@@ -16,77 +22,7 @@ public:
 	virtual void sub(T &dest) const = 0;
 };
 
-template <typename T, typename U = T>
-class UnaryOperation : public Operation<T>
-{
-public:
-	UnaryOperation(const U &target) : m_target(target) {}
-protected:
-	const U &m_target;
-};
-
-template <typename T>
-class OperationNeg : public UnaryOperation<T>
-{
-using UnaryOperation<T>::UnaryOperation;
-using UnaryOperation<T>::m_target;
-public:
-	virtual void assign(T &dest) const override
-	{
-		dest = m_target;
-		dest *= -1;
-	}
-	
-	virtual void add(T &dest) const override
-	{
-		dest -= m_target;
-	}
-	
-	virtual void sub(T &dest) const override
-	{
-		dest += m_target;
-	}
-};
-
-/// Unary negation operator overload.
-template <typename T>
-OperationNeg<T> operator-(const T &target)
-{
-	return OperationNeg<T>(target);
-}
-
-/*
-template <typename T>
-class OperationTrans : public UnaryOperation<T>
-{
-using UnaryOperation<T>::UnaryOperation;
-using UnaryOperation<T>::m_target;
-public:
-	virtual void assign(T &dest) const override
-	{
-		???
-	}
-	
-	virtual void add(T &dest) const override
-	{
-		???
-	}
-	
-	virtual void sub(T &dest) const override
-	{
-		???
-	}
-};
-
-/// Unary transposition operator overload.
-template <typename T>
-OperationTrans<T> operator~(const T &target)
-{
-	return OperationTrans<T>(target);
-}
-*/
-
-template <typename T, typename U = T, typename V = T>
+template <typename T, typename U, typename V>
 class BinaryOperation : public Operation<T>
 {
 public:
@@ -96,12 +32,12 @@ protected:
 	const V &m_rhs;
 };
 
-template <typename T>
-class OperationAdd : public BinaryOperation<T>
+template <typename T, typename U, typename V>
+class OperationAdd : public BinaryOperation<T, U, V>
 {
-using BinaryOperation<T>::BinaryOperation;
-using BinaryOperation<T>::m_lhs;
-using BinaryOperation<T>::m_rhs;
+using BinaryOperation<T, U, V>::BinaryOperation;
+using BinaryOperation<T, U, V>::m_lhs;
+using BinaryOperation<T, U, V>::m_rhs;
 public:
 	virtual void assign(T &dest) const override
 	{
@@ -123,18 +59,18 @@ public:
 };
 
 /// Addition operator overload.
-template <typename T>
-OperationAdd<T> operator+(const T &lhs, const T &rhs)
+template <typename U, typename V>
+OperationAdd<typename OperationResult<U>::type, U, V> operator+(const U &lhs, const V &rhs)
 {
-	return OperationAdd<T>(lhs, rhs);
+	return OperationAdd<typename OperationResult<U>::type, U, V>(lhs, rhs);
 }
 
-template <typename T>
-class OperationSub : public BinaryOperation<T>
+template <typename T, typename U, typename V>
+class OperationSub : public BinaryOperation<T, U, V>
 {
-using BinaryOperation<T>::BinaryOperation;
-using BinaryOperation<T>::m_lhs;
-using BinaryOperation<T>::m_rhs;
+using BinaryOperation<T, U, V>::BinaryOperation;
+using BinaryOperation<T, U, V>::m_lhs;
+using BinaryOperation<T, U, V>::m_rhs;
 public:
 	virtual void assign(T &dest) const override
 	{
@@ -156,18 +92,18 @@ public:
 };
 
 /// Subtraction operator overload.
-template <typename T>
-OperationSub<T> operator-(const T &lhs, const T &rhs)
+template <typename U, typename V>
+OperationSub<typename OperationResult<U>::type, U, V> operator-(const U &lhs, const V &rhs)
 {
-	return OperationSub<T>(lhs, rhs);
+	return OperationSub<typename OperationResult<U>::type, U, V>(lhs, rhs);
 }
 
-template <typename T>
-class OperationMult : public BinaryOperation<T>
+template <typename T, typename U, typename V>
+class OperationMult : public BinaryOperation<T, U, V>
 {
-using BinaryOperation<T>::BinaryOperation;
-using BinaryOperation<T>::m_lhs;
-using BinaryOperation<T>::m_rhs;
+using BinaryOperation<T, U, V>::BinaryOperation;
+using BinaryOperation<T, U, V>::m_lhs;
+using BinaryOperation<T, U, V>::m_rhs;
 public:
 	virtual void assign(T &dest) const override
 	{
@@ -186,10 +122,85 @@ public:
 };
 
 /// (Matrix) multiplication operator overload.
-template <typename T>
-OperationMult<T> operator*(const T &lhs, const T &rhs)
+template <typename U, typename V>
+OperationMult<typename OperationResult<U>::type, U, V> operator*(const U &lhs, const V &rhs)
 {
-	return OperationMult<T>(lhs, rhs);
+	return OperationMult<typename OperationResult<U>::type, U, V>(lhs, rhs);
+}
+
+template <typename T, typename U>
+class UnaryOperation : public Operation<T>
+{
+public:
+	UnaryOperation(const U &target) : m_target(target) {}
+protected:
+	const U &m_target;
+};
+
+template <typename T, typename U>
+class OperationNeg : public UnaryOperation<T, U>
+{
+using UnaryOperation<T, U>::UnaryOperation;
+using UnaryOperation<T, U>::m_target;
+public:
+	virtual void assign(T &dest) const override
+	{
+		dest = m_target;
+		dest *= -1;
+	}
+	
+	virtual void add(T &dest) const override
+	{
+		dest -= m_target;
+	}
+	
+	virtual void sub(T &dest) const override
+	{
+		dest += m_target;
+	}
+};
+
+/// Unary negation operator overload.
+template <typename U>
+OperationNeg<typename OperationResult<U>::type, U> operator-(const U &target)
+{
+	return OperationNeg<typename OperationResult<U>::type, U>(target);
+}
+
+/// \todo determine a more efficient way to directly assign transpositions.
+///       this is a low-priority issue because assigning transpositions is
+///       not generally used; instead, one should use them as multiplicands.
+template <typename T, typename U = T>
+class OperationTrans : public UnaryOperation<T, U>
+{
+using UnaryOperation<T, U>::UnaryOperation;
+using UnaryOperation<T, U>::m_target;
+public:
+	virtual void assign(T &dest) const override
+	{
+		T I = T::identity(m_target.cols(), m_target.cols());
+		OperationMult<T, T, U> temp = OperationMult<T, T, U>(I, *this);
+		// temp.assign(dest);
+	}
+	
+	virtual void add(T &dest) const override
+	{
+		T I = T::identity(m_target.cols(), m_target.cols());
+		OperationMult<T, T, U>(I, *this).add(dest);
+	}
+	
+	virtual void sub(T &dest) const override
+	{
+		T I = T::identity(m_target.cols(), m_target.cols());
+		OperationMult<T, T, U>(I, *this).sub(dest);
+	}
+};
+
+/// Unary transposition operator overload.
+template <typename U>
+OperationTrans<typename OperationResult<U>::type, U> operator~(const U &target)
+{
+	return OperationTrans<typename OperationResult<U>::type, U>(target);
 }
 
 }
