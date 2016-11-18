@@ -77,6 +77,21 @@ void testTensor()
 	NNLibAssert(A.size() == E.size(), "Matrix assignment failed!");
 	for(size_t i = 0; i < E.size(); ++i)
 		NNLibAssert(E[i] == -A[i], "Matrix negation failed!");
+	
+	Matrix<double> X = Matrix<double>::identity(2, 2);
+	Matrix<double> Y(2, 3);
+	Y(0, 0) = 8;
+	Y(0, 1) = 6;
+	Y(0, 2) = 7;
+	Y(1, 0) = 5;
+	Y(1, 1) = 3;
+	Y(1, 2) = 0;
+	
+	Matrix<double> Z = X * Y;
+	NNLibAssert(Z.rows() == X.rows() && Z.cols() == Y.cols(), "Matrix multiplication failed!");
+	for(size_t i = 0; i < Z.rows(); ++i)
+		for(size_t j = 0; j < Z.cols(); ++j)
+			NNLibAssert(Z(i, j) == Y(i, j), "Identity matrix multiplication failed!");
 }
 
 /*

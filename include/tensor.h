@@ -215,9 +215,19 @@ class Matrix : public Tensor<T>
 using Tensor<T>::m_size;
 using Tensor<T>::m_buffer;
 public:
+	/// Identity matrix.
+	static Matrix identity(size_t rows, size_t cols)
+	{
+		Matrix m(rows, cols, 0);
+		size_t d = std::min(rows, cols);
+		for(size_t i = 0; i < d; ++i)
+			m(i, i) = 1;
+		return m;
+	}
+	
 	/// General-purpose constructor.
-	Matrix(size_t rows, size_t cols)
-	: Tensor<T>(rows * cols), m_rows(rows), m_cols(cols), m_ld(cols)
+	Matrix(size_t rows, size_t cols, const T &val = T())
+	: Tensor<T>(rows * cols, val), m_rows(rows), m_cols(cols), m_ld(cols)
 	{}
 	
 	/// Copy constructor.
@@ -323,6 +333,18 @@ public:
 		return m_buffer[i];
 	}
 	
+	/// Number of rows.
+	size_t rows() const
+	{
+		return m_rows;
+	}
+	
+	/// Number of columns.
+	size_t cols() const
+	{
+		return m_cols;
+	}
+	
 	/// Element-wise addition.
 	void add(const Matrix &m, const T &scalar = 1)
 	{
@@ -365,11 +387,17 @@ public:
 		return *this;
 	}
 	
+	/// Matrix multiplication.
+	void multiply(const Matrix &lhs, const Matrix &rhs, const T &alpha = 1, const T &beta = 0)
+	{
+		resize(lhs.m_rows, rhs.m_cols);
+		NNAssert(lhs.m_cols == rhs.m_rows, "Incompatible multiplicands!");
+		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, lhs.m_rows, rhs.m_cols, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
+	}
+	
 private:
 	size_t m_rows, m_cols, m_ld;
 };
-
-
 
 
 
