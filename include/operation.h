@@ -7,9 +7,6 @@ namespace nnlib
 {
 
 template <typename T>
-class Matrix;
-
-template <typename T>
 class Operation
 {
 public:
@@ -18,18 +15,6 @@ public:
 	virtual void assign(T &dest) const = 0;
 	virtual void add(T &dest) const = 0;
 	virtual void sub(T &dest) const = 0;
-};
-
-template <typename T>
-struct OperationResult
-{
-	typedef typename OperationResult<typename T::type>::type type;
-};
-
-template <typename T>
-struct OperationResult<Matrix<T>>
-{
-	typedef Matrix<T> type;
 };
 
 template <typename T, typename U, typename V>
@@ -68,13 +53,6 @@ public:
 	}
 };
 
-/// Addition operator overload.
-template <typename U, typename V>
-OperationAdd<typename OperationResult<U>::type, U, V> operator+(const U &lhs, const V &rhs)
-{
-	return OperationAdd<typename OperationResult<U>::type, U, V>(lhs, rhs);
-}
-
 template <typename T, typename U, typename V>
 class OperationSub : public BinaryOperation<T, U, V>
 {
@@ -101,13 +79,6 @@ public:
 	}
 };
 
-/// Subtraction operator overload.
-template <typename U, typename V>
-OperationSub<typename OperationResult<U>::type, U, V> operator-(const U &lhs, const V &rhs)
-{
-	return OperationSub<typename OperationResult<U>::type, U, V>(lhs, rhs);
-}
-
 template <typename T, typename U, typename V>
 class OperationMult : public BinaryOperation<T, U, V>
 {
@@ -130,13 +101,6 @@ public:
 		dest.multiply(m_lhs, m_rhs, -1, 1);
 	}
 };
-
-/// (Matrix) multiplication operator overload.
-template <typename U, typename V>
-OperationMult<typename OperationResult<U>::type, U, V> operator*(const U &lhs, const V &rhs)
-{
-	return OperationMult<typename OperationResult<U>::type, U, V>(lhs, rhs);
-}
 
 template <typename T, typename U>
 class UnaryOperation : public Operation<T>
@@ -170,13 +134,6 @@ public:
 	}
 };
 
-/// Unary negation operator overload.
-template <typename U>
-OperationNeg<typename OperationResult<U>::type, U> operator-(const U &target)
-{
-	return OperationNeg<typename OperationResult<U>::type, U>(target);
-}
-
 /// \todo determine a more efficient way to directly assign transpositions.
 ///       this is a low-priority issue because assigning transpositions is
 ///       not generally used; instead, one should use them as multiplicands.
@@ -205,13 +162,6 @@ public:
 		OperationMult<T, T, OperationTrans<T, U>>(I, *this).sub(dest);
 	}
 };
-
-/// Unary transposition operator overload.
-template <typename U>
-OperationTrans<typename OperationResult<U>::type, U> operator~(const U &target)
-{
-	return OperationTrans<typename OperationResult<U>::type, U>(target);
-}
 
 template <typename T, typename U = T>
 class OperationSumRows : public UnaryOperation<T, U>
@@ -254,6 +204,87 @@ public:
 		}
 	}
 };
+
+// MARK: Operation result metaprogramming helper.
+
+template <typename T>
+struct OperationResult
+{
+	typedef T type;
+};
+
+template <typename T>
+struct OperationResult<Operation<T>>
+{
+	typedef typename OperationResult<T>::type type;
+};
+
+template <typename T, typename U, typename V>
+struct OperationResult<OperationAdd<T, U, V>>
+{
+	typedef typename OperationResult<T>::type type;
+};
+
+template <typename T, typename U, typename V>
+struct OperationResult<OperationSub<T, U, V>>
+{
+	typedef typename OperationResult<T>::type type;
+};
+
+template <typename T, typename U, typename V>
+struct OperationResult<OperationMult<T, U, V>>
+{
+	typedef typename OperationResult<T>::type type;
+};
+
+template <typename T, typename U>
+struct OperationResult<OperationNeg<T, U>>
+{
+	typedef typename OperationResult<T>::type type;
+};
+
+template <typename T, typename U>
+struct OperationResult<OperationTrans<T, U>>
+{
+	typedef typename OperationResult<T>::type type;
+};
+
+// MARK: Operator overloads.
+
+/// Addition operator overload.
+template <typename U, typename V>
+OperationAdd<typename OperationResult<U>::type, U, V> operator+(const U &lhs, const V &rhs)
+{
+	return OperationAdd<typename OperationResult<U>::type, U, V>(lhs, rhs);
+}
+
+/// Subtraction operator overload.
+template <typename U, typename V>
+OperationSub<typename OperationResult<U>::type, U, V> operator-(const U &lhs, const V &rhs)
+{
+	return OperationSub<typename OperationResult<U>::type, U, V>(lhs, rhs);
+}
+
+/// (Matrix) multiplication operator overload.
+template <typename U, typename V>
+OperationMult<typename OperationResult<U>::type, U, V> operator*(const U &lhs, const V &rhs)
+{
+	return OperationMult<typename OperationResult<U>::type, U, V>(lhs, rhs);
+}
+
+/// Unary negation operator overload.
+template <typename U>
+OperationNeg<typename OperationResult<U>::type, U> operator-(const U &target)
+{
+	return OperationNeg<typename OperationResult<U>::type, U>(target);
+}
+
+/// Unary transposition operator overload.
+template <typename U>
+OperationTrans<typename OperationResult<U>::type, U> operator~(const U &target)
+{
+	return OperationTrans<typename OperationResult<U>::type, U>(target);
+}
 
 }
 

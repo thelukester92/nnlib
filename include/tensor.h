@@ -8,6 +8,9 @@
 namespace nnlib
 {
 
+/// \todo better tensor iterator that is not undefined for non-contiguous tensors.
+///       it should at least cause a runtime error.
+
 /// An ordered collection of elements of type T.
 /// Abstract base class for other tensors.
 template <typename T>
@@ -79,6 +82,34 @@ public:
 	{
 		NNAssert(i < m_size, "Index out of bounds!");
 		return m_buffer[i];
+	}
+	
+	/// std-like iterator begin.
+	/// Behavior is undefined for non-contiguous tensors.
+	T *begin()
+	{
+		return m_buffer;
+	}
+	
+	/// std-like iterator end.
+	/// Behavior is undefined for non-contiguous tensors.
+	T *end()
+	{
+		return m_buffer + m_size;
+	}
+	
+	/// std-like iterator begin.
+	/// Behavior is undefined for non-contiguous tensors.
+	const T *begin() const
+	{
+		return m_buffer;
+	}
+	
+	/// std-like iterator end.
+	/// Behavior is undefined for non-contiguous tensors.
+	const T *end() const
+	{
+		return m_buffer + m_size;
 	}
 protected:
 	size_t m_size, m_capacity;
@@ -295,11 +326,25 @@ public:
 		return *this;
 	}
 	
+	/// Operation addition.
+	Vector &operator+=(const Operation<Vector> &op)
+	{
+		op.add(*this);
+		return *this;
+	}
+	
 	/// Element-wise subtraction.
 	Vector &operator-=(const Vector &v)
 	{
 		NNAssert(m_size == v.m_size, "Incompatible addends!");
 		add(v, -1);
+		return *this;
+	}
+	
+	/// Operation subtraction.
+	Vector &operator-=(const Operation<Vector> &op)
+	{
+		op.sub(*this);
 		return *this;
 	}
 	
@@ -314,34 +359,6 @@ public:
 	{
 		BLAS<T>::scal(m_size, scalar, m_buffer, m_stride);
 		return *this;
-	}
-	
-	/// std-like iterator begin.
-	T *begin()
-	{
-		NNAssert(m_stride == 1, "Can only iterate through contiguous vectors!");
-		return m_buffer;
-	}
-	
-	/// std-like iterator end.
-	T *end()
-	{
-		NNAssert(m_stride == 1, "Can only iterate through contiguous vectors!");
-		return m_buffer + m_size;
-	}
-	
-	/// std-like iterator begin.
-	const T *begin() const
-	{
-		NNAssert(m_stride == 1, "Can only iterate through contiguous vectors!");
-		return m_buffer;
-	}
-	
-	/// std-like iterator end.
-	const T *end() const
-	{
-		NNAssert(m_stride == 1, "Can only iterate through contiguous vectors!");
-		return m_buffer + m_size;
 	}
 
 private:

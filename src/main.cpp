@@ -15,13 +15,24 @@ using namespace std;
 
 void testTensor();
 void testCorrectness();
+double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
 
 int main()
 {
+	size_t inps				= 10000;
+	size_t outs				= 1000;
+	size_t epochs			= 100;
+	
+	using clock = chrono::high_resolution_clock;
+	clock::time_point start;
+	function<void()> startFn = [&](void) { start = clock::now(); };
+	function<void()> endFn = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() << " seconds" << endl; };
+	
 	try
 	{
 		testTensor();
 		testCorrectness();
+		testEfficiency(inps, outs, epochs, startFn, endFn);
 	}
 	catch(exception &e)
 	{
@@ -125,6 +136,10 @@ void testTensor()
 	for(size_t i = 0; i < U.rows(); ++i)
 		for(size_t j = 0; j < U.cols(); ++j)
 			NNLibAssert(U(i, j) == T(i, j), "Matrix transposition failed!");
+	
+	Matrix<double> W = X * Y - Z;
+	Vector<double> a(5), b(5);
+	Vector<double> c = a - b;
 }
 
 void testCorrectness()
@@ -207,8 +222,32 @@ void testCorrectness()
 	nn.release(0);
 }
 
+double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end)
+{
+	Matrix<double> weights(outs, inps);
+	Matrix<double> input(1, inps), result(1, outs);
+	Vector<double> bias(outs);
+	Random r;
+	
+	r.fillNormal(weights);
+	r.fillNormal(bias);
+	r.fillNormal(input);
+	result.fill(0.0);
+	
+	start();
+	for(size_t i = 0; i < epochs; ++i)
+		result += weights * input + bias;
+	end();
+	
+	double resultSum = 0.0;
+	for(size_t i = 0; i < outs; ++i)
+		resultSum += result[i];
+	
+	return resultSum;
+}
+
 /*
-double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
+
 void testLine();
 void testMNIST(function<void()> &start, function<void()> &end);
 
@@ -229,29 +268,6 @@ int main()
 	testLine();
 	testMNIST(startFn, endFn2);
 	return 0;
-}
-
-double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end)
-{
-	Matrix<double> weights(outs, inps);
-	Vector<double> input(inps), bias(outs), result(outs);
-	Random r;
-	
-	r.fillNormal(weights);
-	r.fillNormal(bias);
-	r.fillNormal(input);
-	result.fill(0.0);
-	
-	start();
-	for(size_t i = 0; i < epochs; ++i)
-		result += weights * input + bias;
-	end();
-	
-	double resultSum = 0.0;
-	for(size_t i = 0; i < outs; ++i)
-		resultSum += result[i];
-	
-	return resultSum;
 }
 
 void testLine()
