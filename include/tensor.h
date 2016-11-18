@@ -168,32 +168,25 @@ public:
 	}
 	
 	/// Element-wise addition.
-	void add(const Vector &v)
+	void add(const Vector &v, const T &scalar)
 	{
 		NNAssert(m_size == v.m_size, "Incompatible addends!");
-		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+		BLAS<T>::axpy(m_size, scalar, v.m_buffer, v.m_stride, m_buffer, m_stride);
 	}
 	
 	/// Element-wise addition.
 	Vector &operator+=(const Vector &v)
 	{
 		NNAssert(m_size == v.m_size, "Incompatible addends!");
-		BLAS<T>::axpy(m_size, 1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+		add(v, 1);
 		return *this;
 	}
 	
 	/// Element-wise subtraction.
-	void subtract(const Vector &v)
-	{
-		NNAssert(m_size == v.m_size, "Incompatible addends!");
-		BLAS<T>::axpy(m_size, -1, v.m_buffer, v.m_stride, m_buffer, m_stride);
-	}
-	
-	/// Element-wise addition.
 	Vector &operator-=(const Vector &v)
 	{
 		NNAssert(m_size == v.m_size, "Incompatible addends!");
-		BLAS<T>::axpy(m_size, -1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+		add(v, -1);
 		return *this;
 	}
 	
@@ -331,40 +324,27 @@ public:
 	}
 	
 	/// Element-wise addition.
-	void add(const Matrix &m)
+	void add(const Matrix &m, const T &scalar = 1)
 	{
 		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
 		T *from = m.m_buffer, *to = m_buffer;
 		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
-			BLAS<T>::axpy(m_cols, 1, from, 1, to, 1);
+			BLAS<T>::axpy(m_cols, scalar, from, 1, to, 1);
 	}
 	
 	/// Element-wise addition.
 	Matrix &operator+=(const Matrix &m)
 	{
 		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
-		T *from = m.m_buffer, *to = m_buffer;
-		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
-			BLAS<T>::axpy(m_cols, 1, from, 1, to, 1);
+		add(m, 1);
 		return *this;
 	}
 	
-	/// Element-wise addition.
-	void subtract(const Matrix &m)
-	{
-		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
-		T *from = m.m_buffer, *to = m_buffer;
-		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
-			BLAS<T>::axpy(m_cols, -1, from, 1, to, 1);
-	}
-	
-	/// Element-wise addition.
+	/// Element-wise subtraction.
 	Matrix &operator-=(const Matrix &m)
 	{
 		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
-		T *from = m.m_buffer, *to = m_buffer;
-		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
-			BLAS<T>::axpy(m_cols, -1, from, 1, to, 1);
+		add(m, -1);
 		return *this;
 	}
 	

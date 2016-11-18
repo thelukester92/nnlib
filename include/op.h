@@ -14,6 +14,35 @@ public:
 	virtual void assign(T &dest) const = 0;
 };
 
+template <typename T, typename U = T>
+class UnaryOperation : public Operation<T>
+{
+public:
+	UnaryOperation(const U &target) : m_target(target) {}
+protected:
+	const U &m_target;
+};
+
+template <typename T>
+class OperationNeg : public UnaryOperation<T>
+{
+using UnaryOperation<T>::UnaryOperation;
+using UnaryOperation<T>::m_target;
+public:
+	virtual void assign(T &dest) const override
+	{
+		dest = m_target;
+		dest *= -1;
+	}
+};
+
+/// Unary negation operator overload.
+template <typename T>
+OperationNeg<T> operator-(const T &target)
+{
+	return OperationNeg<T>(target);
+}
+
 template <typename T, typename U = T, typename V = T>
 class BinaryOperation : public Operation<T>
 {

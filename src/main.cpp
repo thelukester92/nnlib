@@ -70,8 +70,13 @@ void testTensor()
 	
 	Matrix<double> D = A - B;
 	NNLibAssert(A.size() == D.size(), "Matrix assignment failed!");
-	for(size_t i = 0; i < C.size(); ++i)
+	for(size_t i = 0; i < D.size(); ++i)
 		NNLibAssert(D[i] == A[i] - B[i], "Matrix subtraction failed!");
+	
+	Matrix<double> E = -A;
+	NNLibAssert(A.size() == E.size(), "Matrix assignment failed!");
+	for(size_t i = 0; i < E.size(); ++i)
+		NNLibAssert(E[i] == -A[i], "Matrix negation failed!");
 }
 
 /*
