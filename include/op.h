@@ -38,6 +38,34 @@ public:
 	}
 };
 
+/// Addition operator overload.
+template <typename T>
+OperationAdd<T> operator+(const T &lhs, const T &rhs)
+{
+	return OperationAdd<T>(lhs, rhs);
+}
+
+template <typename T>
+class OperationSub : public BinaryOperation<T>
+{
+using BinaryOperation<T>::BinaryOperation;
+using BinaryOperation<T>::m_lhs;
+using BinaryOperation<T>::m_rhs;
+public:
+	virtual void assign(T &dest) const override
+	{
+		dest = m_lhs;
+		dest -= m_rhs;
+	}
+};
+
+/// Subtraction operator overload.
+template <typename T>
+OperationSub<T> operator-(const T &lhs, const T &rhs)
+{
+	return OperationSub<T>(lhs, rhs);
+}
+
 }
 
 #endif

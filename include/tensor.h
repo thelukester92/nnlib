@@ -182,6 +182,21 @@ public:
 		return *this;
 	}
 	
+	/// Element-wise subtraction.
+	void subtract(const Vector &v)
+	{
+		NNAssert(m_size == v.m_size, "Incompatible addends!");
+		BLAS<T>::axpy(m_size, -1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+	}
+	
+	/// Element-wise addition.
+	Vector &operator-=(const Vector &v)
+	{
+		NNAssert(m_size == v.m_size, "Incompatible addends!");
+		BLAS<T>::axpy(m_size, -1, v.m_buffer, v.m_stride, m_buffer, m_stride);
+		return *this;
+	}
+	
 	/// Element-wise scaling.
 	void scale(const T &scalar)
 	{
@@ -334,6 +349,25 @@ public:
 		return *this;
 	}
 	
+	/// Element-wise addition.
+	void subtract(const Matrix &m)
+	{
+		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
+		T *from = m.m_buffer, *to = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
+			BLAS<T>::axpy(m_cols, -1, from, 1, to, 1);
+	}
+	
+	/// Element-wise addition.
+	Matrix &operator-=(const Matrix &m)
+	{
+		NNAssert(m_rows == m.m_rows && m_cols == m.m_cols, "Incompatible addends!");
+		T *from = m.m_buffer, *to = m_buffer;
+		for(size_t i = 0; i < m_rows; ++i, from += m.m_ld, to += m_ld)
+			BLAS<T>::axpy(m_cols, -1, from, 1, to, 1);
+		return *this;
+	}
+	
 	/// Element-wise scaling.
 	void scale(const T &scalar)
 	{
@@ -354,13 +388,6 @@ public:
 private:
 	size_t m_rows, m_cols, m_ld;
 };
-
-/// Addition operator overload.
-template <typename T>
-OperationAdd<T> operator+(const T &lhs, const T &rhs)
-{
-	return OperationAdd<T>(lhs, rhs);
-}
 
 
 

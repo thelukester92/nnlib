@@ -64,11 +64,14 @@ void testTensor()
 		A[i] = i, B[i] = B.size() - i;
 	
 	Matrix<double> C = A + B;
+	NNLibAssert(A.size() == C.size(), "Matrix assignment failed!");
 	for(size_t i = 0; i < C.size(); ++i)
-	{
-		cout << A[i] << " + " << B[i] << " = " << C[i] << endl;
 		NNLibAssert(C[i] == A[i] + B[i], "Matrix addition failed!");
-	}
+	
+	Matrix<double> D = A - B;
+	NNLibAssert(A.size() == D.size(), "Matrix assignment failed!");
+	for(size_t i = 0; i < C.size(); ++i)
+		NNLibAssert(D[i] == A[i] - B[i], "Matrix subtraction failed!");
 }
 
 /*
