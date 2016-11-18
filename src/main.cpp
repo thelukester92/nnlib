@@ -116,6 +116,13 @@ void testTensor()
 	for(size_t i = 0; i < T.rows(); ++i)
 		for(size_t j = 0; j < T.cols(); ++j)
 			NNLibAssert(T(i, j) == Q(j, i), "Matrix transposition failed!");
+	
+	Matrix<double> U(0, 0);
+	U = Matrix<double>::identity(3, 3) * ~Q;
+	NNLibAssert(T.rows() == U.rows() && T.cols() == U.cols(), "Matrix transposition failed!");
+	for(size_t i = 0; i < U.rows(); ++i)
+		for(size_t j = 0; j < U.cols(); ++j)
+			NNLibAssert(U(i, j) == T(i, j), "Matrix transposition failed!");
 }
 
 /*
