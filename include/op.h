@@ -180,20 +180,19 @@ public:
 	virtual void assign(T &dest) const override
 	{
 		T I = T::identity(m_target.cols(), m_target.cols());
-		OperationMult<T, T, OperationTrans<T, U>> temp = OperationMult<T, T, OperationTrans<T, U>>(I, *this);
-		// temp.assign(dest);
+		OperationMult<T, T, OperationTrans<T, U>>(I, *this).assign(dest);
 	}
 	
 	virtual void add(T &dest) const override
 	{
 		T I = T::identity(m_target.cols(), m_target.cols());
-		OperationMult<T, T, U>(I, *this).add(dest);
+		OperationMult<T, T, OperationTrans<T, U>>(I, *this).add(dest);
 	}
 	
 	virtual void sub(T &dest) const override
 	{
 		T I = T::identity(m_target.cols(), m_target.cols());
-		OperationMult<T, T, U>(I, *this).sub(dest);
+		OperationMult<T, T, OperationTrans<T, U>>(I, *this).sub(dest);
 	}
 };
 
