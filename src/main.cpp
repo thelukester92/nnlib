@@ -236,7 +236,7 @@ double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> 
 	
 	start();
 	for(size_t i = 0; i < epochs; ++i)
-		result += weights * input + bias;
+		result += input * ~weights + bias;
 	end();
 	
 	double resultSum = 0.0;

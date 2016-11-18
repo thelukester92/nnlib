@@ -206,6 +206,7 @@ public:
 	/// Copy assignment.
 	Vector &operator=(const Vector &v)
 	{
+		resize(v.m_size);
 		copy(v);
 		return *this;
 	}

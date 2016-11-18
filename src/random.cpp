@@ -2,7 +2,6 @@
 #include "tensor.h"
 using namespace nnlib;
 
-/*
 Random::Random() : m_engine(std::random_device()())
 {}
 
@@ -59,4 +58,3 @@ size_t *RandomIterator::end()
 {
 	return m_buffer.end();
 }
-*/
