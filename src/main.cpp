@@ -17,6 +17,7 @@ void testTensor();
 void testCorrectness();
 double testEfficiency(size_t inps, size_t outs, size_t epochs, function<void()> &start, function<void()> &end);
 void testLine();
+void testMNIST(function<void()> &start, function<void()> &end);
 
 int main()
 {
@@ -35,6 +36,7 @@ int main()
 		testCorrectness();
 		testEfficiency(inps, outs, epochs, startFn, endFn);
 		testLine();
+		testMNIST(startFn, endFn);
 	}
 	catch(exception &e)
 	{
@@ -284,13 +286,8 @@ void testLine()
 		ri.reset();
 		for(auto i : ri)
 		{
-			Vector<double> _row = data.row(i);
-			Matrix<double> row(_row, 1, data.cols());
-			nn.forward(row);
-			
-			Vector<double> _res = lab.row(i) - nn.module(1).output().row(0); // nn.output().row(0);
-			Matrix<double> res(_res, 1, _res.size());
-			nn.backward(row, res);
+			nn.forwardSingle(data.row(i));
+			nn.backwardSingle(data.row(i), lab.row(i) - nn.output().row(0));
 			
 			auto p = param.begin();
 			auto b = blame.begin();
@@ -305,36 +302,14 @@ void testLine()
 		Vector<double> _row = data.row(i);
 		Matrix<double> row(_row, 1, data.cols());
 		nn.forward(row);
-		sse += (lab(i, 0) - nn.module(1).output()[0]) * (lab(i, 0) - nn.module(1).output()[0]);
+		sse += (lab(i, 0) - nn.output()[0]) * (lab(i, 0) - nn.output()[0]);
 	}
 	NNAssert(sse < 5, "Linear regression failed!");
 }
 
-/*
-
-void testMNIST(function<void()> &start, function<void()> &end);
-
-int main()
-{
-	size_t inps				= 10000;
-	size_t outs				= 1000;
-	size_t epochs			= 100;
-	
-	using clock = chrono::high_resolution_clock;
-	clock::time_point start;
-	function<void()> startFn = [&](void) { start = clock::now(); };
-	function<void()> endFn = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() / epochs << " seconds per epoch" << endl; };
-	function<void()> endFn2 = [&](void) { cout << "took " << chrono::duration<double>(clock::now() - start).count() << " seconds" << endl; };
-	
-	testCorrectness();
-	testEfficiency(inps, outs, epochs, startFn, endFn);
-	testLine();
-	testMNIST(startFn, endFn2);
-	return 0;
-}
-
 void testMNIST(function<void()> &start, function<void()> &end)
 {
+/*
 	cout << "==================== MNIST ====================" << endl;
 	
 	Sequential<double> nn;
@@ -439,5 +414,5 @@ void testMNIST(function<void()> &start, function<void()> &end)
 			++misclassified;
 	}
 	cout << "End: " << misclassified << "     " << endl;
-}
 */
+}

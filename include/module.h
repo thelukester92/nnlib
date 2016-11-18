@@ -56,6 +56,18 @@ public:
 		m_output.resize(batchSize, outs);
 	}
 	
+	/// Feed in a single vector.
+	virtual Vector<T> forwardSingle(const Vector<T> &input)
+	{
+		return forward(Matrix<T>(*const_cast<Vector<T> *>(&input), 1, input.size())).row(0);
+	}
+	
+	/// Backprop a single vector.
+	virtual Vector<T> backwardSingle(const Vector<T> &input, const Vector<T> &blame)
+	{
+		return backward(Matrix<T>(*const_cast<Vector<T> *>(&input), 1, input.size()), Matrix<T>(*const_cast<Vector<T> *>(&blame), 1, blame.size())).row(0);
+	}
+	
 	/// Feed in input vectors and return cached output vectors.
 	virtual Matrix<T> &forward(const Matrix<T> &input) = 0;
 	
