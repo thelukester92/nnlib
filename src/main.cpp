@@ -111,7 +111,7 @@ void testTensor()
 		for(size_t j = 0; j < Z.cols(); ++j)
 			NNLibAssert(Z(i, j) == Y(i, j) - Q(i, j), "Matrix multiplication+subtraction failed!");
 	
-	// Matrix<double> T = ~Q;
+	Matrix<double> T = ~Q;
 	/*
 	NNLibAssert(T.rows() == Q.cols() && T.cols() == Q.rows(), "Matrix transposition failed!");
 	for(size_t i = 0; i < T.rows(); ++i)

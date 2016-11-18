@@ -415,7 +415,7 @@ public:
 	{
 		resize(lhs.m_target.m_cols, rhs.m_cols);
 		NNAssert(lhs.m_target.m_rows == rhs.m_rows, "Incompatible multiplicands!");
-		BLAS<T>::gemm(CblasRowMajor, CblasTrans, CblasNoTrans, lhs.m_rows, rhs.m_cols, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
+		BLAS<T>::gemm(CblasRowMajor, CblasTrans, CblasNoTrans, lhs.m_target.m_cols, rhs.m_cols, lhs.m_target.m_rows, alpha, lhs.m_target.m_buffer, lhs.m_target.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
 	}
 	
 	/// Matrix multiplication (with transposition on the RHS).
@@ -423,7 +423,7 @@ public:
 	{
 		resize(lhs.m_rows, rhs.m_target.m_rows);
 		NNAssert(lhs.m_cols == rhs.m_target.m_cols, "Incompatible multiplicands!");
-		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasTrans, lhs.m_rows, rhs.m_cols, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_buffer, rhs.m_ld, beta, m_buffer, m_ld);
+		BLAS<T>::gemm(CblasRowMajor, CblasNoTrans, CblasTrans, lhs.m_rows, rhs.m_target.m_rows, lhs.m_cols, alpha, lhs.m_buffer, lhs.m_ld, rhs.m_target.m_buffer, rhs.m_target.m_ld, beta, m_buffer, m_ld);
 	}
 	
 private:

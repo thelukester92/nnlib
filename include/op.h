@@ -173,13 +173,14 @@ OperationNeg<typename OperationResult<U>::type, U> operator-(const U &target)
 template <typename T, typename U = T>
 class OperationTrans : public UnaryOperation<T, U>
 {
+friend T;
 using UnaryOperation<T, U>::UnaryOperation;
 using UnaryOperation<T, U>::m_target;
 public:
 	virtual void assign(T &dest) const override
 	{
 		T I = T::identity(m_target.cols(), m_target.cols());
-		OperationMult<T, T, U> temp = OperationMult<T, T, U>(I, *this);
+		OperationMult<T, T, OperationTrans<T, U>> temp = OperationMult<T, T, OperationTrans<T, U>>(I, *this);
 		// temp.assign(dest);
 	}
 	
