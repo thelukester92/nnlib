@@ -288,13 +288,13 @@ void testLine()
 	Random r;
 	r.fillNormal(param, 0.0, 0.03, 0.1);
 	
-	RandomBatchIterator<double> ri(data, lab);
+	RandomBatcher<double> ri(data, lab);
 	for(size_t i = 0; i < 100; ++i)
 	{
-		for(auto &i = ri.begin(), e = ri.end(); i != e; ++i)
+		for(auto i : ri)
 		{
-			nn.forward(i.features());
-			nn.backward(i.features(), i.labels() - nn.output());
+			nn.forward(i.features);
+			nn.backward(i.features, i.labels - nn.output());
 			
 			auto p = param.begin();
 			auto b = blame.begin();

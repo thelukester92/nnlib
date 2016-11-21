@@ -46,22 +46,76 @@ private:
 /// Randomly iterate through a Matrix, batching together a submatrix.
 /// The input matrix will be shuffled.
 template <typename T>
-class RandomBatchIterator
+class RandomBatcher
 {
 public:
+	struct Iterator
+	{
+		Iterator(RandomBatcher &_ri, size_t _offset = 0)
+		: ri(_ri), features(ri.m_features, ri.m_batchSize, ri.m_features.cols()), labels(ri.m_labels, ri.m_batchSize, ri.m_labels.cols()), offset(_offset)
+		{}
+		
+		Iterator(const Iterator &i)
+		: ri(i.ri), features(ri.m_features, ri.m_batchSize, ri.m_features.cols()), labels(ri.m_labels, ri.m_batchSize, ri.m_labels.cols()), offset(i.offset)
+		{}
+		
+		Iterator &operator++()
+		{
+			offset += ri.m_batchSize;
+			if(offset < ri.m_features.rows())
+			{
+				features.setOffset(offset);
+				labels.setOffset(offset);
+				if(offset + ri.m_batchSize > ri.m_features.rows())
+				{
+					features.resize(features.rows() - offset, features.cols());
+					labels.resize(labels.rows() - offset, labels.cols());
+				}
+			}
+			else
+				offset = ri.m_features.rows();
+			return *this;
+		}
+		
+		Iterator operator++(int)
+		{
+			Iterator it(*this);
+			++*this;
+			return it;
+		}
+		
+		Iterator &operator*()
+		{
+			return *this;
+		}
+		
+		bool operator==(const Iterator &i)
+		{
+			return &ri == &i.ri && offset == i.offset;
+		}
+		
+		bool operator!=(const Iterator &i)
+		{
+			return &ri != &i.ri || offset != i.offset;
+		}
+		
+		RandomBatcher &ri;
+		Matrix<T> features, labels;
+	
+	private:
+		size_t offset;
+	};
+	
 	/// General constructor. Starts in the past-the-end state.
-	RandomBatchIterator(Matrix<T> &features, Matrix<T> &labels, size_t n = 1)
-	: m_random(), m_features(features), m_labels(labels), m_featureBatch(m_features, n, features.cols()), m_labelBatch(m_labels, n, labels.cols()), m_batchSize(n), m_offset(m_features.rows())
+	RandomBatcher(Matrix<T> &features, Matrix<T> &labels, size_t n = 1)
+	: m_random(), m_features(features), m_labels(labels), m_batchSize(n)
 	{
 		NNAssert(m_features.rows() == m_labels.rows(), "Features and labels must have the same number of rows!");
 	}
 	
-	/// Shuffle the matrix and reset offset to 0.
+	/// Shuffle the matrix.
 	void reset()
 	{
-		m_offset = 0;
-		m_featureBatch.resize(m_batchSize, m_features.cols());
-		m_labelBatch.resize(m_batchSize, m_labels.cols());
 		size_t n = m_features.rows();
 		for(size_t i = n - 1; i > 0; --i)
 		{
@@ -71,71 +125,17 @@ public:
 		}
 	}
 	
-	/// The current mini-batch of features.
-	Matrix<T> &features()
-	{
-		NNAssert(m_offset < m_features.rows(), "Cannot batch an uninitialized batch iterator!");
-		return m_featureBatch;
-	}
-	
-	/// The current mini-batch of labels.
-	Matrix<T> &labels()
-	{
-		NNAssert(m_offset < m_labels.rows(), "Cannot batch an uninitialized batch iterator!");
-		return m_labelBatch;
-	}
-	
-	/// The current mini-batch.
-	std::pair<Matrix<T>, Matrix<T>> &operator*()
-	{
-		NNAssert(m_offset < m_features.rows(), "Cannot batch an uninitialized batch iterator!");
-		return std::make_pair(m_featureBatch, m_labelBatch);
-	}
-	
 	/// std-like iterator begin.
-	RandomBatchIterator &begin()
+	Iterator begin()
 	{
 		reset();
-		return *this;
+		return Iterator(*this);
 	}
 	
 	/// std-like iterator end.
-	RandomBatchIterator end()
+	Iterator end()
 	{
-		return RandomBatchIterator(m_features, m_labels, m_batchSize);
-	}
-	
-	RandomBatchIterator &operator++()
-	{
-		m_offset += m_batchSize;
-		if(m_offset < m_features.rows())
-		{
-			m_featureBatch.setOffset(m_offset);
-			m_labelBatch.setOffset(m_offset);
-		}
-		if(m_offset + m_batchSize > m_features.rows())
-		{
-			m_featureBatch.resize(m_features.rows() - m_offset, m_features.cols());
-			m_labelBatch.resize(m_labels.rows() - m_offset, m_labels.cols());
-		}
-		return *this;
-	}
-	
-	RandomBatchIterator operator++(int)
-	{
-		RandomBatchIterator it(*this);
-		++*this;
-		return it;
-	}
-	
-	bool operator==(const RandomBatchIterator &ri)
-	{
-		return m_offset == ri.m_offset && m_batchSize == ri.m_batchSize && &m_features == &ri.m_features && &m_labels == &ri.m_labels;
-	}
-	
-	bool operator!=(const RandomBatchIterator &ri)
-	{
-		return !(*this == ri);
+		return Iterator(*this, m_features.rows());
 	}
 private:
 	Random m_random;
