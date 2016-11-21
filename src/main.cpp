@@ -294,8 +294,8 @@ void testLine()
 		ri.reset();
 		for(auto i : ri)
 		{
-			nn.forwardSingle(data.row(i));
-			nn.backwardSingle(data.row(i), lab.row(i) - nn.output().row(0));
+			nn.forward(data.row(i));
+			nn.backward(data.row(i), lab.row(i) - nn.output().row(0));
 			
 			auto p = param.begin();
 			auto b = blame.begin();

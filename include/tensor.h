@@ -428,9 +428,21 @@ public:
 		op.assign(*this);
 	}
 	
+	/// Operation constructor.
+	Matrix(const Operation<Vector<T>> &op)
+	: Tensor<T>(0), m_rows(0), m_cols(0), m_ld(0)
+	{
+		*this = Vector<T>(op);
+	}
+	
 	/// Move constructor.
 	Matrix(const Matrix &&m)
 	: Tensor<T>(std::move(m)), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_ld)
+	{}
+	
+	/// Move constructor.
+	Matrix(const Tensor<T> &&t)
+	: Tensor<T>(std::move(t)), m_rows(1), m_cols(t.size()), m_ld(m_cols)
 	{}
 	
 	/// Operation assignment.
@@ -461,7 +473,7 @@ public:
 	/// Move assignment.
 	Matrix &operator=(const Matrix &&m)
 	{
-		shareBuffer(m);
+		shareBuffer(*const_cast<Matrix *>(&m));
 		resize(m.m_rows, m.m_cols);
 		m_ld = m.m_ld;
 		return *this;
