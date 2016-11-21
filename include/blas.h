@@ -41,6 +41,12 @@ public:
 			Y[i * strideY] += alpha * X[i * strideX];
 	}
 	
+	static void swap(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		for(size_t i = 0; i < N; ++i)
+			std::swap(X[i], Y[i]);
+	}
+	
 	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
 	{
 		if(transA == CblasNoTrans)
@@ -90,6 +96,11 @@ public:
 		cblas_saxpy(N, alpha, X, strideX, Y, strideY);
 	}
 	
+	static void swap(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_sswap(N, X, strideX, Y, strideY);
+	}
+	
 	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)
 	{
 		cblas_sgemv(order, transA, rows, cols, alpha, A, lda, X, strideX, beta, Y, strideY);
@@ -125,6 +136,11 @@ public:
 	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
 	{
 		cblas_daxpy(N, alpha, X, strideX, Y, strideY);
+	}
+	
+	static void swap(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_dswap(N, X, strideX, Y, strideY);
 	}
 	
 	static void gemv(CBLAS_ORDER order, CBLAS_TRANSPOSE transA, size_t rows, size_t cols, T alpha, T *A, size_t lda, T *X, size_t strideX, T beta, T *Y, size_t strideY)

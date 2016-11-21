@@ -288,14 +288,13 @@ void testLine()
 	Random r;
 	r.fillNormal(param, 0.0, 0.03, 0.1);
 	
-	RandomIterator ri(1000);
+	RandomBatchIterator<double> ri(data, lab);
 	for(size_t i = 0; i < 100; ++i)
 	{
-		ri.reset();
-		for(auto i : ri)
+		for(auto &i = ri.begin(), e = ri.end(); i != e; ++i)
 		{
-			nn.forward(data.row(i));
-			nn.backward(data.row(i), lab.row(i) - nn.output().row(0));
+			nn.forward(i.features());
+			nn.backward(i.features(), i.labels() - nn.output());
 			
 			auto p = param.begin();
 			auto b = blame.begin();
@@ -317,7 +316,7 @@ void testLine()
 
 void testMNIST(function<void()> &start, function<void()> &end)
 {
-/*
+	/*
 	cout << "==================== MNIST ====================" << endl;
 	
 	Sequential<double> nn;
@@ -422,5 +421,5 @@ void testMNIST(function<void()> &start, function<void()> &end)
 			++misclassified;
 	}
 	cout << "End: " << misclassified << "     " << endl;
-*/
+	*/
 }

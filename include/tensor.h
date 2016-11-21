@@ -48,6 +48,13 @@ public:
 		m_sharedBuffer = t.m_sharedBuffer;
 	}
 	
+	/// Set the offset of this vector.
+	void setOffset(size_t n)
+	{
+		NNAssert(n + m_size <= m_sharedSize, "Invalid offset!");
+		m_buffer = m_sharedBuffer.get() + n;
+	}
+	
 	/// Reserve more space in this tensor.
 	void reserve(size_t n)
 	{
@@ -236,13 +243,6 @@ public:
 	{
 		resize(v.m_size);
 		BLAS<T>::copy(m_size, v.m_buffer, v.m_stride, m_buffer, m_stride);
-	}
-	
-	/// Set the offset of this vector.
-	void setOffset(size_t n)
-	{
-		NNAssert(n + m_size <= m_sharedSize, "Invalid offset!");
-		m_buffer = m_sharedBuffer.get() + n;
 	}
 	
 	/// Fill this tensor with the given value.
@@ -512,6 +512,12 @@ public:
 		T *buffer = m_buffer;
 		for(size_t i = 0; i < m_rows; ++i, buffer += m_ld)
 			BLAS<T>::set(m_cols, val, buffer, 1);
+	}
+	
+	/// Swap rows.
+	void swapRows(size_t i, size_t j)
+	{
+		BLAS<T>::swap(m_cols, m_buffer + i * m_ld, 1, m_buffer + j * m_ld, 1);
 	}
 	
 	/// Row access.
