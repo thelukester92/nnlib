@@ -36,7 +36,7 @@ using BinaryOperation<T, U, V>::m_rhs;
 public:
 	virtual void assign(T &dest) const override
 	{
-		dest = m_lhs;
+		dest.copy(m_lhs);
 		dest += m_rhs;
 	}
 	
@@ -62,7 +62,7 @@ using BinaryOperation<T, U, V>::m_rhs;
 public:
 	virtual void assign(T &dest) const override
 	{
-		dest = m_lhs;
+		dest.copy(m_lhs);
 		dest -= m_rhs;
 	}
 	
@@ -119,7 +119,7 @@ using UnaryOperation<T, U>::m_target;
 public:
 	virtual void assign(T &dest) const override
 	{
-		dest = m_target;
+		dest.copy(m_target);
 		dest *= -1;
 	}
 	

@@ -26,16 +26,22 @@ public:
 	}
 	
 	/// Shared-data constructor.
-	Tensor(Tensor &t, size_t n, size_t offset = 0)
-	: m_size(n), m_capacity(n), m_buffer(t.m_buffer + offset), m_sharedSize(t.m_sharedSize), m_sharedBuffer(t.m_sharedBuffer)
+	Tensor(Tensor &t, size_t n = (size_t) -1, size_t offset = 0)
+	: m_size(std::min(n, t.m_size)), m_capacity(t.m_capacity), m_buffer(t.m_buffer + offset), m_sharedSize(t.m_sharedSize), m_sharedBuffer(t.m_sharedBuffer)
+	{}
+	
+	/// Move constructor.
+	Tensor(const Tensor &&t)
+	: m_size(t.m_size), m_capacity(m_size), m_buffer(t.m_buffer), m_sharedSize(t.m_sharedSize), m_sharedBuffer(t.m_sharedBuffer)
 	{}
 	
 	/// Destructor; pure virtual to make this an abstract class.
 	virtual ~Tensor() = 0;
 	
 	/// Reassign to use shared data.
-	void shareBuffer(Tensor &t, size_t n, size_t offset = 0)
+	void shareBuffer(Tensor &t, size_t n = (size_t) -1, size_t offset = 0)
 	{
+		n = std::min(n, t.m_size);
 		m_size = m_capacity = n;
 		m_buffer = t.m_buffer + offset;
 		m_sharedSize = t.m_sharedSize;
@@ -135,6 +141,7 @@ using Tensor<T>::m_sharedBuffer;
 using Tensor<T>::m_sharedSize;
 public:
 	using Tensor<T>::resize;
+	using Tensor<T>::shareBuffer;
 	
 	/// Combine the given tensors into a single vector, then make the given tensors share data.
 	static Vector flatten(const Vector<Tensor<T> *> &tensors)
@@ -163,20 +170,13 @@ public:
 	: Tensor<T>(size, val), m_stride(1)
 	{}
 	
-	/// Copy constructor.
-	Vector(const Vector &v)
-	: Tensor<T>(v.m_size), m_stride(1)
-	{
-		copy(v);
-	}
-	
 	/// Shared-data constructor.
-	Vector(Vector<T> &v, size_t n, size_t offset = 0)
+	Vector(Vector<T> &v, size_t n = (size_t) -1, size_t offset = 0)
 	: Tensor<T>(v, n, offset), m_stride(v.m_stride)
 	{}
 	
 	/// Shared-data constructor.
-	Vector(Tensor<T> &t, size_t n, size_t offset = 0)
+	Vector(Tensor<T> &t, size_t n = (size_t) -1, size_t offset = 0)
 	: Tensor<T>(t, n, offset), m_stride(1)
 	{}
 	
@@ -196,6 +196,11 @@ public:
 		op.assign(*this);
 	}
 	
+	/// Move constructor.
+	Vector(const Vector &&v)
+	: Tensor<T>(std::move(v)), m_stride(v.m_stride)
+	{}
+	
 	/// Operation assignment.
 	Vector &operator=(const Operation<Vector> &op)
 	{
@@ -203,18 +208,33 @@ public:
 		return *this;
 	}
 	
-	/// Copy assignment.
-	Vector &operator=(const Vector &v)
+	/// Shared-data assignment.
+	Vector &operator=(Vector &v)
 	{
-		resize(v.m_size);
-		copy(v);
+		shareBuffer(v);
+		m_stride = v.m_stride;
+		return *this;
+	}
+	
+	/// Shared-data assignment.
+	Vector &operator=(Tensor<T> &t)
+	{
+		shareBuffer(t);
+		return *this;
+	}
+	
+	/// Move assignment.
+	Vector &operator=(const Vector &&v)
+	{
+		shareBuffer(v);
+		m_stride = v.m_stride;
 		return *this;
 	}
 	
 	/// Copy the elements from v into this.
 	void copy(const Vector &v)
 	{
-		NNAssert(v.m_size == m_size, "Invalid size!");
+		resize(v.m_size);
 		BLAS<T>::copy(m_size, v.m_buffer, v.m_stride, m_buffer, m_stride);
 	}
 	
@@ -387,16 +407,9 @@ public:
 	}
 	
 	/// General-purpose constructor.
-	Matrix(size_t rows, size_t cols, const T &val = T())
+	Matrix(size_t rows = 0, size_t cols = 0, const T &val = T())
 	: Tensor<T>(rows * cols, val), m_rows(rows), m_cols(cols), m_ld(cols)
 	{}
-	
-	/// Copy constructor.
-	Matrix(const Matrix &m)
-	: Tensor<T>(m.m_size), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_cols)
-	{
-		copy(m);
-	}
 	
 	/// Shared-data constructor.
 	Matrix(Matrix &m, size_t rows, size_t cols, size_t rowOffset = 0, size_t colOffset = 0)
@@ -404,8 +417,8 @@ public:
 	{}
 	
 	/// Shared-data constructor.
-	Matrix(Tensor<T> &t, size_t rows, size_t cols, size_t offset = 0)
-	: Tensor<T>(t, rows * cols, offset), m_rows(rows), m_cols(cols), m_ld(cols)
+	Matrix(Tensor<T> &t, size_t rows = 1, size_t cols = (size_t) -1, size_t offset = 0)
+	: Tensor<T>(t, rows * std::min(cols, t.size()), offset), m_rows(rows), m_cols(std::min(cols, t.size())), m_ld(m_cols)
 	{}
 	
 	/// Operation constructor.
@@ -415,6 +428,11 @@ public:
 		op.assign(*this);
 	}
 	
+	/// Move constructor.
+	Matrix(const Matrix &&m)
+	: Tensor<T>(std::move(m)), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_ld)
+	{}
+	
 	/// Operation assignment.
 	Matrix &operator=(const Operation<Matrix> &op)
 	{
@@ -422,10 +440,30 @@ public:
 		return *this;
 	}
 	
-	/// Copy assignment.
-	Matrix &operator=(const Matrix &m)
+	/// Shared-data assignment.
+	Matrix &operator=(Matrix &m)
 	{
-		copy(m);
+		shareBuffer(m);
+		resize(m.m_rows, m.m_cols);
+		m_ld = m.m_ld;
+		return *this;
+	}
+	
+	/// Shared-data assignment.
+	Matrix &operator=(Tensor<T> &t)
+	{
+		shareBuffer(t);
+		resize(1, t.m_size);
+		m_ld = t.m_size;
+		return *this;
+	}
+	
+	/// Move assignment.
+	Matrix &operator=(const Matrix &&m)
+	{
+		shareBuffer(m);
+		resize(m.m_rows, m.m_cols);
+		m_ld = m.m_ld;
 		return *this;
 	}
 	

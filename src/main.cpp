@@ -216,13 +216,21 @@ void testCorrectness()
 		NNLibAssert(layer.inputBlame().begin() == nn.inputBlame().begin(), "Sequential failed to share input blame buffer!");
 		NNLibAssert(activation.output().begin() == nn.output().begin(), "Sequential failed to share output buffer!");
 		
-		Matrix<double> tanOut = activation.forward(layer.forward(input));
-		Matrix<double> seqOut = nn.forward(input);
+		Matrix<double> tanOut;
+		tanOut.copy(activation.forward(layer.forward(input)));
+		
+		Matrix<double> seqOut;
+		seqOut.copy(nn.forward(input));
+		
 		for(size_t i = 0; i < seqOut.size(); ++i)
 			NNLibAssert(tanOut[i] == seqOut[i], "sequential forward failed!");
 		
-		Matrix<double> layIn = layer.backward(input, activation.backward(layer.output(), target));
-		Matrix<double> seqIn = nn.backward(input, target);
+		Matrix<double> layIn;
+		layIn.copy(layer.backward(input, activation.backward(layer.output(), target)));
+		
+		Matrix<double> seqIn;
+		seqIn.copy(nn.backward(input, target));
+		
 		for(size_t i = 0; i < seqIn.size(); ++i)
 			NNLibAssert(layIn[i] == seqIn[i], "sequential backward failed!");
 	}
