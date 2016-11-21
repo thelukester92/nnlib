@@ -6,9 +6,6 @@
 namespace nnlib
 {
 
-/// \todo what if the module feeds forward a Matrix instead of a Vector?
-/// \todo Matrix-Matrix feed-in and Matrix-Vector feed-in.
-
 template <typename T>
 class Module
 {
