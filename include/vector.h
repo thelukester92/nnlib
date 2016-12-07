@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <memory>
 #include <iterator>
+#include "error.h"
 
 namespace nnlib
 {
@@ -30,20 +31,26 @@ public:
 	Vector(size_t n = 0);
 	void fill(const T &val);
 	
+	T &operator[](size_t i);
+	const T&operator[](size_t i) const;
+	T &operator()(size_t i);
+	const T &operator()(size_t i) const;
+	
 	Iterator begin();
 	Iterator end();
 private:
-	std::shared_ptr<T> m_ptr;
-	size_t m_offset;
+	T *m_ptr;
 	size_t m_stride;
 	size_t m_size;
 	size_t m_capacity;
+	
+	std::shared_ptr<T> m_shared;
 };
 
 // MARK: Implementation
 
 template <typename T>
-Vector<T>::Vector(size_t n) : m_ptr(new T[n]), m_offset(0), m_stride(1), m_size(n), m_capacity(n)
+Vector<T>::Vector(size_t n) : m_ptr(new T[n]), m_stride(1), m_size(n), m_capacity(n), m_shared(m_ptr)
 {
 	fill(T());
 }
@@ -57,13 +64,41 @@ void Vector<T>::fill(const T &val)
 template <typename T>
 typename Vector<T>::Iterator Vector<T>::begin()
 {
-	return Iterator(m_ptr.get() + m_offset, m_stride);
+	return Iterator(m_ptr, m_stride);
 }
 
 template <typename T>
 typename Vector<T>::Iterator Vector<T>::end()
 {
-	return Iterator(m_ptr.get() + m_offset + m_stride * m_size, m_stride);
+	return Iterator(m_ptr + m_stride * m_size, m_stride);
+}
+
+template <typename T>
+T &Vector<T>::operator[](size_t i)
+{
+	NNAssert(i < m_size, "Invalid Vector index!");
+	return m_ptr[i * m_stride];
+}
+
+template <typename T>
+const T &Vector<T>::operator[](size_t i) const
+{
+	NNAssert(i < m_size, "Invalid Vector index!");
+	return m_ptr[i * m_stride];
+}
+
+template <typename T>
+T &Vector<T>::operator()(size_t i)
+{
+	NNAssert(i < m_size, "Invalid Vector index!");
+	return m_ptr[i * m_stride];
+}
+
+template <typename T>
+const T &Vector<T>::operator()(size_t i) const
+{
+	NNAssert(i < m_size, "Invalid Vector index!");
+	return m_ptr[i * m_stride];
 }
 
 }
