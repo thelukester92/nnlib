@@ -1,24 +1,21 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <algorithm>
-#include <memory>
-#include <iterator>
-#include "error.h"
+#include "tensor.h"
 
 namespace nnlib
 {
 
-// MARK: Interface
-
 template <typename T>
-class Vector
+class Vector : public Tensor<T>
 {
+using Tensor<T>::m_ptr;
+using Tensor<T>::m_size;
 public:
 	class Iterator : public std::iterator<std::forward_iterator_tag, T>
 	{
 	public:
-		Iterator(T *ptr, size_t stride) : m_ptr(ptr), m_stride(stride) {}
+		Iterator(T *ptr, size_t stride)		: m_ptr(ptr), m_stride(stride) {}
 		Iterator &operator++()				{ m_ptr += m_stride; return *this; }
 		T &operator*()						{ return *m_ptr; }
 		bool operator==(const Iterator &i)	{ return m_ptr == i.m_ptr && m_stride == i.m_stride; }
@@ -28,78 +25,64 @@ public:
 		size_t m_stride;
 	};
 	
-	Vector(size_t n = 0);
-	void fill(const T &val);
+	// MARK: Constructors
 	
-	T &operator[](size_t i);
-	const T&operator[](size_t i) const;
-	T &operator()(size_t i);
-	const T &operator()(size_t i) const;
+	/// Create a vector of size n.
+	Vector(size_t n = 0) : Tensor<T>(n), m_stride(1)
+	{
+		fill(T());
+	}
 	
-	Iterator begin();
-	Iterator end();
+	/// Create a shallow copy of another vector.
+	Vector(const Vector &v) : Tensor<T>(v), m_stride(v.m_stride) {}
+	
+	// MARK: Element Manipulation
+	
+	void fill(const T &val)
+	{
+		std::fill(begin(), end(), val);
+	}
+	
+	// MARK: Element Access
+	
+	T &operator[](size_t i)
+	{
+		NNAssert(i < m_size, "Invalid Vector index!");
+		return m_ptr[i * m_stride];
+	}
+	
+	const T&operator[](size_t i) const
+	{
+		NNAssert(i < m_size, "Invalid Vector index!");
+		return m_ptr[i * m_stride];
+	}
+	
+	T &operator()(size_t i)
+	{
+		NNAssert(i < m_size, "Invalid Vector index!");
+		return m_ptr[i * m_stride];
+	}
+	
+	const T &operator()(size_t i) const
+	{
+		NNAssert(i < m_size, "Invalid Vector index!");
+		return m_ptr[i * m_stride];
+	}
+	
+	// MARK: Iterators
+	
+	Iterator begin()
+	{
+		return Iterator(m_ptr, m_stride);
+	}
+	
+	Iterator end()
+	{
+		return Iterator(m_ptr + m_stride * m_size, m_stride);
+	}
 private:
-	T *m_ptr;
-	size_t m_stride;
-	size_t m_size;
-	size_t m_capacity;
-	
-	std::shared_ptr<T> m_shared;
+	size_t m_stride;	///< The stride between elements in this Vector
 };
-
-// MARK: Implementation
-
-template <typename T>
-Vector<T>::Vector(size_t n) : m_ptr(new T[n]), m_stride(1), m_size(n), m_capacity(n), m_shared(m_ptr)
-{
-	fill(T());
-}
-
-template <typename T>
-void Vector<T>::fill(const T &val)
-{
-	std::fill(begin(), end(), val);
-}
-
-template <typename T>
-typename Vector<T>::Iterator Vector<T>::begin()
-{
-	return Iterator(m_ptr, m_stride);
-}
-
-template <typename T>
-typename Vector<T>::Iterator Vector<T>::end()
-{
-	return Iterator(m_ptr + m_stride * m_size, m_stride);
-}
-
-template <typename T>
-T &Vector<T>::operator[](size_t i)
-{
-	NNAssert(i < m_size, "Invalid Vector index!");
-	return m_ptr[i * m_stride];
-}
-
-template <typename T>
-const T &Vector<T>::operator[](size_t i) const
-{
-	NNAssert(i < m_size, "Invalid Vector index!");
-	return m_ptr[i * m_stride];
-}
-
-template <typename T>
-T &Vector<T>::operator()(size_t i)
-{
-	NNAssert(i < m_size, "Invalid Vector index!");
-	return m_ptr[i * m_stride];
-}
-
-template <typename T>
-const T &Vector<T>::operator()(size_t i) const
-{
-	NNAssert(i < m_size, "Invalid Vector index!");
-	return m_ptr[i * m_stride];
-}
 
 }
 
