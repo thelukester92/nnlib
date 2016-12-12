@@ -14,6 +14,12 @@ int main()
 	Linear<double> layer1(inps, outs, batch);
 	Matrix<double> &weights = *layer1.parameters()[0];
 	
+	for(double &val : weights)
+		val = (rand() % 1000) / 500.0 - 1;
+	
+	Matrix<double> inputs(batch, inps);
+	layer1.forward(inputs);
+	
 	
 	
 	return 0;

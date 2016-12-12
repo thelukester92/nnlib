@@ -1,6 +1,7 @@
 #ifndef LINEAR_H
 #define LINEAR_H
 
+#include <iostream>
 #include "module.h"
 
 namespace nnlib
@@ -14,6 +15,7 @@ public:
 	
 	virtual void forward(const Matrix<T> &inputs) override
 	{
+		std::cout << inputs.rows() << "x" << inputs.cols() << " * " << m_weights.cols() << "x" << m_weights.rows() << " = " << m_outputs.rows() << "x" << m_outputs.cols() << std::endl;
 		Matrix<T>::multiply(inputs, m_weights, m_outputs, false, true);
 	}
 	
