@@ -33,31 +33,31 @@ public:
 	// MARK: Algebra; static methods
 	
 	/// Matrix-matrix multiplication (overwrite).
-	static void multiply(const Matrix &A, const Matrix &B, Matrix &C)
+	static void multiply(const Matrix &A, const Matrix &B, Matrix &C, bool transposeA = false, bool transposeB = false)
 	{
 		NNAssert(&A != &C && &B != &C, "Product holder cannot be an operand!");
-		Algebra<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_rows, B.m_cols, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_ld, 0, C.m_ptr, C.m_ld);
+		Algebra<T>::gemm(CblasRowMajor, transposeA ? CblasTrans : CblasNoTrans, transposeB ? CblasTrans : CblasNoTrans, A.m_rows, B.m_cols, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_ld, 0, C.m_ptr, C.m_ld);
 	}
 	
 	/// Matrix-matrix multiplication (add).
-	static void multiplyAdd(const Matrix &A, const Matrix &B, Matrix &C)
+	static void multiplyAdd(const Matrix &A, const Matrix &B, Matrix &C, bool transposeA = false, bool transposeB = false)
 	{
 		NNAssert(&A != &C && &B != &C, "Product holder cannot be an operand!");
-		Algebra<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_rows, B.m_cols, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_ld, 1, C.m_ptr, C.m_ld);
+		Algebra<T>::gemm(CblasRowMajor, transposeA ? CblasTrans : CblasNoTrans, transposeB ? CblasTrans : CblasNoTrans, A.m_rows, B.m_cols, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_ld, 1, C.m_ptr, C.m_ld);
 	}
 	
 	/// Matrix-vector multiplication (overwrite).
-	static void multiply(const Matrix &A, const Vector<T> &B, Vector<T> &C)
+	static void multiply(const Matrix &A, const Vector<T> &B, Vector<T> &C, bool transpose = false)
 	{
 		NNAssert(&A != &C, "Product holder cannot be an operand!");
-		Algebra<T>::gemv(CblasRowMajor, CblasNoTrans, A.m_rows, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, 0, C.m_ptr, C.m_stride);
+		Algebra<T>::gemv(CblasRowMajor, transpose ? CblasTrans : CblasNoTrans, A.m_rows, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, 0, C.m_ptr, C.m_stride);
 	}
 	
 	/// Matrix-vector multiplication (add).
-	static void multiplyAdd(const Matrix &A, const Vector<T> &B, Vector<T> &C)
+	static void multiplyAdd(const Matrix &A, const Vector<T> &B, Vector<T> &C, bool transpose = false)
 	{
 		NNAssert(&A != &C, "Product holder cannot be an operand!");
-		Algebra<T>::gemv(CblasRowMajor, CblasNoTrans, A.m_rows, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, 1, C.m_ptr, C.m_stride);
+		Algebra<T>::gemv(CblasRowMajor, transpose ? CblasTrans : CblasNoTrans, A.m_rows, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, 1, C.m_ptr, C.m_stride);
 	}
 	
 	// MARK: Constructors

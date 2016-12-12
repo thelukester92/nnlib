@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <iterator>
 #include <algorithm>
+#include <initializer_list>
 #include "tensor.h"
 #include "algebra.h"
 
@@ -69,6 +70,14 @@ public:
 	/// Create a const view of a non-const vector.
 	template <typename U = T>
 	Vector(const Vector<typename std::enable_if<std::is_const<U>::value, typename std::remove_const<U>::type>::type> &v) : Tensor<T>(v), m_stride(v.m_stride) {}
+	
+	/// Create a vector from an initializer list.
+	Vector(const std::initializer_list<T> &l) : Tensor<T>(l.size()), m_stride(1)
+	{
+		size_t i = 0;
+		for(const T &val : l)
+			m_ptr[i] = val;
+	}
 	
 	// MARK: Element Manipulation
 	
