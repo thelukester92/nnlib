@@ -83,7 +83,7 @@ public:
 	}
 	
 	/// Get a vector looking at the jth column in the matrix.
-	ConstVector<T> column(size_t i) const
+	ConstVector<T> column(size_t j) const
 	{
 		NNAssert(j < m_cols, "Invalid Matrix column index!");
 		return ConstVector<T>(*this, j, m_rows, m_ld);

@@ -21,6 +21,9 @@ int main()
 	Vector<double> row = mat[1];
 	row.fill(5);
 	
+	Vector<double> col = mat.column(1);
+	col.fill(0);
+	
 	for(auto val : mat)
 		cout << val << " ";
 	cout << endl;
