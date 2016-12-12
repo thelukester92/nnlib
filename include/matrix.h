@@ -46,31 +46,23 @@ public:
 	}
 	
 	// MARK: Element Access
-	/*
-	T &operator[](size_t i)
+	
+	Vector<T> operator[](size_t i)
 	{
-		NNAssert(i < m_size, "Invalid Vector index!");
-		return m_ptr[i * m_stride];
+		
 	}
 	
-	const T&operator[](size_t i) const
+	T &operator()(size_t i, size_t j)
 	{
-		NNAssert(i < m_size, "Invalid Vector index!");
-		return m_ptr[i * m_stride];
+		NNAssert(i < m_rows && j < m_cols, "Invalid Matrix indices!");
+		return m_ptr[i * m_ld + j];
 	}
 	
-	T &operator()(size_t i)
+	const T &operator()(size_t i, size_t j) const
 	{
-		NNAssert(i < m_size, "Invalid Vector index!");
-		return m_ptr[i * m_stride];
+		NNAssert(i < m_rows && j < m_cols, "Invalid Matrix indices!");
+		return m_ptr[i * m_ld + j];
 	}
-	
-	const T &operator()(size_t i) const
-	{
-		NNAssert(i < m_size, "Invalid Vector index!");
-		return m_ptr[i * m_stride];
-	}
-	*/
 	
 	// MARK: Iterators
 	

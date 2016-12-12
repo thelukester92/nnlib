@@ -1,14 +1,18 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <type_traits>
 #include "tensor.h"
 
 namespace nnlib
 {
 
+/// Standard 1-dimensional tensor.
 template <typename T>
 class Vector : public Tensor<T>
 {
+friend class Vector<const T>;
+friend class Vector<typename std::remove_const<T>::type>;
 using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
 public:
@@ -36,6 +40,10 @@ public:
 	/// Create a shallow copy of another vector.
 	Vector(const Vector &v) : Tensor<T>(v), m_stride(v.m_stride) {}
 	
+	/// Create a const version of a non-const vector.
+	template <typename U = T>
+	Vector(const Vector<typename std::enable_if<std::is_const<U>::value, typename std::remove_const<U>::type>::type> &v) : Tensor<T>(v), m_stride(v.m_stride) {}
+	
 	// MARK: Element Manipulation
 	
 	void fill(const T &val)
@@ -51,7 +59,7 @@ public:
 		return m_ptr[i * m_stride];
 	}
 	
-	const T&operator[](size_t i) const
+	const T &operator[](size_t i) const
 	{
 		NNAssert(i < m_size, "Invalid Vector index!");
 		return m_ptr[i * m_stride];
@@ -83,6 +91,10 @@ public:
 private:
 	size_t m_stride;	///< The stride between elements in this Vector
 };
+
+/// Constant 1-dimensional view of a tensor.
+template <typename T>
+using ConstVector = Vector<const T>;
 
 }
 
