@@ -14,13 +14,12 @@ int main()
 		cout << val << " ";
 	cout << endl;
 	
-	for(auto val : vec2)
-		cout << val << " ";
-	cout << endl;
-	
 	Matrix<double> mat(3, 3);
 	mat.fill(3.14);
 	mat(2, 1) = 1.0;
+	
+	Vector<double> row = mat[1];
+	row.fill(5);
 	
 	for(auto val : mat)
 		cout << val << " ";

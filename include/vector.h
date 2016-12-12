@@ -40,7 +40,10 @@ public:
 	/// Create a shallow copy of another vector.
 	Vector(const Vector &v) : Tensor<T>(v), m_stride(v.m_stride) {}
 	
-	/// Create a const version of a non-const vector.
+	/// Create a shallow copy of another tensor (i.e. matrix).
+	Vector(const Tensor<T> &t, size_t offset, size_t size, size_t stride = 1) : Tensor<T>(t, offset, size), m_stride(stride) {}
+	
+	/// Create a const view of a non-const vector.
 	template <typename U = T>
 	Vector(const Vector<typename std::enable_if<std::is_const<U>::value, typename std::remove_const<U>::type>::type> &v) : Tensor<T>(v), m_stride(v.m_stride) {}
 	

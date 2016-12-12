@@ -45,12 +45,16 @@ public:
 		std::fill(begin(), end(), val);
 	}
 	
-	// MARK: Element Access
+	// MARK: Row and Column Access
 	
+	/// Get a vector looking at the ith row in the matrix.
 	Vector<T> operator[](size_t i)
 	{
-		
+		NNAssert(i < m_rows, "Invalid Matrix row index!");
+		return Vector<T>(*this, i * m_ld, m_cols, 1);
 	}
+	
+	// MARK: Element Access
 	
 	T &operator()(size_t i, size_t j)
 	{
