@@ -2,6 +2,8 @@
 #define VECTOR_H
 
 #include <type_traits>
+#include <iterator>
+#include <algorithm>
 #include "tensor.h"
 
 namespace nnlib

@@ -3,6 +3,7 @@
 
 #include "tensor.h"
 #include "vector.h"
+#include "algebra.h"
 
 namespace nnlib
 {
@@ -44,6 +45,10 @@ public:
 	{
 		std::fill(begin(), end(), val);
 	}
+	
+	// MARK: Algebra
+	
+	
 	
 	// MARK: Row and Column Access
 	

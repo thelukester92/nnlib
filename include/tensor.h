@@ -1,9 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
-#include <algorithm>
+#include <type_traits>
 #include <memory>
-#include <iterator>
 #include "error.h"
 
 namespace nnlib
