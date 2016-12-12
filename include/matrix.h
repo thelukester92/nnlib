@@ -54,6 +54,41 @@ public:
 		return Vector<T>(*this, i * m_ld, m_cols, 1);
 	}
 	
+	/// Get a vector looking at the ith row in the matrix.
+	ConstVector<T> operator[](size_t i) const
+	{
+		NNAssert(i < m_rows, "Invalid Matrix row index!");
+		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
+	}
+	
+	/// Get a vector looking at the ith row in the matrix.
+	Vector<T> operator()(size_t i)
+	{
+		NNAssert(i < m_rows, "Invalid Matrix row index!");
+		return Vector<T>(*this, i * m_ld, m_cols, 1);
+	}
+	
+	/// Get a vector looking at the ith row in the matrix.
+	ConstVector<T> operator()(size_t i) const
+	{
+		NNAssert(i < m_rows, "Invalid Matrix row index!");
+		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
+	}
+	
+	/// Get a vector looking at the jth column in the matrix.
+	Vector<T> column(size_t j)
+	{
+		NNAssert(j < m_cols, "Invalid Matrix column index!");
+		return Vector<T>(*this, j, m_rows, m_ld);
+	}
+	
+	/// Get a vector looking at the jth column in the matrix.
+	ConstVector<T> column(size_t i) const
+	{
+		NNAssert(j < m_cols, "Invalid Matrix column index!");
+		return ConstVector<T>(*this, j, m_rows, m_ld);
+	}
+	
 	// MARK: Element Access
 	
 	T &operator()(size_t i, size_t j)
