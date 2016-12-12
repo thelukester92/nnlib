@@ -7,26 +7,23 @@ using namespace nnlib;
 
 int main()
 {
-	Vector<double> vec(10);
-	vec(4) = 3.14;
+	Matrix<double> A(3, 3), B(3, 4);
 	
-	for(auto val : vec)
-		cout << val << " ";
-	cout << endl;
+	for(size_t i = 0; i < A.rows(); ++i)
+		for(size_t j = 0; j < A.cols(); ++j)
+			A(i, j) = i == j ? i : 0;
 	
-	Matrix<double> mat(3, 3);
-	mat.fill(3.14);
-	mat(2, 1) = 1.0;
+	B.fill(3.14);
 	
-	Vector<double> row = mat[1];
-	row.fill(5);
+	Matrix<double> C(3, 4);
+	Matrix<double>::multiply(A, B, C);
 	
-	Vector<double> col = mat.column(1);
-	col.fill(0);
-	
-	for(auto val : mat)
-		cout << val << " ";
-	cout << endl;
+	for(size_t i = 0; i < C.rows(); ++i)
+	{
+		for(size_t j = 0; j < C.cols(); ++j)
+			cout << C(i, j) << "\t";
+		cout << endl;
+	}
 	
 	return 0;
 }

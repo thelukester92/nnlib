@@ -14,6 +14,8 @@ class Matrix : public Tensor<T>
 using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
 public:
+	// MARK: Iterator
+	
 	/// Element iterator
 	class Iterator : public std::iterator<std::forward_iterator_tag, T>
 	{
@@ -27,6 +29,36 @@ public:
 		T *m_ptr;
 		size_t m_cols, m_ld, m_col;
 	};
+	
+	// MARK: Algebra; static methods
+	
+	/// Matrix-matrix multiplication (overwrite).
+	static void multiply(const Matrix &A, const Matrix &B, Matrix &C)
+	{
+		NNAssert(&A != &C && &B != &C, "Product holder cannot be an operand!");
+		Algebra<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_rows, B.m_cols, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_ld, 0, C.m_ptr, C.m_ld);
+	}
+	
+	/// Matrix-matrix multiplication (add).
+	static void multiplyAdd(const Matrix &A, const Matrix &B, Matrix &C)
+	{
+		NNAssert(&A != &C && &B != &C, "Product holder cannot be an operand!");
+		Algebra<T>::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_rows, B.m_cols, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_ld, 1, C.m_ptr, C.m_ld);
+	}
+	
+	/// Matrix-vector multiplication (overwrite).
+	static void multiply(const Matrix &A, const Vector<T> &B, Vector<T> &C)
+	{
+		NNAssert(&A != &C, "Product holder cannot be an operand!");
+		Algebra<T>::gemv(CblasRowMajor, CblasNoTrans, A.m_rows, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, 0, C.m_ptr, C.m_stride);
+	}
+	
+	/// Matrix-vector multiplication (add).
+	static void multiplyAdd(const Matrix &A, const Vector<T> &B, Vector<T> &C)
+	{
+		NNAssert(&A != &C, "Product holder cannot be an operand!");
+		Algebra<T>::gemv(CblasRowMajor, CblasNoTrans, A.m_rows, A.m_cols, 1, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, 1, C.m_ptr, C.m_stride);
+	}
 	
 	// MARK: Constructors
 	
@@ -45,10 +77,6 @@ public:
 	{
 		std::fill(begin(), end(), val);
 	}
-	
-	// MARK: Algebra
-	
-	
 	
 	// MARK: Row and Column Access
 	
@@ -120,6 +148,18 @@ public:
 	{
 		NNAssert(i < m_rows && j < m_cols, "Invalid Matrix indices!");
 		return m_ptr[i * m_ld + j];
+	}
+	
+	// MARK: Other methods
+	
+	size_t rows() const
+	{
+		return m_rows;
+	}
+	
+	size_t cols() const
+	{
+		return m_cols;
 	}
 	
 	// MARK: Iterators

@@ -5,9 +5,13 @@
 #include <iterator>
 #include <algorithm>
 #include "tensor.h"
+#include "algebra.h"
 
 namespace nnlib
 {
+
+template <typename T>
+class Matrix;
 
 /// Standard 1-dimensional tensor.
 template <typename T>
@@ -15,9 +19,12 @@ class Vector : public Tensor<T>
 {
 friend class Vector<const T>;
 friend class Vector<typename std::remove_const<T>::type>;
+friend class Matrix<T>;
 using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
 public:
+	// MARK: Iterator
+	
 	class Iterator : public std::iterator<std::forward_iterator_tag, T>
 	{
 	public:
@@ -30,6 +37,20 @@ public:
 		T *m_ptr;
 		size_t m_stride;
 	};
+	
+	// MARK: Algebra; static methods
+	
+	/// Deep copy the contents of another vector.
+	static void copy(const Vector &A, Vector &B)
+	{
+		Algebra<T>::copy(A.m_size, A.m_ptr, A.m_stride, B.m_ptr, B.m_stride);
+	}
+	
+	/// Vector-scalar multiplication.
+	static void multiply(T scalar, Vector &A)
+	{
+		Algebra<T>::scal(A.m_size, scalar, A.m_ptr, A.m_stride);
+	}
 	
 	// MARK: Constructors
 	
