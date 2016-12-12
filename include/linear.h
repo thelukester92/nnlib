@@ -15,12 +15,13 @@ public:
 	
 	virtual void forward(const Matrix<T> &inputs) override
 	{
-		std::cout << inputs.rows() << "x" << inputs.cols() << " * " << m_weights.cols() << "x" << m_weights.rows() << " = " << m_outputs.rows() << "x" << m_outputs.cols() << std::endl;
+		/// \todo add bias
 		Matrix<T>::multiply(inputs, m_weights, m_outputs, false, true);
 	}
 	
 	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
+		/// \todo test this and add bias
 		Matrix<T>::multiply(blame, inputs, m_weightsBlame, true, false);
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
 	}
@@ -30,6 +31,7 @@ public:
 		return m_outputs;
 	}
 	
+	/// \todo make it Tensor* for bias
 	virtual Vector<Matrix<T> *> parameters() override
 	{
 		return { &m_weights };
