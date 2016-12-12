@@ -75,6 +75,20 @@ public:
 		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
 	}
 	
+	/// Get a vector looking at the ith row in the matrix.
+	Vector<T> row(size_t i)
+	{
+		NNAssert(i < m_rows, "Invalid Matrix row index!");
+		return Vector<T>(*this, i * m_ld, m_cols, 1);
+	}
+	
+	/// Get a vector looking at the ith row in the matrix.
+	ConstVector<T> row(size_t i) const
+	{
+		NNAssert(i < m_rows, "Invalid Matrix row index!");
+		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
+	}
+	
 	/// Get a vector looking at the jth column in the matrix.
 	Vector<T> column(size_t j)
 	{
