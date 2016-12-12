@@ -11,6 +11,8 @@ public:
 	virtual void forward(const Matrix<T> &inputs) = 0;
 	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
 	
+	virtual Matrix<T> &output() = 0;
+	
 	virtual Vector<Matrix<T> *> parameters()
 	{
 		return Vector<Matrix<T> *>();

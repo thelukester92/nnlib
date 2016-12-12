@@ -25,6 +25,11 @@ public:
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
 	}
 	
+	virtual Matrix<T> &output() override
+	{
+		return m_outputs;
+	}
+	
 	virtual Vector<Matrix<T> *> parameters() override
 	{
 		return { &m_weights };
