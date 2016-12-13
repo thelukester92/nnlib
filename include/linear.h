@@ -17,17 +17,19 @@ public:
 	  m_inputBlame(batch, inps), m_outputs(batch, outs)
 	{}
 	
-	virtual void forward(const Matrix<T> &inputs) override
+	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
 		Matrix<T>::multiply(inputs, m_weights, m_outputs, false, true);
 		Matrix<T>::addOuterProduct(m_addBuffer, m_bias, m_outputs);
+		return m_outputs;
 	}
 	
-	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
+	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
 		Matrix<T>::multiply(blame, inputs, m_weightsBlame, true, false);
 		Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame);
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
+		return m_inputBlame;
 	}
 	
 	virtual Matrix<T> &output() override

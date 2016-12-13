@@ -10,8 +10,8 @@ class Module
 public:
 	typedef T type;
 	
-	virtual void forward(const Matrix<T> &inputs) = 0;
-	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
+	virtual Matrix<T> &forward(const Matrix<T> &inputs) = 0;
+	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
 	
 	virtual Matrix<T> &output() = 0;
 	virtual Matrix<T> &inputBlame() = 0;

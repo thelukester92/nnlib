@@ -14,20 +14,22 @@ public:
 	: m_inputBlame(batch, size), m_outputs(batch, size)
 	{}
 	
-	virtual void forward(const Matrix<T> &inputs) override
+	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
 		auto i = inputs.begin();
 		auto j = m_outputs.begin(), end = m_outputs.end();
 		for(; j != end; ++i, ++j)
 			*j = tanh(*i);
+		return m_outputs;
 	}
 	
-	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
+	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
 		auto i = inputs.begin(), k = blame.begin();
 		auto j = m_inputBlame.begin(), end = m_inputBlame.end();
 		for(; j != end; ++i, ++j, ++k)
 			*j = *k * (1.0 - *i * *i);
+		return m_inputBlame;
 	}
 	
 	virtual Matrix<T> &output() override

@@ -2,6 +2,8 @@
 #include <vector>
 #include "matrix.h"
 #include "linear.h"
+#include "tanh.h"
+#include "sequential.h"
 #include "sgd.h"
 #include "sse.h"
 using namespace std;
@@ -74,8 +76,13 @@ int main()
 			NNAssert(fabs(inputBlame(i, j) - layer1.inputBlame()(i, j)) < 1e-6, "Linear::backword failed!");
 	cout << "Linear::backward passed!" << endl;
 	
+	TanH<double> layer2(outs, batch);
+	Sequential<double> nn;
+	nn.add(layer1);
+	nn.add(layer2);
+	
 	SSE<double> critic(outs, batch);
-	SGD<Linear<double>, SSE<double>> optimizer(layer1, critic);
+	SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 	
 	double inputSum = 0, targetSum = 0;
 	for(double val : inputs)
@@ -83,10 +90,10 @@ int main()
 	for(double val : targets)
 		targetSum += val;
 	
-	for(size_t i = 0; i < 1000; ++i)
+	for(size_t i = 0; i < 100; ++i)
 	{
 		Matrix<double>::shuffleRows(inputs, targets);
-		cout << i << "\t" << calcSSE(inputs, targets, layer1) << endl;
+		cout << i << "\t" << calcSSE(inputs, targets, nn) << endl;
 		optimizer.optimize(inputs, targets);
 		
 		double foo = 0;
