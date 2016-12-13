@@ -41,8 +41,8 @@ public:
 	}
 	
 private:
-	Matrix<T> m_inputBlame;		///< Gradient of the error w.r.t. the inputs.
-	Matrix<T> m_outputs;		///< The output of this layer.
+	Matrix<T> m_inputBlame;	///< Gradient of the error w.r.t. the inputs.
+	Matrix<T> m_outputs;	///< The output of this layer.
 };
 
 }
