@@ -116,6 +116,12 @@ public:
 		std::fill(begin(), end(), val);
 	}
 	
+	void push_back(const T &val)
+	{
+		resize(m_size + 1);
+		m_ptr[m_size - 1] = val;
+	}
+	
 	// MARK: Element Access
 	
 	T &operator[](size_t i)

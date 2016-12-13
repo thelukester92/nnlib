@@ -12,8 +12,7 @@ class Container : public Module<T>
 public:
 	void add(Module<T> &component)
 	{
-		m_components.resize(m_components.size() + 1);
-		m_components[m_components.size() - 1] = &component;
+		m_components.push_back(&component);
 	}
 protected:
 	Vector<Module<T> *> m_components;

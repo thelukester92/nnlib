@@ -36,6 +36,24 @@ public:
 	{
 		return m_components[0]->inputBlame();
 	}
+	
+	virtual Vector<Tensor<T> *> parameters() override
+	{
+		Vector<Tensor<T> *> params;
+		for(Module<T> *layer : m_components)
+			for(Tensor<T> *t : layer->parameters())
+				params.push_back(t);
+		return params;
+	}
+	
+	virtual Vector<Tensor<T> *> blame() override
+	{
+		Vector<Tensor<T> *> blam;
+		for(Module<T> *layer : m_components)
+			for(Tensor<T> *t : layer->blame())
+				blam.push_back(t);
+		return blam;
+	}
 };
 
 }
