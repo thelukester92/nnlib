@@ -91,6 +91,18 @@ public:
 		);
 	}
 	
+	/// Shuffle the rows of two matrices together.
+	static void shuffleRows(const Matrix<T> &A, const Matrix<T> &B)
+	{
+		NNAssert(A.m_rows == B.m_rows, "Cannot shuffle matrices with a different number of rows!");
+		for(size_t i = A.m_rows - 1; i > 0; --i)
+		{
+			size_t j = rand() % i;
+			Algebra<T>::swap(A.m_cols, A.m_ptr + i * A.m_ld, 1, A.m_ptr + j * A.m_ld, 1);
+			Algebra<T>::swap(B.m_cols, B.m_ptr + i * B.m_ld, 1, B.m_ptr + j * B.m_ld, 1);
+		}
+	}
+	
 	// MARK: Constructors
 	
 	/// Create a matrix of size rows * cols.

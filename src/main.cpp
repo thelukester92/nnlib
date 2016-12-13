@@ -7,6 +7,17 @@
 using namespace std;
 using namespace nnlib;
 
+double calcSSE(const Matrix<double> &inputs, const Matrix<double> &targets, Module<double> &model)
+{
+	model.forward(inputs);
+	double d = 0;
+	auto i = targets.begin();
+	auto j = model.output().begin(), end = model.output().end();
+	for(; j != end; ++i, ++j)
+		d += (*j - *i) * (*j - *i);
+	return d;
+}
+
 int main()
 {
 	size_t inps = 3;
@@ -28,6 +39,10 @@ int main()
 	
 	Matrix<double> blame(batch, outs);
 	for(double &val : blame)
+		val = (rand() % 1000) / 500.0 - 1;
+	
+	Matrix<double> targets(batch, outs);
+	for(double &val : targets)
 		val = (rand() % 1000) / 500.0 - 1;
 	
 	Matrix<double> outputs(batch, outs);
@@ -61,6 +76,29 @@ int main()
 	
 	SSE<double> critic(batch, outs);
 	SGD<Linear<double>, SSE<double>> optimizer(layer1, critic);
+	
+	double inputSum = 0, targetSum = 0;
+	for(double val : inputs)
+		inputSum += val;
+	for(double val : targets)
+		targetSum += val;
+	
+	for(size_t i = 0; i < 1000; ++i)
+	{
+		Matrix<double>::shuffleRows(inputs, targets);
+		cout << i << "\t" << calcSSE(inputs, targets, layer1) << endl;
+		optimizer.optimize(inputs, targets);
+		
+		double foo = 0;
+		for(double val : inputs)
+			foo += val;
+		NNAssert(fabs(inputSum - foo) < 1e-6, "shuffleRows failed!");
+		
+		foo = 0;
+		for(double val : targets)
+			foo += val;
+		NNAssert(fabs(targetSum - foo) < 1e-6, "shuffleRows failed!");
+	}
 	
 	return 0;
 }
