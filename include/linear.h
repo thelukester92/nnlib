@@ -22,8 +22,8 @@ public:
 	
 	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
-		/// \todo test this and add bias
 		Matrix<T>::multiply(blame, inputs, m_weightsBlame, true, false);
+		Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame, true);
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
 	}
 	
