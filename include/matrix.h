@@ -121,6 +121,16 @@ public:
 		std::fill(begin(), end(), val);
 	}
 	
+	// MARK: Statistics
+	
+	T sum()
+	{
+		T d = 0;
+		for(auto val : *this)
+			d += val;
+		return d;
+	}
+	
 	// MARK: Row and Column Access
 	
 	/// Get a vector looking at the ith row in the matrix.

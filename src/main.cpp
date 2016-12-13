@@ -9,17 +9,6 @@
 using namespace std;
 using namespace nnlib;
 
-double calcSSE(const Matrix<double> &inputs, const Matrix<double> &targets, Module<double> &model)
-{
-	model.forward(inputs);
-	double d = 0;
-	auto i = targets.begin();
-	auto j = model.output().begin(), end = model.output().end();
-	for(; j != end; ++i, ++j)
-		d += (*j - *i) * (*j - *i);
-	return d;
-}
-
 int main()
 {
 	size_t inps = 3;
@@ -95,7 +84,7 @@ int main()
 		Matrix<double>::shuffleRows(inputs, targets);
 		optimizer.optimize(inputs, targets);
 	}
-	NNAssert(calcSSE(inputs, targets, nn) < 1.25, "SGD::optimize failed!");
+	NNAssert(critic.forward(nn.forward(inputs), targets).sum() < 1.25, "SGD::optimize failed!");
 	cout << "SGD::optimize passed!" << endl;
 	
 	return 0;
