@@ -90,7 +90,12 @@ int main()
 	for(double val : targets)
 		targetSum += val;
 	
-	for(size_t i = 0; i < 100; ++i)
+	nn.forward(inputs);
+	for(size_t i = 0; i < batch; ++i)
+		for(size_t j = 0; j < outs; ++j)
+			NNAssert(fabs(nn.output()(i, j) - tanh(layer1.output()(i, j))) < 1e-6, "Sequential::forward failed!");
+	
+	for(size_t i = 0; i < 1000; ++i)
 	{
 		Matrix<double>::shuffleRows(inputs, targets);
 		cout << i << "\t" << calcSSE(inputs, targets, nn) << endl;

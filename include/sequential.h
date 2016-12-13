@@ -16,7 +16,7 @@ public:
 		const Matrix<T> *inps = &inputs;
 		for(Module<T> *layer : m_components)
 			inps = &layer->forward(*inps);
-		return m_components[0]->output();
+		return *const_cast<Matrix<T> *>(inps);
 	}
 	
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override

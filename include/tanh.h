@@ -25,8 +25,8 @@ public:
 	
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
-		auto i = inputs.begin(), k = blame.begin();
-		auto j = m_inputBlame.begin(), end = m_inputBlame.end();
+		auto k = blame.begin();
+		auto i = m_outputs.begin(), j = m_inputBlame.begin(), end = m_inputBlame.end();
 		for(; j != end; ++i, ++j, ++k)
 			*j = *k * (1.0 - *i * *i);
 		return m_inputBlame;
