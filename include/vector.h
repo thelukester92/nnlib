@@ -79,6 +79,13 @@ public:
 			m_ptr[i++] = val;
 	}
 	
+	// MARK: Other methods
+	
+	size_t size() const
+	{
+		return m_size;
+	}
+	
 	// MARK: Element Manipulation
 	
 	void fill(const T &val)
