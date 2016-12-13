@@ -56,9 +56,9 @@ public:
 	// MARK: Constructors
 	
 	/// Create a vector of size n.
-	Vector(size_t n = 0) : Tensor<T>(n), m_stride(1)
+	Vector(size_t n = 0, const T &val = T()) : Tensor<T>(n), m_stride(1)
 	{
-		fill(T());
+		fill(val);
 	}
 	
 	/// Create a shallow copy of another vector.
@@ -76,7 +76,7 @@ public:
 	{
 		size_t i = 0;
 		for(const T &val : l)
-			m_ptr[i] = val;
+			m_ptr[i++] = val;
 	}
 	
 	// MARK: Element Manipulation
