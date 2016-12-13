@@ -13,14 +13,14 @@ public:
 	
 	virtual Matrix<T> &output() = 0;
 	
-	virtual Vector<Matrix<T> *> parameters()
+	virtual Vector<Tensor<T> *> parameters()
 	{
-		return Vector<Matrix<T> *>();
+		return Vector<Tensor<T> *>();
 	}
 	
-	virtual Vector<Matrix<T> *> blame()
+	virtual Vector<Tensor<T> *> blame()
 	{
-		return Vector<Matrix<T> *>();
+		return Vector<Tensor<T> *>();
 	}
 };
 

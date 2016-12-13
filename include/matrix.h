@@ -88,6 +88,16 @@ public:
 		);
 	}
 	
+	/// Add vector-vector outer product.
+	static void addOuterProduct(const Vector<T> &A, const Vector<T> &B, Matrix &C)
+	{
+		Algebra<T>::ger(
+			CblasRowMajor,
+			C.m_rows, C.m_cols,
+			1, A.m_ptr, A.m_stride, B.m_ptr, B.m_stride, C.m_ptr, C.m_ld
+		);
+	}
+	
 	// MARK: Constructors
 	
 	/// Create a matrix of size rows * cols.

@@ -11,12 +11,13 @@ template <typename T>
 class Linear : public Module<T>
 {
 public:
-	Linear(size_t inps, size_t outs, size_t batch) : m_weights(outs, inps), m_outputs(batch, outs), m_weightsBlame(outs, inps), m_inputBlame(batch, inps) {}
+	Linear(size_t inps, size_t outs, size_t batch)
+	: m_bias(outs), m_addBuffer(batch, 1), m_weights(outs, inps), m_biasBlame(outs), m_weightsBlame(outs, inps), m_inputBlame(batch, inps), m_outputs(batch, outs) {}
 	
 	virtual void forward(const Matrix<T> &inputs) override
 	{
-		/// \todo add bias
 		Matrix<T>::multiply(inputs, m_weights, m_outputs, false, true);
+		Matrix<T>::addOuterProduct(m_addBuffer, m_bias, m_outputs);
 	}
 	
 	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
@@ -31,22 +32,25 @@ public:
 		return m_outputs;
 	}
 	
-	/// \todo make it Tensor* for bias
-	virtual Vector<Matrix<T> *> parameters() override
+	virtual Vector<Tensor<T> *> parameters() override
 	{
-		return { &m_weights };
+		return { &m_bias, &m_weights };
 	}
 	
-	virtual Vector<Matrix<T> *> blame() override
+	virtual Vector<Tensor<T> *> blame() override
 	{
-		return { &m_weightsBlame };
+		return { &m_biasBlame, &m_weightsBlame };
 	}
 	
 private:
+	Vector<T> m_bias, m_addBuffer;
 	Matrix<T> m_weights;
-	Matrix<T> m_outputs;
+	
+	Vector<T> m_biasBlame;
 	Matrix<T> m_weightsBlame;
+	
 	Matrix<T> m_inputBlame;
+	Matrix<T> m_outputs;
 };
 
 }
