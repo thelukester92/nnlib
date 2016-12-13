@@ -2,6 +2,8 @@
 #include <vector>
 #include "matrix.h"
 #include "linear.h"
+#include "sgd.h"
+#include "sse.h"
 using namespace std;
 using namespace nnlib;
 
@@ -56,6 +58,9 @@ int main()
 		for(size_t j = 0; j < inps; ++j)
 			NNAssert(fabs(inputBlame(i, j) - layer1.inputBlame()(i, j)) < 1e-6, "Linear::backword failed!");
 	cout << "Linear::backward passed!" << endl;
+	
+	SSE<double> critic(batch, outs);
+	SGD<Linear<double>, SSE<double>> optimizer(layer1, critic);
 	
 	return 0;
 }

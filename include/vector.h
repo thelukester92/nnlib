@@ -101,6 +101,14 @@ public:
 		}
 	}
 	
+	// MARK: Non-static Algebra
+	
+	/// Add another vector, scaled.
+	void addScaled(const Vector &A, T scalar)
+	{
+		Algebra<T>::axpy(m_size, scalar, A.m_ptr, A.m_stride, m_ptr, m_stride);
+	}
+	
 	// MARK: Element Manipulation
 	
 	void fill(const T &val)

@@ -30,6 +30,20 @@ public:
 		size_t m_cols, m_ld, m_col;
 	};
 	
+	/// Element iterator
+	class ConstIterator : public std::iterator<std::forward_iterator_tag, T>
+	{
+	public:
+		ConstIterator(const T *ptr, size_t cols, size_t ld)	: m_ptr(ptr), m_cols(cols), m_ld(ld), m_col(0) {}
+		ConstIterator &operator++()							{ if(++m_col % m_cols == 0) { m_col = 0; m_ptr += m_ld; } return *this; }
+		const T &operator*()								{ return m_ptr[m_col]; }
+		bool operator==(const ConstIterator &i)				{ return m_ptr == i.m_ptr && m_cols == i.m_cols && m_ld == i.m_ld && m_col == i.m_col; }
+		bool operator!=(const ConstIterator &i)				{ return m_ptr != i.m_ptr || m_cols != i.m_cols || m_ld != i.m_ld || m_col != i.m_col; }
+	private:
+		const T *m_ptr;
+		size_t m_cols, m_ld, m_col;
+	};
+	
 	// MARK: Algebra; static methods
 	
 	/// Matrix-matrix multiplication.
@@ -186,9 +200,19 @@ public:
 		return Iterator(m_ptr, m_cols, m_ld);
 	}
 	
+	ConstIterator begin() const
+	{
+		return ConstIterator(m_ptr, m_cols, m_ld);
+	}
+	
 	Iterator end()
 	{
 		return Iterator(m_ptr + m_ld * m_rows, m_cols, m_ld);
+	}
+	
+	ConstIterator end() const
+	{
+		return ConstIterator(m_ptr + m_ld * m_rows, m_cols, m_ld);
 	}
 private:
 	size_t m_rows, m_cols;	///< the dimensions of this Matrix
