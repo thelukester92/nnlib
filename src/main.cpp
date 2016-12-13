@@ -9,6 +9,8 @@
 using namespace std;
 using namespace nnlib;
 
+/// \todo resizable modules (change batch size)
+
 int main()
 {
 	size_t inps = 3;
