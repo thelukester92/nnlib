@@ -15,7 +15,7 @@ using Optimizer<M, C>::m_critic;
 public:
 	using T = typename Optimizer<M, C>::T;
 	
-	SGD(M &model, C &critic, double learningRate = 0.001)
+	SGD(M &model, C &critic, double learningRate = 0.01)
 	: Optimizer<M, C>(model, critic), m_parameters(model.parameters()), m_blame(model.blame()), m_learningRate(learningRate) {}
 	
 	virtual void optimize(const Matrix<T> &inputs, const Matrix<T> &targets) override

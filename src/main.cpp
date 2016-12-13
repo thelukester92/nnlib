@@ -74,7 +74,7 @@ int main()
 			NNAssert(fabs(inputBlame(i, j) - layer1.inputBlame()(i, j)) < 1e-6, "Linear::backword failed!");
 	cout << "Linear::backward passed!" << endl;
 	
-	SSE<double> critic(batch, outs);
+	SSE<double> critic(outs, batch);
 	SGD<Linear<double>, SSE<double>> optimizer(layer1, critic);
 	
 	double inputSum = 0, targetSum = 0;
