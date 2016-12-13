@@ -50,7 +50,6 @@ public:
 	/// Matrix-vector multiplication.
 	static void multiply(const Matrix &A, const Vector<T> &B, Vector<T> &C, bool transpose = false, T alpha = 1, T beta = 0)
 	{
-		NNAssert(&A != &C, "Product holder cannot be an operand!");
 		Algebra<T>::gemv(
 			CblasRowMajor,
 			transpose ? CblasTrans : CblasNoTrans,
