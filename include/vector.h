@@ -23,7 +23,10 @@ friend class Vector<typename std::remove_const<T>::type>;
 friend class Matrix<T>;
 using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
+using Tensor<T>::m_shared;
 public:
+	using Tensor<T>::resize;
+	
 	// MARK: Iterator
 	
 	class Iterator : public std::iterator<std::forward_iterator_tag, T>
@@ -79,11 +82,23 @@ public:
 			m_ptr[i++] = val;
 	}
 	
-	// MARK: Other methods
-	
-	size_t size() const
+	/// Create a vector (flattened) from several tensors.
+	Vector(Vector<Tensor<T> *> tensors) : Tensor<T>(0), m_stride(1)
 	{
-		return m_size;
+		size_t size = 0;
+		for(Tensor<T> *t : tensors)
+			size += t->size();
+		resize(size);
+		
+		T *ptr = m_ptr;
+		for(Tensor<T> *t : tensors)
+		{
+			T *tPtr = t->ptr();
+			for(size_t i = 0; i < t->size(); ++i)
+				ptr[i] = tPtr[i];
+			t->set(ptr, t->size(), m_shared);
+			ptr += t->size();
+		}
 	}
 	
 	// MARK: Element Manipulation

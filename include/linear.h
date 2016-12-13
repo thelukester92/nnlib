@@ -11,7 +11,11 @@ class Linear : public Module<T>
 {
 public:
 	Linear(size_t inps, size_t outs, size_t batch)
-	: m_bias(outs), m_addBuffer(batch, 1), m_weights(outs, inps), m_biasBlame(outs), m_weightsBlame(outs, inps), m_inputBlame(batch, inps), m_outputs(batch, outs) {}
+	: m_addBuffer(batch, 1),
+	  m_bias(outs), m_weights(outs, inps),
+	  m_biasBlame(outs), m_weightsBlame(outs, inps),
+	  m_inputBlame(batch, inps), m_outputs(batch, outs)
+	{}
 	
 	virtual void forward(const Matrix<T> &inputs) override
 	{
@@ -47,14 +51,13 @@ public:
 	}
 	
 private:
-	Vector<T> m_bias, m_addBuffer;
-	Matrix<T> m_weights;
-	
-	Vector<T> m_biasBlame;
-	Matrix<T> m_weightsBlame;
-	
-	Matrix<T> m_inputBlame;
-	Matrix<T> m_outputs;
+	Vector<T> m_addBuffer;		///< A vector of 1s to quickly evaluate bias.
+	Vector<T> m_bias;			///< The bias; adding constants to outputs.
+	Matrix<T> m_weights;		///< The parameters.
+	Vector<T> m_biasBlame;		///< Gradient of the error w.r.t. the bias.
+	Matrix<T> m_weightsBlame;	///< Gradient of the error w.r.t. the weights.
+	Matrix<T> m_inputBlame;		///< Gradient of the error w.r.t. the inputs.
+	Matrix<T> m_outputs;		///< The output of this layer.
 };
 
 }

@@ -13,12 +13,11 @@ int main()
 	
 	Linear<double> layer1(inps, outs, batch);
 	
-	Matrix<double> &weights = *(Matrix<double> *)layer1.parameters()[1];
-	for(double &val : weights)
-		val = (rand() % 1000) / 500.0 - 1;
-	
 	Vector<double> &bias = *(Vector<double> *)layer1.parameters()[0];
-	for(double &val : bias)
+	Matrix<double> &weights = *(Matrix<double> *)layer1.parameters()[1];
+	
+	Vector<double> parameters(layer1.parameters());
+	for(double &val : parameters)
 		val = (rand() % 1000) / 500.0 - 1;
 	
 	Matrix<double> inputs(batch, inps);

@@ -23,6 +23,39 @@ public:
 	/// Create a const version of a non-const tensor.
 	template <typename U = T>
 	Tensor(const Tensor<typename std::enable_if<std::is_const<U>::value, typename std::remove_const<U>::type>::type> &t) : m_ptr(t.m_ptr), m_size(t.m_size), m_shared(t.m_shared) {}
+	
+	/// The raw underlying storage.
+	T *ptr()
+	{
+		return m_ptr;
+	}
+	
+	/// The number of elements in this tensor.
+	size_t size() const
+	{
+		return m_size;
+	}
+	
+	/// Reallocate this tensor; this may decouple shared tensors.
+	void resize(size_t size)
+	{
+		if(size > m_size)
+		{
+			T *ptr = new T[size];
+			for(size_t i = 0; i < m_size; ++i)
+				ptr[i] = m_ptr[i];
+			m_size = size;
+			m_shared.reset(m_ptr = ptr);
+		}
+	}
+	
+	/// Change the underlying pointer.
+	void set(T *ptr, size_t size, const std::shared_ptr<T> &shared)
+	{
+		m_ptr		= ptr;
+		m_size		= size;
+		m_shared	= shared;
+	}
 protected:
 	T *m_ptr;						///< The primary storage, with offset.
 	size_t m_size;					///< The number of elements.

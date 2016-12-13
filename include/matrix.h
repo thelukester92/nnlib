@@ -86,7 +86,7 @@ public:
 	}
 	
 	/// Create a shallow copy of another matrix.
-	Matrix(const Matrix &m) : Tensor<T>(m), m_rows(m.rows), m_cols(m.cols), m_ld(m.ld) {}
+	Matrix(const Matrix &m) : Tensor<T>(m), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_ld) {}
 	
 	// MARK: Element Manipulation
 	
