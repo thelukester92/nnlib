@@ -20,8 +20,7 @@ public:
 	
 	virtual void optimize(const Matrix<T> &inputs, const Matrix<T> &targets) override
 	{
-		m_critic.calculateBlame(m_model.forward(inputs), targets);
-		m_model.backward(inputs, m_critic.blame());
+		m_model.backward(inputs, m_critic.backward(m_model.forward(inputs), targets));
 		m_parameters.addScaled(m_blame, m_learningRate);
 	}
 	

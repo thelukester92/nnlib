@@ -10,7 +10,10 @@ template <typename T>
 class Critic
 {
 public:
-	virtual void calculateBlame(const Matrix<T> &inputs, const Matrix<T> &targets) = 0;
+	virtual Matrix<T> &forward(const Matrix<T> &inputs, const Matrix<T> &targets) = 0;
+	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &targets) = 0;
+	
+	virtual Matrix<T> &output() = 0;
 	virtual Matrix<T> &blame() = 0;
 };
 

@@ -84,33 +84,19 @@ int main()
 	SSE<double> critic(outs, batch);
 	SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 	
-	double inputSum = 0, targetSum = 0;
-	for(double val : inputs)
-		inputSum += val;
-	for(double val : targets)
-		targetSum += val;
-	
 	nn.forward(inputs);
 	for(size_t i = 0; i < batch; ++i)
 		for(size_t j = 0; j < outs; ++j)
 			NNAssert(fabs(nn.output()(i, j) - tanh(layer1.output()(i, j))) < 1e-6, "Sequential::forward failed!");
+	cout << "Sequential::forward passed!" << endl;
 	
 	for(size_t i = 0; i < 1000; ++i)
 	{
 		Matrix<double>::shuffleRows(inputs, targets);
-		cout << i << "\t" << calcSSE(inputs, targets, nn) << endl;
 		optimizer.optimize(inputs, targets);
-		
-		double foo = 0;
-		for(double val : inputs)
-			foo += val;
-		NNAssert(fabs(inputSum - foo) < 1e-6, "shuffleRows failed!");
-		
-		foo = 0;
-		for(double val : targets)
-			foo += val;
-		NNAssert(fabs(targetSum - foo) < 1e-6, "shuffleRows failed!");
 	}
+	NNAssert(calcSSE(inputs, targets, nn) < 1.25, "SGD::optimize failed!");
+	cout << "SGD::optimize passed!" << endl;
 	
 	return 0;
 }
