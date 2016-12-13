@@ -23,13 +23,18 @@ public:
 	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
 		Matrix<T>::multiply(blame, inputs, m_weightsBlame, true, false);
-		Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame, true);
+		// Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame, true);
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
 	}
 	
 	virtual Matrix<T> &output() override
 	{
 		return m_outputs;
+	}
+	
+	virtual Matrix<T> &inputBlame() override
+	{
+		return m_inputBlame;
 	}
 	
 	virtual Vector<Tensor<T> *> parameters() override

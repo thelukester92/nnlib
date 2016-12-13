@@ -12,6 +12,7 @@ public:
 	virtual void backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
 	
 	virtual Matrix<T> &output() = 0;
+	virtual Matrix<T> &inputBlame() = 0;
 	
 	virtual Vector<Tensor<T> *> parameters()
 	{

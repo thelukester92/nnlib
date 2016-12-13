@@ -25,6 +25,10 @@ int main()
 	for(double &val : inputs)
 		val = (rand() % 1000) / 500.0 - 1;
 	
+	Matrix<double> blame(batch, outs);
+	for(double &val : blame)
+		val = (rand() % 1000) / 500.0 - 1;
+	
 	Matrix<double> outputs(batch, outs);
 	for(size_t i = 0; i < batch; ++i)
 	{
@@ -40,8 +44,19 @@ int main()
 	for(size_t i = 0; i < batch; ++i)
 		for(size_t j = 0; j < outs; ++j)
 			NNAssert(fabs(outputs(i, j) - layer1.output()(i, j)) < 1e-6, "Linear::forward failed!");
+	cout << "Linear::forward passed!" << endl;
 	
+	Matrix<double> inputBlame(batch, inps, 0);
+	for(size_t i = 0; i < batch; ++i)
+		for(size_t j = 0; j < inps; ++j)
+			for(size_t k = 0; k < outs; ++k)
+				inputBlame(i, j) += blame(i, k) * weights(k, j);
 	
+	layer1.backward(inputs, blame);
+	for(size_t i = 0; i < batch; ++i)
+		for(size_t j = 0; j < inps; ++j)
+			NNAssert(fabs(inputBlame(i, j) - layer1.inputBlame()(i, j)) < 1e-6, "Linear::backword failed!");
+	cout << "Linear::backward passed!" << endl;
 	
 	return 0;
 }

@@ -36,6 +36,14 @@ public:
 	static void multiply(const Matrix &A, const Matrix &B, Matrix &C, bool transposeA = false, bool transposeB = false, T alpha = 1, T beta = 0)
 	{
 		NNAssert(&A != &C && &B != &C, "Product holder cannot be an operand!");
+		NNAssert(transposeA ? A.m_cols == C.m_rows : A.m_rows == C.m_rows, "Incorrect product rows!");
+		NNAssert(transposeB ? B.m_rows == C.m_cols : B.m_cols == C.m_cols, "Incorrect product cols!");
+		NNAssert(
+			(transposeA && transposeB) ? A.m_rows == B.m_cols :
+			(transposeA ? A.m_rows == B.m_rows :
+			(transposeB ? A.m_cols == B.m_cols : A.m_cols == B.m_rows)),
+			"Incompatible operands!"
+		);
 		Algebra<T>::gemm(
 			CblasRowMajor,
 			transposeA ? CblasTrans : CblasNoTrans,
@@ -72,9 +80,9 @@ public:
 	// MARK: Constructors
 	
 	/// Create a matrix of size rows * cols.
-	Matrix(size_t rows = 0, size_t cols = 0) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols), m_ld(cols)
+	Matrix(size_t rows = 0, size_t cols = 0, const T &val = T()) : Tensor<T>(rows * cols), m_rows(rows), m_cols(cols), m_ld(cols)
 	{
-		fill(T());
+		fill(val);
 	}
 	
 	/// Create a shallow copy of another matrix.
