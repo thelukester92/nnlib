@@ -117,6 +117,12 @@ public:
 	/// Create a shallow copy of a non-matrix tensor.
 	Matrix(const Tensor<T> &t, size_t rows, size_t cols) : Tensor<T>(t), m_rows(rows), m_cols(cols), m_ld(cols) {}
 	
+	/// Create a matrix as a row vector.
+	Matrix(const Vector<T> &v) : Tensor<T>(v), m_rows(1), m_cols(v.size()), m_ld(v.size())
+	{
+		NNAssert(v.stride() == 1, "Cannot make a matrix from a non-contiguous vector!");
+	}
+	
 	// MARK: Element Manipulation
 	
 	Matrix &fill(const T &val)

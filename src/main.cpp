@@ -4,10 +4,10 @@
 using namespace std;
 using namespace nnlib;
 
-/// \todo resizable modules (change batch size)
-
 int main()
 {
+	cout << "========== Sanity Test ==========" << endl;
+	
 	size_t inps = 3;
 	size_t outs = 2;
 	size_t batch = 5;
@@ -84,9 +84,10 @@ int main()
 	NNAssert(critic.forward(nn.forward(inputs), targets).sum() < 1.25, "SGD::optimize failed!");
 	cout << "SGD::optimize passed!" << endl;
 	
+	cout << "Sanity test passed!" << endl << endl;
+	
 	// MARK: MNIST Test
 	
-	if(false)
 	{
 		cout << "========== MNIST Test ==========" << endl;
 		cout << "Loading data..." << flush;
@@ -117,11 +118,18 @@ int main()
 		
 		cout << " Done!\nCreating network..." << flush;
 		
-		
+		Sequential<double> nn;
+		nn.add(new Linear<double>(trainFeat.cols(), 100));
+		nn.add(new TanH<double>(100));
+		nn.add(new Linear<double>(100, 10));
+		nn.add(new TanH<double>(10));
+		nn.batch(trainFeat.rows());
 		
 		cout << " Done!\nTraining..." << flush;
 		
 		
+		
+		cout << " Done!" << endl;
 	}
 	
 	return 0;

@@ -127,6 +127,11 @@ public:
 		m_ptr[(m_size - 1) * m_stride] = val;
 	}
 	
+	size_t stride() const
+	{
+		return m_stride;
+	}
+	
 	// MARK: Element Access
 	
 	T &operator[](size_t i)
