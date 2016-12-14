@@ -6,6 +6,7 @@
 #include "sequential.h"
 #include "sgd.h"
 #include "sse.h"
+#include "loader.h"
 using namespace std;
 using namespace nnlib;
 
@@ -88,6 +89,9 @@ int main()
 	}
 	NNAssert(critic.forward(nn.forward(inputs), targets).sum() < 1.25, "SGD::optimize failed!");
 	cout << "SGD::optimize passed!" << endl;
+	
+	Matrix<double> train = Loader<double>::loadArff("../datasets/mnist/train.arff");
+	Matrix<double> test  = Loader<double>::loadArff("../datasets/mnist/test.arff");
 	
 	return 0;
 }

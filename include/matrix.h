@@ -114,6 +114,9 @@ public:
 	/// Create a shallow copy of another matrix.
 	Matrix(const Matrix &m) : Tensor<T>(m), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_ld) {}
 	
+	/// Create a shallow copy of a non-matrix tensor.
+	Matrix(const Tensor<T> &t, size_t rows, size_t cols) : Tensor<T>(t), m_rows(rows), m_cols(cols), m_ld(cols) {}
+	
 	// MARK: Element Manipulation
 	
 	void fill(const T &val)
