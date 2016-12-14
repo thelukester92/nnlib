@@ -21,6 +21,11 @@ int main()
 	for(double &val : parameters)
 		val = (rand() % 1000) / 500.0 - 1;
 	
+	for(double &val : bias)
+		val = (rand() % 1000) / 500.0 - 1;
+	for(double &val : weights)
+		val = (rand() % 1000) / 500.0 - 1;
+	
 	Matrix<double> inputs(batch, inps);
 	for(double &val : inputs)
 		val = (rand() % 1000) / 500.0 - 1;
@@ -30,8 +35,7 @@ int main()
 		val = (rand() % 1000) / 500.0 - 1;
 	
 	Matrix<double> targets(batch, outs);
-	for(double &val : targets)
-		val = (rand() % 1000) / 500.0 - 1;
+	targets.fill(-0.25);
 	
 	Matrix<double> outputs(batch, outs);
 	for(size_t i = 0; i < batch; ++i)
@@ -76,10 +80,11 @@ int main()
 			NNAssert(fabs(nn.output()(i, j) - tanh(layer1.output()(i, j))) < 1e-6, "Sequential::forward failed!");
 	cout << "Sequential::forward passed!" << endl;
 	
-	for(size_t i = 0; i < 1000; ++i)
+	for(size_t i = 0; i < 10000; ++i)
 	{
 		Matrix<double>::shuffleRows(inputs, targets);
 		optimizer.optimize(inputs, targets);
+		cout << critic.forward(nn.forward(inputs), targets).sum() << endl;
 	}
 	NNAssert(critic.forward(nn.forward(inputs), targets).sum() < 1.25, "SGD::optimize failed!");
 	cout << "SGD::optimize passed!" << endl;
@@ -124,7 +129,7 @@ int main()
 		nn.add(new Linear<double>(100, 10));
 		nn.add(new TanH<double>(10));
 		
-		SSE<double> critic(10, trainFeat.rows());
+		SSE<double> critic(10);
 		SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 		
 		cout << " Done!\nTraining..." << flush;
@@ -134,10 +139,18 @@ int main()
 			Matrix<double>::shuffleRows(trainFeat, trainLab);
 			for(size_t j = 0; j < trainFeat.rows(); ++j)
 				optimizer.optimize(trainFeat[j], trainLab[j]);
-			cout << "\rTraining... " << i << "\t" << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
+			
+			nn.batch(trainFeat.rows());
+			critic.batch(trainFeat.rows());
+			cout << "\rTraining... " << i << "\t" << critic.forward(nn.forward(trainFeat), trainLab).sum() << flush;
+			nn.batch(1);
+			critic.batch(1);
 		}
 		
-		cout << " Done!" << endl;
+		cout << "\rTraining... Done!" << endl;
+		nn.batch(trainFeat.rows());
+		critic.batch(trainFeat.rows());
+		cout << "Final error: " << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
 	}
 	
 	return 0;

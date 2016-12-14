@@ -15,7 +15,12 @@ public:
 	  m_bias(outs), m_weights(outs, inps),
 	  m_biasBlame(outs), m_weightsBlame(outs, inps),
 	  m_inputBlame(batch, inps), m_outputs(batch, outs)
-	{}
+	{
+		for(double &val : m_weights)
+			val = (rand() % 1000) / 500.0 - 1;
+		for(double &val : m_bias)
+			val = (rand() % 1000) / 500.0 - 1;
+	}
 	
 	virtual void batch(size_t size) override
 	{
