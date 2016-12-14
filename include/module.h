@@ -10,6 +10,8 @@ class Module
 public:
 	typedef T type;
 	
+	virtual ~Module() {}
+	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) = 0;
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
 	

@@ -70,8 +70,8 @@ int main()
 	
 	TanH<double> layer2(outs, batch);
 	Sequential<double> nn;
-	nn.add(layer1);
-	nn.add(layer2);
+	nn.add(new Linear<double>(layer1));
+	nn.add(new TanH<double>(layer2));
 	
 	SSE<double> critic(outs, batch);
 	SGD<Module<double>, SSE<double>> optimizer(nn, critic);
@@ -90,8 +90,45 @@ int main()
 	NNAssert(critic.forward(nn.forward(inputs), targets).sum() < 1.25, "SGD::optimize failed!");
 	cout << "SGD::optimize passed!" << endl;
 	
-	Matrix<double> train = Loader<double>::loadArff("../datasets/mnist/train.arff");
-	Matrix<double> test  = Loader<double>::loadArff("../datasets/mnist/test.arff");
+	// MARK: MNIST Test
+	
+	if(false)
+	{
+		cout << "========== MNIST Test ==========" << endl;
+		cout << "Loading data..." << flush;
+		
+		Matrix<double> train = Loader<double>::loadArff("../datasets/mnist/train.arff");
+		Matrix<double> test  = Loader<double>::loadArff("../datasets/mnist/test.arff");
+		
+		Matrix<double> trainFeat(train.rows(), train.cols() - 1), trainLab(train.rows(), 10, 0.0);
+		Matrix<double> testFeat(test.rows(), test.cols() - 1), testLab(test.rows(), 10, 0.0);
+		
+		cout << " Done!\nPreprocessing data..." << flush;
+		
+		for(size_t i = 0; i < train.rows(); ++i)
+		{
+			size_t j;
+			for(j = 0; j < trainFeat.cols(); ++j)
+				trainFeat(i, j) = train(i, j) / 255.0;
+			trainLab[train(i, j)] = 1.0;
+		}
+		
+		for(size_t i = 0; i < test.rows(); ++i)
+		{
+			size_t j;
+			for(j = 0; j < testFeat.cols(); ++j)
+				testFeat(i, j) = test(i, j) / 255.0;
+			testLab[test(i, j)] = 1.0;
+		}
+		
+		cout << " Done!\nCreating network..." << flush;
+		
+		
+		
+		cout << " Done!\nTraining..." << flush;
+		
+		
+	}
 	
 	return 0;
 }

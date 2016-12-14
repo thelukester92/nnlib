@@ -119,7 +119,7 @@ public:
 	void push_back(const T &val)
 	{
 		resize(m_size + 1);
-		m_ptr[m_size - 1] = val;
+		m_ptr[(m_size - 1) * m_stride] = val;
 	}
 	
 	// MARK: Element Access
@@ -146,6 +146,16 @@ public:
 	{
 		NNAssert(i < m_size, "Invalid Vector index!");
 		return m_ptr[i * m_stride];
+	}
+	
+	T &back()
+	{
+		return m_ptr[(m_size - 1) * m_stride];
+	}
+	
+	const T &back() const
+	{
+		return m_ptr[(m_size - 1) * m_stride];
 	}
 	
 	// MARK: Iterators

@@ -3,6 +3,8 @@
 
 #include "module.h"
 
+/// \todo single-vector optimization
+
 namespace nnlib
 {
 

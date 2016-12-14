@@ -10,9 +10,15 @@ template <typename T>
 class Container : public Module<T>
 {
 public:
-	void add(Module<T> &component)
+	virtual ~Container()
 	{
-		m_components.push_back(&component);
+		for(Module<T> *component : m_components)
+			delete component;
+	}
+	
+	void add(Module<T> *component)
+	{
+		m_components.push_back(component);
 	}
 protected:
 	Vector<Module<T> *> m_components;
