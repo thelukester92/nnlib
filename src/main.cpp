@@ -141,7 +141,7 @@ int main()
 		critic.batch(1);
 		
 		cout << "Training..." << flush;
-		size_t presentationsPerEpoch = 1000; // trainFeat.rows();
+		size_t presentationsPerEpoch = 200; // trainFeat.rows();
 		
 		for(size_t i = 0; i < 100; ++i)
 		{
@@ -157,9 +157,9 @@ int main()
 		}
 		
 		cout << "\rTraining... Done!                    " << endl;
-		nn.batch(trainFeat.rows());
-		critic.batch(trainFeat.rows());
-		cout << "Final SSE: " << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
+		nn.batch(testFeat.rows());
+		critic.batch(testFeat.rows());
+		cout << "Final SSE: " << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
 	}
 	
 	return 0;
