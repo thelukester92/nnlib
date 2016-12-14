@@ -10,7 +10,7 @@ template <typename T>
 class SSE : public Critic<T>
 {
 public:
-	SSE(size_t size, size_t batch) : m_output(batch, size), m_blame(batch, size) {}
+	SSE(size_t size, size_t batch = 1) : m_output(batch, size), m_blame(batch, size) {}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs, const Matrix<T> &targets) override
 	{

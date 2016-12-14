@@ -123,11 +123,19 @@ int main()
 		nn.add(new TanH<double>(100));
 		nn.add(new Linear<double>(100, 10));
 		nn.add(new TanH<double>(10));
-		nn.batch(trainFeat.rows());
+		
+		SSE<double> critic(10, trainFeat.rows());
+		SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 		
 		cout << " Done!\nTraining..." << flush;
 		
-		
+		for(size_t i = 0; i < 100; ++i)
+		{
+			Matrix<double>::shuffleRows(trainFeat, trainLab);
+			for(size_t j = 0; j < trainFeat.rows(); ++j)
+				optimizer.optimize(trainFeat[j], trainLab[j]);
+			cout << "\rTraining... " << i << "\t" << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
+		}
 		
 		cout << " Done!" << endl;
 	}

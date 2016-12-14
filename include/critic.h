@@ -10,6 +10,12 @@ template <typename T>
 class Critic
 {
 public:
+	virtual void batch(size_t size)
+	{
+		output().resize(size, output().cols());
+		blame().resize(size, blame().cols());
+	}
+	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs, const Matrix<T> &targets) = 0;
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &targets) = 0;
 	
