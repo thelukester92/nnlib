@@ -36,8 +36,8 @@ public:
 		return m_size;
 	}
 	
-	/// Reallocate this tensor; this may decouple shared tensors.
-	void resize(size_t size)
+	/// Reallocate this tensor; this assumes contiguous storage and may decouple shared tensors.
+	Tensor &resize(size_t size)
 	{
 		if(size > m_size)
 		{
@@ -47,14 +47,16 @@ public:
 			m_size = size;
 			m_shared.reset(m_ptr = ptr);
 		}
+		return *this;
 	}
 	
 	/// Change the underlying pointer.
-	void set(T *ptr, size_t size, const std::shared_ptr<T> &shared)
+	Tensor &set(T *ptr, size_t size, const std::shared_ptr<T> &shared)
 	{
 		m_ptr		= ptr;
 		m_size		= size;
 		m_shared	= shared;
+		return *this;
 	}
 protected:
 	T *m_ptr;						///< The primary storage, with offset.

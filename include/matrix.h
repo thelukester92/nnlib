@@ -119,9 +119,19 @@ public:
 	
 	// MARK: Element Manipulation
 	
-	void fill(const T &val)
+	Matrix &fill(const T &val)
 	{
 		std::fill(begin(), end(), val);
+		return *this;
+	}
+	
+	Matrix &resize(size_t rows, size_t cols)
+	{
+		Tensor<T>::resize(rows * cols);
+		m_rows = rows;
+		m_cols = cols;
+		m_ld = cols;
+		return *this;
 	}
 	
 	// MARK: Statistics

@@ -10,15 +10,24 @@ template <typename T>
 class Linear : public Module<T>
 {
 public:
-	Linear(size_t inps, size_t outs, size_t batch)
+	Linear(size_t inps, size_t outs, size_t batch = 1)
 	: m_addBuffer(batch, 1),
 	  m_bias(outs), m_weights(outs, inps),
 	  m_biasBlame(outs), m_weightsBlame(outs, inps),
 	  m_inputBlame(batch, inps), m_outputs(batch, outs)
 	{}
 	
+	virtual void batch(size_t size) override
+	{
+		m_addBuffer.resize(size).fill(1);
+		m_inputBlame.resize(size, m_inputBlame.cols());
+		m_outputs.resize(size, m_outputs.cols());
+	}
+	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
+		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
+		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
 		Matrix<T>::multiply(inputs, m_weights, m_outputs, false, true);
 		Matrix<T>::addOuterProduct(m_addBuffer, m_bias, m_outputs);
 		return m_outputs;
@@ -26,6 +35,10 @@ public:
 	
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
+		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
+		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
+		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
+		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
 		Matrix<T>::multiply(blame, inputs, m_weightsBlame, true, false);
 		Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame);
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);

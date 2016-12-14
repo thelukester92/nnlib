@@ -12,6 +12,13 @@ public:
 	
 	virtual ~Module() {}
 	
+	/// Change the batch size.
+	virtual void batch(size_t size)
+	{
+		output().resize(size, output().cols());
+		inputBlame().resize(size, inputBlame().cols());
+	}
+	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) = 0;
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
 	

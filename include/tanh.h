@@ -10,12 +10,14 @@ template <typename T>
 class TanH : public Module<T>
 {
 public:
-	TanH(size_t size, size_t batch)
+	TanH(size_t size, size_t batch = 1)
 	: m_inputBlame(batch, size), m_outputs(batch, size)
 	{}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
+		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
+		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
 		auto i = inputs.begin();
 		auto j = m_outputs.begin(), end = m_outputs.end();
 		for(; j != end; ++i, ++j)
@@ -25,6 +27,10 @@ public:
 	
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
+		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
+		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
+		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
+		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
 		auto k = blame.begin();
 		auto i = m_outputs.begin(), j = m_inputBlame.begin(), end = m_inputBlame.end();
 		for(; j != end; ++i, ++j, ++k)

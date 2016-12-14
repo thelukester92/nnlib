@@ -11,6 +11,12 @@ class Sequential : public Container<T>
 {
 using Container<T>::m_components;
 public:
+	virtual void batch(size_t size) override
+	{
+		for(Module<T> *layer : m_components)
+			layer->batch(size);
+	}
+	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
 		const Matrix<T> *inps = &inputs;

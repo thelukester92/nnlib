@@ -25,8 +25,6 @@ using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
 using Tensor<T>::m_shared;
 public:
-	using Tensor<T>::resize;
-	
 	// MARK: Iterator
 	
 	class Iterator : public std::iterator<std::forward_iterator_tag, T>
@@ -111,9 +109,16 @@ public:
 	
 	// MARK: Element Manipulation
 	
-	void fill(const T &val)
+	Vector &fill(const T &val)
 	{
 		std::fill(begin(), end(), val);
+		return *this;
+	}
+	
+	Vector &resize(size_t size)
+	{
+		Tensor<T>::resize(size);
+		return *this;
 	}
 	
 	void push_back(const T &val)
