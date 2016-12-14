@@ -1,12 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "matrix.h"
-#include "linear.h"
-#include "tanh.h"
-#include "sequential.h"
-#include "sgd.h"
-#include "sse.h"
-#include "loader.h"
+#include "nnlib"
 using namespace std;
 using namespace nnlib;
 
