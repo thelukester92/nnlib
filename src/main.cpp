@@ -141,21 +141,22 @@ int main()
 		critic.batch(1);
 		
 		cout << "Training..." << flush;
+		size_t presentationsPerEpoch = 1000; // trainFeat.rows();
 		
 		for(size_t i = 0; i < 100; ++i)
 		{
 			Matrix<double>::shuffleRows(trainFeat, trainLab);
-			for(size_t j = 0; j < trainFeat.rows(); ++j)
+			for(size_t j = 0; j < presentationsPerEpoch; ++j)
 				optimizer.optimize(trainFeat[j], trainLab[j]);
 			
 			nn.batch(testFeat.rows());
 			critic.batch(testFeat.rows());
-			cout << "\rTraining... " << critic.forward(nn.forward(testFeat), testLab).sum() << "          " << flush;
+			cout << "\rTraining... " << i << "%\t" << critic.forward(nn.forward(testFeat), testLab).sum() << "          " << flush;
 			nn.batch(1);
 			critic.batch(1);
 		}
 		
-		cout << "\rTraining... Done!          " << endl;
+		cout << "\rTraining... Done!                    " << endl;
 		nn.batch(trainFeat.rows());
 		critic.batch(trainFeat.rows());
 		cout << "Final SSE: " << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
