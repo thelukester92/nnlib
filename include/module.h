@@ -19,6 +19,12 @@ public:
 		inputBlame().resize(size, inputBlame().cols());
 	}
 	
+	/// Change the batch size based on an input.
+	virtual void batchFor(const Matrix<T> &inputs)
+	{
+		batch(inputs.rows());
+	}
+	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) = 0;
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) = 0;
 	
