@@ -28,7 +28,7 @@ public:
 		while(!fin.fail())
 		{
 			std::getline(fin, line);
-			NNAssert(line[0] == '\0' || line[0] == '@' || line[0] == '%', "Invalid arff file!")
+			NNAssert(line[0] == '\0' || line[0] == '@' || line[0] == '%', "Invalid arff file!");
 			
 			std::transform(line.begin(), line.end(), line.begin(), ::tolower);
 			if(line[0] == '@')
