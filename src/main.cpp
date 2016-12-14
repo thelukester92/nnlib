@@ -123,7 +123,9 @@ int main()
 		cout << " Done!\nCreating network..." << flush;
 		
 		Sequential<double> nn;
-		nn.add(new Linear<double>(trainFeat.cols(), 100));
+		nn.add(new Linear<double>(trainFeat.cols(), 300));
+		nn.add(new TanH<double>(300));
+		nn.add(new Linear<double>(300, 100));
 		nn.add(new TanH<double>(100));
 		nn.add(new Linear<double>(100, 10));
 		nn.add(new TanH<double>(10));
@@ -131,7 +133,14 @@ int main()
 		SSE<double> critic(10);
 		SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 		
-		cout << " Done!\nTraining..." << flush;
+		cout << " Done!\nInitial SSE: ";
+		nn.batch(testFeat.rows());
+		critic.batch(testFeat.rows());
+		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
+		nn.batch(1);
+		critic.batch(1);
+		
+		cout << "Training..." << flush;
 		
 		for(size_t i = 0; i < 100; ++i)
 		{
@@ -139,17 +148,17 @@ int main()
 			for(size_t j = 0; j < trainFeat.rows(); ++j)
 				optimizer.optimize(trainFeat[j], trainLab[j]);
 			
-			nn.batch(trainFeat.rows());
-			critic.batch(trainFeat.rows());
-			cout << "\rTraining... " << i << "\t" << critic.forward(nn.forward(trainFeat), trainLab).sum() << flush;
+			nn.batch(testFeat.rows());
+			critic.batch(testFeat.rows());
+			cout << "\rTraining... " << critic.forward(nn.forward(testFeat), testLab).sum() << "          " << flush;
 			nn.batch(1);
 			critic.batch(1);
 		}
 		
-		cout << "\rTraining... Done!" << endl;
+		cout << "\rTraining... Done!          " << endl;
 		nn.batch(trainFeat.rows());
 		critic.batch(trainFeat.rows());
-		cout << "Final error: " << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
+		cout << "Final SSE: " << critic.forward(nn.forward(trainFeat), trainLab).sum() << endl;
 	}
 	
 	return 0;
