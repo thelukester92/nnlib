@@ -84,7 +84,6 @@ int main()
 	{
 		Matrix<double>::shuffleRows(inputs, targets);
 		optimizer.optimize(inputs, targets);
-		cout << critic.forward(nn.forward(inputs), targets).sum() << endl;
 	}
 	NNAssert(critic.forward(nn.forward(inputs), targets).sum() < 1.25, "SGD::optimize failed!");
 	cout << "SGD::optimize passed!" << endl;
