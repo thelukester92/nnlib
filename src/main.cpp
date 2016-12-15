@@ -4,7 +4,6 @@
 using namespace std;
 using namespace nnlib;
 
-/// \todo convenience method for adding multiple layers
 /// \todo resizable layers (not just batch size)
 /// \todo RMSProp
 /// \todo easier way to build a network (i.e. auto FLEXIBLE_SIZE)
@@ -128,12 +127,14 @@ int main()
 		cout << " Done!\nCreating network..." << flush;
 		
 		Sequential<double> nn;
-		nn.add(new Linear<double>(trainFeat.cols(), 300));
-		nn.add(new TanH<double>(300));
-		nn.add(new Linear<double>(300, 100));
-		nn.add(new TanH<double>(100));
-		nn.add(new Linear<double>(100, 10));
-		nn.add(new TanH<double>(10));
+		nn.add(
+			new Linear<double>(trainFeat.cols(), 300),
+			new TanH<double>(300),
+			new Linear<double>(300, 100),
+			new TanH<double>(100),
+			new Linear<double>(100, 10),
+			new TanH<double>(10)
+		);
 		
 		SSE<double> critic(10);
 		SGD<Module<double>, SSE<double>> optimizer(nn, critic);

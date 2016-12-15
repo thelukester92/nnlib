@@ -20,6 +20,13 @@ public:
 	{
 		m_components.push_back(component);
 	}
+	
+	template <typename ... Ts>
+	void add(Module<T> *component, Ts*...more)
+	{
+		add(component);
+		add(more...);
+	}
 protected:
 	Vector<Module<T> *> m_components;
 };
