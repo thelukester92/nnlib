@@ -146,21 +146,26 @@ int main()
 		nn.batch(1);
 		critic.batch(1);
 		
-		cout << "Training..." << flush;
+		size_t epochs = 100;
 		size_t presentationsPerEpoch = 200; // trainFeat.rows();
 		
-		for(size_t i = 0; i < 100; ++i)
+		for(size_t i = 0; i < epochs; ++i)
 		{
 			Matrix<double>::shuffleRows(trainFeat, trainLab);
 			for(size_t j = 0; j < presentationsPerEpoch; ++j)
 				optimizer.optimize(trainFeat[j], trainLab[j]);
 			
+			/*
 			nn.batch(testFeat.rows());
 			critic.batch(testFeat.rows());
 			cout << "\rTraining... " << i << "%\t" << critic.forward(nn.forward(testFeat), testLab).sum() << "          " << flush;
 			nn.batch(1);
 			critic.batch(1);
+			*/
+			
+			Progress::display(i, epochs);
 		}
+		Progress::display(epochs, epochs, '\n');
 		
 		cout << "\rTraining... Done!                    " << endl;
 		nn.batch(testFeat.rows());
