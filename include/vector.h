@@ -107,6 +107,12 @@ public:
 		Algebra<T>::axpy(m_size, scalar, A.m_ptr, A.m_stride, m_ptr, m_stride);
 	}
 	
+	Vector &scale(T scalar)
+	{
+		Algebra<T>::scal(m_size, scalar, m_ptr, m_stride);
+		return *this;
+	}
+	
 	// MARK: Element Manipulation
 	
 	Vector &fill(const T &val)

@@ -140,6 +140,15 @@ public:
 		return *this;
 	}
 	
+	// MARK: Non-static Algebra
+	
+	Matrix &scale(T scalar)
+	{
+		NNAssert(m_cols == m_ld, "Cannot scale a non-contiguous matrix!");
+		Algebra<T>::scal(m_size, scalar, m_ptr, 1);
+		return *this;
+	}
+	
 	// MARK: Statistics
 	
 	T sum()
