@@ -21,3 +21,4 @@
 #include "sse.h"
 #include "optimizer.h"
 #include "sgd.h"
+#include "rmsprop.h"
