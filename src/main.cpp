@@ -144,6 +144,7 @@ int main()
 		size_t epochs = 100;
 		size_t presentationsPerEpoch = 200;
 		
+		/// \todo mini-batches to fix RMSProp
 		cout << "Training..." << endl;
 		for(size_t i = 0; i < epochs; ++i)
 		{
