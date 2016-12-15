@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "nnlib"
+#include "nnlib.h"
 using namespace std;
 using namespace nnlib;
 
