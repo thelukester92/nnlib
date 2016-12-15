@@ -132,7 +132,7 @@ int main()
 		);
 		
 		SSE<double> critic(10);
-		RMSProp<Module<double>, SSE<double>> optimizer(nn, critic, 0.01);
+		RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
 		
 		cout << " Done!\nInitial SSE: " << flush;
 		nn.batch(testFeat.rows());
