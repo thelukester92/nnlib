@@ -7,7 +7,6 @@ using namespace nnlib;
 /// \todo convenience method for adding multiple layers
 /// \todo resizable layers (not just batch size)
 /// \todo RMSProp
-/// \todo cool progress bar
 /// \todo easier way to build a network (i.e. auto FLEXIBLE_SIZE)
 
 int main()
