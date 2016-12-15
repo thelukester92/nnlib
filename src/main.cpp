@@ -4,9 +4,7 @@
 using namespace std;
 using namespace nnlib;
 
-/// \todo resizable layers (not just batch size)
 /// \todo RMSProp
-/// \todo easier way to build a network (i.e. auto FLEXIBLE_SIZE)
 
 int main()
 {
@@ -129,17 +127,17 @@ int main()
 		Sequential<double> nn;
 		nn.add(
 			new Linear<double>(trainFeat.cols(), 300),
-			new TanH<double>(300),
-			new Linear<double>(300, 100),
-			new TanH<double>(100),
-			new Linear<double>(100, 10),
-			new TanH<double>(10)
+			new TanH<double>(),
+			new Linear<double>(100),
+			new TanH<double>(),
+			new Linear<double>(10),
+			new TanH<double>()
 		);
 		
 		SSE<double> critic(10);
 		SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 		
-		cout << " Done!\nInitial SSE: ";
+		cout << " Done!\nInitial SSE: " << flush;
 		nn.batch(testFeat.rows());
 		critic.batch(testFeat.rows());
 		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
@@ -155,15 +153,13 @@ int main()
 			for(size_t j = 0; j < presentationsPerEpoch; ++j)
 				optimizer.optimize(trainFeat[j], trainLab[j]);
 			
-			/*
+			Progress::display(i, epochs);
+			
 			nn.batch(testFeat.rows());
 			critic.batch(testFeat.rows());
-			cout << "\rTraining... " << i << "%\t" << critic.forward(nn.forward(testFeat), testLab).sum() << "          " << flush;
+			cout << "\t" << critic.forward(nn.forward(testFeat), testLab).sum() << flush;
 			nn.batch(1);
 			critic.batch(1);
-			*/
-			
-			Progress::display(i, epochs);
 		}
 		Progress::display(epochs, epochs, '\n');
 		

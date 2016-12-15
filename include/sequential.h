@@ -6,11 +6,32 @@
 namespace nnlib
 {
 
-template <typename T>
+template <typename T = double>
 class Sequential : public Container<T>
 {
 using Container<T>::m_components;
 public:
+	virtual void add(Module<T> *component) override
+	{
+		Container<T>::add(component);
+		if(m_components.size() > 1)
+			m_components.back()->resize(m_components[m_components.size() - 2]->output().cols());
+	}
+	
+	template <typename ... Ts>
+	void add(Module<T> *component, Ts*...more)
+	{
+		add(component);
+		add(more...);
+	}
+	
+	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	{
+		m_components[0]->resize(inps);
+		m_components.back()->resize(m_components.back()->inputBlame().cols(), outs);
+		batch(bats);
+	}
+	
 	virtual void batch(size_t size) override
 	{
 		for(Module<T> *layer : m_components)

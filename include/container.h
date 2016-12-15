@@ -6,7 +6,7 @@
 namespace nnlib
 {
 
-template <typename T>
+template <typename T = double>
 class Container : public Module<T>
 {
 public:
@@ -16,7 +16,7 @@ public:
 			delete component;
 	}
 	
-	void add(Module<T> *component)
+	virtual void add(Module<T> *component)
 	{
 		m_components.push_back(component);
 	}

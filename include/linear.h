@@ -6,7 +6,7 @@
 namespace nnlib
 {
 
-template <typename T>
+template <typename T = double>
 class Linear : public Module<T>
 {
 public:
@@ -16,10 +16,36 @@ public:
 	  m_biasBlame(outs), m_weightsBlame(outs, inps),
 	  m_inputBlame(batch, inps), m_outputs(batch, outs)
 	{
+		resetWeights();
+	}
+	
+	Linear(size_t outs)
+	: m_addBuffer(1, 1),
+	  m_bias(outs), m_weights(outs, 0),
+	  m_biasBlame(outs), m_weightsBlame(outs, 0),
+	  m_inputBlame(1, 0), m_outputs(1, outs)
+	{
+		resetWeights();
+	}
+	
+	void resetWeights()
+	{
 		for(double &val : m_weights)
 			val = (rand() % 1000) / 500.0 - 1;
 		for(double &val : m_bias)
 			val = (rand() % 1000) / 500.0 - 1;
+	}
+	
+	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	{
+		m_addBuffer.resize(bats).fill(1);
+		m_inputBlame.resize(bats, inps);
+		m_outputs.resize(bats, outs);
+		m_bias.resize(outs);
+		m_weights.resize(outs, inps);
+		m_biasBlame.resize(outs);
+		m_weightsBlame.resize(outs, inps);
+		resetWeights();
 	}
 	
 	virtual void batch(size_t size) override

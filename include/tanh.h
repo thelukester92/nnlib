@@ -6,13 +6,18 @@
 namespace nnlib
 {
 
-template <typename T>
+template <typename T = double>
 class TanH : public Module<T>
 {
 public:
-	TanH(size_t size, size_t batch = 1)
+	TanH(size_t size = 0, size_t batch = 1)
 	: m_inputBlame(batch, size), m_outputs(batch, size)
 	{}
+	
+	virtual void resize(size_t inps) override
+	{
+		Module<T>::resize(inps, inps, m_outputs.rows());
+	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
