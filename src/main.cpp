@@ -124,14 +124,11 @@ int main()
 		
 		cout << " Done!\nCreating network..." << flush;
 		
-		Sequential<double> nn;
+		Sequential<> nn;
 		nn.add(
-			new Linear<double>(trainFeat.cols(), 300),
-			new TanH<double>(),
-			new Linear<double>(100),
-			new TanH<double>(),
-			new Linear<double>(10),
-			new TanH<double>()
+			new Linear<>(trainFeat.cols(), 300), new TanH<>(),
+			new Linear<>(100), new TanH<>(),
+			new Linear<>(10), new TanH<>()
 		);
 		
 		SSE<double> critic(10);
@@ -145,8 +142,9 @@ int main()
 		critic.batch(1);
 		
 		size_t epochs = 100;
-		size_t presentationsPerEpoch = 200; // trainFeat.rows();
+		size_t presentationsPerEpoch = 200;
 		
+		cout << "Training..." << endl;
 		for(size_t i = 0; i < epochs; ++i)
 		{
 			Matrix<double>::shuffleRows(trainFeat, trainLab);
@@ -162,11 +160,6 @@ int main()
 			critic.batch(1);
 		}
 		Progress::display(epochs, epochs, '\n');
-		
-		cout << "\rTraining... Done!                    " << endl;
-		nn.batch(testFeat.rows());
-		critic.batch(testFeat.rows());
-		cout << "Final SSE: " << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
 	}
 	
 	return 0;
