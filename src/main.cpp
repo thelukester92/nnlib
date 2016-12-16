@@ -139,7 +139,6 @@ int main()
 		Batcher<double> batcher(trainFeat, trainLab, batchSize);
 		nn.batch(batchSize);
 		critic.batch(batchSize);
-		optimizer.learningRate(optimizer.learningRate() / batchSize);
 		
 		cout << "Training..." << endl;
 		for(size_t i = 0; i < epochs; ++i)

@@ -62,7 +62,7 @@ public:
 			*j /= sqrt(*i) + epsilon;
 		}
 		
-		m_parameters.addScaled(m_blame, m_learningRate);
+		m_parameters.addScaled(m_blame, m_learningRate / inputs.rows());
 	}
 	
 private:

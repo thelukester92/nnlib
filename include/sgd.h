@@ -44,7 +44,7 @@ public:
 	{
 		m_blame.scale(m_momentum);
 		m_model.backward(inputs, m_critic.backward(m_model.forward(inputs), targets));
-		m_parameters.addScaled(m_blame, m_learningRate);
+		m_parameters.addScaled(m_blame, m_learningRate / inputs.rows());
 	}
 	
 private:
