@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include "nnlib.h"
 using namespace std;
 using namespace nnlib;
@@ -87,12 +88,20 @@ int main()
 	
 	// MARK: MNIST Test
 	
+	using clock = chrono::high_resolution_clock;
+	chrono::time_point start;
+	
 	{
 		cout << "========== MNIST Test ==========" << endl;
-		cout << "Loading data..." << flush;
 		
+		cout << "Loading data..." << flush;
+		start = clock::now();
 		Matrix<double> train = Loader<double>::loadArff("../datasets/mnist/train.arff");
 		Matrix<double> test  = Loader<double>::loadArff("../datasets/mnist/test.arff");
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+		
+		cout << "Preprocessing data..." << flush;
+		start = clock::now();
 		
 		Matrix<double> trainLab(train.rows(), 10, 0.0);
 		Matrix<double> trainFeat = train.block(0, 0, train.rows(), train.cols() - 1);
@@ -102,15 +111,16 @@ int main()
 		Matrix<double> testFeat = test.block(0, 0, test.rows(), test.cols() - 1);
 		testFeat.scale(1.0 / 255.0);
 		
-		cout << " Done!\nPreprocessing data..." << flush;
-		
 		for(size_t i = 0; i < train.rows(); ++i)
 			trainLab[train(i).back()] = 1.0;
 		
 		for(size_t i = 0; i < test.rows(); ++i)
 			testLab[test(i).back()] = 1.0;
 		
-		cout << " Done!\nCreating network..." << flush;
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+		
+		cout << "Creating network..." << flush;
+		start = clock::now();
 		
 		Sequential<> nn;
 		nn.add(
@@ -122,7 +132,9 @@ int main()
 		SSE<double> critic(10);
 		RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
 		
-		cout << " Done!\nInitial SSE: " << flush;
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+		
+		cout << "Initial SSE: " << flush;
 		nn.batch(testFeat.rows());
 		critic.batch(testFeat.rows());
 		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
@@ -136,6 +148,8 @@ int main()
 		critic.batch(batchSize);
 		
 		cout << "Training..." << endl;
+		start = clock::now();
+		
 		for(size_t i = 0; i < epochs; ++i)
 		{
 			for(size_t j = 0; j < batchesPerEpoch; ++j)
@@ -153,6 +167,8 @@ int main()
 			critic.batch(batchSize);
 		}
 		Progress::display(epochs, epochs, '\n');
+		
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
 	}
 	
 	return 0;
