@@ -55,21 +55,27 @@ class Random<size_t>
 {
 using T = size_t;
 public:
-	Random() : m_engine(std::random_device()()) {}
-	Random(size_t seed) : m_engine(seed) {}
+	Random() = delete;
 	
-	T uniform(T to)
+	static void seed(size_t seed = 0)
+	{
+		m_engine.seed(0);
+	}
+	
+	static T uniform(T to)
 	{
 		return std::uniform_int_distribution<T>(0, to)(m_engine);
 	}
 	
-	T uniform(T from, T to)
+	static T uniform(T from, T to)
 	{
 		return std::uniform_int_distribution<T>(from, to)(m_engine);
 	}
 private:
-	std::default_random_engine m_engine;
+	static std::default_random_engine m_engine;
 };
+
+std::default_random_engine Random<size_t>::m_engine = std::default_random_engine(std::random_device()());
 
 }
 

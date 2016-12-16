@@ -19,20 +19,15 @@ int main()
 	
 	Vector<double> parameters(layer1.parameters());
 	for(double &val : parameters)
-		val = (rand() % 1000) / 500.0 - 1;
-	
-	for(double &val : bias)
-		val = (rand() % 1000) / 500.0 - 1;
-	for(double &val : weights)
-		val = (rand() % 1000) / 500.0 - 1;
+		val = Random<double>::normal(0, 1, 1);
 	
 	Matrix<double> inputs(batch, inps);
 	for(double &val : inputs)
-		val = (rand() % 1000) / 500.0 - 1;
+		val = Random<double>::normal(0, 1, 1);
 	
 	Matrix<double> blame(batch, outs);
 	for(double &val : blame)
-		val = (rand() % 1000) / 500.0 - 1;
+		val = Random<double>::normal(0, 1, 1);
 	
 	Matrix<double> targets(batch, outs);
 	targets.fill(-0.25);
