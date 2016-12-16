@@ -22,10 +22,20 @@ public:
 	  m_learningRate(lr), m_gamma(g)
 	{}
 	
+	double learningRate() const
+	{
+		return m_learningRate;
+	}
+	
 	RMSProp &learningRate(T lr)
 	{
 		m_learningRate = lr;
 		return *this;
+	}
+	
+	double gamma() const
+	{
+		return m_gamma;
 	}
 	
 	RMSProp &gamma(T g)

@@ -4,8 +4,6 @@
 using namespace std;
 using namespace nnlib;
 
-/// \todo RMSProp
-
 int main()
 {
 	cout << "========== Sanity Test ==========" << endl;
@@ -132,7 +130,7 @@ int main()
 		);
 		
 		SSE<double> critic(10);
-		SGD<Module<double>, SSE<double>> optimizer(nn, critic);
+		RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
 		
 		cout << " Done!\nInitial SSE: " << flush;
 		nn.batch(testFeat.rows());
