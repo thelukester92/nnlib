@@ -136,13 +136,7 @@ int main()
 		size_t batchesPerEpoch = 100;
 		size_t batchSize = 10;
 		
-		size_t batchCount = trainFeat.rows() / batchSize;
-		size_t batchIndex = 0;
-		
-		Matrix<double>::shuffleRows(trainFeat, trainLab);
-		Matrix<double> batchFeat = trainFeat.block(0, 0, batchSize);
-		Matrix<double> batchLab = trainLab.block(0, 0, batchSize);
-		
+		Batcher<double> batcher(trainFeat, trainLab, batchSize);
 		nn.batch(batchSize);
 		critic.batch(batchSize);
 		optimizer.learningRate(optimizer.learningRate() / batchSize);
@@ -152,17 +146,8 @@ int main()
 		{
 			for(size_t j = 0; j < batchesPerEpoch; ++j)
 			{
-				if(batchIndex >= batchCount)
-				{
-					Matrix<double>::shuffleRows(trainFeat, trainLab);
-					batchIndex = 0;
-				}
-				
-				trainFeat.block(batchFeat, batchIndex * batchSize);
-				trainLab.block(batchLab, batchIndex * batchSize);
-				++batchIndex;
-				
-				optimizer.optimize(batchFeat, batchLab);
+				optimizer.optimize(batcher.features(), batcher.labels());
+				batcher.next(true);
 			}
 			
 			Progress::display(i, epochs);

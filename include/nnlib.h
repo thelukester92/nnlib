@@ -3,6 +3,7 @@
 #include "error.h"
 #include "loader.h"
 #include "progress.h"
+#include "random.h"
 
 // Tensors
 #include "tensor.h"

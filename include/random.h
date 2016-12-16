@@ -97,18 +97,15 @@ public:
 		return *this;
 	}
 	
-	Batcher &nextWrap()
-	{
-		if(!next())
-			reset();
-		next();
-		return *this;
-	}
-	
-	bool next()
+	bool next(bool wrap = false)
 	{
 		if(m_index >= m_batches)
-			return false;
+		{
+			if(wrap)
+				reset();
+			else
+				return false;
+		}
 		
 		m_feat.block(m_batchFeat, m_batchSize * m_index);
 		m_lab.block(m_batchLab, m_batchSize * m_index);
