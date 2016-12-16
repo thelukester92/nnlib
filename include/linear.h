@@ -2,6 +2,7 @@
 #define LINEAR_H
 
 #include "module.h"
+#include "random.h"
 
 namespace nnlib
 {
@@ -31,9 +32,9 @@ public:
 	void resetWeights()
 	{
 		for(double &val : m_weights)
-			val = (rand() % 1000) / 500.0 - 1;
+			val = Random<T>::normal(0, 1, 1);
 		for(double &val : m_bias)
-			val = (rand() % 1000) / 500.0 - 1;
+			val = Random<T>::normal(0, 1, 1);
 	}
 	
 	virtual void resize(size_t inps, size_t outs, size_t bats) override
