@@ -132,33 +132,53 @@ int main()
 		);
 		
 		SSE<double> critic(10);
-		RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
+		SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 		
 		cout << " Done!\nInitial SSE: " << flush;
 		nn.batch(testFeat.rows());
 		critic.batch(testFeat.rows());
 		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
-		nn.batch(1);
-		critic.batch(1);
 		
 		size_t epochs = 100;
-		size_t presentationsPerEpoch = 200;
+		size_t batchesPerEpoch = 100;
+		size_t batchSize = 10;
 		
-		/// \todo mini-batches to fix RMSProp
+		size_t batchCount = trainFeat.rows() / batchSize;
+		size_t batchIndex = 0;
+		
+		Matrix<double>::shuffleRows(trainFeat, trainLab);
+		Matrix<double> batchFeat = trainFeat.block(0, 0, batchSize);
+		Matrix<double> batchLab = trainLab.block(0, 0, batchSize);
+		
+		nn.batch(batchSize);
+		critic.batch(batchSize);
+		optimizer.learningRate(optimizer.learningRate() / batchSize);
+		
 		cout << "Training..." << endl;
 		for(size_t i = 0; i < epochs; ++i)
 		{
-			Matrix<double>::shuffleRows(trainFeat, trainLab);
-			for(size_t j = 0; j < presentationsPerEpoch; ++j)
-				optimizer.optimize(trainFeat[j], trainLab[j]);
+			for(size_t j = 0; j < batchesPerEpoch; ++j)
+			{
+				if(batchIndex >= batchCount)
+				{
+					Matrix<double>::shuffleRows(trainFeat, trainLab);
+					batchIndex = 0;
+				}
+				
+				trainFeat.block(batchFeat, batchIndex * batchSize);
+				trainLab.block(batchLab, batchIndex * batchSize);
+				++batchIndex;
+				
+				optimizer.optimize(batchFeat, batchLab);
+			}
 			
 			Progress::display(i, epochs);
 			
 			nn.batch(testFeat.rows());
 			critic.batch(testFeat.rows());
 			cout << "\t" << critic.forward(nn.forward(testFeat), testLab).sum() << flush;
-			nn.batch(1);
-			critic.batch(1);
+			nn.batch(batchSize);
+			critic.batch(batchSize);
 		}
 		Progress::display(epochs, epochs, '\n');
 	}

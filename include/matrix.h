@@ -8,11 +8,12 @@
 namespace nnlib
 {
 
-template <typename T>
+template <typename T = double>
 class Matrix : public Tensor<T>
 {
 using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
+using Tensor<T>::m_shared;
 public:
 	// MARK: Iterator
 	
@@ -159,7 +160,7 @@ public:
 		return d;
 	}
 	
-	// MARK: Row and Column Access
+	// MARK: Row, Column, and Block Access
 	
 	/// Get a vector looking at the ith row in the matrix.
 	Vector<T> operator[](size_t i)
@@ -215,6 +216,23 @@ public:
 	{
 		NNAssert(j < m_cols, "Invalid Matrix column index!");
 		return ConstVector<T>(*this, j, m_rows, m_ld);
+	}
+	
+	Matrix block(size_t row, size_t col, size_t rows = (size_t) -1, size_t cols = (size_t) -1)
+	{
+		NNAssert(row < m_rows && col < m_cols, "Invalid row/col for matrix block!");
+		Matrix m(*this, std::min(m_rows - row, rows), std::min(m_cols - col, cols));
+		m.m_ptr += row * m_ld + col;
+		return m;
+	}
+	
+	Matrix &block(Matrix &m, size_t row, size_t col = 0)
+	{
+		m.m_shared = m_shared;
+		m.m_ptr = m_ptr + row * m_ld + col;
+		if(row + m.m_rows > m_rows)
+			m.m_rows = m_rows - row;
+		return m;
 	}
 	
 	// MARK: Element Access

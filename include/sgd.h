@@ -18,10 +18,20 @@ public:
 	SGD(M &model, C &critic, T lr = 0.01, T m = 0.0)
 	: Optimizer<M, C>(model, critic), m_parameters(model.parameters()), m_blame(model.blame()), m_learningRate(lr), m_momentum(m) {}
 	
+	double learningRate() const
+	{
+		return m_learningRate;
+	}
+	
 	SGD &learningRate(T lr)
 	{
 		m_learningRate = lr;
 		return *this;
+	}
+	
+	double momentum() const
+	{
+		return m_momentum;
 	}
 	
 	SGD &momentum(T m)
