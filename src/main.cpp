@@ -94,26 +94,21 @@ int main()
 		Matrix<double> train = Loader<double>::loadArff("../datasets/mnist/train.arff");
 		Matrix<double> test  = Loader<double>::loadArff("../datasets/mnist/test.arff");
 		
-		Matrix<double> trainFeat(train.rows(), train.cols() - 1), trainLab(train.rows(), 10, 0.0);
-		Matrix<double> testFeat(test.rows(), test.cols() - 1), testLab(test.rows(), 10, 0.0);
+		Matrix<double> trainLab(train.rows(), 10, 0.0);
+		Matrix<double> trainFeat = train.block(0, 0, train.rows(), train.cols() - 1);
+		trainFeat.scale(1.0 / 255.0);
+		
+		Matrix<double> testLab(test.rows(), 10, 0.0);
+		Matrix<double> testFeat = test.block(0, 0, test.rows(), test.cols() - 1);
+		testFeat.scale(1.0 / 255.0);
 		
 		cout << " Done!\nPreprocessing data..." << flush;
 		
 		for(size_t i = 0; i < train.rows(); ++i)
-		{
-			size_t j;
-			for(j = 0; j < trainFeat.cols(); ++j)
-				trainFeat(i, j) = train(i, j) / 255.0;
-			trainLab[train(i, j)] = 1.0;
-		}
+			trainLab[train(i).back()] = 1.0;
 		
 		for(size_t i = 0; i < test.rows(); ++i)
-		{
-			size_t j;
-			for(j = 0; j < testFeat.cols(); ++j)
-				testFeat(i, j) = test(i, j) / 255.0;
-			testLab[test(i, j)] = 1.0;
-		}
+			testLab[test(i).back()] = 1.0;
 		
 		cout << " Done!\nCreating network..." << flush;
 		
