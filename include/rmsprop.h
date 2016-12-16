@@ -44,6 +44,16 @@ public:
 		return *this;
 	}
 	
+	inline T isqrt(T number)
+	{
+		float x = number * 0.5f;
+		float y = number;
+		long i = *(long *) &y;
+		i = 0x5f3759df - (i >> 1);
+		y = *(float *) &i;
+		return y * (1.5f - (x * y * y));
+	}
+	
 	virtual void optimize(const Matrix<T> &inputs, const Matrix<T> &targets) override
 	{
 		static const T epsilon = 1e-9;
@@ -57,9 +67,8 @@ public:
 		{
 			*i *= m_gamma;
 			*i += scale * *j * *j;
-			
-			/// \todo fast inverse square root instead of this
-			*j /= sqrt(*i) + epsilon;
+			*j *= isqrt(*i);
+			// *j /= sqrt(*i) + epsilon;
 		}
 		
 		m_parameters.addScaled(m_blame, m_learningRate / inputs.rows());
