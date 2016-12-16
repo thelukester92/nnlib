@@ -34,7 +34,14 @@ public:
 			if(line[0] == '@')
 			{
 				if(line.compare(0, 10, "@attribute") == 0)
+				{
+					/// \todo determine if attribute is categorical
+					/// if so, count categories and automatically
+					/// convert to one-hot right here (maybe use a flag
+					/// to disable this from happening, if desired?)
+					
 					++cols;
+				}
 				else if(line.compare(0, 5, "@data") == 0)
 					break;
 			}
