@@ -2,6 +2,7 @@
 #define RANDOM_H
 
 #include <random>
+#include "matrix.h"
 
 namespace nnlib
 {
@@ -76,6 +77,60 @@ private:
 };
 
 std::default_random_engine Random<size_t>::m_engine = std::default_random_engine(std::random_device()());
+
+template <typename T>
+class Batcher
+{
+public:
+	Batcher(Matrix<T> &feat, Matrix<T> &lab, size_t batchSize)
+	: m_feat(feat), m_lab(lab),
+	  m_batchFeat(feat.block(0, 0, batchSize)), m_batchLab(lab.block(0, 0, batchSize)),
+	  m_batches((size_t) ceil(feat.rows() / double(batchSize))), m_index(0), m_batchSize(batchSize)
+	{
+		reset();
+	}
+	
+	Batcher &reset()
+	{
+		Matrix<T>::shuffleRows(m_feat, m_lab);
+		m_index = 0;
+		return *this;
+	}
+	
+	Batcher &nextWrap()
+	{
+		if(!next())
+			reset();
+		next();
+		return *this;
+	}
+	
+	bool next()
+	{
+		if(m_index >= m_batches)
+			return false;
+		
+		m_feat.block(m_batchFeat, m_batchSize * m_index);
+		m_lab.block(m_batchLab, m_batchSize * m_index);
+		++m_index;
+		
+		return true;
+	}
+	
+	Matrix<T> &features()
+	{
+		return m_batchFeat;
+	}
+	
+	Matrix<T> &labels()
+	{
+		return m_batchLab;
+	}
+private:
+	Matrix<T> &m_feat, &m_lab;
+	Matrix<T> m_batchFeat, m_batchLab;
+	size_t m_batches, m_index, m_batchSize;
+};
 
 }
 
