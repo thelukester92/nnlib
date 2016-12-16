@@ -56,8 +56,6 @@ public:
 	
 	virtual void optimize(const Matrix<T> &inputs, const Matrix<T> &targets) override
 	{
-		static const T epsilon = 1e-9;
-		
 		m_blame.fill(0.0);
 		m_model.backward(inputs, m_critic.backward(m_model.forward(inputs), targets));
 		
@@ -68,7 +66,6 @@ public:
 			*i *= m_gamma;
 			*i += scale * *j * *j;
 			*j *= isqrt(*i);
-			// *j /= sqrt(*i) + epsilon;
 		}
 		
 		m_parameters.addScaled(m_blame, m_learningRate / inputs.rows());

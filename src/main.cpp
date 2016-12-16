@@ -68,7 +68,7 @@ int main()
 	nn.add(new TanH<double>(layer2));
 	
 	SSE<double> critic(outs, batch);
-	SGD<Module<double>, SSE<double>> optimizer(nn, critic);
+	RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
 	
 	nn.forward(inputs);
 	for(size_t i = 0; i < batch; ++i)
@@ -89,7 +89,7 @@ int main()
 	// MARK: MNIST Test
 	
 	using clock = chrono::high_resolution_clock;
-	chrono::time_point start;
+	chrono::time_point<clock> start;
 	
 	{
 		cout << "========== MNIST Test ==========" << endl;
