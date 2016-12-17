@@ -68,7 +68,7 @@ int main()
 	nn.add(new TanH<double>(layer2));
 	
 	SSE<double> critic(outs, batch);
-	RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
+	SGD<Module<double>, SSE<double>> optimizer(nn, critic);
 	
 	nn.forward(inputs);
 	for(size_t i = 0; i < batch; ++i)

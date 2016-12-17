@@ -19,7 +19,7 @@ public:
 	static Matrix<T> loadArff(const std::string &filename)
 	{
 		Vector<Tensor<T> *> rows;
-		size_t cols = 0;
+		Vector<Vector<std::string>> attributes;
 		
 		std::ifstream fin(filename.c_str());
 		NNAssert(fin.is_open(), "Could not open file '" + filename + "'!");
@@ -35,12 +35,32 @@ public:
 			{
 				if(line.compare(0, 10, "@attribute") == 0)
 				{
-					/// \todo determine if attribute is categorical
-					/// if so, count categories and automatically
-					/// convert to one-hot right here (maybe use a flag
-					/// to disable this from happening, if desired?)
+					char *ptr = const_cast<char *>(line.c_str() + 10);
 					
-					++cols;
+					// Skip attribute name
+					ptr = tokenEnd(ptr);
+					
+					// Check attribute type
+					if(strncmp(ptr, "numeric", 7) == 0 || strncmp(ptr, "integer", 7) == 0 || strncmp(ptr, "real", 4) == 0)
+						attributes.push_back(Vector<std::string>());
+					else if(*ptr == '{')
+					{
+						Vector<std::string> vals;
+						while(*ptr != '}' && *ptr != '\0')
+						{
+							char *end = tokenEnd(ptr);
+							vals.push_back(std::string(ptr, end - ptr));
+							ptr = end;
+							skipWhitespace(&ptr);
+							if(*ptr != '\0' && *ptr != '}')
+								++ptr;
+							
+							std::cout << "found nominal: '" << vals.back() << "'" << std::endl;
+						}
+						attributes.push_back(vals);
+					}
+					else
+						NNAssert(false, "Unrecognized attribute type!");
 				}
 				else if(line.compare(0, 5, "@data") == 0)
 					break;
@@ -48,7 +68,7 @@ public:
 		}
 		while(!fin.fail())
 		{
-			Vector<T> *rowPtr = new Vector<T>(cols);
+			Vector<T> *rowPtr = new Vector<T>(attributes.size());
 			Vector<T> &row = *rowPtr;
 			rows.push_back(rowPtr);
 			
@@ -65,18 +85,56 @@ public:
 					++ptr;
 				if(*ptr == '\0')
 					break;
-				NNAssert(i < cols, "Too many columns on row " + std::to_string(rows.size()));
+				NNAssert(i < attributes.size(), "Too many columns on row " + std::to_string(rows.size()));
 				row[i] = std::strtod(ptr, &ptr);
 				if(*ptr == ',')
 					++ptr;
 				++i;
 			}
-			NNAssert(i == cols, "Not enough columns on row " + std::to_string(rows.size()));
+			NNAssert(i == attributes.size(), "Not enough columns on row " + std::to_string(rows.size()));
 		}
 		fin.close();
 		
 		/// Flatten and return.
-		return Matrix<T>(Vector<T>(rows), rows.size(), cols);
+		return Matrix<T>(Vector<T>(rows), rows.size(), attributes.size());
+	}
+
+private:
+	static void skipWhitespace(char **ptr)
+	{
+		while(**ptr == ' ' || **ptr == '\t')
+			++*ptr;
+	}
+	
+	static char *tokenEnd(char *start)
+	{
+		char *ptr = start;
+		skipWhitespace(&ptr);
+		
+		// Skip token; may be quoted
+		if(*ptr == '\'')
+		{
+			++ptr;
+			while(*ptr != '\'' && *ptr != '\0')
+				++ptr;
+			NNAssert(*ptr == '\'', "Invalid token!");
+			++ptr;
+		}
+		else if(*ptr == '"')
+		{
+			++ptr;
+			while(*ptr != '"' && *ptr != '\0')
+				++ptr;
+			NNAssert(*ptr == '"', "Invalid token!");
+			++ptr;
+		}
+		else
+		{
+			while(*ptr != ' ' && *ptr != '\t' && *ptr != '\0')
+				++ptr;
+		}
+		
+		return ptr;
 	}
 };
 
