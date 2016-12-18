@@ -21,6 +21,7 @@ protected:
 	C &m_critic;
 };
 
+/// Convenience method for automatically templating a new optimizer.
 template <template<typename, typename> class T, typename M, typename C>
 T<M, C> MakeOptimizer(M &model, C &critic)
 {
