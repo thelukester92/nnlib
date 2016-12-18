@@ -24,7 +24,7 @@ public:
 		std::vector<std::unordered_map<std::string, size_t>> attrVals;
 	};
 	
-	/// Load a weka .arff file. Assumes real values (for now).
+	/// Load a weka .arff file.
 	static Matrix<T> loadArff(const std::string &filename, Relation *relPtr = nullptr)
 	{
 		Vector<Tensor<T> *> rows;
