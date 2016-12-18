@@ -130,7 +130,7 @@ int main()
 		);
 		
 		SSE<double> critic(10);
-		RMSProp<Module<double>, SSE<double>> optimizer(nn, critic);
+		auto optimizer = MakeOptimizer<RMSProp>(nn, critic);
 		
 		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
 		

@@ -21,6 +21,12 @@ protected:
 	C &m_critic;
 };
 
+template <template<typename, typename> class T, typename M, typename C>
+T<M, C> MakeOptimizer(M &model, C &critic)
+{
+	return T<M, C>(model, critic);
+}
+
 }
 
 #endif
