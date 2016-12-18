@@ -78,7 +78,7 @@ private:
 
 std::default_random_engine Random<size_t>::m_engine = std::default_random_engine(std::random_device()());
 
-template <typename T>
+template <typename T = double>
 class Batcher
 {
 public:
