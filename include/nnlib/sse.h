@@ -6,7 +6,7 @@
 namespace nnlib
 {
 
-template <typename T>
+template <typename T = double>
 class SSE : public Critic<T>
 {
 public:
