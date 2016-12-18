@@ -17,6 +17,9 @@ After nnlib is installed, you can use it in a new C++ file right away by using `
 Make sure that is in your include path (i.e. using a `-I` flag on your compiler).
 For a different install directory, use `sudo make install prefix=/path/to/dir`.
 
+When you compile, make sure you link BLAS.
+On a Mac, you can do this by adding the `-framework Accelerate -DAPPLE` flags to the compile command.
+
 # Example
 
 For a complete example, see src/main.cpp.
