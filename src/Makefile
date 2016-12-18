@@ -8,9 +8,7 @@ CXX:=g++
 UNAME:=$(shell uname -s)
 
 prefix?=/usr/local
-INSTALL_BIN:=$(prefix)/bin
-INSTALL_LIB:=$(prefix)/lib/libnnlib.so
-INSTALL_INC:=$(prefix)/include/nnlib
+INSTALL_INC:=$(prefix)/include
 INSTALL_FLAGS:=-fPIC -shared
 INSTALL_INC_FILES:=$(wildcard $(INC)/*)
 INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
@@ -18,7 +16,6 @@ INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
 ifeq ($(UNAME),Darwin)
 	LFLAGS+=-framework Accelerate
 	CFLAGS+=-DAPPLE
-	INSTALL_LIB:=$(INSTALL_LIB:%.so=%.dylib)
 else
 	LFLAGS+=-lblas -llapack
 endif
@@ -34,26 +31,21 @@ DEP_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.d) $(CPP_FILES:%.cpp=$(OBJ)/dbg/%.d)
 OBJ_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.o)
 DBG_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/dbg/%.o)
 DBG_OUT:=$(OUT)_dbg
-INSTALL_OBJ_FILES:=$(filter-out $(OBJ)/opt/main.o, $(OBJ_FILES))
 
 dbg: $(BIN)/$(DBG_OUT)
 opt: $(BIN)/$(OUT)
-install: $(INSTALL_LIB) $(INSTALL_INC_FILES)
+install: $(INSTALL_INC_FILES)
 clean:
 	rm -rf $(BIN)/*
 	rm -rf $(OBJ)/*
 uninstall:
-	rm -rf $(INSTALL_INC)
-	rm -f $(INSTALL_LIB)
+	rm -rf $(INSTALL_INC)/nnlib $(INSTALL_INC)/nnlib.h
 
 $(BIN)/$(OUT): $(BIN) $(OBJ) $(OBJ_FILES)
 	$(CXX) $(OBJ_FILES) $(CFLAGS_OPT) $(LFLAGS_OPT) -o $@
 
 $(BIN)/$(DBG_OUT): $(BIN) $(OBJ) $(DBG_FILES)
 	$(CXX) $(DBG_FILES) $(CFLAGS_DBG) $(LFLAGS_DBG) -o $@
-
-$(INSTALL_LIB): $(INSTALL_OBJ_FILES)
-	$(CXX) $< $(INSTALL_FLAGS) -o $@
 
 $(INSTALL_INC)/%.h: $(INC)/%.h
 	mkdir -p $(dir $@)
