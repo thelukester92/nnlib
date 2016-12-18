@@ -3,6 +3,7 @@
 This is Luke Godfrey's neural network library (nnlib), an all-header library to facilitate the use of artificial neural networks.
 It is designed to be fast and easy to use.
 nnlib is written entirely in C++ on a Mac, but should work on other platforms as well (official support should come eventually).
+You will need to install OpenBLAS and link it on Linux.
 
 # Get Started
 
