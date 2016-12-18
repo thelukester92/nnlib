@@ -19,6 +19,7 @@ For a different install directory, use `sudo make install prefix=/path/to/dir`.
 
 When you compile, make sure you link BLAS.
 On a Mac, you can do this by adding the `-framework Accelerate -DAPPLE` flags to the compile command.
+Make sure you use at least C++11 with the `std=c++11` flag.
 
 # Example
 
