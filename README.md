@@ -24,4 +24,4 @@ By default, code runs in debug mode. To optimize debugging checks out, use the `
 
 # Example
 
-For a complete example, see src/main.cpp.
+For a complete example, see [the examples repo](https://github.com/thelukester92/nnlib_examples).
