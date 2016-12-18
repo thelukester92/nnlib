@@ -13,7 +13,7 @@ Getting started is as easy as cloning the repository and installing. From a term
 	sudo make install
 
 After nnlib is installed, you can use it in a new C++ file right away by using `#include <nnlib.h>`.
-`make install` will install the header files to `usr/local/include`.
+`make install` will install the header files to `/usr/local/include`.
 Make sure that is in your include path (i.e. using a `-I` flag on your compiler).
 For a different install directory, use `sudo make install prefix=/path/to/dir`.
 
