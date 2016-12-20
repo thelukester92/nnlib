@@ -2,6 +2,7 @@
 #define LOADER_H
 
 #include <string>
+#include <string.h>
 #include <fstream>
 #include <algorithm>
 #include <cstdlib>

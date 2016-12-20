@@ -4,7 +4,10 @@
 #ifdef APPLE
 	#include <Accelerate/Accelerate.h>
 #else
-	#include <cblas.h>
+	extern "C"
+	{
+		#include <cblas.h>
+	};
 #endif
 
 namespace nnlib
@@ -24,7 +27,9 @@ public:
 	/// X.fill(alpha)
 	static void set(size_t N, T alpha, T *X, size_t strideX)
 	{
-		catlas_sset(N, alpha, X, strideX);
+		// catlas_sset(N, alpha, X, strideX);
+		for(size_t i = 0; i < N; ++i)
+			X[i * strideX] = alpha;
 	}
 	
 	/// Y = X
@@ -78,7 +83,9 @@ typedef double T;
 public:
 	static void set(size_t N, T alpha, T *X, size_t strideX)
 	{
-		catlas_dset(N, alpha, X, strideX);
+		// catlas_dset(N, alpha, X, strideX);
+		for(size_t i = 0; i < N; ++i)
+			X[i * strideX] = alpha;
 	}
 	
 	static void copy(size_t N, T *X, size_t strideX, T *Y, size_t strideY)
