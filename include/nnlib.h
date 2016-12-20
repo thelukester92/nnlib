@@ -16,6 +16,7 @@
 #include "nnlib/sequential.h"
 #include "nnlib/linear.h"
 #include "nnlib/tanh.h"
+#include "nnlib/onehot.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"
