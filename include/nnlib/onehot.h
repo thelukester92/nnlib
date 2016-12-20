@@ -28,13 +28,7 @@ public:
 		
 		m_outputs.fill(0.0);
 		for(size_t i = 0; i < inputs.rows(); ++i)
-		{
-			size_t max = 0;
-			for(size_t j = 1; j < inputs.cols(); ++j)
-				if(inputs(i, j) > inputs(i, max))
-					max = j;
-			m_outputs(i, max) = 1.0;
-		}
+			m_outputs(i, (size_t) inputs(i, 0)) = 1.0;
 		
 		return m_outputs;
 	}
@@ -48,13 +42,7 @@ public:
 		
 		m_inputBlame.fill(0.0);
 		for(size_t i = 0; i < inputs.rows(); ++i)
-		{
-			size_t max = 0;
-			for(size_t j = 1; j < inputs.cols(); ++j)
-				if(inputs(i, j) > inputs(i, max))
-					max = j;
-			m_inputBlame(i, 1) = blame(i, max);
-		}
+			m_inputBlame(i, 0) = blame(i, (size_t) inputs(i, 0));
 		
 		return m_inputBlame;
 	}
