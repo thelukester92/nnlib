@@ -8,7 +8,8 @@
 namespace nnlib
 {
 
-#define NNLibAssert(x, m)										\
+/// Asserts that should never be optimized out.
+#define NNHardAssert(x, m)										\
 {																\
 	if(!(x))													\
 	{															\
@@ -22,7 +23,7 @@ namespace nnlib
 
 /// General asserts that should only be optimized out after verifying the code works.
 #ifndef OPTIMIZE
-	#define NNAssert(x, m) NNLibAssert(x, m)
+	#define NNAssert(x, m) NNHardAssert(x, m)
 #else
 	#define NNAssert(x, m) (void) 0
 #endif

@@ -32,13 +32,13 @@ public:
 		Relation rel;
 		
 		std::ifstream fin(filename.c_str());
-		NNAssert(fin.is_open(), "Could not open file '" + filename + "'!");
+		NNHardAssert(fin.is_open(), "Could not open file '" + filename + "'!");
 		
 		std::string line;
 		while(!fin.fail())
 		{
 			std::getline(fin, line);
-			NNAssert(line[0] == '\0' || line[0] == '@' || line[0] == '%', "Invalid arff file!");
+			NNHardAssert(line[0] == '\0' || line[0] == '@' || line[0] == '%', "Invalid arff file!");
 			
 			std::transform(line.begin(), line.end(), line.begin(), ::tolower);
 			if(line[0] == '@')
@@ -76,7 +76,7 @@ public:
 						}
 					}
 					else
-						NNAssert(strncmp(ptr, "numeric", 7) == 0 || strncmp(ptr, "integer", 7) == 0 || strncmp(ptr, "real", 4) == 0, "Unrecognized attribute type!");
+						NNHardAssert(strncmp(ptr, "numeric", 7) == 0 || strncmp(ptr, "integer", 7) == 0 || strncmp(ptr, "real", 4) == 0, "Unrecognized attribute type!");
 					
 					rel.attrVals.push_back(attrVals);
 				}
@@ -86,15 +86,20 @@ public:
 		}
 		while(!fin.fail())
 		{
-			Vector<T> *rowPtr = new Vector<T>(rel.attrNames.size());
-			Vector<T> &row = *rowPtr;
-			rows.push_back(rowPtr);
-			
 			std::getline(fin, line);
 			char *ptr = const_cast<char *>(line.c_str());
 			
+			// end-of-file
 			if(fin.fail())
 				break;
+			
+			// empty line
+			if(*ptr == '\0')
+				continue;
+			
+			Vector<T> *rowPtr = new Vector<T>(rel.attrNames.size());
+			Vector<T> &row = *rowPtr;
+			rows.push_back(rowPtr);
 			
 			size_t i = 0;
 			while(*ptr != '\0')
@@ -102,21 +107,21 @@ public:
 				skipWhitespace(&ptr);
 				if(*ptr == '\0')
 					break;
-				NNAssert(i < rel.attrNames.size(), "Too many columns on row " + std::to_string(rows.size()));
+				NNHardAssert(i < rel.attrNames.size(), "Too many columns on row " + std::to_string(rows.size()));
 				if(rel.attrVals[i].size() == 0)
 					row[i] = std::strtod(ptr, &ptr);
 				else
 				{
 					char *end = tokenEnd(ptr, ",");
 					auto j = rel.attrVals[i].find(std::string(ptr, end - ptr));
-					NNAssert(j != rel.attrVals[i].end(), "Invalid nominal value '" + std::string(ptr, end - ptr) + "'");
+					NNHardAssert(j != rel.attrVals[i].end(), "Invalid nominal value '" + std::string(ptr, end - ptr) + "'");
 					row[i] = j->second;
 					ptr = end - 1;
 				}
 				++ptr;
 				++i;
 			}
-			NNAssert(i == rel.attrNames.size(), "Not enough columns on row " + std::to_string(rows.size()));
+			NNHardAssert(i == rel.attrNames.size(), "Not enough columns on row " + std::to_string(rows.size()));
 		}
 		fin.close();
 		
@@ -148,7 +153,7 @@ private:
 			++ptr;
 			while(*ptr != '\'' && *ptr != '\0')
 				++ptr;
-			NNAssert(*ptr == '\'', "Invalid token!");
+			NNHardAssert(*ptr == '\'', "Invalid token!");
 			++ptr;
 		}
 		else if(*ptr == '"')
@@ -156,7 +161,7 @@ private:
 			++ptr;
 			while(*ptr != '"' && *ptr != '\0')
 				++ptr;
-			NNAssert(*ptr == '"', "Invalid token!");
+			NNHardAssert(*ptr == '"', "Invalid token!");
 			++ptr;
 		}
 		else
