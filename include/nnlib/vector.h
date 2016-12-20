@@ -57,7 +57,7 @@ public:
 	// MARK: Constructors
 	
 	/// Create a vector of size n.
-	Vector(size_t n = 0, const T &val = T()) : Tensor<T>(n), m_stride(1)
+	explicit Vector(size_t n = 0, const T &val = T()) : Tensor<T>(n), m_stride(1)
 	{
 		fill(val);
 	}

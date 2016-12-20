@@ -112,7 +112,7 @@ int main()
 		testFeat.scale(1.0 / 255.0);
 		
 		for(size_t i = 0; i < train.rows(); ++i)
-			trainLab(i, train(i).back()) = 1.0;
+			trainLab[train(i).back()] = 1.0; // trainLab(i, train(i).back()) = 1.0;
 		
 		for(size_t i = 0; i < test.rows(); ++i)
 			testLab(i, test(i).back()) = 1.0;
