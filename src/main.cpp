@@ -112,10 +112,10 @@ int main()
 		testFeat.scale(1.0 / 255.0);
 		
 		for(size_t i = 0; i < train.rows(); ++i)
-			trainLab[train(i).back()] = 1.0;
+			trainLab(i, train(i).back()) = 1.0;
 		
 		for(size_t i = 0; i < test.rows(); ++i)
-			testLab[test(i).back()] = 1.0;
+			testLab(i, test(i).back()) = 1.0;
 		
 		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
 		
