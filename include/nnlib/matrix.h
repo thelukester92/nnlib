@@ -147,6 +147,7 @@ public:
 	Matrix &scale(T scalar)
 	{
 		NNAssert(m_cols == m_ld, "Cannot scale a non-contiguous matrix!");
+		std::cout << m_cols << " <> " << m_ld << std::endl;
 		Algebra<T>::scal(m_size, scalar, m_ptr, 1);
 		return *this;
 	}
@@ -222,7 +223,9 @@ public:
 	Matrix block(size_t row, size_t col, size_t rows = (size_t) -1, size_t cols = (size_t) -1)
 	{
 		NNAssert(row < m_rows && col < m_cols, "Invalid row/col for matrix block!");
-		Matrix m(*this, std::min(m_rows - row, rows), std::min(m_cols - col, cols));
+		Matrix m(*this);
+		m.m_rows = std::min(m_rows - row, rows);
+		m.m_cols = std::min(m_cols - col, cols);
 		m.m_ptr += row * m_ld + col;
 		return m;
 	}
