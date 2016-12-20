@@ -146,9 +146,11 @@ public:
 	
 	Matrix &scale(T scalar)
 	{
-		NNAssert(m_cols == m_ld, "Cannot scale a non-contiguous matrix!");
-		std::cout << m_cols << " <> " << m_ld << std::endl;
-		Algebra<T>::scal(m_size, scalar, m_ptr, 1);
+		if(m_cols == m_ld)
+			Algebra<T>::scal(m_size, scalar, m_ptr, 1);
+		else
+			for(size_t i = 0; i < m_rows; ++i)
+				Algebra<T>::scal(m_cols, scalar, m_ptr + i * m_ld, 1);
 		return *this;
 	}
 	
