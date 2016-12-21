@@ -1,7 +1,7 @@
 #ifndef ONEHOT_H
 #define ONEHOT_H
 
-#include <iostream>
+#include "module.h"
 
 namespace nnlib
 {
