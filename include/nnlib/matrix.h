@@ -105,6 +105,20 @@ public:
 		}
 	}
 	
+	/// Shuffle the rows of two matrices together, where the rows of one matrix must stay in blocks.
+	static void shuffleRows(const Matrix<T> &A, const Matrix<T> &B, size_t blockSizeA)
+	{
+		NNAssert(A.m_rows == B.m_rows * blockSizeA, "Cannot shuffle matrices with an incompatible number of rows!");
+		NNAssert(A.m_rows % blockSizeA == 0, "Invalid block size!");
+		for(size_t i = B.m_rows - 1; i > 0; --i)
+		{
+			size_t j = Random<size_t>::uniform(i);
+			for(size_t k = 0; k < blockSizeA; ++k)
+				Algebra<T>::swap(A.m_cols, A.m_ptr + (i * blockSizeA + k) * A.m_ld, 1, A.m_ptr + (j * blockSizeA + k) * A.m_ld, 1);
+			Algebra<T>::swap(B.m_cols, B.m_ptr + i * B.m_ld, 1, B.m_ptr + j * B.m_ld, 1);
+		}
+	}
+	
 	// MARK: Constructors
 	
 	/// Create a matrix of size rows * cols.
@@ -115,6 +129,16 @@ public:
 	
 	/// Create a shallow copy of another matrix.
 	Matrix(const Matrix &m) : Tensor<T>(m), m_rows(m.m_rows), m_cols(m.m_cols), m_ld(m.m_ld) {}
+	
+	/// Create a shallow copy of another matrix.
+	Matrix &operator=(const Matrix &m)
+	{
+		Tensor<T>::operator=(m);
+		m_rows = m.m_rows;
+		m_cols = m.m_cols;
+		m_ld = m.m_ld;
+		return *this;
+	}
 	
 	/// Create a shallow copy of a non-matrix tensor.
 	Matrix(const Tensor<T> &t, size_t rows, size_t cols) : Tensor<T>(t), m_rows(rows), m_cols(cols), m_ld(cols) {}

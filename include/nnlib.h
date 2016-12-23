@@ -5,7 +5,7 @@
 #include "nnlib/progress.h"
 #include "nnlib/random.h"
 #include "nnlib/timer.h"
-#include "nnlib/image.h"
+#include "nnlib/imageset.h"
 
 // Tensors
 #include "nnlib/tensor.h"

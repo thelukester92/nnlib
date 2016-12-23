@@ -20,6 +20,14 @@ public:
 	Tensor(const Tensor &t) : m_ptr(t.m_ptr), m_size(t.m_size), m_shared(t.m_shared) {}
 	Tensor(const Tensor &t, size_t offset, size_t size) : m_ptr(t.m_ptr + offset), m_size(size), m_shared(t.m_shared) {}
 	
+	Tensor &operator=(const Tensor &t)
+	{
+		m_ptr = t.m_ptr;
+		m_size = t.m_size;
+		m_shared = t.m_shared;
+		return *this;
+	}
+	
 	/// Create a const version of a non-const tensor.
 	template <typename U = T>
 	Tensor(const Tensor<typename std::enable_if<std::is_const<U>::value, typename std::remove_const<U>::type>::type> &t) : m_ptr(t.m_ptr), m_size(t.m_size), m_shared(t.m_shared) {}

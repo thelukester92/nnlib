@@ -92,6 +92,90 @@ int main()
 	chrono::time_point<clock> start;
 	
 	{
+		cout << "========== MNIST Test (Convolutional) ==========" << endl;
+		
+		cout << "Loading data..." << flush;
+		start = clock::now();
+		Matrix<double> train = Loader<double>::loadArff("../datasets/mnist/train.arff");
+		Matrix<double> test  = Loader<double>::loadArff("../datasets/mnist/test.arff");
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+		
+		cout << "Preprocessing data..." << flush;
+		start = clock::now();
+		
+		Matrix<double> trainLab(train.rows(), 10, 0.0);
+		Matrix<double> trainFeat = train.block(0, 0, train.rows(), train.cols() - 1);
+		trainFeat.scale(1.0 / 255.0);
+		trainFeat = ImageSet<>(trainFeat, 28, 28, 1).patches(5, 5);
+		
+		Matrix<double> testLab(test.rows(), 10, 0.0);
+		Matrix<double> testRaw = test.block(0, 0, test.rows(), test.cols() - 1);
+		testRaw.scale(1.0 / 255.0);
+		
+		Matrix<> testFeat = ImageSet<>(testRaw, 28, 28, 1).patches(5, 5);
+		size_t patchesPerImage = testFeat.rows() / testRaw.rows();
+		
+		for(size_t i = 0; i < train.rows(); ++i)
+			trainLab(i, train(i).back()) = 1.0;
+		
+		for(size_t i = 0; i < test.rows(); ++i)
+			testLab(i, test(i).back()) = 1.0;
+		
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+		
+		cout << "Creating network..." << flush;
+		start = clock::now();
+		
+		Sequential<> nn;
+		nn.add(
+			new Linear<>(trainFeat.cols(), 300), new TanH<>(),
+			new Linear<>(100), new TanH<>(),
+			new Linear<>(10), new TanH<>()
+		);
+		
+		SSE<double> critic(10);
+		auto optimizer = MakeOptimizer<RMSProp>(nn, critic);
+		
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+		
+		cout << "Initial SSE: " << flush;
+		nn.batch(testFeat.rows());
+		critic.batch(testFeat.rows());
+		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
+		
+		size_t epochs = 100;
+		size_t batchesPerEpoch = 100;
+		size_t batchSize = 10;
+		
+		BlockBatcher<double> batcher(trainFeat, trainLab, batchSize, patchesPerImage);
+		nn.batch(batchSize);
+		critic.batch(batchSize);
+		
+		cout << "Training..." << endl;
+		start = clock::now();
+		
+		for(size_t i = 0; i < epochs; ++i)
+		{
+			for(size_t j = 0; j < batchesPerEpoch; ++j)
+			{
+				optimizer.optimize(batcher.features(), batcher.labels());
+				batcher.next(true);
+			}
+			
+			Progress::display(i, epochs);
+			
+			nn.batch(testFeat.rows());
+			critic.batch(testFeat.rows());
+			cout << "\t" << critic.forward(nn.forward(testFeat), testLab).sum() << flush;
+			nn.batch(batchSize);
+			critic.batch(batchSize);
+		}
+		Progress::display(epochs, epochs, '\n');
+		
+		cout << " Done in " << chrono::duration<double>(clock::now() - start).count() << endl;
+	}
+	
+	{
 		cout << "========== MNIST Test ==========" << endl;
 		
 		cout << "Loading data..." << flush;
