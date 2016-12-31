@@ -15,7 +15,6 @@ INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
 
 ifeq ($(UNAME),Darwin)
 	LFLAGS+=-framework Accelerate
-	CFLAGS+=-DAPPLE
 else
 	LFLAGS+=-lblas -llapack
 endif

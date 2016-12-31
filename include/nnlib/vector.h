@@ -45,13 +45,13 @@ public:
 	/// Deep copy the contents of another vector.
 	static void copy(const Vector &A, Vector &B)
 	{
-		Algebra<T>::copy(A.m_size, A.m_ptr, A.m_stride, B.m_ptr, B.m_stride);
+		Algebra<T>::instance().copy(A.m_size, A.m_ptr, A.m_stride, B.m_ptr, B.m_stride);
 	}
 	
 	/// Vector-scalar multiplication.
 	static void multiply(T scalar, Vector &A)
 	{
-		Algebra<T>::scal(A.m_size, scalar, A.m_ptr, A.m_stride);
+		Algebra<T>::instance().scal(A.m_size, scalar, A.m_ptr, A.m_stride);
 	}
 	
 	// MARK: Constructors
@@ -104,12 +104,12 @@ public:
 	/// Add another vector, scaled.
 	void addScaled(const Vector &A, T scalar)
 	{
-		Algebra<T>::axpy(m_size, scalar, A.m_ptr, A.m_stride, m_ptr, m_stride);
+		Algebra<T>::instance().axpy(m_size, scalar, A.m_ptr, A.m_stride, m_ptr, m_stride);
 	}
 	
 	Vector &scale(T scalar)
 	{
-		Algebra<T>::scal(m_size, scalar, m_ptr, m_stride);
+		Algebra<T>::instance().scal(m_size, scalar, m_ptr, m_stride);
 		return *this;
 	}
 	

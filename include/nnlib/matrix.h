@@ -60,7 +60,7 @@ public:
 			(transposeB ? A.m_cols == B.m_cols : A.m_cols == B.m_rows)),
 			"Incompatible operands!"
 		);
-		Algebra<T>::gemm(
+		Algebra<T>::instance().gemm(
 			CblasRowMajor,
 			transposeA ? CblasTrans : CblasNoTrans,
 			transposeB ? CblasTrans : CblasNoTrans,
@@ -74,7 +74,7 @@ public:
 	/// Matrix-vector multiplication.
 	static void multiply(const Matrix &A, const Vector<T> &B, Vector<T> &C, bool transpose = false, T alpha = 1, T beta = 0)
 	{
-		Algebra<T>::gemv(
+		Algebra<T>::instance().gemv(
 			CblasRowMajor,
 			transpose ? CblasTrans : CblasNoTrans,
 			transpose ? A.m_cols : A.m_rows,
@@ -86,7 +86,7 @@ public:
 	/// Add vector-vector outer product.
 	static void addOuterProduct(const Vector<T> &A, const Vector<T> &B, Matrix &C, T alpha = 1)
 	{
-		Algebra<T>::ger(
+		Algebra<T>::instance().ger(
 			CblasRowMajor,
 			C.m_rows, C.m_cols,
 			alpha, A.m_ptr, A.m_stride, B.m_ptr, B.m_stride, C.m_ptr, C.m_ld
@@ -100,8 +100,8 @@ public:
 		for(size_t i = A.m_rows - 1; i > 0; --i)
 		{
 			size_t j = Random<size_t>::uniform(i);
-			Algebra<T>::swap(A.m_cols, A.m_ptr + i * A.m_ld, 1, A.m_ptr + j * A.m_ld, 1);
-			Algebra<T>::swap(B.m_cols, B.m_ptr + i * B.m_ld, 1, B.m_ptr + j * B.m_ld, 1);
+			Algebra<T>::instance().swap(A.m_cols, A.m_ptr + i * A.m_ld, 1, A.m_ptr + j * A.m_ld, 1);
+			Algebra<T>::instance().swap(B.m_cols, B.m_ptr + i * B.m_ld, 1, B.m_ptr + j * B.m_ld, 1);
 		}
 	}
 	
@@ -114,8 +114,8 @@ public:
 		{
 			size_t j = Random<size_t>::uniform(i);
 			for(size_t k = 0; k < blockSizeA; ++k)
-				Algebra<T>::swap(A.m_cols, A.m_ptr + (i * blockSizeA + k) * A.m_ld, 1, A.m_ptr + (j * blockSizeA + k) * A.m_ld, 1);
-			Algebra<T>::swap(B.m_cols, B.m_ptr + i * B.m_ld, 1, B.m_ptr + j * B.m_ld, 1);
+				Algebra<T>::instance().swap(A.m_cols, A.m_ptr + (i * blockSizeA + k) * A.m_ld, 1, A.m_ptr + (j * blockSizeA + k) * A.m_ld, 1);
+			Algebra<T>::instance().swap(B.m_cols, B.m_ptr + i * B.m_ld, 1, B.m_ptr + j * B.m_ld, 1);
 		}
 	}
 	
@@ -171,10 +171,10 @@ public:
 	Matrix &scale(T scalar)
 	{
 		if(m_cols == m_ld)
-			Algebra<T>::scal(m_size, scalar, m_ptr, 1);
+			Algebra<T>::instance().scal(m_size, scalar, m_ptr, 1);
 		else
 			for(size_t i = 0; i < m_rows; ++i)
-				Algebra<T>::scal(m_cols, scalar, m_ptr + i * m_ld, 1);
+				Algebra<T>::instance().scal(m_cols, scalar, m_ptr + i * m_ld, 1);
 		return *this;
 	}
 	
