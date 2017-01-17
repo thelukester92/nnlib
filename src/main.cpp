@@ -86,10 +86,19 @@ int main()
 	
 	cout << "Sanity test passed!" << endl << endl;
 	
-	// MARK: MNIST Test
-	
 	using clock = chrono::high_resolution_clock;
 	chrono::time_point<clock> start;
+	
+	// MARK: Concat Test
+	
+	{
+		// cout << "========== Concat Test ==========" << endl;
+		
+		Sequential<> nn;
+		Concat<> concat;
+	}
+	
+	// MARK: MNIST Test
 	
 	{
 		cout << "========== MNIST Test ==========" << endl;

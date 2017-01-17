@@ -54,6 +54,21 @@ public:
 	{
 		return Vector<Tensor<T> *>();
 	}
+	
+	size_t inputCount()
+	{
+		return inputBlame().cols();
+	}
+	
+	size_t outputCount()
+	{
+		return output().cols();
+	}
+	
+	size_t batchSize()
+	{
+		return output().rows();
+	}
 };
 
 }

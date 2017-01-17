@@ -168,6 +168,17 @@ public:
 	
 	// MARK: Non-static Algebra
 	
+	Matrix &add(const Matrix &m, T scalar = 1)
+	{
+		NNAssert(m.m_rows == m_rows && m.m_cols == m_cols, "Incompatible matrices for element-wise addition!");
+		if(m_cols == m_ld && m.m_cols == m.m_ld)
+			Algebra<T>::instance().axpy(m_size, scalar, m.m_ptr, 1, m_ptr, 1);
+		else
+			for(size_t i = 0; i < m_rows; ++i)
+				Algebra<T>::instance().axpy(m_cols, scalar, m.m_ptr + i * m.m_ld, 1, m_ptr + i * m_ld, 1);
+		return *this;
+	}
+	
 	Matrix &scale(T scalar)
 	{
 		if(m_cols == m_ld)
@@ -256,10 +267,13 @@ public:
 		return m;
 	}
 	
-	Matrix &block(Matrix &m, size_t row, size_t col = 0)
+	Matrix &block(Matrix &m, size_t row, size_t col = 0, size_t rows = 0, size_t cols = 0)
 	{
-		m.m_shared = m_shared;
-		m.m_ptr = m_ptr + row * m_ld + col;
+		m.m_shared	= m_shared;
+		m.m_rows	= rows == 0 ? m.m_rows : std::min(rows, m_rows - row);
+		m.m_cols	= cols == 0 ? m.m_cols : std::min(cols, m_cols - col);
+		m.m_ld		= m_ld;
+		m.m_ptr		= m_ptr + row * m_ld + col;
 		if(row + m.m_rows > m_rows)
 			m.m_rows = m_rows - row;
 		return m;

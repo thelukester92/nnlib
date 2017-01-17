@@ -15,6 +15,7 @@
 #include "nnlib/module.h"
 #include "nnlib/container.h"
 #include "nnlib/sequential.h"
+#include "nnlib/concat.h"
 #include "nnlib/linear.h"
 #include "nnlib/tanh.h"
 #include "nnlib/onehot.h"
