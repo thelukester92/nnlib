@@ -18,7 +18,7 @@
 #include "nnlib/concat.h"
 #include "nnlib/linear.h"
 #include "nnlib/tanh.h"
-#include "nnlib/onehot.h"
+#include "nnlib/sin.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"

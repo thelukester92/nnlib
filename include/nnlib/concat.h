@@ -11,6 +11,14 @@ class Concat : public Container<T>
 {
 using Container<T>::m_components;
 public:
+	Concat() {}
+	
+	template <typename ... Ts>
+	Concat(Ts*...more)
+	{
+		add(more...);
+	}
+	
 	virtual void add(Module<T> *component) override
 	{
 		NNHardAssert(m_components.size() == 0 || component->inputCount() == m_components[0]->inputCount(), "Incompatible concat component!");

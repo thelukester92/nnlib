@@ -11,6 +11,14 @@ class Sequential : public Container<T>
 {
 using Container<T>::m_components;
 public:
+	Sequential() {}
+	
+	template <typename ... Ts>
+	Sequential(Ts*...more)
+	{
+		add(more...);
+	}
+	
 	virtual void add(Module<T> *component) override
 	{
 		Container<T>::add(component);

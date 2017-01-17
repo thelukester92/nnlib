@@ -37,7 +37,8 @@ public:
 		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
 		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
 		auto k = blame.begin();
-		auto i = inputs.begin(), j = m_inputBlame.begin(), end = m_inputBlame.end();
+		auto i = inputs.begin();
+		auto j = m_inputBlame.begin(), end = m_inputBlame.end();
 		for(; j != end; ++i, ++j, ++k)
 			*j = *k * cos(*i);
 		return m_inputBlame;

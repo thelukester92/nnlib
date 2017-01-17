@@ -92,10 +92,14 @@ int main()
 	// MARK: Concat Test
 	
 	{
-		// cout << "========== Concat Test ==========" << endl;
+		cout << "========== Concat Test ==========" << endl;
 		
-		Sequential<> nn;
-		Concat<> concat;
+		Concat<> *concat = new Concat<>(
+			new Sequential<>(new Linear<>(100), new Sin<>()),
+			new Sequential<>(new Linear<>(10))
+		);
+		
+		Sequential<> nn(concat, new Linear<>(1));
 	}
 	
 	// MARK: MNIST Test
