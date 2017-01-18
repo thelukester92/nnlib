@@ -29,6 +29,16 @@ public:
 		resetWeights();
 	}
 	
+	Vector<T> &bias()
+	{
+		return m_bias;
+	}
+	
+	Matrix<T> &weights()
+	{
+		return m_weights;
+	}
+	
 	void resetWeights()
 	{
 		for(double &val : m_weights)

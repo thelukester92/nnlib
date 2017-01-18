@@ -104,17 +104,49 @@ int main()
 		Matrix<> trainLab	= train.block(0, 1, train.rows(), 1);
 		Matrix<> testFeat	= test.block(0, 0, test.rows(), 1);
 		Matrix<> testLab	= test.block(0, 1, test.rows(), 1);
+		
+		double biggest = trainLab(0, 0), smallest = trainLab(0, 0);
+		for(auto d : trainLab)
+			biggest = std::max(biggest, d), smallest = std::min(smallest, d);
+		for(auto &d : trainLab)
+			d = 10 * (d - smallest) / (biggest - smallest);
+		for(auto &d : testLab)
+			d = 10 * (d - smallest) / (biggest - smallest);
+		
+		Saver<>::saveArff(trainLab, "newtrain.arff");
+		
 		cout << " Done." << endl;
 		
 		cout << "Creating network..." << flush;
+		Linear<> *sine = new Linear<>(1, 100), *line = new Linear<>(1, 10), *out = new Linear<>(1);
 		Concat<> *concat = new Concat<>(
-			new Sequential<>(new Linear<>(1, 100), new Sin<>()),
-			new Sequential<>(new Linear<>(1, 10))
+			new Sequential<>(sine, new Sin<>()),
+			new Sequential<>(line)
 		);
-		Sequential<> nn(concat, new Linear<>(1));
+		Sequential<> nn(concat, out);
 		SSE<double> critic(1);
-		auto optimizer = MakeOptimizer<RMSProp>(nn, critic);
-		optimizer.learningRate(1e-6);
+		auto optimizer = MakeOptimizer<SGD>(nn, critic);
+		optimizer.learningRate(0.001);
+		cout << " Done." << endl;
+		
+		cout << "Initializing weights..." << flush;
+		{
+			auto &bias = sine->bias();
+			auto &weights = sine->weights();
+			for(size_t i = 0; i < bias.size() / 2; ++i)
+			{
+				for(size_t j = 0; j < weights.cols(); ++j)
+				{
+					weights(2 * i, j)		= 2.0 * M_PI * (i + 1);
+					weights(2 * i + 1, j)	= 2.0 * M_PI * (i + 1);
+				}
+				bias(2 * i)		= 0.5 * M_PI;
+				bias(2 * i + 1)	= M_PI;
+			}
+		}
+		line->bias().fill(0);
+		line->weights().fill(1);
+		out->weights().scale(0.001);
 		cout << " Done." << endl;
 		
 		cout << "Initial SSE: " << flush;
@@ -122,9 +154,11 @@ int main()
 		critic.batch(testFeat.rows());
 		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
 		
-		size_t epochs = 2000;
+		size_t epochs = 1000;
 		size_t batchesPerEpoch = train.rows();
 		size_t batchSize = 1;
+		
+		double l1 = 0;//.01;
 		
 		Batcher<double> batcher(trainFeat, trainLab, batchSize);
 		nn.batch(batchSize);
@@ -136,6 +170,10 @@ int main()
 		{
 			for(size_t j = 0; j < batchesPerEpoch; ++j)
 			{
+				for(auto &w : out->bias())
+					w = w > 0 ? std::max(0.0, w - l1) : std::min(0.0, w + l1);
+				for(auto &w : out->weights())
+					w = w > 0 ? std::max(0.0, w - l1) : std::min(0.0, w + l1);
 				optimizer.optimize(batcher.features(), batcher.labels());
 				batcher.next(true);
 			}
@@ -149,6 +187,12 @@ int main()
 			critic.batch(batchSize);
 		}
 		Progress::display(epochs, epochs, '\n');
+		
+		nn.batch(testFeat.rows());
+		nn.forward(testFeat);
+		for(auto &d : nn.output())
+			d = d * (biggest - smallest) / 10.0 + smallest;
+		Saver<>::saveArff(nn.output(), "prediction.arff");
 		
 		cout << endl;
 	}

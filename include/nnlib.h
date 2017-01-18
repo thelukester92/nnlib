@@ -2,6 +2,7 @@
 #include "nnlib/algebra.h"
 #include "nnlib/error.h"
 #include "nnlib/loader.h"
+#include "nnlib/saver.h"
 #include "nnlib/progress.h"
 #include "nnlib/random.h"
 #include "nnlib/timer.h"
