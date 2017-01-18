@@ -25,7 +25,7 @@ public:
 		Container<T>::add(component);
 		
 		// Flatten all output matrices into a single output matrix
-		m_outputs.resize(component->batchSize(), m_outputs.cols() + component->inputCount());
+		m_outputs.resize(component->batchSize(), m_outputs.cols() + component->outputCount());
 		size_t offset = 0;
 		for(auto *c : m_components)
 		{
@@ -58,8 +58,14 @@ public:
 	
 	virtual void batch(size_t size) override
 	{
+		m_outputs.resize(size, m_outputs.cols());
+		size_t offset = 0;
 		for(auto *c : m_components)
+		{
 			c->batch(size);
+			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputCount());
+			offset += c->outputCount();
+		}
 	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override

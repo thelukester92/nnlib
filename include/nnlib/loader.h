@@ -109,16 +109,19 @@ public:
 					break;
 				NNHardAssert(i < rel.attrNames.size(), "Too many columns on row " + std::to_string(rows.size()));
 				if(rel.attrVals[i].size() == 0)
+				{
 					row[i] = std::strtod(ptr, &ptr);
+					if(*ptr == ',')
+						++ptr;
+				}
 				else
 				{
 					char *end = tokenEnd(ptr, ",");
 					auto j = rel.attrVals[i].find(std::string(ptr, end - ptr));
 					NNHardAssert(j != rel.attrVals[i].end(), "Invalid nominal value '" + std::string(ptr, end - ptr) + "'");
 					row[i] = j->second;
-					ptr = end - 1;
+					ptr = end;
 				}
-				++ptr;
 				++i;
 			}
 			NNHardAssert(i == rel.attrNames.size(), "Not enough columns on row " + std::to_string(rows.size()));

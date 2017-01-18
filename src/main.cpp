@@ -94,12 +94,62 @@ int main()
 	{
 		cout << "========== Concat Test ==========" << endl;
 		
-		Concat<> *concat = new Concat<>(
-			new Sequential<>(new Linear<>(100), new Sin<>()),
-			new Sequential<>(new Linear<>(10))
-		);
+		cout << "Loading data..." << flush;
+		Matrix<> train = Loader<>::loadArff("../datasets/mackey-glass/train.arff");
+		Matrix<> test  = Loader<>::loadArff("../datasets/mackey-glass/test.arff");
+		cout << " Done." << endl;
 		
+		cout << "Preprocessing data..." << flush;
+		Matrix<> trainFeat	= train.block(0, 0, train.rows(), 1);
+		Matrix<> trainLab	= train.block(0, 1, train.rows(), 1);
+		Matrix<> testFeat	= test.block(0, 0, test.rows(), 1);
+		Matrix<> testLab	= test.block(0, 1, test.rows(), 1);
+		cout << " Done." << endl;
+		
+		cout << "Creating network..." << flush;
+		Concat<> *concat = new Concat<>(
+			new Sequential<>(new Linear<>(1, 100), new Sin<>()),
+			new Sequential<>(new Linear<>(1, 10))
+		);
 		Sequential<> nn(concat, new Linear<>(1));
+		SSE<double> critic(1);
+		auto optimizer = MakeOptimizer<RMSProp>(nn, critic);
+		cout << " Done." << endl;
+		
+		cout << "Initial SSE: " << flush;
+		nn.batch(testFeat.rows());
+		critic.batch(testFeat.rows());
+		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
+		
+		size_t epochs = 100;
+		size_t batchesPerEpoch = train.rows();
+		size_t batchSize = 1;
+		
+		Batcher<double> batcher(trainFeat, trainLab, batchSize);
+		nn.batch(batchSize);
+		critic.batch(batchSize);
+		
+		cout << "Training..." << endl;
+		
+		for(size_t i = 0; i < epochs; ++i)
+		{
+			for(size_t j = 0; j < batchesPerEpoch; ++j)
+			{
+				optimizer.optimize(batcher.features(), batcher.labels());
+				batcher.next(true);
+			}
+			
+			Progress::display(i, epochs);
+			
+			nn.batch(testFeat.rows());
+			critic.batch(testFeat.rows());
+			cout << "\t" << critic.forward(nn.forward(testFeat), testLab).sum() << flush;
+			nn.batch(batchSize);
+			critic.batch(batchSize);
+		}
+		Progress::display(epochs, epochs, '\n');
+		
+		cout << endl;
 	}
 	
 	// MARK: MNIST Test
