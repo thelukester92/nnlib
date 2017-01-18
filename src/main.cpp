@@ -114,6 +114,7 @@ int main()
 		Sequential<> nn(concat, new Linear<>(1));
 		SSE<double> critic(1);
 		auto optimizer = MakeOptimizer<RMSProp>(nn, critic);
+		optimizer.learningRate(1e-6);
 		cout << " Done." << endl;
 		
 		cout << "Initial SSE: " << flush;
@@ -121,7 +122,7 @@ int main()
 		critic.batch(testFeat.rows());
 		cout << critic.forward(nn.forward(testFeat), testLab).sum() << endl;
 		
-		size_t epochs = 100;
+		size_t epochs = 2000;
 		size_t batchesPerEpoch = train.rows();
 		size_t batchSize = 1;
 		
