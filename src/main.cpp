@@ -108,10 +108,16 @@ int main()
 		Matrix<> input(1, 1);
 		input(0, 0) = 1;
 		
-		nn.forward(input);
+		Matrix<> blame(1, 2);
+		blame(0, 0) = 1;
+		blame(0, 1) = 0.5;
 		
-		NNHardAssert(nn.output()(0, 0) == 1, "Linear portion failed!");
-		NNHardAssert(nn.output()(0, 1) == sin(1), "Sinusoid portion failed!");
+		nn.forward(input);
+		nn.backward(input, blame);
+		
+		NNHardAssert(nn.output()(0, 0) == 1, "Linear forward in concat failed!");
+		NNHardAssert(nn.output()(0, 1) == sin(1), "Sinusoid forward in concat failed!");
+		NNHardAssert(nn.inputBlame()(0, 0) == 1 + 0.5 * cos(1), "Backward in concat failed!");
 		
 		cout << "Simple concat test passed!" << endl << endl;
 	}
