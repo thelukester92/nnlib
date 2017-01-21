@@ -190,7 +190,7 @@ int main()
 		size_t batchesPerEpoch = train.rows();
 		size_t batchSize = 1;
 		
-		double l1 = 0.01;
+		double l1 = 0.01 * optimizer.learningRate();
 		
 		Batcher<double> batcher(trainFeat, trainLab, batchSize);
 		nn.batch(batchSize);
