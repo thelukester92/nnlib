@@ -92,6 +92,31 @@ int main()
 	// MARK: Concat Test
 	
 	{
+		cout << "========== Simple Concat ==========" << endl;
+		
+		Sequential<> *one = new Sequential<>(new Linear<>(1, 1));
+		Sequential<> *two = new Sequential<>(new Linear<>(1, 1), new Sin<>());
+		Concat<> *concat  = new Concat<>(one, two);
+		Sequential<> nn(concat);
+		
+		dynamic_cast<Linear<> *>(one->component(0))->bias().fill(0);
+		dynamic_cast<Linear<> *>(one->component(0))->weights().fill(1);
+		
+		dynamic_cast<Linear<> *>(two->component(0))->bias().fill(0);
+		dynamic_cast<Linear<> *>(two->component(0))->weights().fill(1);
+		
+		Matrix<> input(1, 1);
+		input(0, 0) = 1;
+		
+		nn.forward(input);
+		
+		NNHardAssert(nn.output()(0, 0) == 1, "Linear portion failed!");
+		NNHardAssert(nn.output()(0, 1) == sin(1), "Sinusoid portion failed!");
+		
+		cout << "Simple concat test passed!" << endl << endl;
+	}
+	
+	{
 		cout << "========== Concat Test ==========" << endl;
 		
 		cout << "Loading data..." << flush;
@@ -118,7 +143,7 @@ int main()
 		cout << " Done." << endl;
 		
 		cout << "Creating network..." << flush;
-		Linear<> *sine = new Linear<>(1, 100), *line = new Linear<>(1, 10), *out = new Linear<>(1);
+		Linear<> *sine = new Linear<>(1, train.rows()), *line = new Linear<>(1, 10), *out = new Linear<>(1);
 		Concat<> *concat = new Concat<>(
 			new Sequential<>(sine, new Sin<>()),
 			new Sequential<>(line)
@@ -146,6 +171,7 @@ int main()
 		}
 		line->bias().fill(0);
 		line->weights().fill(1);
+		out->bias().scale(0.001);
 		out->weights().scale(0.001);
 		cout << " Done." << endl;
 		
@@ -158,7 +184,7 @@ int main()
 		size_t batchesPerEpoch = train.rows();
 		size_t batchSize = 1;
 		
-		double l1 = 0;//.01;
+		double l1 = 0.01;
 		
 		Batcher<double> batcher(trainFeat, trainLab, batchSize);
 		nn.batch(batchSize);

@@ -138,6 +138,14 @@ public:
 		return m_stride;
 	}
 	
+	void erase(size_t i)
+	{
+		NNAssert(i < m_size, "Invalid Vector index!");
+		for(++i; i < m_size; ++i)
+			m_ptr[(i - 1) * m_stride] = m_ptr[i * m_stride];
+		--m_size;
+	}
+	
 	// MARK: Element Access
 	
 	T &operator[](size_t i)

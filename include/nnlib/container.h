@@ -27,6 +27,21 @@ public:
 		add(component);
 		add(more...);
 	}
+	
+	Module<T> *component(size_t i)
+	{
+		NNAssert(i < m_components.size(), "Invalid component index!");
+		return m_components[i];
+	}
+	
+	/// Remove the specified component. Caller is responsible for deleting it and fixing any problems caused by its removal.
+	Module<T> *releaseComponent(size_t i)
+	{
+		NNAssert(i < m_components.size(), "Invalid component index!");
+		Module<T> *component = m_components[i];
+		m_components.erase(i);
+		return component;
+	}
 protected:
 	Vector<Module<T> *> m_components;
 };
