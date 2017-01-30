@@ -20,6 +20,7 @@
 #include "nnlib/linear.h"
 #include "nnlib/tanh.h"
 #include "nnlib/sin.h"
+#include "nnlib/fuzzy_pooling.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"
