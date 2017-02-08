@@ -71,7 +71,7 @@ public:
 		for(size_t row = 0; row < inputs.rows(); ++row)
 		{
 			auto alpha = m_alpha.begin(), alphaBlame = m_alphaBlame.begin(), end = m_alpha.end();
-			for(; alpha != end; ++alpha, ++alphaBlame)
+			for(; alpha != end; ++alpha, ++alphaBlame, ++i, ++j, ++jj, ++k)
 			{
 				T a = std::abs(*alpha);
 				T x = *j, y = *++jj, z = 1.0 / (a + 1);
