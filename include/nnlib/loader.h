@@ -40,17 +40,16 @@ public:
 			std::getline(fin, line);
 			NNHardAssert(line[0] == '\0' || line[0] == '@' || line[0] == '%', "Invalid arff file!");
 			
-			std::transform(line.begin(), line.end(), line.begin(), ::tolower);
 			if(line[0] == '@')
 			{
-				if(line.compare(0, 9, "@relation") == 0)
+				if(startsWith(line, "@relation"))
 				{
 					char *ptr = const_cast<char *>(line.c_str());
 					skipWhitespace(&ptr);
 					char *end = tokenEnd(ptr);
 					rel.name = std::string(ptr, end - ptr);
 				}
-				else if(line.compare(0, 10, "@attribute") == 0)
+				else if(startsWith(line, "@attribute"))
 				{
 					char *ptr = const_cast<char *>(line.c_str() + 10);
 					skipWhitespace(&ptr);
@@ -80,7 +79,7 @@ public:
 					
 					rel.attrVals.push_back(attrVals);
 				}
-				else if(line.compare(0, 5, "@data") == 0)
+				else if(startsWith(line, "@data"))
 					break;
 			}
 		}
@@ -139,6 +138,13 @@ public:
 	}
 
 private:
+	static bool startsWith(std::string str, std::string prefix)
+	{
+		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+		std::transform(prefix.begin(), prefix.end(), prefix.begin(), ::tolower);
+		return str.compare(0, prefix.length(), prefix) == 0;
+	}
+	
 	static void skipWhitespace(char **ptr)
 	{
 		while(**ptr == ' ' || **ptr == '\t')
