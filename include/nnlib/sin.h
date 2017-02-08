@@ -6,6 +6,7 @@
 namespace nnlib
 {
 
+/// An activation function layer that applies sin to each input.
 template <typename T = double>
 class Sin : public Module<T>
 {

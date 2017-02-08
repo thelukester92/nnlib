@@ -6,6 +6,7 @@
 namespace nnlib
 {
 
+/// An activation function layer that applies tanh to each input.
 template <typename T = double>
 class TanH : public Module<T>
 {

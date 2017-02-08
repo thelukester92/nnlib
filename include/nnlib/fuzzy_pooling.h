@@ -52,7 +52,7 @@ public:
 		
 		for(size_t row = 0; row < inputs.rows(); ++row)
 			for(k = m_alpha.begin(); k != end; ++k)
-				*j = FuzzyPooling::fuzzy(*i, *++i, *k);
+				*j = fuzzy(*i, *++i, *k);
 		
 		return m_outputs;
 	}

@@ -41,9 +41,9 @@ public:
 	
 	void resetWeights()
 	{
-		for(double &val : m_weights)
+		for(auto &val : m_weights)
 			val = Random<T>::normal(0, 1, 1);
-		for(double &val : m_bias)
+		for(auto &val : m_bias)
 			val = Random<T>::normal(0, 1, 1);
 	}
 	
