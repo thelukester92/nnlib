@@ -89,6 +89,40 @@ int main()
 	using clock = chrono::high_resolution_clock;
 	chrono::time_point<clock> start;
 	
+	// MARK: Gaussian Test
+	
+	{
+		cout << "=========== Gaussian Test ===========" << endl;
+		
+		double mean = 0.5;
+		double stddev = 0.25;
+		size_t rows = 100000, batch = 1;
+		
+		Matrix<> feat(rows, 1), lab(rows, 1);
+		for(size_t i = 0; i < feat.rows(); ++i)
+		{
+			feat[i][0] = i / double(feat.rows());
+			lab[i][0]  = exp(-(feat[i][0] - mean) * (feat[i][0] - mean) / (2 * stddev * stddev));
+		}
+		
+		Gaussian<> gauss(1, batch);
+		SSE<> critic(1, batch);
+		Batcher<> batcher(feat, lab, batch);
+		auto optimizer = MakeOptimizer<SGD>(gauss, critic);
+		optimizer.learningRate(0.1);
+		
+		for(size_t i = 0; i < 10000; ++i)
+		{
+			batcher.next(true);
+			optimizer.optimize(batcher.features(), batcher.labels());
+		}
+		
+		gauss.batch(rows);
+		critic.batch(rows);
+		NNHardAssert(critic.forward(gauss.forward(feat), lab).sum() < 10, "Gaussian failed!");
+		cout << "Gaussian test passed!" << endl << endl;
+	}
+	
 	// MARK: Concat Test
 	
 	{

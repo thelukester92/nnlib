@@ -48,8 +48,11 @@ public:
 		auto j = m_outputs.begin();
 		auto m = m_means.begin(), s = m_stddevs.begin(), end = m_means.end();
 		
+		for(; s != m_stddevs.end(); ++s)
+			*s = std::max(*s, std::numeric_limits<T>::epsilon());
+		
 		for(size_t row = 0; row < inputs.rows(); ++row)
-			for(m = m_means.begin(), s = m_stddevs.begin(); m != end; ++m, ++s)
+			for(m = m_means.begin(), s = m_stddevs.begin(); m != end; ++m, ++s, ++i, ++j)
 				*j = exp(-(*i - *m) * (*i - *m) / (2 * *s * *s));
 		
 		return m_outputs;
@@ -93,6 +96,16 @@ public:
 	virtual Matrix<T> &inputBlame() override
 	{
 		return m_inputBlame;
+	}
+	
+	virtual Vector<Tensor<T> *> parameters() override
+	{
+		return { &m_means, &m_stddevs };
+	}
+	
+	virtual Vector<Tensor<T> *> blame() override
+	{
+		return { &m_meanBlame, &m_stddevBlame };
 	}
 	
 private:

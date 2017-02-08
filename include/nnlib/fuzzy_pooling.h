@@ -51,7 +51,7 @@ public:
 			*k = *k < 0 ? 0 : (*k > 1 ? 1 : *k);
 		
 		for(size_t row = 0; row < inputs.rows(); ++row)
-			for(k = m_alpha.begin(); k != end; ++k)
+			for(k = m_alpha.begin(); k != end; ++k, ++i, ++j)
 				*j = fuzzy(*i, *++i, *k);
 		
 		return m_outputs;
