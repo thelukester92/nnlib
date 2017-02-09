@@ -30,14 +30,22 @@ public:
 			val = Random<T>::uniform(1.0);
 	}
 	
-	virtual void resize(size_t size) override
+	virtual void resize(size_t size, size_t outs, size_t bats) override
 	{
-		Module<T>::resize(size, size, m_outputs.rows());
+		NNHardAssert(size == outs, "Gaussian modules must have an equal number of inputs and outputs!");
+		bool needsReset = size != m_inputBlame.cols() || outs != m_outputs.cols();
+		Module<T>::resize(size, size, bats);
 		m_means.resize(size);
 		m_stddevs.resize(size);
 		m_meanBlame.resize(size);
 		m_stddevBlame.resize(size);
-		resetWeights();
+		if(needsReset)
+			resetWeights();
+	}
+	
+	virtual void resize(size_t size) override
+	{
+		resize(size, size, m_outputs.rows());
 	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override

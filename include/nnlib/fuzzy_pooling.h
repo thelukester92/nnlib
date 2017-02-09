@@ -26,17 +26,24 @@ public:
 	virtual void resize(size_t inps, size_t outs, size_t bats) override
 	{
 		NNAssert(outs * 2 == inps, "Fuzzy pooling layers must have an input size that is twice its output!");
+		bool needsReset = inps != m_inputBlame.cols() || outs != m_outputs.cols();
 		m_inputBlame.resize(bats, inps);
 		m_outputs.resize(bats, outs);
 		m_alpha.resize(outs);
 		m_alphaBlame.resize(outs / 2);
-		resetWeights();
+		if(needsReset)
+			resetWeights();
 	}
 	
 	virtual void resize(size_t inps) override
 	{
 		NNAssert(inps % 2 == 0, "Fuzzy pooling layers must have an even number of inputs!");
 		resize(inps, inps / 2, m_outputs.rows());
+	}
+	
+	virtual void batch(size_t bats) override
+	{
+		Module<T>::batch(bats);
 	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override

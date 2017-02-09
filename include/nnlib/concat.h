@@ -59,6 +59,7 @@ public:
 	virtual void batch(size_t size) override
 	{
 		m_outputs.resize(size, m_outputs.cols());
+		m_inputBlame.resize(size, m_inputBlame.cols());
 		size_t offset = 0;
 		for(auto *c : m_components)
 		{
