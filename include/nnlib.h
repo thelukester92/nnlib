@@ -22,6 +22,7 @@
 #include "nnlib/sin.h"
 #include "nnlib/fuzzy_pooling.h"
 #include "nnlib/gaussian.h"
+#include "nnlib/identity.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"
