@@ -2,6 +2,7 @@
 #define FUZZY_POOLING_H
 
 #include "module.h"
+#include <limits>
 
 namespace nnlib
 {
@@ -20,7 +21,7 @@ public:
 	void resetWeights()
 	{
 		for(double &val : m_alpha)
-			val = Random<T>::uniform(0, 1);
+			val = Random<T>::uniform(std::numeric_limits<T>::epsilon(), 1);
 	}
 	
 	virtual void resize(size_t inps, size_t outs, size_t bats) override
@@ -87,7 +88,7 @@ public:
 				
 				// This makes it robust to the discontinuity in the derivative that occurs when a=0.
 				if(a < 0.001)
-					a = -a;
+					*alpha = -*alpha;
 				
 				*alphaBlame += *k * (a * (x + y) - *alpha * (x * y + 1.0)) / (a * (a + 1.0) * (a + 1.0));
 			}
