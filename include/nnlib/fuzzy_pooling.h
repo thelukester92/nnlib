@@ -71,26 +71,28 @@ public:
 		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
 		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
 		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
-		auto i = m_outputs.begin(), j = m_inputBlame.begin(), jj = m_inputBlame.begin();
+		auto i = m_outputs.begin(), j = m_inputBlame.begin();
 		auto k = blame.begin();
+		
+		auto inp = inputs.begin();
 		
 		m_alphaBlame.fill(0);
 		
 		for(size_t row = 0; row < inputs.rows(); ++row)
 		{
 			auto alpha = m_alpha.begin(), alphaBlame = m_alphaBlame.begin(), end = m_alpha.end();
-			for(; alpha != end; ++alpha, ++alphaBlame, ++i, ++j, ++jj, ++k)
+			for(; alpha != end; ++alpha, ++alphaBlame, ++i, ++j, ++k, ++inp)
 			{
-				T a = std::abs(*alpha);
-				T x = *j, y = *++jj, z = 1.0 / (a + 1);
+				T aa = std::abs(*alpha);
+				T x = *inp, y = *++inp, z = 1.0 / (aa + 1);
 				*j   = *k * (y + *alpha) * z;
 				*++j = *k * (x + *alpha) * z;
 				
 				// This makes it robust to the discontinuity in the derivative that occurs when a=0.
-				if(a < 0.001)
+				if(aa < 0.001)
 					*alpha = -*alpha;
 				
-				*alphaBlame += *k * (a * (x + y) - *alpha * (x * y + 1.0)) / (a * (a + 1.0) * (a + 1.0));
+				*alphaBlame += *k * (aa * (x + y) - *alpha * (x * y + 1.0)) / (aa * (aa + 1.0) * (aa + 1.0) + 0.001);
 			}
 		}
 		
