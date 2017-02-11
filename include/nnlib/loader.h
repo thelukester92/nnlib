@@ -66,6 +66,7 @@ public:
 						size_t val = 0;
 						while(*ptr != '}' && *ptr != '\0')
 						{
+							skipWhitespace(&ptr);
 							char *end = tokenEnd(ptr, ",}");
 							attrVals[std::string(ptr, end - ptr)] = val++;
 							ptr = end;
