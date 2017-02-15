@@ -24,6 +24,7 @@ public:
 		std::vector<std::string> attrNames;
 		std::vector<std::unordered_map<std::string, size_t>> attrVals;
 	};
+	static T unknown;
 	
 	/// Load a weka .arff file.
 	static Matrix<T> loadArff(const std::string &filename, Relation *relPtr = nullptr)
@@ -84,6 +85,7 @@ public:
 					break;
 			}
 		}
+		
 		while(!fin.fail())
 		{
 			std::getline(fin, line);
@@ -110,7 +112,14 @@ public:
 				NNHardAssert(i < rel.attrNames.size(), "Too many columns on row " + std::to_string(rows.size()));
 				if(rel.attrVals[i].size() == 0)
 				{
-					row[i] = std::strtod(ptr, &ptr);
+					if(*ptr == '?')
+					{
+						row[i] = unknown;
+						++ptr;
+					}
+					else
+						row[i] = std::strtod(ptr, &ptr);
+					
 					if(*ptr == ',')
 						++ptr;
 				}
@@ -183,6 +192,9 @@ private:
 		return ptr;
 	}
 };
+
+template <typename T>
+T Loader<T>::unknown = -1e308;
 
 }
 
