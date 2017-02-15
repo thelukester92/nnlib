@@ -26,12 +26,7 @@ public:
 		
 		// Flatten all output matrices into a single output matrix
 		m_outputs.resize(component->batchSize(), m_outputs.cols() + component->outputCount());
-		size_t offset = 0;
-		for(auto *c : m_components)
-		{
-			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputCount());
-			offset += c->outputCount();
-		}
+		flattenOutputs();
 		
 		// Same-size input blame
 		m_inputBlame.resize(component->batchSize(), component->inputCount());
@@ -44,6 +39,21 @@ public:
 		add(more...);
 	}
 	
+	void flattenOutputs()
+	{
+		size_t count = 0;
+		for(auto *c : m_components)
+			count += c->outputCount();
+		m_outputs.resize(m_outputs.rows(), count);
+		
+		size_t offset = 0;
+		for(auto *c : m_components)
+		{
+			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputCount());
+			offset += c->outputCount();
+		}
+	}
+	
 	virtual void resize(size_t inps, size_t outs, size_t bats) override
 	{
 		NNHardAssert(m_components.size() > 0, "Cannot resize an empty concat module!");
@@ -53,6 +63,7 @@ public:
 			c->resize(inps);
 			c->batch(bats);
 		}
+		flattenOutputs();
 		m_inputBlame.resize(m_components[0]->inputBlame().rows(), m_components[0]->inputBlame().cols());
 	}
 	
