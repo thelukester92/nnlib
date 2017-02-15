@@ -13,9 +13,9 @@ class Random
 public:
 	Random() = delete;
 	
-	static void seed(size_t seed = 0)
+	static void seed(size_t s = 0)
 	{
-		m_engine.seed(0);
+		m_engine.seed(s);
 	}
 	
 	static T uniform(T to)
