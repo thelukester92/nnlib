@@ -30,6 +30,26 @@ public:
 			val = Random<T>::uniform(1.0);
 	}
 	
+	Vector<T> &means()
+	{
+		return m_means;
+	}
+	
+	T &mean(size_t i)
+	{
+		return m_means(i);
+	}
+	
+	Vector<T> &stddevs()
+	{
+		return m_stddevs;
+	}
+	
+	T &stddev(size_t i)
+	{
+		return m_stddevs(i);
+	}
+	
 	virtual void resize(size_t size, size_t outs, size_t bats) override
 	{
 		NNHardAssert(size == outs, "Gaussian modules must have an equal number of inputs and outputs!");

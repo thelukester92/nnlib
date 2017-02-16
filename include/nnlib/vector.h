@@ -20,8 +20,9 @@ class Matrix;
 template <typename T>
 class Vector : public Tensor<T>
 {
+typedef typename std::remove_const<T>::type TT;
 friend class Vector<const T>;
-friend class Vector<typename std::remove_const<T>::type>;
+friend class Vector<TT>;
 friend class Matrix<T>;
 using Tensor<T>::m_ptr;
 using Tensor<T>::m_size;
@@ -137,6 +138,43 @@ public:
 		return *this;
 	}
 	
+	// MARK: Statistics
+	
+	/// Add all the elements of this vector and return the sum.
+	TT sum() const
+	{
+		TT d = 0;
+		for(TT val : *this)
+			d += val;
+		return d;
+	}
+	
+	/// Get the minimum value.
+	TT minimum() const
+	{
+		TT smallest = *begin();
+		for(TT val : *this)
+			if(val < smallest)
+				smallest = val;
+		return smallest;
+	}
+	
+	/// Get the maximum value.
+	TT maximum() const
+	{
+		TT biggest = *begin();
+		for(TT val : *this)
+			if(val > biggest)
+				biggest = val;
+		return biggest;
+	}
+	
+	/// Get the average value.
+	TT mean() const
+	{
+		return sum() / m_size;
+	}
+	
 	// MARK: Element Manipulation
 	
 	Vector &fill(const T &val)
@@ -206,26 +244,6 @@ public:
 		return m_ptr[(m_size - 1) * m_stride];
 	}
 	
-	/// Get the minimum value.
-	T minimum()
-	{
-		T smallest = *begin();
-		for(T val : *this)
-			if(val < smallest)
-				smallest = val;
-		return smallest;
-	}
-	
-	/// Get the maximum value.
-	T maximum()
-	{
-		T biggest = *begin();
-		for(T val : *this)
-			if(val > biggest)
-				biggest = val;
-		return biggest;
-	}
-	
 	// MARK: Iterators
 	
 	Iterator begin()
@@ -233,7 +251,17 @@ public:
 		return Iterator(m_ptr, m_stride);
 	}
 	
+	Iterator begin() const
+	{
+		return Iterator(m_ptr, m_stride);
+	}
+	
 	Iterator end()
+	{
+		return Iterator(m_ptr + m_stride * m_size, m_stride);
+	}
+	
+	Iterator end() const
 	{
 		return Iterator(m_ptr + m_stride * m_size, m_stride);
 	}
