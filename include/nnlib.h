@@ -21,7 +21,6 @@
 #include "nnlib/linear.h"
 #include "nnlib/tanh.h"
 #include "nnlib/sin.h"
-#include "nnlib/fuzzy_pooling.h"
 #include "nnlib/gaussian.h"
 #include "nnlib/identity.h"
 
