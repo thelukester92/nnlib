@@ -5,8 +5,10 @@
 #include <iterator>
 #include <algorithm>
 #include <initializer_list>
+#include <utility>
 #include "tensor.h"
 #include "algebra.h"
+#include "random.h"
 
 namespace nnlib
 {
@@ -102,14 +104,36 @@ public:
 	// MARK: Non-static Algebra
 	
 	/// Add another vector, scaled.
-	void addScaled(const Vector &A, T scalar)
+	Vector &addScaled(const Vector &A, T scalar)
 	{
 		Algebra<T>::instance().axpy(m_size, scalar, A.m_ptr, A.m_stride, m_ptr, m_stride);
+		return *this;
 	}
 	
+	/// Multiply each element by a scalar.
 	Vector &scale(T scalar)
 	{
 		Algebra<T>::instance().scal(m_size, scalar, m_ptr, m_stride);
+		return *this;
+	}
+	
+	/// Normalize between the given min and max.
+	Vector &normalize(T min = 0.0, T max = 1.0)
+	{
+		T smallest = minimum(), biggest = maximum();
+		for(T &val : *this)
+			val = (val - smallest) / (biggest - smallest) * (max - min) + min;
+		return *this;
+	}
+	
+	/// Shuffle the elements of this vector.
+	Vector &shuffle()
+	{
+		for(size_t i = m_size - 1; i > 0; --i)
+		{
+			size_t j = Random<size_t>::uniform(i);
+			std::swap((*this)[i], (*this)[j]);
+		}
 		return *this;
 	}
 	
@@ -180,6 +204,26 @@ public:
 	const T &back() const
 	{
 		return m_ptr[(m_size - 1) * m_stride];
+	}
+	
+	/// Get the minimum value.
+	T minimum()
+	{
+		T smallest = *begin();
+		for(T val : *this)
+			if(val < smallest)
+				smallest = val;
+		return smallest;
+	}
+	
+	/// Get the maximum value.
+	T maximum()
+	{
+		T biggest = *begin();
+		for(T val : *this)
+			if(val > biggest)
+				biggest = val;
+		return biggest;
 	}
 	
 	// MARK: Iterators

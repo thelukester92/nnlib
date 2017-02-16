@@ -5,6 +5,7 @@
 #include "nnlib/saver.h"
 #include "nnlib/progress.h"
 #include "nnlib/random.h"
+#include "nnlib/batcher.h"
 #include "nnlib/timer.h"
 
 // Tensors
@@ -23,7 +24,6 @@
 #include "nnlib/fuzzy_pooling.h"
 #include "nnlib/gaussian.h"
 #include "nnlib/identity.h"
-#include "nnlib/all_pairs.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"

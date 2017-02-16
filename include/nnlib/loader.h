@@ -138,7 +138,7 @@ public:
 		fin.close();
 		
 		if(relPtr != nullptr)
-			relPtr = new Relation(rel);
+			*relPtr = rel;
 		
 		Matrix<T> flattened(Vector<T>(rows), rows.size(), rel.attrNames.size());
 		for(auto *i : rows)
