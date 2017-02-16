@@ -140,10 +140,31 @@ public:
 		if(relPtr != nullptr)
 			relPtr = new Relation(rel);
 		
-		/// Flatten and return.
 		Matrix<T> flattened(Vector<T>(rows), rows.size(), rel.attrNames.size());
 		for(auto *i : rows)
 			delete i;
+		
+		for(size_t i = 0; i < flattened.cols(); ++i)
+		{
+			double sum = 0.0;
+			size_t count = 0;
+			for(size_t j = 0; j < flattened.rows(); ++j)
+			{
+				if(flattened(j, i) != unknown)
+				{
+					sum += flattened(j, i);
+					++count;
+				}
+			}
+			if(count > 0)
+			{
+				double mean = sum / count;
+				for(size_t j = 0; j < flattened.rows(); ++j)
+					if(flattened(j, i) == unknown)
+						flattened(j, i) = mean;
+			}
+		}
+		
 		return flattened;
 	}
 
