@@ -28,6 +28,11 @@ public:
 		add(more...);
 	}
 	
+	size_t componentCount()
+	{
+		return m_components.size();
+	}
+	
 	Module<T> *component(size_t i)
 	{
 		NNAssert(i < m_components.size(), "Invalid component index!");
