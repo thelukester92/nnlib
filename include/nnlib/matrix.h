@@ -74,11 +74,13 @@ public:
 	/// Matrix-vector multiplication.
 	static void multiply(const Matrix &A, const Vector<T> &B, Vector<T> &C, bool transpose = false, T alpha = 1, T beta = 0)
 	{
+		NNAssert(transpose && A.m_rows == B.m_size || !transpose && A.m_cols == B.m_size, "Incompatible matrix-vector operands!");
+		NNAssert(transpose && A.m_cols == C.m_size || !transpose && A.m_rows == C.m_size, "Incompatible output vector for gemv!");
 		Algebra<T>::instance().gemv(
 			CblasRowMajor,
 			transpose ? CblasTrans : CblasNoTrans,
-			transpose ? A.m_cols : A.m_rows,
-			transpose ? A.m_rows : A.m_cols,
+			A.m_rows,
+			A.m_cols,
 			alpha, A.m_ptr, A.m_ld, B.m_ptr, B.m_stride, beta, C.m_ptr, C.m_stride
 		);
 	}

@@ -82,7 +82,7 @@ public:
 		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
 		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
 		Matrix<T>::multiply(blame, inputs, m_weightsBlame, true, false, 1, 1);
-		Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame, false, 1, 1);
+		Matrix<T>::multiply(blame, m_addBuffer, m_biasBlame, true, 1, 1);
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
 		return m_inputBlame;
 	}

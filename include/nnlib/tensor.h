@@ -55,6 +55,8 @@ public:
 			m_size = size;
 			m_shared.reset(m_ptr = ptr);
 		}
+		else
+			m_size = size;
 		return *this;
 	}
 	
