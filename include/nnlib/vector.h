@@ -17,7 +17,7 @@ template <typename T>
 class Matrix;
 
 /// Standard 1-dimensional tensor.
-template <typename T>
+template <typename T = double>
 class Vector : public Tensor<T>
 {
 typedef typename std::remove_const<T>::type TT;

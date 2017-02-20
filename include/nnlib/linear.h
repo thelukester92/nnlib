@@ -19,7 +19,7 @@ public:
 	{
 		resetWeights();
 	}
-	
+
 	Linear(size_t outs)
 	: m_addBuffer(1, 1),
 	  m_bias(outs), m_weights(outs, 0),
@@ -28,17 +28,17 @@ public:
 	{
 		resetWeights();
 	}
-	
+
 	Vector<T> &bias()
 	{
 		return m_bias;
 	}
-	
+
 	Matrix<T> &weights()
 	{
 		return m_weights;
 	}
-	
+
 	void resetWeights()
 	{
 		for(auto &val : m_weights)
@@ -46,7 +46,7 @@ public:
 		for(auto &val : m_bias)
 			val = Random<T>::normal(0, 1, 1);
 	}
-	
+
 	virtual void resize(size_t inps, size_t outs, size_t bats) override
 	{
 		m_addBuffer.resize(bats).fill(1);
@@ -58,14 +58,14 @@ public:
 		m_weightsBlame.resize(outs, inps);
 		resetWeights();
 	}
-	
+
 	virtual void batch(size_t size) override
 	{
 		m_addBuffer.resize(size).fill(1);
 		m_inputBlame.resize(size, m_inputBlame.cols());
 		m_outputs.resize(size, m_outputs.cols());
 	}
-	
+
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
 		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
@@ -74,7 +74,7 @@ public:
 		Matrix<T>::addOuterProduct(m_addBuffer, m_bias, m_outputs);
 		return m_outputs;
 	}
-	
+
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
 		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
@@ -86,27 +86,27 @@ public:
 		Matrix<T>::multiply(blame, m_weights, m_inputBlame);
 		return m_inputBlame;
 	}
-	
+
 	virtual Matrix<T> &output() override
 	{
 		return m_outputs;
 	}
-	
+
 	virtual Matrix<T> &inputBlame() override
 	{
 		return m_inputBlame;
 	}
-	
+
 	virtual Vector<Tensor<T> *> parameters() override
 	{
 		return { &m_bias, &m_weights };
 	}
-	
+
 	virtual Vector<Tensor<T> *> blame() override
 	{
 		return { &m_biasBlame, &m_weightsBlame };
 	}
-	
+
 private:
 	Vector<T> m_addBuffer;		///< A vector of 1s to quickly evaluate bias.
 	Vector<T> m_bias;			///< The bias; adding constants to outputs.
