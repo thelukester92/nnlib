@@ -191,6 +191,20 @@ public:
 		return *this;
 	}
 	
+	Matrix &normalizeColumns(T min = 0.0, T max = 1.0)
+	{
+		for(size_t i = 0; i < m_cols; ++i)
+			column(i).normalize(min, max);
+		return *this;
+	}
+	
+	Matrix &normalizeRows(T min = 0.0, T max = 1.0)
+	{
+		for(size_t i = 0; i < m_rows; ++i)
+			row(i).normalize(min, max);
+		return *this;
+	}
+	
 	// MARK: Statistics
 	
 	T sum()
