@@ -1,0 +1,130 @@
+#ifndef CONVOLUTION_H
+#define CONVOLUTION_H
+
+#include "module.h"
+#include "random.h"
+
+namespace nnlib
+{
+
+template <typename T = double>
+class Convolution : public Module<T>
+{
+public:
+	struct Shape
+	{
+		Shape(size_t width, size_t height, size_t channels) : width(width), height(height), channels(channels) {}
+		size_t size()
+		{
+			return width * height * channels;
+		}
+		size_t width, height, channels;
+	};
+	
+	Convolution(size_t inRows, size_t inCols, size_t inChannels, size_t kernelRows, size_t kernelCols, size_t kernelCount, size_t padding = 0, size_t stride = 1, size_t batch = 1) :
+	m_inputShape(inCols, inRows, inChannels),
+	m_kernelShape(kernelCols, kernelRows, inChannels),
+	m_outputShape((inCols - kernelCols + 2 * padding) / stride + 1, (inRows - kernelRows + 2 * padding) / stride + 1, kernelCount),
+	m_kernels(kernelCount, m_kernelShape.size()),
+	m_kernelsBlame(kernelCount, m_kernelShape.size()),
+	m_inputBlame(batch, m_inputShape.size()),
+	m_outputs(batch, m_outputShape.size())
+	{
+		resetWeights();
+	}
+	
+	const Shape &inputShape()
+	{
+		return m_inputShape;
+	}
+	
+	const Shape &kernelShape()
+	{
+		return m_kernelShape;
+	}
+	
+	const Shape &outputShape()
+	{
+		return m_outputShape;
+	}
+	
+	Matrix<T> &kernels()
+	{
+		return m_kernels;
+	}
+	
+	void resetWeights()
+	{
+		for(auto &val : m_kernels)
+			val = Random<T>::normal(0, 1, 1);
+	}
+	
+	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	{
+		NNHardAssert(inps == inputShape.size() && outs == outputShape.size(), "Cannot resize a convolutional module this way!");
+		batch(bats);
+		
+		/// \todo allow resizing with special functions
+	}
+	
+	virtual void batch(size_t size) override
+	{
+		m_inputBlame.resize(size, m_inputBlame.cols());
+		m_outputs.resize(size, m_outputs.cols());
+	}
+	
+	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
+	{
+		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
+		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
+		
+		/// \todo convolution
+		
+		return m_outputs;
+	}
+	
+	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
+	{
+		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
+		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
+		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
+		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
+		
+		/// \todo deconvolution
+		
+		return m_inputBlame;
+	}
+	
+	virtual Matrix<T> &output() override
+	{
+		return m_outputs;
+	}
+	
+	virtual Matrix<T> &inputBlame() override
+	{
+		return m_inputBlame;
+	}
+	
+	virtual Vector<Tensor<T> *> parameters() override
+	{
+		return { &m_kernels };
+	}
+	
+	virtual Vector<Tensor<T> *> blame() override
+	{
+		return { &m_kernelsBlame };
+	}
+
+private:
+	Shape m_inputShape;			///< The width, height, and number of channels in the input.
+	Shape m_kernelShape;		///< The width, height, and number of channels in the kernels.
+	Shape m_outputShape;		///< The width, height, and number of channels in the output.
+	Matrix<T> m_kernels;		///< The parameters, imagined as convolutional kernels.
+	Matrix<T> m_kernelsBlame;	///< Gradient of the error w.r.t. the parameters.
+	Matrix<T> m_inputBlame;		///< Gradient of the error w.r.t. the inputs.
+	Matrix<T> m_outputs;		///< The output of this layer.
+};
+
+}
+
+#endif // CONVOLUTION_H

@@ -23,6 +23,7 @@
 #include "nnlib/sin.h"
 #include "nnlib/gaussian.h"
 #include "nnlib/identity.h"
+#include "nnlib/convolution.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"
