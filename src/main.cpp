@@ -235,8 +235,8 @@ int main()
 	{
 		cout << "========== Convolution Test ==========" << endl;
 		
-		Matrix<double> train(1, 5*5*3);
-		train(0) = {
+		Matrix<double> features(1, 5*5*3);
+		features(0) = {
 			// red
 			0, 1, 1, 0, 0,
 			1, 0, 1, 0, 2,
@@ -259,8 +259,8 @@ int main()
 			1, 1, 1, 0, 0
 		};
 		
-		Matrix<double> test(1, 3*3*2);
-		test(0) = {
+		Matrix<double> labels(1, 3*3*2);
+		labels(0) = {
 			0, 3, 3,
 			0, 3, 16,
 			1, 0, 5,
@@ -310,6 +310,9 @@ int main()
 			// bias
 			0
 		};
+		
+		cout << "features.sum() = " << features.sum() << endl;
+		cout << "diff is " << SSE<double>(1).forward(conv.forward(features), labels).sum() << endl;
 	}
 	
 	// MNIST
