@@ -236,7 +236,7 @@ int main()
 		cout << "========== Convolution Test ==========" << endl;
 		
 		Matrix<double> features(1, 5*5*3);
-		features(0) = {
+		features(0).copy({
 			// red
 			0, 1, 1, 0, 0,
 			1, 0, 1, 0, 2,
@@ -257,10 +257,10 @@ int main()
 			0, 1, 1, 2, 2,
 			2, 0, 1, 1, 2,
 			1, 1, 1, 0, 0
-		};
+		});
 		
 		Matrix<double> labels(1, 3*3*2);
-		labels(0) = {
+		labels(0).copy({
 			0, 3, 3,
 			0, 3, 16,
 			1, 0, 5,
@@ -268,10 +268,10 @@ int main()
 			1, -2, 4,
 			-1, 0, 3,
 			7, 4, -7
-		};
+		});
 		
 		Convolution<double> conv(5, 5, 3, 3, 3, 2, 1, 1, 1);
-		conv.kernels()(0) = {
+		conv.kernels()(0).copy({
 			// red
 			-1, 1, 1,
 			1, 0, -1,
@@ -289,9 +289,9 @@ int main()
 			
 			// bias
 			1
-		};
+		});
 		
-		conv.kernels()(1) = {
+		conv.kernels()(1).copy({
 			// red
 			-1, -1, 1,
 			0, 1, 1,
@@ -309,7 +309,7 @@ int main()
 			
 			// bias
 			0
-		};
+		});
 		
 		cout << "features.sum() = " << features.sum() << endl;
 		cout << "diff is " << SSE<double>(1).forward(conv.forward(features), labels).sum() << endl;
