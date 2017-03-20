@@ -104,6 +104,13 @@ public:
 	
 	// MARK: Non-static Algebra
 	
+	/// Deep copy the contents of another vector.
+	Vector &copy(const Vector &A)
+	{
+		Vector::copy(A, *this);
+		return *this;
+	}
+	
 	/// Add another vector, scaled.
 	Vector &addScaled(const Vector &A, T scalar)
 	{
