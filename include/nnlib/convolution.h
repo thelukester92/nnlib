@@ -63,7 +63,7 @@ public:
 	
 	virtual void resize(size_t inps, size_t outs, size_t bats) override
 	{
-		NNHardAssert(inps == inputShape.size() && outs == outputShape.size(), "Cannot resize a convolutional module this way!");
+		NNHardAssert(inps == m_inputShape.size() && outs == m_outputShape.size(), "Cannot resize a convolutional module this way!");
 		batch(bats);
 		
 		/// \todo allow resizing with special functions
@@ -100,7 +100,7 @@ public:
 								for(size_t col = 0; col < m_kernelShape.width; ++col)
 								{
 									if(inRow >= 0 && inRow < m_inputShape.height && inCol >= 0 && inCol < m_inputShape.width)
-										sum += m_kernels(ker, (channels * m_kernelShape.height + row) * m_kernelShape.width + col) * inputs(inp, (channel * m_inputShape.height + inRow) * m_inputShape.width + inCol);
+										sum += m_kernels(ker, (channel * m_kernelShape.height + row) * m_kernelShape.width + col) * inputs(inp, (channel * m_inputShape.height + inRow) * m_inputShape.width + inCol);
 									++inCol;
 								}
 								++inRow;

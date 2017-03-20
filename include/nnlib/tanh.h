@@ -24,6 +24,7 @@ public:
 	{
 		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
 		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
+		
 		auto i = inputs.begin();
 		auto j = m_outputs.begin(), end = m_outputs.end();
 		for(; j != end; ++i, ++j)
