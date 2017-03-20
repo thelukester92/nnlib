@@ -27,7 +27,7 @@ public:
 	m_outputShape((inCols - kernelCols + 2 * padding) / stride + 1, (inRows - kernelRows + 2 * padding) / stride + 1, kernelCount),
 	m_padding(padding),
 	m_stride(stride),
-	m_kernels(kernelCount, m_kernelShape.size()),
+	m_kernels(kernelCount, m_kernelShape.size() + 1),
 	m_kernelsBlame(kernelCount, m_kernelShape.size()),
 	m_inputBlame(batch, m_inputShape.size()),
 	m_outputs(batch, m_outputShape.size())
@@ -87,16 +87,16 @@ public:
 			{
 				for(size_t outRow = 0; outRow < m_outputShape.height; ++outRow)
 				{
-					int inRow = int(outRow * m_stride) - int(m_padding);
 					for(size_t outCol = 0; outCol < m_outputShape.width; ++outCol)
 					{
-						int inCol = int(outCol * m_stride) - int(m_padding);
 						T &sum = m_outputs(inp, (ker * m_outputShape.height + outRow) * m_outputShape.width + outCol);
-						sum = 0.0;
+						sum = m_kernels(ker, m_kernelShape.size());
 						for(size_t channel = 0; channel < m_kernelShape.channels; ++channel)
 						{
+							int inRow = int(outRow * m_stride) - int(m_padding);
 							for(size_t row = 0; row < m_kernelShape.height; ++row)
 							{
+								int inCol = int(outCol * m_stride) - int(m_padding);
 								for(size_t col = 0; col < m_kernelShape.width; ++col)
 								{
 									if(inRow >= 0 && inRow < m_inputShape.height && inCol >= 0 && inCol < m_inputShape.width)

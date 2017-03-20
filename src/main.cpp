@@ -270,7 +270,7 @@ int main()
 			7, 4, -7
 		});
 		
-		Convolution<double> conv(5, 5, 3, 3, 3, 2, 1, 1, 1);
+		Convolution<double> conv(5, 5, 3, 3, 3, 2, 1, 2, 1);
 		conv.kernels()(0).copy({
 			// red
 			-1, 1, 1,
@@ -311,8 +311,22 @@ int main()
 			0
 		});
 		
-		cout << "features.sum() = " << features.sum() << endl;
+		cout << "labels.sum() = " << labels.sum() << endl;
+		cout << "output.sum() = " << conv.forward(features).sum() << endl;
 		cout << "diff is " << SSE<double>(1).forward(conv.forward(features), labels).sum() << endl;
+		
+		for(size_t k = 0; k < 2; ++k)
+		{
+			for(size_t i = 0; i < 3; ++i)
+			{
+				for(size_t j = 0; j < 3; ++j)
+				{
+					cout << conv.output()(0, 9*k+3*i+j) << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+		}
 	}
 	
 	// MNIST
