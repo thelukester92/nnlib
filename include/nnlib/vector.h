@@ -57,6 +57,22 @@ public:
 		Algebra<T>::instance().scal(A.m_size, scalar, A.m_ptr, A.m_stride);
 	}
 	
+	// MARK: Factory methods
+	
+	/// Create a vector from several tensors as a deep copy (not flattening).
+	static Vector concatenate(Vector<Tensor<T> *> tensors)
+	{
+		size_t size = 0;
+		for(Tensor<T> *t : tensors)
+			size += t->size();
+		
+		Vector v(size);
+		auto i = v.begin();
+		for(Tensor<T> *t : tensors)
+			for(T &v : *t)
+				*i++ = v;
+	}
+	
 	// MARK: Constructors
 	
 	/// Create a vector of size n.
