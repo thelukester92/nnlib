@@ -21,7 +21,7 @@ public:
 		m_step = 0;
 	}
 	
-	void stepForward(const Vector<T> &x)
+	void stepForward()
 	{
 		++m_step;
 		
@@ -50,12 +50,17 @@ public:
 	{
 		size_t hids = x.size();
 		
+		Vector<T> xyh(3 * hids);
+		xyh.concatenate({ &x, &m_outputs[m_step - 1], &m_hiddens[m_step] });
+		
+		Vector<T> xy = xyh.narrow(2 * hids);
+		
 		Vector<T> oBlame(hids);
 		oBlame.copy(blame).pointwiseProduct(m_outputActivations[m_step]);
 		
 		Vector<T> hBlame(hids);
 		hBlame.copy(blame).pointwiseProduct(m_outputGateActivations[m_step]);
-		hBlame.pointwiseProduct(m_outputGate.backward());
+		hBlame.pointwiseProduct();
 		
 		
 		
