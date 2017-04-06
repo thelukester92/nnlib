@@ -17,6 +17,8 @@ public:
 	void setup()
 	{
 		/// \todo implement Split, a module which takes an offset and a size and filters out all other inputs
+		/// \todo save a pointer to the Sequential that produces h(t) for accessing h(t) later
+		/// \todo determine how this is supposed to work when doing BPTT...?
 		
 		// input = x(t) . y(t - 1) . h(t - 1)
 		// output = y(t)
@@ -62,6 +64,7 @@ public:
 					new TanH<T>()
 				)
 			),
+			// y(t)
 			new ProductPool<T>()
 		);
 	}
