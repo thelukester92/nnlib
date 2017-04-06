@@ -187,6 +187,7 @@ public:
 	}
 	
 	/// Concatenate (deep copy) several tensors into this vector.
+	/// \todo variadic template args
 	Vector &concatenate(Vector<Tensor<T> *> tensors)
 	{
 		size_t size = 0;

@@ -27,7 +27,9 @@ public:
 		
 		size_t hids = x.size();
 		
-		Vector<T> xyh = Vector<T>::concatenate(x, m_outputs[m_step - 1], m_hiddens[m_step - 1]);
+		Vector<T> xyh(3 * hids);
+		xyh.concatenate({ &x, &m_outputs[m_step - 1], &m_hiddens[m_step - 1] });
+		
 		Vector<T> xy = xyh.narrow(2 * hids);
 		
 		m_inputActivation.forward(xy);
@@ -44,9 +46,20 @@ public:
 		m_outputs[m_step].copy(m_outputGate.output()).pointwiseProduct(m_outputActivation.output());
 	}
 	
-	void stepBackward()
+	void stepBackward(const Vector<T> &x, const Vector<T> &blame)
 	{
-		/// \todo fill me in
+		size_t hids = x.size();
+		
+		Vector<T> oBlame(hids);
+		oBlame.copy(blame).pointwiseProduct(m_outputActivations[m_step]);
+		
+		Vector<T> hBlame(hids);
+		hBlame.copy(blame).pointwiseProduct(m_outputGateActivations[m_step]);
+		hBlame.pointwiseProduct(m_outputGate.backward());
+		
+		
+		
+		--m_step;
 	}
 	
 	
