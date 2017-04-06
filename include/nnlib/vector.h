@@ -57,6 +57,34 @@ public:
 		Algebra<T>::instance().scal(A.m_size, scalar, A.m_ptr, A.m_stride);
 	}
 	
+	/// Element-wise / Pointwise / Hadamard product.
+	static Vector pointwiseProduct(const Vector &u, const Vector &v)
+	{
+		NNAssert(u.size() == v.size(), "Incompatible vectors for pointwise product!");
+		Vector p(u.size());
+		
+		auto i = u.begin(), j = v.begin();
+		for(T &val : p)
+		{
+			val = *i++ * *j++;
+		}
+		
+		return p;
+	}
+	
+	/// Dot product of two vectors.
+	static T dotProduct(const Vector &u, const Vector &v)
+	{
+		NNAssert(u.size() == v.size(), "Incompatible vectors for dot product!");
+		T sum = 0;
+		auto i = u.begin(), j = v.begin(), k = v.end();
+		while(j != k)
+		{
+			sum += *i++ * *j++;
+		}
+		return sum;
+	}
+	
 	// MARK: Factory methods
 	
 	/// Create a vector from several tensors as a deep copy (not flattening).
