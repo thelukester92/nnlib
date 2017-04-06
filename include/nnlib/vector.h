@@ -48,6 +48,7 @@ public:
 	/// Deep copy the contents of another vector.
 	static void copy(const Vector &A, Vector &B)
 	{
+		NNAssert(A.m_size == B.m_size, "Incompatible vectors for copying!");
 		Algebra<T>::instance().copy(A.m_size, A.m_ptr, A.m_stride, B.m_ptr, B.m_stride);
 	}
 	
@@ -58,18 +59,14 @@ public:
 	}
 	
 	/// Element-wise / Pointwise / Hadamard product.
-	static Vector pointwiseProduct(const Vector &u, const Vector &v)
+	static void pointwiseProduct(const Vector &u, const Vector &v, Vector &p)
 	{
-		NNAssert(u.size() == v.size(), "Incompatible vectors for pointwise product!");
-		Vector p(u.size());
-		
+		NNAssert(u.size() == v.size() && v.size() == p.size(), "Incompatible vectors for pointwise product!");
 		auto i = u.begin(), j = v.begin();
 		for(T &val : p)
 		{
 			val = *i++ * *j++;
 		}
-		
-		return p;
 	}
 	
 	/// Dot product of two vectors.
@@ -86,22 +83,6 @@ public:
 	}
 	
 	// MARK: Factory methods
-	
-	/// Create a vector from several tensors as a deep copy (not flattening).
-	static Vector concatenate(Vector<Tensor<T> *> tensors)
-	{
-		size_t size = 0;
-		for(Tensor<T> *t : tensors)
-			size += t->size();
-		
-		Vector v(size);
-		auto i = v.begin();
-		for(Tensor<T> *t : tensors)
-			for(T &v : *t)
-				*i++ = v;
-		
-		return v;
-	}
 	
 	/// Create a vector (flattened) from several tensors.
 	static Vector flatten(Vector<Tensor<T> *> tensors)
@@ -160,7 +141,7 @@ public:
 	}
 	
 	/// Add another vector, scaled.
-	Vector &addScaled(const Vector &A, T scalar)
+	Vector &addScaled(const Vector &A, T scalar = 1.0)
 	{
 		Algebra<T>::instance().axpy(m_size, scalar, A.m_ptr, A.m_stride, m_ptr, m_stride);
 		return *this;
@@ -196,13 +177,35 @@ public:
 	/// Element-wise / Pointwise / Hadamard product, storing the result in this.
 	Vector &pointwiseProduct(const Vector &v)
 	{
-		NNAssert(v.size() == m_size, "Incompatible vector for pointwise product!");
+		NNAssert(v.m_size == m_size, "Incompatible vector for pointwise product!");
 		auto itr = v.begin();
 		for(T &val : *this)
 		{
 			val *= *itr++;
 		}
 		return *this;
+	}
+	
+	/// Concatenate (deep copy) several tensors into this vector.
+	Vector &concatenate(Vector<Tensor<T> *> tensors)
+	{
+		size_t size = 0;
+		for(Tensor<T> *t : tensors)
+			size += t->size();
+		resize(size);
+		
+		auto i = begin();
+		for(Tensor<T> *t : tensors)
+			for(T &v : *t)
+				*i++ = v;
+		
+		return *this;
+	}
+	
+	/// Get a new vector that shares the same storage.
+	Vector narrow(size_t offset, size_t size)
+	{
+		return Vector(*this, offset * m_stride, size, m_stride);
 	}
 	
 	/// Dot product with another vector.
