@@ -203,7 +203,7 @@ public:
 	}
 	
 	/// Get a new vector that shares the same storage.
-	Vector narrow(size_t offset, size_t size)
+	Vector narrow(size_t size, size_t offset = 0)
 	{
 		return Vector(*this, offset * m_stride, size, m_stride);
 	}
