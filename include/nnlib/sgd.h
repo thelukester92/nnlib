@@ -15,8 +15,13 @@ using Optimizer<M, C>::m_critic;
 public:
 	using T = typename Optimizer<M, C>::T;
 	
-	SGD(M &model, C &critic, T lr = 0.01, T m = 0.0)
-	: Optimizer<M, C>(model, critic), m_parameters(model.parameters()), m_blame(model.blame()), m_learningRate(lr), m_momentum(m) {}
+	SGD(M &model, C &critic, T lr = 0.01, T m = 0.0) :
+		Optimizer<M, C>(model, critic),
+		m_parameters(Vector<T>::flatten(model.parameters())),
+		m_blame(Vector<T>::flatten(model.blame())),
+		m_learningRate(lr),
+		m_momentum(m)
+	{}
 	
 	double learningRate() const
 	{

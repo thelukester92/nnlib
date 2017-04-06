@@ -15,11 +15,12 @@ using Optimizer<M, C>::m_critic;
 public:
 	using T = typename Optimizer<M, C>::T;
 	
-	RMSProp(M &model, C &critic, T lr = 0.01, T g = 0.9)
-	: Optimizer<M, C>(model, critic),
-	  m_parameters(model.parameters()), m_blame(model.blame()),
-	  m_meanSquare(m_parameters.size(), 1.0),
-	  m_learningRate(lr), m_gamma(g)
+	RMSProp(M &model, C &critic, T lr = 0.01, T g = 0.9) :
+		Optimizer<M, C>(model, critic),
+		m_parameters(Vector<T>::flatten(model.parameters())),
+		m_blame(Vector<T>::flatten(model.blame())),
+		m_meanSquare(m_parameters.size(), 1.0),
+		m_learningRate(lr), m_gamma(g)
 	{}
 	
 	double learningRate() const

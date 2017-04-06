@@ -71,6 +71,29 @@ public:
 		for(Tensor<T> *t : tensors)
 			for(T &v : *t)
 				*i++ = v;
+		
+		return v;
+	}
+	
+	/// Create a vector (flattened) from several tensors.
+	static Vector flatten(Vector<Tensor<T> *> tensors)
+	{
+		size_t size = 0;
+		for(Tensor<T> *t : tensors)
+			size += t->size();
+		Vector v(size);
+		
+		T *ptr = v.m_ptr;
+		for(Tensor<T> *t : tensors)
+		{
+			T *tPtr = t->ptr();
+			for(size_t i = 0; i < t->size(); ++i)
+				ptr[i] = tPtr[i];
+			t->set(ptr, t->size(), v.m_shared);
+			ptr += t->size();
+		}
+		
+		return v;
 	}
 	
 	// MARK: Constructors
@@ -97,25 +120,6 @@ public:
 		size_t i = 0;
 		for(const T &val : l)
 			m_ptr[i++] = val;
-	}
-	
-	/// Create a vector (flattened) from several tensors.
-	Vector(Vector<Tensor<T> *> tensors) : Tensor<T>(0), m_stride(1)
-	{
-		size_t size = 0;
-		for(Tensor<T> *t : tensors)
-			size += t->size();
-		resize(size);
-		
-		T *ptr = m_ptr;
-		for(Tensor<T> *t : tensors)
-		{
-			T *tPtr = t->ptr();
-			for(size_t i = 0; i < t->size(); ++i)
-				ptr[i] = tPtr[i];
-			t->set(ptr, t->size(), m_shared);
-			ptr += t->size();
-		}
 	}
 	
 	// MARK: Non-static Algebra

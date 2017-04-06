@@ -18,7 +18,7 @@ int main()
 	Vector<double> &bias = *(Vector<double> *)layer1.parameters()[0];
 	Matrix<double> &weights = *(Matrix<double> *)layer1.parameters()[1];
 	
-	Vector<double> parameters(layer1.parameters());
+	Vector<double> parameters = Vector<double>::flatten(layer1.parameters());
 	for(double &val : parameters)
 		val = Random<double>::normal(0, 1, 1);
 	

@@ -140,7 +140,7 @@ public:
 		if(relPtr != nullptr)
 			*relPtr = rel;
 		
-		Matrix<T> flattened(Vector<T>(rows), rows.size(), rel.attrNames.size());
+		Matrix<T> flattened(Vector<T>::flatten(rows), rows.size(), rel.attrNames.size());
 		for(auto *i : rows)
 			delete i;
 		
