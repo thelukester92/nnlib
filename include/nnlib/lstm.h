@@ -14,6 +14,58 @@ template <typename T = double>
 class LSTM : public Module<T>
 {
 public:
+	void setup()
+	{
+		/// \todo implement Split, a module which takes an offset and a size and filters out all other inputs
+		
+		// input = x(t) . y(t - 1) . h(t - 1)
+		// output = y(t)
+		m_giantNetwork = new Sequential<T>(
+			new Concat<T>(
+				// x(t) . y(t - 1) . h(t - 1)
+				new Identity<T>(),
+				
+				// forgetGate(_) . inputGate(_)
+				new Sequential<T>(
+					new Linear<T>(inputSize + outputSize + hiddenSize, 2 * hiddenSize),
+					new Logistic<T>()
+				),
+				
+				// inputActivation(x(t) . y(t - 1))
+				new Sequential<T>(
+					new Split<T>(0, inputSize + outputSize),
+					new Linear<T>(inputSize + outputSize, hiddenSize),
+					new TanH<T>()
+				)
+			),
+			new Concat<T>(
+				// x(t) . y(t - 1)
+				new Split<T>(0, inputSize + outputSize),
+				
+				// h(t)
+				new Sequential<T>(
+					new Split<T>(inputSize + outputSize, 4 * hiddenSize),
+					new ProductPool<T>(),
+					new SumPool<T>()
+				)
+			),
+			new Concat<T>(
+				// outputGate(_)
+				new Sequential<T>(
+					new Linear<T>(inputSize + outputSize + hiddenSize, hiddenSize),
+					new Logistic<T>()
+				),
+				
+				// tanh(h(t))
+				new Sequential<T>(
+					new Split<T>(inputSize + outputSize, hiddenSize),
+					new TanH<T>()
+				)
+			),
+			new ProductPool<T>()
+		);
+	}
+	
 	void reset()
 	{
 		m_hiddens[0].fill(0.0);
@@ -21,50 +73,74 @@ public:
 		m_step = 0;
 	}
 	
-	void stepForward()
+	void stepForward(const Vector<T> &x, const Vector<T> &yPrev, const Vector<T> &hPrev, Vector<T> &y, Vector<T> &h)
 	{
-		++m_step;
-		
 		size_t hids = x.size();
 		
-		Vector<T> xyh(3 * hids);
-		xyh.concatenate({ &x, &m_outputs[m_step - 1], &m_hiddens[m_step - 1] });
-		
+		Vector<T> xyh = Vector<T>::concatenate(x, yPrev, hPrev);
 		Vector<T> xy = xyh.narrow(2 * hids);
 		
-		m_inputActivation.forward(xy);
-		m_inputGate.forward(xyh);
-		m_forgetGate.forward(xyh);
+		h.copy(
+			m_adder.forward(
+				m_multiplier.forward(
+					m_inputGate.forward(xyh),
+					m_inputActivation.forward(xy)
+				),
+				m_multiplier.forward(
+					m_forgetGate.forward(xyh),
+					hPrev
+				)
+			);
+		);
 		
-		tmp.copy(m_inputGate.output()).pointwiseProduct(m_inputActivation.output());
-		m_hiddens[m_step].copy(m_forgetGate.output()).pointwiseProduct(m_hiddens[m_step - 1]).addScaled(tmp);
+		xyh.narrow(hids, 2 * hids).copy(h);
 		
-		xyh.narrow(hids, 2 * hids).copy(m_hiddens[m_step]);
-		m_outputGate.forward(xyh);
-		
-		m_outputActivation.forward(m_hiddens[m_step]);
-		m_outputs[m_step].copy(m_outputGate.output()).pointwiseProduct(m_outputActivation.output());
+		y.copy(
+			m_multiplier.forward(
+				m_outputGate.forward(xyh),
+				m_outputActivation.forward(h)
+			)
+		);
 	}
 	
-	void stepBackward(const Vector<T> &x, const Vector<T> &blame)
+	void stepBackward()
 	{
 		size_t hids = x.size();
 		
-		Vector<T> xyh(3 * hids);
-		xyh.concatenate({ &x, &m_outputs[m_step - 1], &m_hiddens[m_step] });
-		
+		Vector<T> xyh = Vector<T>::concatenate(x, yPrev, hPrev);
 		Vector<T> xy = xyh.narrow(2 * hids);
 		
-		Vector<T> oBlame(hids);
-		oBlame.copy(blame).pointwiseProduct(m_outputActivations[m_step]);
+		// we want:
+		// - update blame in the gates
+		// - update hidden state blame
+		// - update input blame
 		
-		Vector<T> hBlame(hids);
-		hBlame.copy(blame).pointwiseProduct(m_outputGateActivations[m_step]);
-		hBlame.pointwiseProduct();
+		oBlame = m_multiplier.forward(
+			blame,
+			m_outputActivation.forward(h)
+		);
 		
+		h.copy(
+			m_adder.forward(
+				m_multiplier.forward(
+					m_inputGate.forward(xyh),
+					m_inputActivation.forward(xy)
+				),
+				m_multiplier.forward(
+					m_forgetGate.forward(xyh),
+					hPrev
+				)
+			);
+		);
 		
+		xyh.narrow(hids, 2 * hids).copy(h);
 		
-		--m_step;
+		y.copy(
+			m_multiplier.forward(
+				m_outputGate.forward(xyh),
+				m_outputActivation.forward(h)
+			)
+		);
 	}
 	
 	

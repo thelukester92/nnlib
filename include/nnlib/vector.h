@@ -84,6 +84,23 @@ public:
 	
 	// MARK: Factory methods
 	
+	/// Concatenate (deep copy) several tensors into this vector.
+	/// \todo variadic template args
+	static Vector concatenate(Vector<Tensor<T> *> tensors)
+	{
+		size_t size = 0;
+		for(Tensor<T> *t : tensors)
+			size += t->size();
+		Vector v(size);
+		
+		auto i = v.begin();
+		for(Tensor<T> *t : tensors)
+			for(T &v : *t)
+				*i++ = v;
+		
+		return v;
+	}
+	
 	/// Create a vector (flattened) from several tensors.
 	static Vector flatten(Vector<Tensor<T> *> tensors)
 	{
