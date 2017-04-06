@@ -165,6 +165,31 @@ public:
 		return *this;
 	}
 	
+	/// Element-wise / Pointwise / Hadamard product, storing the result in this.
+	Vector &pointwiseProduct(const Vector &v)
+	{
+		NNAssert(v.size() == m_size, "Incompatible vector for pointwise product!");
+		auto itr = v.begin();
+		for(T &val : *this)
+		{
+			val *= *itr++;
+		}
+		return *this;
+	}
+	
+	/// Dot product with another vector.
+	TT dotProduct(const Vector &v) const
+	{
+		NNAssert(v.size() == m_size, "Incompatible vector for dot product!");
+		TT sum = 0;
+		auto itr = v.begin();
+		for(TT val : *this)
+		{
+			sum += val * *itr++;
+		}
+		return sum;
+	}
+	
 	// MARK: Statistics
 	
 	/// Add all the elements of this vector and return the sum.
