@@ -21,15 +21,15 @@ public:
 	
 	virtual void add(Module<T> *component) override
 	{
-		NNHardAssert(m_components.size() == 0 || component->inputCount() == m_components[0]->inputCount(), "Incompatible concat component!");
+		NNHardAssert(m_components.size() == 0 || component->inputs() == m_components[0]->inputs(), "Incompatible concat component!");
 		Container<T>::add(component);
 		
 		// Flatten all output matrices into a single output matrix
-		m_outputs.resize(component->batchSize(), m_outputs.cols() + component->outputCount());
+		m_outputs.resize(component->batchSize(), m_outputs.cols() + component->outputs());
 		flattenOutputs();
 		
 		// Same-size input blame
-		m_inputBlame.resize(component->batchSize(), component->inputCount());
+		m_inputBlame.resize(component->batchSize(), component->inputs());
 	}
 	
 	template <typename ... Ts>
@@ -43,40 +43,36 @@ public:
 	{
 		size_t count = 0;
 		for(auto *c : m_components)
-			count += c->outputCount();
+			count += c->outputs();
 		m_outputs.resize(m_outputs.rows(), count);
 		
 		size_t offset = 0;
 		for(auto *c : m_components)
 		{
-			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputCount());
-			offset += c->outputCount();
+			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputs());
+			offset += c->outputs();
 		}
 	}
 	
-	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	virtual void resize(size_t inps, size_t outs) override
 	{
 		NNHardAssert(m_components.size() > 0, "Cannot resize an empty concat module!");
 		NNHardAssert(outs == m_outputs.cols(), "Cannot directly change output size of a concat module!");
 		for(auto *c : m_components)
-		{
 			c->resize(inps);
-			c->batch(bats);
-		}
 		flattenOutputs();
-		m_inputBlame.resize(m_components[0]->inputBlame().rows(), m_components[0]->inputBlame().cols());
+		m_inputBlame.resize(m_components[0]->batchSize(), m_components[0]->inputs());
 	}
 	
-	virtual void batch(size_t size) override
+	virtual void batch(size_t bats) override
 	{
-		m_outputs.resize(size, m_outputs.cols());
-		m_inputBlame.resize(size, m_inputBlame.cols());
+		Module<T>::batch(bats);
 		size_t offset = 0;
 		for(auto *c : m_components)
 		{
-			c->batch(size);
-			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputCount());
-			offset += c->outputCount();
+			c->batch(bats);
+			m_outputs.block(c->output(), 0, offset, (size_t) -1, c->outputs());
+			offset += c->outputs();
 		}
 	}
 	
@@ -96,9 +92,9 @@ public:
 		size_t offset = 0;
 		for(auto *c : m_components)
 		{
-			Matrix<T> blam = ncBlame.block(0, offset, (size_t) -1, c->outputCount());
+			Matrix<T> blam = ncBlame.block(0, offset, (size_t) -1, c->outputs());
 			m_inputBlame.add(c->backward(inputs, blam));
-			offset += c->outputCount();
+			offset += c->outputs();
 		}
 		
 		return m_inputBlame;

@@ -47,11 +47,9 @@ public:
 			val = Random<T>::normal(0, 1, 1);
 	}
 
-	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	virtual void resize(size_t inps, size_t outs) override
 	{
-		m_addBuffer.resize(bats).fill(1);
-		m_inputBlame.resize(bats, inps);
-		m_outputs.resize(bats, outs);
+		Module<T>::resize(inps, outs);
 		m_bias.resize(outs);
 		m_weights.resize(outs, inps);
 		m_biasBlame.resize(outs);
@@ -59,11 +57,10 @@ public:
 		resetWeights();
 	}
 
-	virtual void batch(size_t size) override
+	virtual void batch(size_t bats) override
 	{
-		m_addBuffer.resize(size).fill(1);
-		m_inputBlame.resize(size, m_inputBlame.cols());
-		m_outputs.resize(size, m_outputs.cols());
+		Module<T>::batch(bats);
+		m_addBuffer.resize(bats).fill(1);
 	}
 
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override

@@ -15,28 +15,23 @@ public:
 	virtual ~Module() {}
 	
 	/// Change the input, output, and batch size.
-	virtual void resize(size_t inps, size_t outs, size_t bats)
-	{
-		output().resize(bats, outs);
-		inputBlame().resize(bats, inps);
-	}
-	
-	/// Change the input and output size.
 	virtual void resize(size_t inps, size_t outs)
 	{
-		resize(inps, outs, output().rows());
+		output().resize(batchSize(), outs);
+		inputBlame().resize(batchSize(), inps);
 	}
 	
 	/// Change the input size.
 	virtual void resize(size_t inps)
 	{
-		resize(inps, output().cols(), output().rows());
+		resize(inps, outputs());
 	}
 	
 	/// Change the batch size.
-	virtual void batch(size_t size)
+	virtual void batch(size_t bats)
 	{
-		resize(inputBlame().cols(), output().cols(), size);
+		output().resize(bats, outputs());
+		inputBlame().resize(bats, inputs());
 	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) = 0;
@@ -55,12 +50,12 @@ public:
 		return Vector<Tensor<T> *>();
 	}
 	
-	size_t inputCount()
+	size_t inputs()
 	{
 		return inputBlame().cols();
 	}
 	
-	size_t outputCount()
+	size_t outputs()
 	{
 		return output().cols();
 	}

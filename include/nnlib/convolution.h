@@ -61,18 +61,10 @@ public:
 			val = Random<T>::normal(0, 1, 1);
 	}
 	
-	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	virtual void resize(size_t inps, size_t outs) override
 	{
 		NNHardAssert(inps == m_inputShape.size() && outs == m_outputShape.size(), "Cannot resize a convolutional module this way!");
-		batch(bats);
-		
 		/// \todo allow resizing with special functions
-	}
-	
-	virtual void batch(size_t size) override
-	{
-		m_inputBlame.resize(size, m_inputBlame.cols());
-		m_outputs.resize(size, m_outputs.cols());
 	}
 	
 	

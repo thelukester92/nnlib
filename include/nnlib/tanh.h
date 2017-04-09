@@ -17,7 +17,7 @@ public:
 	
 	virtual void resize(size_t inps) override
 	{
-		Module<T>::resize(inps, inps, m_outputs.rows());
+		Module<T>::resize(inps, inps);
 	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override

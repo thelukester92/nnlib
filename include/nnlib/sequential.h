@@ -33,17 +33,16 @@ public:
 		add(more...);
 	}
 	
-	virtual void resize(size_t inps, size_t outs, size_t bats) override
+	virtual void resize(size_t inps, size_t outs) override
 	{
 		m_components[0]->resize(inps);
-		m_components.back()->resize(m_components.back()->inputBlame().cols(), outs);
-		batch(bats);
+		m_components.back()->resize(m_components.back()->inputs(), outs);
 	}
 	
-	virtual void batch(size_t size) override
+	virtual void batch(size_t bats) override
 	{
 		for(Module<T> *layer : m_components)
-			layer->batch(size);
+			layer->batch(bats);
 	}
 	
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
