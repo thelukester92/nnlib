@@ -62,10 +62,10 @@ int main()
 			NNAssert(fabs(inputBlame(i, j) - layer1.inputBlame()(i, j)) < 1e-6, "Linear::backword failed!");
 	cout << "Linear::backward passed!" << endl;
 	
-	TanH<double> layer2(outs, batch);
+	Activation<TanH<>, double> layer2(outs, batch);
 	Sequential<double> nn;
 	nn.add(new Linear<double>(layer1));
-	nn.add(new TanH<double>(layer2));
+	nn.add(new Activation<TanH<>, double>(layer2));
 	
 	SSE<double> critic(outs, batch);
 	SGD<Module<double>, SSE<double>> optimizer(nn, critic);
@@ -363,9 +363,9 @@ int main()
 		
 		Sequential<> nn;
 		nn.add(
-			new Linear<>(trainFeat.cols(), 300), new TanH<>(),
-			new Linear<>(100), new TanH<>(),
-			new Linear<>(10), new TanH<>()
+			new Linear<>(trainFeat.cols(), 300), new Activation<TanH<>>(),
+			new Linear<>(100), new Activation<TanH<>>(),
+			new Linear<>(10), new Activation<TanH<>>()
 		);
 		
 		SSE<double> critic(10);

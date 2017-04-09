@@ -19,6 +19,7 @@
 #include "nnlib/sequential.h"
 #include "nnlib/concat.h"
 #include "nnlib/linear.h"
+#include "nnlib/activation.h"
 #include "nnlib/tanh.h"
 #include "nnlib/sin.h"
 #include "nnlib/gaussian.h"
