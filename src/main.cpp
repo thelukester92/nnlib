@@ -36,8 +36,6 @@ void testSelect()
 
 int main()
 {
-	testSelect();
-	
 	cout << "========== Sanity Test ==========" << endl;
 	
 	size_t inps = 3;
@@ -116,6 +114,8 @@ int main()
 	cout << "SGD::optimize passed!" << endl;
 	
 	cout << "Sanity test passed!" << endl << endl;
+	
+	testSelect();
 	
 	using clock = chrono::high_resolution_clock;
 	chrono::time_point<clock> start;
