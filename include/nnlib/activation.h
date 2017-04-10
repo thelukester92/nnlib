@@ -8,7 +8,6 @@ namespace nnlib
 
 /// A module that applies an activation function to each input.
 /// F must have a forward and a backward function.
-/// \todo make F be templated and auto template it to T
 template <template <typename> class F, typename T = double>
 class Activation : public Module<T>
 {
