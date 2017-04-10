@@ -9,19 +9,21 @@ void testSelect()
 {
 	cout << "========== Select Test ==========" << endl;
 	
+	Select<> select(2, 4, 2);
+	Vector<> inp = { 1.0, 3.0, 5.0, 7.0 };
+	select.forward(inp);
+	NNHardAssert(Vector<>(inp, 2, 2).squaredDistance(select.output()(0)) < 1e-5, "Select failed!");
+	
 	Sequential<> nn(
 		new Concat<>(
 			new Select<>(0, 2),
 			new Select<>(2, 3)
 		)
 	);
-	
 	nn.resize(5, 5);
-	
 	Vector<> v = { 1.1, 2.2, 3.3, 4.4, 5.5 };
 	nn.forward(v);
-	
-	NNHardAssert(v.squaredDistance(nn.output()(0)) < 1e-5, "Select failed!");
+	NNHardAssert(v.squaredDistance(nn.output()(0)) < 1e-5, "Select and Concat failed!");
 	
 	cout << "Select test passed!" << endl;
 	cout << endl;
