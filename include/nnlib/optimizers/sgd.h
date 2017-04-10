@@ -1,8 +1,8 @@
 #ifndef SGD_H
 #define SGD_H
 
-#include "optimizer.h"
-#include "vector.h"
+#include "../optimizer.h"
+#include "../util/vector.h"
 
 namespace nnlib
 {

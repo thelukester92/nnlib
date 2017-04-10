@@ -1,7 +1,7 @@
 #ifndef CONTAINER_H
 #define CONTAINER_H
 
-#include "module.h"
+#include "../module.h"
 
 namespace nnlib
 {

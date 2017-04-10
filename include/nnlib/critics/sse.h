@@ -1,7 +1,7 @@
 #ifndef SSE_H
 #define SSE_H
 
-#include "critic.h"
+#include "../critic.h"
 
 namespace nnlib
 {

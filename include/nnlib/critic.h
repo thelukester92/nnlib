@@ -1,7 +1,7 @@
 #ifndef CRITIC_H
 #define CRITIC_H
 
-#include "matrix.h"
+#include "util/matrix.h"
 
 namespace nnlib
 {

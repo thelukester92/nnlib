@@ -1,8 +1,6 @@
 #ifndef LOGISTIC_H
 #define LOGISTIC_H
 
-#include "module.h"
-
 namespace nnlib
 {
 

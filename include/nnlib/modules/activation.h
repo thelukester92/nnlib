@@ -1,7 +1,7 @@
 #ifndef ACTIVATION_H
 #define ACTIVATION_H
 
-#include "module.h"
+#include "../module.h"
 
 namespace nnlib
 {

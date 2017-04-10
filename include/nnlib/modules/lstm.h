@@ -1,7 +1,7 @@
 #ifndef LSTM_H
 #define LSTM_H
 
-#include "module.h"
+#include "../module.h"
 #include "linear.h"
 #include "tanh.h"
 #include "logistic.h"

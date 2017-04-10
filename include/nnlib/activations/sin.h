@@ -1,8 +1,6 @@
 #ifndef SIN_H
 #define SIN_H
 
-#include "module.h"
-
 namespace nnlib
 {
 

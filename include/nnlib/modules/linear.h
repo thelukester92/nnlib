@@ -1,8 +1,8 @@
 #ifndef LINEAR_H
 #define LINEAR_H
 
-#include "module.h"
-#include "random.h"
+#include "../module.h"
+#include "../util/random.h"
 
 namespace nnlib
 {

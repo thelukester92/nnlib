@@ -1,7 +1,7 @@
 #ifndef IDENTITY_H
 #define IDENTITY_H
 
-#include "module.h"
+#include "../module.h"
 
 namespace nnlib
 {
