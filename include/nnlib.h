@@ -19,12 +19,14 @@
 #include "nnlib/sequential.h"
 #include "nnlib/concat.h"
 #include "nnlib/linear.h"
-#include "nnlib/activation.h"
-#include "nnlib/tanh.h"
-#include "nnlib/sin.h"
-#include "nnlib/gaussian.h"
-#include "nnlib/identity.h"
 #include "nnlib/convolution.h"
+#include "nnlib/identity.h"
+#include "nnlib/activation.h"
+
+// Activation functions
+#include "nnlib/tanh.h"
+#include "nnlib/logistic.h"
+#include "nnlib/sin.h"
 
 // Neural Network Utilities
 #include "nnlib/critic.h"

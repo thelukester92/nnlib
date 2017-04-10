@@ -6,58 +6,20 @@
 namespace nnlib
 {
 
-/// An activation function layer that applies the logistic function to each input.
+/// Logistic activation function.
 template <typename T = double>
-class Logistic : public Module<T>
+class Logistic
 {
 public:
-	Logistic(size_t size = 0, size_t batch = 1)
-	: m_inputBlame(batch, size), m_outputs(batch, size)
-	{}
-	
-	virtual void resize(size_t inps) override
+	static T forward(const T &x)
 	{
-		Module<T>::resize(inps, inps, m_outputs.rows());
+		return 1.0 / (1.0 + exp(-x));
 	}
 	
-	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
+	static T backward(const T &x, const T &y)
 	{
-		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
-		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
-		
-		auto i = inputs.begin();
-		auto j = m_outputs.begin(), end = m_outputs.end();
-		for(; j != end; ++i, ++j)
-			*j = 1.0 / (1.0 + exp(-*i));
-		return m_outputs;
+		return y * (1.0 - y);
 	}
-	
-	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
-	{
-		NNAssert(inputs.rows() == m_inputBlame.rows(), "Incorrect batch size!");
-		NNAssert(inputs.cols() == m_inputBlame.cols(), "Incorrect input size!");
-		NNAssert(blame.rows() == m_outputs.rows(), "Incorrect batch size!");
-		NNAssert(blame.cols() == m_outputs.cols(), "Incorrect blame size!");
-		auto k = blame.begin();
-		auto i = m_outputs.begin(), j = m_inputBlame.begin(), end = m_inputBlame.end();
-		for(; j != end; ++i, ++j, ++k)
-			*j = *k * *i * (1.0 - *i);
-		return m_inputBlame;
-	}
-	
-	virtual Matrix<T> &output() override
-	{
-		return m_outputs;
-	}
-	
-	virtual Matrix<T> &inputBlame() override
-	{
-		return m_inputBlame;
-	}
-	
-private:
-	Matrix<T> m_inputBlame;	///< Gradient of the error w.r.t. the inputs.
-	Matrix<T> m_outputs;	///< The output of this layer.
 };
 
 }

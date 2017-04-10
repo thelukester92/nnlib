@@ -9,7 +9,7 @@ namespace nnlib
 /// A module that applies an activation function to each input.
 /// F must have a forward and a backward function.
 /// \todo make F be templated and auto template it to T
-template <typename F, typename T = double>
+template <template <typename> class F, typename T = double>
 class Activation : public Module<T>
 {
 public:
@@ -31,7 +31,7 @@ public:
 		auto i = input.begin();
 		auto j = m_output.begin(), end = m_output.end();
 		for(; j != end; ++i, ++j)
-			*j = F::forward(*i);
+			*j = F<T>::forward(*i);
 		
 		return m_output;
 	}
@@ -48,7 +48,7 @@ public:
 		auto k = blame.begin();
 		auto l = m_inputBlame.begin(), end = m_inputBlame.end();
 		for(; l != end; ++i, ++j, ++k, ++l)
-			*l = *k * F::backward(*i, *j);
+			*l = *k * F<T>::backward(*i, *j);
 		
 		return m_inputBlame;
 	}
