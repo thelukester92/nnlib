@@ -5,8 +5,32 @@
 using namespace std;
 using namespace nnlib;
 
+void testSelect()
+{
+	cout << "========== Select Test ==========" << endl;
+	
+	Sequential<> nn(
+		new Concat<>(
+			new Select<>(0, 2),
+			new Select<>(2, 3)
+		)
+	);
+	
+	nn.resize(5, 5);
+	
+	Vector<> v = { 1.1, 2.2, 3.3, 4.4, 5.5 };
+	nn.forward(v);
+	
+	NNHardAssert(v.squaredDistance(nn.output()(0)) < 1e-5, "Select failed!");
+	
+	cout << "Select test passed!" << endl;
+	cout << endl;
+}
+
 int main()
 {
+	testSelect();
+	
 	cout << "========== Sanity Test ==========" << endl;
 	
 	size_t inps = 3;

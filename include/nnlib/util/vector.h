@@ -235,10 +235,22 @@ public:
 		TT sum = 0;
 		auto itr = v.begin();
 		for(TT val : *this)
-		{
 			sum += val * *itr++;
-		}
 		return sum;
+	}
+	
+	/// Squared distance to another vector.
+	TT squaredDistance(const Vector &v)
+	{
+		NNAssert(v.size() == m_size, "Incompatible vector for distance!");
+		TT distance = 0;
+		auto itr = v.begin();
+		for(TT val : *this)
+		{
+			distance += (val - *itr) * (val - *itr);
+			++itr;
+		}
+		return distance;
 	}
 	
 	// MARK: Statistics

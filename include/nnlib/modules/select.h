@@ -1,5 +1,5 @@
-#ifndef IDENTITY_H
-#define IDENTITY_H
+#ifndef SELECT_H
+#define SELECT_H
 
 #include "../module.h"
 
@@ -25,13 +25,13 @@ public:
 	
 	Select &offset(size_t offset)
 	{
-		NNAssert(outputs() + offset < inputs(), "Invalid offset and length for a Select module!");
+		NNAssert(this->outputs() + offset <= this->inputs(), "Invalid offset and length for a Select module!");
 		m_offset = offset;
 	}
 	
 	virtual void resize(size_t inps, size_t outs) override
 	{
-		NNAssert(outs + m_offset < inps, "Invalid offset and length for a Select module!");
+		NNAssert(outs + m_offset <= inps, "Invalid offset and length for a Select module!");
 		Module<T>::resize(inps, outs);
 	}
 	
@@ -41,7 +41,7 @@ public:
 		NNAssert(input.cols() == m_inputBlame.cols(), "Invalid input size!");
 		
 		for(size_t row = 0, rend = input.rows(); row < rend; ++row)
-			for(size_t i = 0, iend = m_outputs.cols(); i < iend; ++i)
+			for(size_t i = 0, iend = m_output.cols(); i < iend; ++i)
 				m_output(row, i) = input(row, i + m_offset);
 		
 		return m_output;
@@ -56,7 +56,7 @@ public:
 		
 		m_inputBlame.fill(0.0);
 		for(size_t row = 0, rend = input.rows(); row < rend; ++row)
-			for(size_t i = 0, iend = m_outputs.cols(); i < iend; ++i)
+			for(size_t i = 0, iend = m_output.cols(); i < iend; ++i)
 				m_inputBlame(row, i + m_offset) = blame(row, i);
 		
 		return m_inputBlame;
