@@ -19,6 +19,7 @@
 #include "nnlib/modules/convolution.h"
 #include "nnlib/modules/identity.h"
 #include "nnlib/modules/linear.h"
+#include "nnlib/modules/select.h"
 #include "nnlib/modules/sequential.h"
 
 // Activation functions
