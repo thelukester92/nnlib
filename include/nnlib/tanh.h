@@ -16,7 +16,7 @@ public:
 	
 	static T backward(const T &x, const T &y)
 	{
-		return 1.0 - x * x;
+		return 1.0 - y * y;
 	}
 };
 
