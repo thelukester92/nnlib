@@ -153,6 +153,12 @@ public:
 	
 	// MARK: Non-static Algebra
 	
+	Vector &clear()
+	{
+		resize(0);
+		return *this;
+	}
+	
 	/// Deep copy the contents of another vector.
 	Vector &copy(const Vector &A)
 	{
@@ -209,6 +215,7 @@ public:
 	/// Concatenate (deep copy) several tensors into this vector.
 	/// \todo variadic template args
 	/// \todo realize that this assumes contiguous data; we should enforce this with an assert
+	/*
 	Vector &concatenate(Vector<Tensor<T> *> tensors)
 	{
 		size_t size = 0;
@@ -225,6 +232,31 @@ public:
 		}
 		
 		return *this;
+	}
+	*/
+	
+	template <typename V>
+	Vector &append(V &t)
+	{
+		size_t i = m_size;
+		resize(m_size + t.size());
+		for(T &v : t)
+			m_ptr[i++ * m_stride] = v;
+		return *this;
+	}
+	
+	template <typename V, typename ... Vs>
+	Vector &append(V &t, Vs &...more)
+	{
+		append(t);
+		return append(more...);
+	}
+	
+	template <typename ... Vs>
+	Vector &concatenate(Vs &...more)
+	{
+		clear();
+		return append(more...);
 	}
 	
 	/// Get a new vector that shares the same storage.

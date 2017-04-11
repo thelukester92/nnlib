@@ -81,15 +81,26 @@ public:
 				new Sequential<T>(
 					new Select<T>(inps + outs, outs),
 					new Activation<OutAct, T>()
-				)
+				),
+				
+				// h(t)
+				new Select<T>(inps + outs, outs)
 			),
-			// y(t)
-			new Select<T>(outs, outs)
-			// new Reduce<Product, T>(outs)
+			new Concat<T>(
+				// y(t)
+				new Sequential<T>(
+					new Select<T>(0, 2 * outs),
+					new Reduce<Product, T>(outs)
+				),
+				
+				// h(t)
+				new Select<T>(2 * outs, outs)
+			)
 		);
 	}
 	
 	/// Forward propagation of a sequence, resetting hidden state.
+	/// \todo note that right now it only works for blockSize = 1.
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
 		size_t sequenceLength = inputs.rows();
@@ -100,22 +111,21 @@ public:
 		m_nn->output().fill(0);
 		
 		// create an appropriately-sized view of inputs
-		// Matrix<T> inp = inputs.block(0, 0, blockSize);
 		Matrix<T> inp(blockSize, inputs.cols());
-		inp(0).copy(inputs(0));
-		
 		Vector<T> foo;
 		
 		// loop over blocks and forward propagate
 		for(size_t i = 0; i < sequenceLength; ++i)
 		{
 			inp(0).copy(inputs(i));
-			foo.concatenate({ &inp, &m_nn->output(), &m_hidden->output() });
+			foo.concatenate(inp, m_nn->output());
 			m_nn->forward(foo);
 			
 			std::cout << foo(0) << ", " << foo(1) << ", " << foo(2) << " -> ";
 			std::cout << m_nn->output()(0, 0) << std::endl;
 		}
+		
+		/// \todo actually use the output
 		
 		return m_output;
 	}
@@ -123,6 +133,29 @@ public:
 	/// Backpropagation across a sequence.
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
+		/*
+		size_t sequenceLength = inputs.rows();
+		size_t blockSize = 1; // inputs.rows() / sequenceLength;
+		
+		// create an appropriately-sized view of inputs
+		// Matrix<T> inp = inputs.block(0, 0, blockSize);
+		/// \todo this is not the cleanest, fastest, or most stable way to do this... make it better
+		Matrix<T> inp(blockSize, inputs.cols());
+		inp(0).copy(inputs(0));
+		
+		Vector<T> foo, bar;
+		
+		for(size_t i = sequenceLength; i > 1; --i)
+		{
+			// send it forward again to reset internal state
+			inp(0).copy(inputs(i - 1));
+			foo.concatenate({ &inp, &m_outputs(i - 2), &m_hiddens(i - 2) });
+			m_nn->forward(foo);
+			
+			// now we can backprop it
+			m_nn->backward(foo, bar);
+		}
+		*/
 		return m_inputBlame;
 	}
 	
