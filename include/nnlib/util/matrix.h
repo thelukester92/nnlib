@@ -226,10 +226,10 @@ public:
 	}
 	
 	/// Get a vector looking at the ith row in the matrix.
-	ConstVector<T> operator[](size_t i) const
+	const Vector<T> operator[](size_t i) const
 	{
 		NNAssert(i < m_rows, "Invalid Matrix row index!");
-		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
+		return Vector<T>(*this, i * m_ld, m_cols, 1);
 	}
 	
 	/// Get a vector looking at the ith row in the matrix.
@@ -268,10 +268,10 @@ public:
 	}
 	
 	/// Get a vector looking at the jth column in the matrix.
-	ConstVector<T> column(size_t j) const
+	const Vector<T> column(size_t j) const
 	{
 		NNAssert(j < m_cols, "Invalid Matrix column index!");
-		return ConstVector<T>(*this, j, m_rows, m_ld);
+		return Vector<T>(*this, j, m_rows, m_ld);
 	}
 	
 	Matrix block(size_t row, size_t col, size_t rows = (size_t) -1, size_t cols = (size_t) -1) const

@@ -16,11 +16,10 @@ void testSelect()
 	
 	Sequential<> nn(
 		new Concat<>(
-			new Select<>(0, 2),
-			new Select<>(2, 3)
+			new Select<>(0, 5, 2),
+			new Select<>(2, 5, 3)
 		)
 	);
-	nn.resize(5, 5);
 	Vector<> v = { 1.1, 2.2, 3.3, 4.4, 5.5 };
 	nn.forward(v);
 	NNHardAssert(v.squaredDistance(nn.output()(0)) < 1e-9, "Select::forward inside Concat::forward failed!");

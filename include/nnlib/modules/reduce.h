@@ -64,7 +64,7 @@ public:
 				T &reduction = m_output(row, i);
 				reduction = F<T>::init();
 				for(size_t j = 0; j < m_slices; ++j)
-					reduction = F<T>::forward(reduction, inputs(row, indices(j)));
+					reduction = F<T>::forward(reduction, inputs(row, indices(j)++));
 			}
 		}
 		

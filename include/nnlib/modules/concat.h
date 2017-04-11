@@ -21,8 +21,11 @@ public:
 	
 	virtual void add(Module<T> *component) override
 	{
-		NNHardAssert(m_components.size() == 0 || component->inputs() == m_components[0]->inputs(), "Incompatible concat component!");
+		NNHardAssert(m_components.size() == 0 || component->inputs() == m_components[0]->inputs() || component->inputs() == 0, "Incompatible concat component!");
 		Container<T>::add(component);
+		
+		if(component->inputs() == 0 && m_components[0]->inputs() != 0)
+			component->resize(m_components[0]->inputs(), component->outputs());
 		
 		// Flatten all output matrices into a single output matrix
 		m_outputs.resize(component->batchSize(), m_outputs.cols() + component->outputs());

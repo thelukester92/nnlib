@@ -46,16 +46,16 @@ public:
 				// x(t) . y(t - 1) . h(t - 1)
 				new Identity<T>(inps + 2 * outs),
 				
-				// forgetGate(_) . inputGate(_)
+				// inputGate(_) . forgetGate(_)
 				new Sequential<T>(
-					new Linear<T>(inps + 2 * outs, 2 * outs),
+					new Linear<T>(2 * outs),
 					new Activation<GateAct, T>()
 				),
 				
 				// inputActivation(x(t) . y(t - 1))
 				new Sequential<T>(
-					new Select<T>(0, inps + 2 * outs, inps + outs),
-					new Linear<T>(inps + outs, outs),
+					new Select<T>(0, inps + outs),
+					new Linear<T>(outs),
 					new Activation<InAct, T>()
 				)
 			),
@@ -63,7 +63,7 @@ public:
 				// x(t) . y(t - 1)
 				new Select<T>(0, inps + outs),
 				
-				// h(t)
+				// h(t) = sum(product( h(t - 1) . inputGate(_) . forgetGate(_) . inputActivation(_) ))
 				m_hidden = new Sequential<T>(
 					new Select<T>(inps + outs, 4 * outs),
 					new Reduce<Product, T>(2 * outs),
@@ -73,18 +73,19 @@ public:
 			new Concat<T>(
 				// outputGate(_)
 				new Sequential<T>(
-					new Linear<T>(inps + 2 * outs, outs),
+					new Linear<T>(outs),
 					new Activation<GateAct, T>()
 				),
 				
 				// tanh(h(t))
 				new Sequential<T>(
-					new Select<T>(inps + outs, inps + 2 * outs, outs),
+					new Select<T>(inps + outs, outs),
 					new Activation<OutAct, T>()
 				)
 			),
 			// y(t)
-			new Reduce<Product, T>(outs)
+			new Select<T>(outs, outs)
+			// new Reduce<Product, T>(outs)
 		);
 	}
 	
@@ -108,9 +109,11 @@ public:
 		// loop over blocks and forward propagate
 		for(size_t i = 0; i < sequenceLength; ++i)
 		{
+			inp(0).copy(inputs(i));
 			foo.concatenate({ &inp, &m_nn->output(), &m_hidden->output() });
 			m_nn->forward(foo);
 			
+			std::cout << foo(0) << ", " << foo(1) << ", " << foo(2) << " -> ";
 			std::cout << m_nn->output()(0, 0) << std::endl;
 		}
 		

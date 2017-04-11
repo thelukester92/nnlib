@@ -389,10 +389,6 @@ private:
 	size_t m_stride;	///< The stride between elements in this Vector
 };
 
-/// Constant 1-dimensional view of a tensor.
-template <typename T>
-using ConstVector = Vector<const T>;
-
 }
 
 #endif
