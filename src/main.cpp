@@ -37,22 +37,15 @@ void testLSTM()
 {
 	cout << "========== LSTM Test ==========" << endl;
 	
-	LSTM<> lstm(1, 1);
+	LSTM<> lstm(1, 1, 10);
 	
 	Matrix<> sequence(10, 1);
-	size_t i = 0;
-	sequence(i++, 0) = 8;
-	sequence(i++, 0) = 6;
-	sequence(i++, 0) = 7;
-	sequence(i++, 0) = 5;
-	sequence(i++, 0) = 3;
-	sequence(i++, 0) = 0;
-	sequence(i++, 0) = 9;
-	sequence(i++, 0) = 1;
-	sequence(i++, 0) = 2;
-	sequence(i++, 0) = 4;
-	
+	for(size_t i = 0; i < 10; ++i)
+		sequence(i, 0) = i;
 	lstm.forward(sequence);
+	
+	cout << "LSTM test passed!" << endl;
+	cout << endl;
 }
 
 int main()

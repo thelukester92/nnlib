@@ -84,25 +84,6 @@ public:
 	
 	// MARK: Factory methods
 	
-	/// Concatenate (deep copy) several tensors into this vector.
-	/// \todo variadic template args
-	/*
-	static Vector concatenate(Vector<Tensor<T> *> tensors)
-	{
-		size_t size = 0;
-		for(Tensor<T> *t : tensors)
-			size += t->size();
-		Vector v(size);
-		
-		auto i = v.begin();
-		for(Tensor<T> *t : tensors)
-			for(T &v : *t)
-				*i++ = v;
-		
-		return v;
-	}
-	*/
-	
 	/// Create a vector (flattened) from several tensors.
 	/// \todo realize that this assumes contiguous data; we should enforce this with an assert
 	static Vector flatten(Vector<Tensor<T> *> tensors)
@@ -125,6 +106,14 @@ public:
 		return v;
 	}
 	
+	/// Create a vector from several tensors, like flatten, but a deep copy.
+	template <typename ... Vs>
+	static Vector concatenate(Vs &...more)
+	{
+		Vector v;
+		return v.append(more...);
+	}
+	
 	// MARK: Constructors
 	
 	/// Create a vector of size n.
@@ -134,7 +123,10 @@ public:
 	}
 	
 	/// Create a shallow copy of another vector.
-	Vector(const Vector &v) : Tensor<T>(v), m_stride(v.m_stride) {}
+	Vector(const Vector &v, size_t offset = 0, size_t size = (size_t) -1) :
+		Tensor<T>(v, offset * v.m_stride, std::min(size, v.m_size - offset)),
+		m_stride(v.m_stride)
+	{}
 	
 	/// Create a shallow copy of another tensor (i.e. matrix).
 	Vector(const Tensor<T> &t, size_t offset, size_t size, size_t stride = 1) : Tensor<T>(t, offset, size), m_stride(stride) {}
@@ -212,29 +204,7 @@ public:
 		return *this;
 	}
 	
-	/// Concatenate (deep copy) several tensors into this vector.
-	/// \todo variadic template args
-	/// \todo realize that this assumes contiguous data; we should enforce this with an assert
-	/*
-	Vector &concatenate(Vector<Tensor<T> *> tensors)
-	{
-		size_t size = 0;
-		for(Tensor<T> *t : tensors)
-			size += t->size();
-		resize(size);
-		
-		auto i = begin();
-		for(Tensor<T> *t : tensors)
-		{
-			T *tPtr = t->ptr();
-			for(size_t j = 0; j < t->size(); ++i, ++j)
-				*i = tPtr[j];
-		}
-		
-		return *this;
-	}
-	*/
-	
+	/// Append a single tensor.
 	template <typename V>
 	Vector &append(V &t)
 	{
@@ -245,17 +215,11 @@ public:
 		return *this;
 	}
 	
+	/// Append a list of tensors.
 	template <typename V, typename ... Vs>
 	Vector &append(V &t, Vs &...more)
 	{
 		append(t);
-		return append(more...);
-	}
-	
-	template <typename ... Vs>
-	Vector &concatenate(Vs &...more)
-	{
-		clear();
 		return append(more...);
 	}
 	

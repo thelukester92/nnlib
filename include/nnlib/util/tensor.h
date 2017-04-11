@@ -45,6 +45,7 @@ public:
 	}
 	
 	/// Reallocate this tensor; this assumes contiguous storage and may decouple shared tensors.
+	/// \todo make this more intelligent, I didn't realize I wasn't tracking capacity!
 	Tensor &resize(size_t size)
 	{
 		if(size > m_size)

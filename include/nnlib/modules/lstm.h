@@ -28,7 +28,6 @@ class LSTM : public Module<T>
 public:
 	LSTM(size_t inps, size_t outs, size_t bats = 1) :
 		m_nn(nullptr),
-		m_hidden(nullptr),
 		m_inputBlame(bats, inps),
 		m_output(bats, outs)
 	{
@@ -37,6 +36,8 @@ public:
 	
 	virtual void resize(size_t inps, size_t outs) override
 	{
+		Module<T>::resize(inps, outs);
+		
 		delete m_nn;
 		
 		// input = x(t) . y(t - 1) . h(t - 1)
@@ -64,7 +65,7 @@ public:
 				new Select<T>(0, inps + outs),
 				
 				// h(t) = sum(product( h(t - 1) . inputGate(_) . forgetGate(_) . inputActivation(_) ))
-				m_hidden = new Sequential<T>(
+				new Sequential<T>(
 					new Select<T>(inps + outs, 4 * outs),
 					new Reduce<Product, T>(2 * outs),
 					new Reduce<Sum, T>(outs)
@@ -100,32 +101,22 @@ public:
 	}
 	
 	/// Forward propagation of a sequence, resetting hidden state.
-	/// \todo note that right now it only works for blockSize = 1.
+	/// \todo allow sequence batches
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
+		NNAssert(inputs.rows() == this->batchSize() && inputs.cols() == this->inputs(), "Incompatible input!");
+		
 		size_t sequenceLength = inputs.rows();
-		size_t blockSize = 1; // inputs.rows() / sequenceLength;
+		size_t outs = m_output.cols();
 		
 		// reset hidden state and output
-		m_hidden->output().fill(0);
 		m_nn->output().fill(0);
-		
-		// create an appropriately-sized view of inputs
-		Matrix<T> inp(blockSize, inputs.cols());
-		Vector<T> foo;
 		
 		// loop over blocks and forward propagate
 		for(size_t i = 0; i < sequenceLength; ++i)
 		{
-			inp(0).copy(inputs(i));
-			foo.concatenate(inp, m_nn->output());
-			m_nn->forward(foo);
-			
-			std::cout << foo(0) << ", " << foo(1) << ", " << foo(2) << " -> ";
-			std::cout << m_nn->output()(0, 0) << std::endl;
+			m_output(i).copy(Vector<T>(m_nn->forward(Vector<T>::concatenate(inputs(i), m_nn->output()))(0), 0, outs));
 		}
-		
-		/// \todo actually use the output
 		
 		return m_output;
 	}
@@ -171,7 +162,6 @@ public:
 	
 private:
 	Sequential<T> *m_nn;
-	Sequential<T> *m_hidden;
 	Matrix<T> m_inputBlame;
 	Matrix<T> m_output;
 };
