@@ -37,14 +37,35 @@ void testLSTM()
 {
 	cout << "========== LSTM Test ==========" << endl;
 	
-	LSTM<> lstm(1, 1, 10);
+	Sequential<> nn(
+		new LSTM<>(1, 1),
+		new Linear<>(1)
+	);
+	nn.batch(10);
 	
-	Matrix<> sequence(10, 1);
-	for(size_t i = 0; i < 10; ++i)
-		sequence(i, 0) = i;
-	lstm.forward(sequence);
+	SSE<> critic(1, 10);
 	
-	cout << "LSTM test passed!" << endl;
+	Matrix<> inputs(10, 1), targets(10, 1);
+	
+	auto optimizer = MakeOptimizer<SGD>(nn, critic);
+	optimizer.learningRate(0.001);
+	
+	inputs(0, 0) = Random<>::uniform(100);
+	targets(0, 0) = inputs(0, 0) + 1;
+	
+	for(size_t j = 1; j < 10; ++j)
+	{
+		inputs(j, 0) = inputs(j - 1, 0) + 1;
+		targets(j, 0) = inputs(j, 0) + 1;
+	}
+	
+	for(size_t i = 0;; ++i)
+	{
+		optimizer.optimize(inputs, targets);
+		cout << "\r" << critic.forward(nn.forward(inputs), targets).sum() << "\t" << nn.output()(0, 0) << " <> " << targets(0, 0) << "           " << flush;
+	}
+	
+	cout << "\nLSTM test passed!" << endl;
 	cout << endl;
 }
 

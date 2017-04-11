@@ -28,15 +28,19 @@ class LSTM : public Module<T>
 public:
 	LSTM(size_t inps, size_t outs, size_t bats = 1) :
 		m_nn(nullptr),
+		m_outputAndHidden(bats, 2 * outs),
 		m_inputBlame(bats, inps),
-		m_output(bats, outs)
+		m_output(0, 0)
 	{
 		resize(inps, outs);
 	}
 	
 	virtual void resize(size_t inps, size_t outs) override
 	{
-		Module<T>::resize(inps, outs);
+		m_outputAndHidden.resize(m_outputAndHidden.rows(), 2 * outs);
+		m_inputBlame.resize(m_inputBlame.rows(), inps);
+		m_output.resize(m_output.rows(), outs);
+		m_outputAndHidden.block(m_output, 0, 0, (size_t) -1, outs);
 		
 		delete m_nn;
 		
@@ -100,6 +104,14 @@ public:
 		);
 	}
 	
+	virtual void batch(size_t bats) override
+	{
+		m_outputAndHidden.resize(bats, m_outputAndHidden.cols());
+		m_inputBlame.resize(bats, m_inputBlame.cols());
+		m_output.resize(bats, m_output.cols());
+		m_outputAndHidden.block(m_output, 0, 0, (size_t) -1, m_output.cols());
+	}
+	
 	/// Forward propagation of a sequence, resetting hidden state.
 	/// \todo allow sequence batches
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
@@ -107,7 +119,6 @@ public:
 		NNAssert(inputs.rows() == this->batchSize() && inputs.cols() == this->inputs(), "Incompatible input!");
 		
 		size_t sequenceLength = inputs.rows();
-		size_t outs = m_output.cols();
 		
 		// reset hidden state and output
 		m_nn->output().fill(0);
@@ -116,7 +127,7 @@ public:
 		for(size_t i = 0; i < sequenceLength; ++i)
 		{
 			Vector<T> inp = Vector<T>::concatenate(inputs(i), m_nn->output());
-			m_output(i).copy(Vector<T>(m_nn->forward(inp)(0), 0, outs));
+			m_outputAndHidden(i).copy(m_nn->forward(inp)(0));
 		}
 		
 		return m_output;
@@ -133,12 +144,18 @@ public:
 		
 		// reset hidden blame
 		Vector<T> blam(2 * outs, 0);
+		Vector<T> inp(inps + 2 * outs);
 		
 		// loop over blocks and back propagate
 		for(int t = sequenceLength - 1; t >= 0; --t)
 		{
-			// reset state to time t = i - 1
-			Vector<T> inp = Vector<T>::concatenate(inputs(t), m_output(t - 1));
+			// reset state to time t
+			inp.narrow(inps).copy(inputs(t));
+			if(t > 0)
+				inp.narrow(outs * 2, inps).copy(m_outputAndHidden(t - 1));
+			else
+				inp.narrow(outs * 2).fill(0.0);
+			
 			m_nn->forward(inp);
 			
 			// backprop in this old state
@@ -162,8 +179,20 @@ public:
 		return m_inputBlame;
 	}
 	
+	virtual Vector<Tensor<T> *> parameters() override
+	{
+		return m_nn->parameters();
+	}
+
+	virtual Vector<Tensor<T> *> blame() override
+	{
+		return m_nn->blame();
+	}
+	
 private:
 	Sequential<T> *m_nn;
+	Matrix<T> m_outputAndHidden;
+	
 	Matrix<T> m_inputBlame;
 	Matrix<T> m_output;
 };
