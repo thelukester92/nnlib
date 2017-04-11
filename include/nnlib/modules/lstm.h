@@ -5,183 +5,139 @@
 #include "../util/random.h"
 #include "../activations/logistic.h"
 #include "../activations/tanh.h"
+#include "../reductions/product.h"
+#include "../reductions/sum.h"
 #include "concat.h"
 #include "identity.h"
 #include "linear.h"
 #include "select.h"
 #include "sequential.h"
+#include "reduce.h"
 
 namespace nnlib
 {
 
-template <typename T = double>
+template <
+	template <typename> class GateAct = Logistic,
+	template <typename> class InAct = TanH,
+	template <typename> class OutAct = TanH,
+	typename T = double
+>
 class LSTM : public Module<T>
 {
 public:
-	void setup()
+	LSTM(size_t inps, size_t outs, size_t bats = 1) :
+		m_nn(nullptr),
+		m_hidden(nullptr),
+		m_inputBlame(bats, inps),
+		m_output(bats, outs)
 	{
-		/// \todo implement Split, a module which takes an offset and a size and filters out all other inputs
-		/// \todo save a pointer to the Sequential that produces h(t) for accessing h(t) later
-		/// \todo determine how this is supposed to work when doing BPTT...?
+		resize(inps, outs);
+	}
+	
+	virtual void resize(size_t inps, size_t outs) override
+	{
+		delete m_nn;
 		
 		// input = x(t) . y(t - 1) . h(t - 1)
 		// output = y(t)
-		auto *m_giantNetwork = new Sequential<T>(
+		m_nn = new Sequential<T>(
 			new Concat<T>(
 				// x(t) . y(t - 1) . h(t - 1)
-				new Identity<T>(),
+				new Identity<T>(inps + 2 * outs),
 				
 				// forgetGate(_) . inputGate(_)
 				new Sequential<T>(
-					new Linear<T>(inputSize + outputSize + hiddenSize, 2 * hiddenSize),
-					new Logistic<T>()
+					new Linear<T>(inps + 2 * outs, 2 * outs),
+					new Activation<GateAct, T>()
 				),
 				
 				// inputActivation(x(t) . y(t - 1))
 				new Sequential<T>(
-					new Select<T>(0, inputSize + outputSize),
-					new Linear<T>(inputSize + outputSize, hiddenSize),
-					new Activation<TanH, T>()
+					new Select<T>(0, inps + 2 * outs, inps + outs),
+					new Linear<T>(inps + outs, outs),
+					new Activation<InAct, T>()
 				)
 			),
 			new Concat<T>(
 				// x(t) . y(t - 1)
-				new Select<T>(0, inputSize + outputSize),
+				new Select<T>(0, inps + outs),
 				
 				// h(t)
-				new Sequential<T>(
-					new Select<T>(inputSize + outputSize, 4 * hiddenSize),
-					new ProductPool<T>(),
-					new SumPool<T>()
+				m_hidden = new Sequential<T>(
+					new Select<T>(inps + outs, 4 * outs),
+					new Reduce<Product, T>(2 * outs),
+					new Reduce<Sum, T>(outs)
 				)
 			),
 			new Concat<T>(
 				// outputGate(_)
 				new Sequential<T>(
-					new Linear<T>(inputSize + outputSize + hiddenSize, hiddenSize),
-					new Logistic<T>()
+					new Linear<T>(inps + 2 * outs, outs),
+					new Activation<GateAct, T>()
 				),
 				
 				// tanh(h(t))
 				new Sequential<T>(
-					new Select<T>(inputSize + outputSize, hiddenSize),
-					new Activation<TanH, T>()
+					new Select<T>(inps + outs, inps + 2 * outs, outs),
+					new Activation<OutAct, T>()
 				)
 			),
 			// y(t)
-			new ProductPool<T>()
+			new Reduce<Product, T>(outs)
 		);
 	}
-	
-	void reset()
-	{
-		m_hiddens[0].fill(0.0);
-		m_outputs[0].fill(0.0);
-		m_step = 0;
-	}
-	
-	void stepForward(const Vector<T> &x, const Vector<T> &yPrev, const Vector<T> &hPrev, Vector<T> &y, Vector<T> &h)
-	{
-		size_t hids = x.size();
-		
-		Vector<T> xyh = Vector<T>::concatenate(x, yPrev, hPrev);
-		Vector<T> xy = xyh.narrow(2 * hids);
-		
-		h.copy(
-			m_adder.forward(
-				m_multiplier.forward(
-					m_inputGate.forward(xyh),
-					m_inputActivation.forward(xy)
-				),
-				m_multiplier.forward(
-					m_forgetGate.forward(xyh),
-					hPrev
-				)
-			);
-		);
-		
-		xyh.narrow(hids, 2 * hids).copy(h);
-		
-		y.copy(
-			m_multiplier.forward(
-				m_outputGate.forward(xyh),
-				m_outputActivation.forward(h)
-			)
-		);
-	}
-	
-	void stepBackward()
-	{
-		size_t hids = x.size();
-		
-		Vector<T> xyh = Vector<T>::concatenate(x, yPrev, hPrev);
-		Vector<T> xy = xyh.narrow(2 * hids);
-		
-		// we want:
-		// - update blame in the gates
-		// - update hidden state blame
-		// - update input blame
-		
-		oBlame = m_multiplier.forward(
-			blame,
-			m_outputActivation.forward(h)
-		);
-		
-		h.copy(
-			m_adder.forward(
-				m_multiplier.forward(
-					m_inputGate.forward(xyh),
-					m_inputActivation.forward(xy)
-				),
-				m_multiplier.forward(
-					m_forgetGate.forward(xyh),
-					hPrev
-				)
-			);
-		);
-		
-		xyh.narrow(hids, 2 * hids).copy(h);
-		
-		y.copy(
-			m_multiplier.forward(
-				m_outputGate.forward(xyh),
-				m_outputActivation.forward(h)
-			)
-		);
-	}
-	
-	
 	
 	/// Forward propagation of a sequence, resetting hidden state.
 	virtual Matrix<T> &forward(const Matrix<T> &inputs) override
 	{
-		reset();
+		size_t sequenceLength = inputs.rows();
+		size_t blockSize = 1; // inputs.rows() / sequenceLength;
 		
-		for(size_t i = 0; i < inputs.rows(); ++i)
+		// reset hidden state and output
+		m_hidden->output().fill(0);
+		m_nn->output().fill(0);
+		
+		// create an appropriately-sized view of inputs
+		// Matrix<T> inp = inputs.block(0, 0, blockSize);
+		Matrix<T> inp(blockSize, inputs.cols());
+		inp(0).copy(inputs(0));
+		
+		Vector<T> foo;
+		
+		// loop over blocks and forward propagate
+		for(size_t i = 0; i < sequenceLength; ++i)
 		{
-			stepForward(inputs[i]);
+			foo.concatenate({ &inp, &m_nn->output(), &m_hidden->output() });
+			m_nn->forward(foo);
+			
+			std::cout << m_nn->output()(0, 0) << std::endl;
 		}
 		
-		return m_outputs;
+		return m_output;
 	}
 	
 	/// Backpropagation across a sequence.
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
-		// reset old blame
-		/// \todo ???
-		
-		for(m_step = inputs.rows(); m_step != 0; --m_step)
-		{
-			tmp.copy(m_outputs[m_step - 1]);
-			activatedHidden;
-			
-			
-		}
+		return m_inputBlame;
+	}
+	
+	virtual Matrix<T> &output() override
+	{
+		return m_output;
+	}
+	
+	virtual Matrix<T> &inputBlame() override
+	{
+		return m_inputBlame;
 	}
 	
 private:
-	
+	Sequential<T> *m_nn;
+	Sequential<T> *m_hidden;
+	Matrix<T> m_inputBlame;
+	Matrix<T> m_output;
 };
 
 }

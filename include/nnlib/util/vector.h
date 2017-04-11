@@ -104,6 +104,7 @@ public:
 	*/
 	
 	/// Create a vector (flattened) from several tensors.
+	/// \todo realize that this assumes contiguous data; we should enforce this with an assert
 	static Vector flatten(Vector<Tensor<T> *> tensors)
 	{
 		size_t size = 0;
@@ -207,6 +208,7 @@ public:
 	
 	/// Concatenate (deep copy) several tensors into this vector.
 	/// \todo variadic template args
+	/// \todo realize that this assumes contiguous data; we should enforce this with an assert
 	Vector &concatenate(Vector<Tensor<T> *> tensors)
 	{
 		size_t size = 0;
@@ -216,8 +218,11 @@ public:
 		
 		auto i = begin();
 		for(Tensor<T> *t : tensors)
-			for(T &v : *t)
-				*i++ = v;
+		{
+			T *tPtr = t->ptr();
+			for(size_t j = 0; j < t->size(); ++i, ++j)
+				*i = tPtr[j];
+		}
 		
 		return *this;
 	}

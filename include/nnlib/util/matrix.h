@@ -146,6 +146,7 @@ public:
 	Matrix(const Tensor<T> &t, size_t rows, size_t cols) : Tensor<T>(t), m_rows(rows), m_cols(cols), m_ld(cols) {}
 	
 	/// Create a matrix as a row vector.
+	/// \todo maybe column vector is more flexible, since m_ld = stride?
 	Matrix(const Vector<T> &v) : Tensor<T>(v), m_rows(1), m_cols(v.size()), m_ld(v.size())
 	{
 		NNAssert(v.stride() == 1, "Cannot make a matrix from a non-contiguous vector!");
@@ -239,10 +240,10 @@ public:
 	}
 	
 	/// Get a vector looking at the ith row in the matrix.
-	ConstVector<T> operator()(size_t i) const
+	const Vector<T> operator()(size_t i) const
 	{
 		NNAssert(i < m_rows, "Invalid Matrix row index!");
-		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
+		return Vector<T>(*this, i * m_ld, m_cols, 1);
 	}
 	
 	/// Get a vector looking at the ith row in the matrix.
@@ -253,10 +254,10 @@ public:
 	}
 	
 	/// Get a vector looking at the ith row in the matrix.
-	ConstVector<T> row(size_t i) const
+	const Vector<T> row(size_t i) const
 	{
 		NNAssert(i < m_rows, "Invalid Matrix row index!");
-		return ConstVector<T>(*this, i * m_ld, m_cols, 1);
+		return Vector<T>(*this, i * m_ld, m_cols, 1);
 	}
 	
 	/// Get a vector looking at the jth column in the matrix.
@@ -273,7 +274,7 @@ public:
 		return ConstVector<T>(*this, j, m_rows, m_ld);
 	}
 	
-	Matrix block(size_t row, size_t col, size_t rows = (size_t) -1, size_t cols = (size_t) -1)
+	Matrix block(size_t row, size_t col, size_t rows = (size_t) -1, size_t cols = (size_t) -1) const
 	{
 		NNAssert(row < m_rows && col < m_cols, "Invalid row/col for matrix block!");
 		Matrix m(*this);
@@ -283,7 +284,7 @@ public:
 		return m;
 	}
 	
-	Matrix &block(Matrix &m, size_t row, size_t col = 0, size_t rows = 0, size_t cols = 0)
+	Matrix &block(Matrix &m, size_t row, size_t col = 0, size_t rows = 0, size_t cols = 0) const
 	{
 		m.m_shared	= m_shared;
 		m.m_rows	= rows == 0 ? m.m_rows : std::min(rows, m_rows - row);
