@@ -115,7 +115,8 @@ public:
 		// loop over blocks and forward propagate
 		for(size_t i = 0; i < sequenceLength; ++i)
 		{
-			m_output(i).copy(Vector<T>(m_nn->forward(Vector<T>::concatenate(inputs(i), m_nn->output()))(0), 0, outs));
+			Vector<T> inp = Vector<T>::concatenate(inputs(i), m_nn->output());
+			m_output(i).copy(Vector<T>(m_nn->forward(inp)(0), 0, outs));
 		}
 		
 		return m_output;
@@ -124,29 +125,30 @@ public:
 	/// Backpropagation across a sequence.
 	virtual Matrix<T> &backward(const Matrix<T> &inputs, const Matrix<T> &blame) override
 	{
-		/*
+		NNAssert(inputs.rows() == this->batchSize() && inputs.cols() == this->inputs(), "Incompatible input!");
+		NNAssert(blame.rows() == this->batchSize() && blame.cols() == this->outputs(), "Incompatible blame!");
+		
 		size_t sequenceLength = inputs.rows();
-		size_t blockSize = 1; // inputs.rows() / sequenceLength;
+		size_t inps = inputs.cols(), outs = m_output.cols();
 		
-		// create an appropriately-sized view of inputs
-		// Matrix<T> inp = inputs.block(0, 0, blockSize);
-		/// \todo this is not the cleanest, fastest, or most stable way to do this... make it better
-		Matrix<T> inp(blockSize, inputs.cols());
-		inp(0).copy(inputs(0));
+		// reset hidden blame
+		Vector<T> blam(2 * outs, 0);
 		
-		Vector<T> foo, bar;
-		
-		for(size_t i = sequenceLength; i > 1; --i)
+		// loop over blocks and back propagate
+		for(int t = sequenceLength - 1; t >= 0; --t)
 		{
-			// send it forward again to reset internal state
-			inp(0).copy(inputs(i - 1));
-			foo.concatenate({ &inp, &m_outputs(i - 2), &m_hiddens(i - 2) });
-			m_nn->forward(foo);
+			// reset state to time t = i - 1
+			Vector<T> inp = Vector<T>::concatenate(inputs(t), m_output(t - 1));
+			m_nn->forward(inp);
 			
-			// now we can backprop it
-			m_nn->backward(foo, bar);
+			// backprop in this old state
+			blam.narrow(outs).addScaled(blame(t));
+			m_nn->backward(inp, blam);
+			
+			// update input blame
+			m_inputBlame(t).copy(Vector<T>(m_nn->output()(0), 0, inps));
 		}
-		*/
+		
 		return m_inputBlame;
 	}
 	

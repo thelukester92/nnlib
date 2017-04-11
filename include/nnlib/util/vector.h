@@ -108,7 +108,7 @@ public:
 	
 	/// Create a vector from several tensors, like flatten, but a deep copy.
 	template <typename ... Vs>
-	static Vector concatenate(Vs &...more)
+	static Vector concatenate(const Vs &...more)
 	{
 		Vector v;
 		return v.append(more...);
@@ -206,18 +206,18 @@ public:
 	
 	/// Append a single tensor.
 	template <typename V>
-	Vector &append(V &t)
+	Vector &append(const V &t)
 	{
 		size_t i = m_size;
 		resize(m_size + t.size());
-		for(T &v : t)
+		for(const T &v : t)
 			m_ptr[i++ * m_stride] = v;
 		return *this;
 	}
 	
 	/// Append a list of tensors.
 	template <typename V, typename ... Vs>
-	Vector &append(V &t, Vs &...more)
+	Vector &append(const V &t, const Vs &...more)
 	{
 		append(t);
 		return append(more...);
