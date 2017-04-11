@@ -7,7 +7,7 @@ namespace nnlib
 {
 
 /// A module that applies an activation function to each input.
-/// F must have a forward and a backward function.
+/// F must have static forward and backward functions.
 template <template <typename> class F, typename T = double>
 class Activation : public Module<T>
 {

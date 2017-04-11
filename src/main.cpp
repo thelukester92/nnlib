@@ -34,6 +34,13 @@ void testSelect()
 	cout << endl;
 }
 
+void testLSTM()
+{
+	cout << "========== LSTM Test ==========" << endl;
+	
+	LSTM<> lstm;
+}
+
 int main()
 {
 	cout << "========== Sanity Test ==========" << endl;
@@ -116,6 +123,7 @@ int main()
 	cout << "Sanity test passed!" << endl << endl;
 	
 	testSelect();
+	testLSTM();
 	
 	using clock = chrono::high_resolution_clock;
 	chrono::time_point<clock> start;
