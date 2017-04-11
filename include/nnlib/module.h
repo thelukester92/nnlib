@@ -14,7 +14,7 @@ public:
 	
 	virtual ~Module() {}
 	
-	/// Change the input, output, and batch size.
+	/// Change the input and output size.
 	virtual void resize(size_t inps, size_t outs)
 	{
 		output().resize(batchSize(), outs);

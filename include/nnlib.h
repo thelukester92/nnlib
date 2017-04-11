@@ -11,7 +11,6 @@
 #include "nnlib/util/timer.h"
 #include "nnlib/util/vector.h"
 
-
 // Neural Network Modules
 #include "nnlib/modules/activation.h"
 #include "nnlib/modules/concat.h"
@@ -20,6 +19,7 @@
 #include "nnlib/modules/identity.h"
 #include "nnlib/modules/linear.h"
 #include "nnlib/modules/lstm.h"
+#include "nnlib/modules/reduce.h"
 #include "nnlib/modules/select.h"
 #include "nnlib/modules/sequential.h"
 
@@ -27,6 +27,10 @@
 #include "nnlib/activations/logistic.h"
 #include "nnlib/activations/sin.h"
 #include "nnlib/activations/tanh.h"
+
+// Reductions
+#include "nnlib/reductions/product.h"
+#include "nnlib/reductions/sum.h"
 
 // Neural Network Utilities
 #include "nnlib/critics/sse.h"
