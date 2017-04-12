@@ -61,36 +61,46 @@ void testReduce()
 void testLSTM()
 {
 	cout << "========== LSTM Test ==========" << endl;
+	size_t batchSize = 100;
+	
+	Random<>::seed(0);
 	
 	Sequential<> nn(
-		new LSTM<>(1, 1),
+		/*
+		new Linear<>(1, 4),
+		new Activation<TanH>(),
+		*/
+		new LSTM<>(1, 10),
 		new Linear<>(1)
 	);
-	nn.batch(10);
+	nn.batch(batchSize);
 	
-	SSE<> critic(1, 10);
+	SSE<> critic(1, batchSize);
 	
-	Matrix<> inputs(10, 1), targets(10, 1);
+	Matrix<> tinputs(batchSize, 1), ttargets(batchSize, 1);
+	double start = Random<>::uniform(100);
+	for(size_t j = 0; j < batchSize; ++j)
+	{
+		tinputs(j, 0) = sin(start + 0.1 * j);
+		ttargets(j, 0) = cos(start + 0.1 * j);
+	}
 	
 	auto optimizer = MakeOptimizer<SGD>(nn, critic);
-	optimizer.learningRate(0.001);
-	
-	inputs(0, 0) = Random<>::uniform(100);
-	targets(0, 0) = inputs(0, 0) + 1;
-	
-	for(size_t j = 1; j < 10; ++j)
-	{
-		inputs(j, 0) = inputs(j - 1, 0) + 1;
-		targets(j, 0) = inputs(j, 0) + 1;
-	}
+	optimizer.learningRate(0.000001);
 	
 	for(size_t i = 0;; ++i)
 	{
+		Matrix<> inputs(batchSize, 1), targets(batchSize, 1);
+		double start = Random<>::uniform(100);
+		for(size_t j = 0; j < batchSize; ++j)
+		{
+			inputs(j, 0) = sin(start + 0.05 * j);
+			targets(j, 0) = cos(start + 0.05 * j);
+		}
+		
 		optimizer.optimize(inputs, targets);
-		nn.forward(inputs);
-		cout << "\r" << nn.output()(0, 0) << endl;
-		cout << "\r" << critic.forward(nn.forward(inputs), targets).sum() << "\t" << nn.output()(0, 0) << " <> " << targets(0, 0) << "           " << flush;
-		break;
+		nn.forward(tinputs);
+		cout << "\r" << critic.forward(nn.output(), ttargets).sum() << "     \t@ " << i << flush;
 	}
 	
 	cout << "\nLSTM test passed!" << endl;
