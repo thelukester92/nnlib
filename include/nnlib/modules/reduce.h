@@ -64,7 +64,10 @@ public:
 				T &reduction = m_output(row, i);
 				reduction = F<T>::init();
 				for(size_t j = 0; j < m_slices; ++j)
-					reduction = F<T>::forward(reduction, inputs(row, indices(j)++));
+				{
+					reduction = F<T>::forward(reduction, inputs(row, indices(j)));
+					++indices(j);
+				}
 			}
 		}
 		
@@ -91,7 +94,10 @@ public:
 			{
 				const T &output = m_output(row, i), &blam = blame(row, i);
 				for(size_t j = 0; j < m_slices; ++j)
+				{
 					m_inputBlame(row, indices(j)) = blam * F<T>::backward(output, inputs(row, indices(j)));
+					++indices(j);
+				}
 			}
 		}
 		

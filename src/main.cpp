@@ -33,6 +33,31 @@ void testSelect()
 	cout << endl;
 }
 
+void testReduce()
+{
+	cout << "========== Reduce Test ==========" << endl;
+	
+	Vector<> inp = { 1, 2, 3, 4, 5, 6 };
+	Vector<> out = { 5, 7, 9 };
+	
+	Vector<> inBlame = { 7, 8, 9, 7, 8, 9 };
+	Vector<> outBlame = { 7, 8, 9 };
+	
+	Reduce<Sum> sum(6, 3);
+	NNHardAssert(SSE<>(3).forward(sum.forward(inp), out).sum() < 1e-6, "Reduce<Sum>::forward failed!");
+	NNHardAssert(SSE<>(6).forward(sum.backward(inp, outBlame), inBlame).sum() < 1e-6, "Reduce<Sum>::backward failed!");
+	cout << "Reduce<Sum> test passed!" << endl;
+	
+	out = { 4, 10, 18 };
+	inBlame = { 28, 40, 54, 7, 16, 27 };
+	Reduce<Product> product(6, 3);
+	NNHardAssert(SSE<>(3).forward(product.forward(inp), out).sum() < 1e-6, "Reduce<Product>::forward failed!");
+	NNHardAssert(SSE<>(6).forward(product.backward(inp, outBlame), inBlame).sum() < 1e-6, "Reduce<Product>::backward failed!");
+	cout << "Reduce<Product> test passed!" << endl;
+	
+	cout << endl;
+}
+
 void testLSTM()
 {
 	cout << "========== LSTM Test ==========" << endl;
@@ -62,7 +87,10 @@ void testLSTM()
 	for(size_t i = 0;; ++i)
 	{
 		optimizer.optimize(inputs, targets);
+		nn.forward(inputs);
+		cout << "\r" << nn.output()(0, 0) << endl;
 		cout << "\r" << critic.forward(nn.forward(inputs), targets).sum() << "\t" << nn.output()(0, 0) << " <> " << targets(0, 0) << "           " << flush;
+		break;
 	}
 	
 	cout << "\nLSTM test passed!" << endl;
@@ -151,6 +179,7 @@ int main()
 	cout << "Sanity test passed!" << endl << endl;
 	
 	testSelect();
+	testReduce();
 	testLSTM();
 	
 	using clock = chrono::high_resolution_clock;
