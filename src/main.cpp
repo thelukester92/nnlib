@@ -3,17 +3,20 @@
 using namespace std;
 using namespace nnlib;
 
-void testVector()
+void testTensor()
 {
-	Vector<> v(2, 3.14);
-	NNHardAssert(v(1) == 3.14, "Vector::Vector(size_t, double) failed!");
+	Tensor<double> tensor(5, 3, 2);
+	NNAssert(tensor.size() == 5*3*2, "Tensor::Tensor(...) yielded the wrong tensor size!");
+	NNAssert(tensor.size(0) == 5, "Tensor::Tensor(...) yielded the wrong 0th dimension size!");
+	NNAssert(tensor.size(1) == 3, "Tensor::Tensor(...) yielded the wrong 1st dimension size!");
+	NNAssert(tensor.size(2) == 2, "Tensor::Tensor(...) yielded the wrong 2nd dimension size!");
 	
-	Vector<> u = v;
-	NNHardAssert(u(1) == 3.14, "Vector::Vector(Vector &) failed!");
+	
 }
 
 void testNeuralNet()
 {
+	/*
 	Sequential neuralDecomposition(
 		new Concat(
 			new Sequential(
@@ -28,11 +31,12 @@ void testNeuralNet()
 		),
 		new Linear(10)
 	);
+	*/
 }
 
 int main()
 {
-	testVector();
+	testTensor();
 	testNeuralNet();
 	return 0;
 }

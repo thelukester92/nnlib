@@ -1,6 +1,7 @@
-/// Utilities and Structures
-#include "nnlib/error.h"
-#include "nnlib/vector.h"
+/// Utilities
+#include "nnlib/util/error.h"
+#include "nnlib/util/storage.h"
+#include "nnlib/util/tensor.h"
 
 /// Modules
-#include "nnlib/module.h"
+// #include "nnlib/module.h"
