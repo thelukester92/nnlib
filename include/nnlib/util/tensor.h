@@ -1,11 +1,14 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
-namespace nnlib
-{
+#include <memory>
 
 #include "error.h"
 #include "storage.h"
+#include "algebra.h"
+
+namespace nnlib
+{
 
 template <typename T>
 class Tensor
@@ -13,18 +16,35 @@ class Tensor
 public:
 	/// Create a tensor with the given size and shape.
 	template <typename ... Ts>
-	Tensor(Ts... dims)
+	Tensor(Ts... dims) :
+		m_data(new Storage<T>()),
+		m_shared(m_data)
 	{
 		resize(dims...);
 	}
 	
+	explicit Tensor(const Storage<size_t> &dims) :
+		m_data(new Storage<T>()),
+		m_shared(m_data)
+	{
+		resize(dims);
+	}
+	
+	/// Create a tensor as a view of another tensor with the same shape.
+	/// \note Non-rvalue tensors can use default shallow copy.
+	Tensor(Tensor &&other) :
+		m_dims(other.m_dims),
+		m_strides(other.m_strides),
+		m_data(other.m_data),
+		m_shared(other.m_shared)
+	{}
+	
 	// MARK: Size and shape methods.
 	
-	/// Resize this tensor and, if necessary, its underlying storage.
-	template <typename ... Ts>
-	void resize(Ts... dims)
+	/// Resize this tensor in place and, if necessary, resizes its underlying storage.
+	Tensor &resize(const Storage<size_t> &dims)
 	{
-		m_dims = { static_cast<size_t>(dims)... };
+		m_dims = dims;
 		m_strides.resize(m_dims.size());
 		
 		m_strides[m_strides.size() - 1] = 1;
@@ -33,27 +53,30 @@ public:
 			m_strides[i - 1] = m_strides[i] * m_dims[i];
 		}
 		
-		m_data.resize(m_strides[0] * m_dims[0]);
+		m_data->resize(m_strides[0] * m_dims[0]);
+		return *this;
 	}
 	
-	/// Reshape this tensor without changing its size.
 	template <typename ... Ts>
-	void reshape(Ts... dims)
+	Tensor &resize(Ts... dims)
 	{
-		Storage<size_t> newDims = { static_cast<size_t>(dims)... };
-		Storage<size_t> newStrides(newDims.size());
-		
-		newStrides[newStrides.size() - 1] = 1;
-		for(size_t i = newStrides.size() - 1; i > 0; --i)
-		{
-			newStrides[i - 1] = newStrides[i] * newDims[i];
-		}
-		
-		NNAssert(newStrides[0] * newDims[0] == m_data.size(), "Incompatible shape!");
-		m_data.resize(newStrides[0] * newDims[0]);
-		
-		m_dims = newDims;
-		m_strides = newStrides;
+		return resize({ static_cast<size_t>(dims)... });
+	}
+	
+	/// Creates a new tensor with a copy of this data but a new shape.
+	/// The shape must be compatible.
+	Tensor reshape(const Storage<size_t> &dims)
+	{
+		Tensor t(dims);
+		NNAssert(t.size() == m_data->size(), "Incompatible dimensions for reshaping!");
+		/// \todo copy all data into t
+		return t;
+	}
+	
+	template <typename ... Ts>
+	Tensor reshape(Ts... dims)
+	{
+		return reshape({ static_cast<size_t>(dims)... });
 	}
 	
 	/// Get the number of dimensions in this tensor.
@@ -65,7 +88,7 @@ public:
 	/// Get the total number of elements in this tensor.
 	size_t size() const
 	{
-		return m_data.size();
+		return m_data->size();
 	}
 	
 	/// Get the size of a given dimension.
@@ -93,23 +116,28 @@ public:
 	template <typename ... Ts>
 	T &operator()(Ts... indices)
 	{
-		return m_data[indexOf({ static_cast<size_t>(indices)... })];
+		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
 	}
 private:
-	Storage<size_t> m_dims, m_strides;
-	Storage<T> m_data;
+	Storage<size_t> m_dims;					///< The length along each dimension.
+	Storage<size_t> m_strides;				///< Strides between dimensions.
+	Storage<T> *m_data;						///< The actual data.
+	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
-	/// \todo BLAS accelerated dot product between indices and m_strides
-	size_t indexOf(const std::initializer_list<size_t> &indices)
+	size_t indexOf(const Storage<size_t> &indices)
 	{
 		NNAssert(indices.size() == m_dims.size(), "Incorrect number of dimensions!");
-		size_t sum = 0, idx = 0;
-		for(const size_t *i = indices.begin(), *j = indices.end(); i != j; ++i, ++idx)
-			sum += *i * m_strides[idx];
-		std::cout << sum << std::endl;
-		return sum;
+		return Algebra<size_t>::dot(indices.size(), indices.begin(), 1, m_dims.ptr(), 1);
 	}
+};
+
+template <typename T>
+class TensorIterator
+{
+public:
+	TensorIterator &operator++();
+	TensorIterator operator++(int);
 };
 
 }

@@ -12,10 +12,10 @@ void testTensor()
 	NNAssert(tensor.size(1) == 3, "Tensor::Tensor yielded the wrong 1st dimension size!");
 	NNAssert(tensor.size(2) == 2, "Tensor::Tensor yielded the wrong 2nd dimension size!");
 	
-	tensor.reshape(9, 4);
-	NNAssert(tensor.dims() == 2, "Tensor::reshape yielded the wrong number of dimensions!");
-	NNAssert(tensor.size(0) == 9, "Tensor::reshape yielded the wrong 0th dimension size!");
-	NNAssert(tensor.size(1) == 4, "Tensor::reshape yielded the wrong 1st dimension size!");
+	Tensor<double> reshaped = tensor.reshape(9, 4);
+	NNAssert(reshaped.dims() == 2, "Tensor::reshape yielded the wrong number of dimensions!");
+	NNAssert(reshaped.size(0) == 9, "Tensor::reshape yielded the wrong 0th dimension size!");
+	NNAssert(reshaped.size(1) == 4, "Tensor::reshape yielded the wrong 1st dimension size!");
 	
 	bool causedProblems = false;
 	try
