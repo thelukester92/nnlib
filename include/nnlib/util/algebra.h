@@ -32,24 +32,6 @@ public:
 	}
 };
 
-template <>
-class Algebra<size_t>
-{
-typedef size_t T;
-public:
-	static T dot(size_t N, T *x, size_t strideX, T *y, size_t strideY)
-	{
-		T sum = 0;
-		for(size_t i = 0; i < N; ++i)
-		{
-			sum += x[i] * y[i];
-			x += strideX;
-			y += strideY;
-		}
-		return sum;
-	}
-};
-
 }
 
 #endif

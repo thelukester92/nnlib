@@ -13,11 +13,14 @@ template <typename T>
 class Storage
 {
 public:
-	Storage(size_t n = 0) :
+	Storage(size_t n = 0, const T &defaultValue = 0) :
 		m_ptr(new T[n]),
 		m_size(n),
 		m_capacity(n)
-	{}
+	{
+		for(size_t i = 0; i < n; ++i)
+			m_ptr[i] = defaultValue;
+	}
 	
 	Storage(const Storage &copy) :
 		m_ptr(new T[copy.size()]),
@@ -45,6 +48,11 @@ public:
 		}
 	}
 	
+	~Storage()
+	{
+		delete[] m_ptr;
+	}
+	
 	Storage &operator=(const Storage &copy)
 	{
 		resize(copy.size());
@@ -69,13 +77,15 @@ public:
 		return *this;
 	}
 	
-	void resize(size_t n)
+	void resize(size_t n, const T &defaultValue = 0)
 	{
 		if(n > m_capacity)
 		{
 			T *ptr = new T[n];
 			for(size_t i = 0; i < m_size; ++i)
 				ptr[i] = m_ptr[i];
+			for(size_t i = m_size; i < n; ++i)
+				ptr[i] = defaultValue;
 			delete[] m_ptr;
 			m_ptr = ptr;
 			m_capacity = n;

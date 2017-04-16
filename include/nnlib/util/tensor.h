@@ -11,6 +11,9 @@ namespace nnlib
 {
 
 template <typename T>
+class TensorIterator;
+
+template <typename T>
 class Tensor
 {
 public:
@@ -39,6 +42,14 @@ public:
 		m_shared(other.m_shared)
 	{}
 	
+	Tensor &operator=(Tensor &&other)
+	{
+		m_dims		= other.m_dims;
+		m_strides	= other.m_strides;
+		m_data		= other.m_data;
+		m_shared	= other.m_shared;
+	}
+	
 	// MARK: Size and shape methods.
 	
 	/// Resize this tensor in place and, if necessary, resizes its underlying storage.
@@ -65,16 +76,21 @@ public:
 	
 	/// Creates a new tensor with a copy of this data but a new shape.
 	/// The shape must be compatible.
-	Tensor reshape(const Storage<size_t> &dims)
+	Tensor reshape(const Storage<size_t> &dims) const
 	{
 		Tensor t(dims);
 		NNAssert(t.size() == m_data->size(), "Incompatible dimensions for reshaping!");
-		/// \todo copy all data into t
+		auto k = t.begin();
+		for(const T &value : *this)
+		{
+			*k = value;
+			++k;
+		}
 		return t;
 	}
 	
 	template <typename ... Ts>
-	Tensor reshape(Ts... dims)
+	Tensor reshape(Ts... dims) const
 	{
 		return reshape({ static_cast<size_t>(dims)... });
 	}
@@ -94,6 +110,7 @@ public:
 	/// Get the size of a given dimension.
 	size_t size(size_t dim) const
 	{
+		NNAssert(dim < m_dims.size(), "Invalid dimension!");
 		return m_dims[dim];
 	}
 	
@@ -113,10 +130,37 @@ public:
 	// MARK: Element access methods.
 	
 	/// Element access given a multidimensional index.
+	T &operator()(const Storage<size_t> &indices)
+	{
+		return (*m_data)[indexOf(indices)];
+	}
+	
 	template <typename ... Ts>
 	T &operator()(Ts... indices)
 	{
 		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
+	// MARK: iterators
+	
+	TensorIterator<T> begin()
+	{
+		return TensorIterator<T>(this);
+	}
+	
+	TensorIterator<T> end()
+	{
+		return TensorIterator<T>(this, true);
+	}
+	
+	TensorIterator<const T> begin() const
+	{
+		return TensorIterator<const T>(this);
+	}
+	
+	TensorIterator<const T> end() const
+	{
+		return TensorIterator<const T>(this, true);
 	}
 private:
 	Storage<size_t> m_dims;					///< The length along each dimension.
@@ -128,16 +172,73 @@ private:
 	size_t indexOf(const Storage<size_t> &indices)
 	{
 		NNAssert(indices.size() == m_dims.size(), "Incorrect number of dimensions!");
-		return Algebra<size_t>::dot(indices.size(), indices.begin(), 1, m_dims.ptr(), 1);
+		size_t sum = 0;
+		for(size_t i = 0, j = indices.size(); i < j; ++i)
+		{
+			sum += indices[i] * m_dims[i];
+		}
+		return sum;
 	}
 };
 
 template <typename T>
 class TensorIterator
 {
+using TT = typename std::remove_const<T>::type;
 public:
-	TensorIterator &operator++();
-	TensorIterator operator++(int);
+	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
+		m_tensor(const_cast<Tensor<TT> *>(tensor)),
+		m_indices(tensor->dims(), 0)
+	{
+		if(end)
+		{
+			m_indices[0] = m_tensor->size(0);
+		}
+	}
+	
+	TensorIterator &operator++()
+	{
+		size_t dim = m_indices.size() - 1;
+		++m_indices[dim];
+		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
+		{
+			m_indices[dim] = 0;
+			--dim;
+			++m_indices[dim];
+		}
+		return *this;
+	}
+	
+	T &operator*()
+	{
+		return (*m_tensor)(m_indices);
+	}
+	
+	bool operator==(const TensorIterator &other)
+	{
+		if(m_tensor != other.m_tensor)
+		{
+			return false;
+		}
+		
+		for(size_t i = 0, j = m_indices.size(); i < j; ++i)
+		{
+			if(m_indices[i] != other.m_indices[i])
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	bool operator !=(const TensorIterator &other)
+	{
+		return !(*this == other);
+	}
+private:
+	Tensor<TT> *m_tensor;
+	Storage<size_t> m_indices;
 };
 
 }

@@ -5,6 +5,16 @@ using namespace nnlib;
 
 void testTensor()
 {
+	Tensor<double> vector(5);
+	NNAssert(vector.size() == 5, "Tensor::Tensor yielded the wrong tensor size!");
+	NNAssert(vector.dims() == 1, "Tensor::Tensor yielded the wrong number of dimensions!");
+	NNAssert(vector.size(0) == 5, "Tensor::Tensor yielded the wrong 0th dimension size!");
+	
+	for(double &value : vector)
+	{
+		std::cout << "vector[] = " << value << std::endl;
+	}
+	
 	Tensor<double> tensor(6, 3, 2);
 	NNAssert(tensor.size() == 6*3*2, "Tensor::Tensor yielded the wrong tensor size!");
 	NNAssert(tensor.dims() == 3, "Tensor::Tensor yielded the wrong number of dimensions!");
