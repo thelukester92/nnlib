@@ -13,7 +13,7 @@ Run the following commands to clone the repo and install the headers.
 	sudo make install
 
 After nnlib is installed, you can use it right away with `#include <nnlib.h>`.
-The default installation directory is `/usr/local/include`. Make sure that is in your 
+The default installation directory is `/usr/local/include`.
 For a different install directory, use `make install prefix=/path/to/dir`.
 When you compile, make sure you link BLAS.
 On Linux, you can do this with the `-lopenblas` flag.
