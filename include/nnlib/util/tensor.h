@@ -122,11 +122,42 @@ public:
 	
 	// MARK: Element manipulation methods.
 	
+	/// Set every element in this tensor to value.
 	Tensor &fill(const T &value)
 	{
 		for(T &v : *this)
 		{
 			v = value;
+		}
+		return *this;
+	}
+	
+	/// Set every element in this tensor to a uniformly distributed random value.
+	Tensor &rand(const T &from = -1, const T &to = 1)
+	{
+		for(T &v : *this)
+		{
+			v = Random<T>::uniform(from, to);
+		}
+		return *this;
+	}
+	
+	/// Set every element in this tensor to a normally distributed random value.
+	Tensor &randn(const T &mean = 0, const T &stddev = 1)
+	{
+		for(T &v : *this)
+		{
+			v = Random<T>::normal(mean, stddev);
+		}
+		return *this;
+	}
+	
+	/// Set every element in this tensor to a normally distributed random value, capped.
+	Tensor &randn(const T &mean, const T &stddev, const T &cap)
+	{
+		for(T &v : *this)
+		{
+			v = Random<T>::normal(mean, stddev, cap);
 		}
 		return *this;
 	}

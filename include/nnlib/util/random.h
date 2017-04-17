@@ -2,6 +2,7 @@
 #define RANDOM_H
 
 #include <random>
+#include "error.h"
 
 namespace nnlib
 {
@@ -42,7 +43,7 @@ public:
 	template <typename U = T>
 	static typename std::enable_if<std::is_integral<U>::value, T>::type uniform(T from, T to)
 	{
-		return std::uniform_int_distribution<double>(from, to)(RandomEngine::engine());
+		return std::uniform_int_distribution<T>(from, to)(RandomEngine::engine());
 	}
 	
 	template <typename U = T>
@@ -54,7 +55,7 @@ public:
 	template <typename U = T>
 	static typename std::enable_if<!std::is_integral<U>::value, T>::type uniform(T from, T to)
 	{
-		return std::uniform_real_distribution<double>(from, to)(RandomEngine::engine());
+		return std::uniform_real_distribution<T>(from, to)(RandomEngine::engine());
 	}
 	
 	template <typename U = T>
@@ -66,7 +67,7 @@ public:
 	template <typename U = T>
 	static typename std::enable_if<!std::is_integral<U>::value, T>::type normal(T mean, T stddev, T cap)
 	{
-		double n;
+		T n;
 		std::normal_distribution<T> dist(mean, stddev);
 		do
 		{

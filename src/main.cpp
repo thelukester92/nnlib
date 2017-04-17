@@ -12,7 +12,7 @@ void testTensor()
 	NNAssert(vector.size(0) == 5, "Tensor::Tensor yielded the wrong 0th dimension size!");
 	
 	vector.fill(3.14);
-	for(double &value : vector)
+	for(const double &value : vector)
 	{
 		NNAssert(fabs(value - 3.14) < 1e-9, "Tensor::fill failed!");
 	}
