@@ -4,5 +4,5 @@
 #include "nnlib/util/storage.h"
 #include "nnlib/util/tensor.h"
 
-/// Modules
-// #include "nnlib/module.h"
+/// Neural Networks
+#include "nnlib/nn/module.h"

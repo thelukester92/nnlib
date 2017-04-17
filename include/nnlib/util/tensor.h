@@ -17,20 +17,31 @@ template <typename T>
 class Tensor
 {
 public:
-	/// Create a tensor with the given size and shape.
-	template <typename ... Ts>
-	Tensor(Ts... dims) :
-		m_data(new Storage<T>()),
+	/// Create a vector with the given data.
+	/// \note This conflicts with the dimensions constructor when T = size_t
+	Tensor(const Storage<T> &values) :
+		m_dims({ values.size() }),
+		m_strides({ 1 }),
+		m_data(new Storage<T>(values)),
 		m_shared(m_data)
-	{
-		resize(dims...);
-	}
+	{}
 	
+	/// Create a tensor with the given size and shape.
 	explicit Tensor(const Storage<size_t> &dims) :
 		m_data(new Storage<T>()),
 		m_shared(m_data)
 	{
 		resize(dims);
+	}
+	
+	/// Create a tensor with the given size and shape.
+	/// \note This method includes the default constructor.
+	template <typename ... Ts>
+	explicit Tensor(Ts... dims) :
+		m_data(new Storage<T>()),
+		m_shared(m_data)
+	{
+		resize(dims...);
 	}
 	
 	/// Create a tensor as a view of another tensor with the same shape.
@@ -42,6 +53,7 @@ public:
 		m_shared(other.m_shared)
 	{}
 	
+	/// Move a tensor to this.
 	Tensor &operator=(Tensor &&other)
 	{
 		m_dims		= other.m_dims;
@@ -68,6 +80,7 @@ public:
 		return *this;
 	}
 	
+	/// Resize this tensor in place and, if necessary, resizes its underlying storage.
 	template <typename ... Ts>
 	Tensor &resize(Ts... dims)
 	{
