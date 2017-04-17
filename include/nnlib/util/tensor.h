@@ -124,7 +124,11 @@ public:
 	
 	Tensor &fill(const T &value)
 	{
-		/// \todo fill me in; may need to implement iterators first and/or isContigious
+		for(T &v : *this)
+		{
+			v = value;
+		}
+		return *this;
 	}
 	
 	// MARK: Element access methods.
@@ -175,9 +179,8 @@ private:
 		size_t sum = 0;
 		for(size_t i = 0, j = indices.size(); i < j; ++i)
 		{
-			sum += indices[i] * m_dims[i];
+			sum += indices[i] * m_strides[i];
 		}
-		std::cout << sum << std::endl;
 		return sum;
 	}
 };

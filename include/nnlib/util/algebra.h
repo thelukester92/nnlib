@@ -19,6 +19,7 @@ typedef double T;
 public:
 	static T dot(size_t N, T *x, size_t strideX, T *y, size_t strideY)
 	{
+		return 0.0;
 		// return cblas_ddot(N, x, strideX, y, strideY);
 	}
 };
@@ -30,6 +31,7 @@ typedef float T;
 public:
 	static T dot(size_t N, T *x, size_t strideX, T *y, size_t strideY)
 	{
+		return 0.0;
 		// return cblas_sdot(N, x, strideX, y, strideY);
 	}
 };
