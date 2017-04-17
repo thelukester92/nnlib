@@ -177,6 +177,7 @@ private:
 		{
 			sum += indices[i] * m_dims[i];
 		}
+		std::cout << sum << std::endl;
 		return sum;
 	}
 };

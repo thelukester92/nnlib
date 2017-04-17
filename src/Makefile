@@ -16,7 +16,7 @@ INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
 ifeq ($(UNAME),Darwin)
 	LFLAGS+=-framework Accelerate
 else
-	LFLAGS+=-lblas -llapack
+	LFLAGS+=-L/usr/local/lib -lopenblas -lpthread
 endif
 
 CFLAGS_OPT:=$(CFLAGS) -O3 -DOPTIMIZE
