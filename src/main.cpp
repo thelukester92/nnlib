@@ -10,13 +10,13 @@ void testTensor()
 	NNAssert(vector.size() == 5, "Tensor::Tensor yielded the wrong tensor size!");
 	NNAssert(vector.dims() == 1, "Tensor::Tensor yielded the wrong number of dimensions!");
 	NNAssert(vector.size(0) == 5, "Tensor::Tensor yielded the wrong 0th dimension size!");
-
+	
 	vector.fill(3.14);
 	for(double &value : vector)
 	{
 		NNAssert(fabs(value - 3.14) < 1e-9, "Tensor::fill failed!");
 	}
-
+	
 	Tensor<double> tensor(6, 3, 2);
 	NNAssert(tensor.size() == 6*3*2, "Tensor::Tensor yielded the wrong tensor size!");
 	NNAssert(tensor.dims() == 3, "Tensor::Tensor yielded the wrong number of dimensions!");
@@ -66,7 +66,7 @@ int main()
 	cout << "===== Testing Tensor =====" << endl;
 	testTensor();
 	cout << "Tensor test passed!" << endl;
-
+	
 	testNeuralNet();
 	return 0;
 }
