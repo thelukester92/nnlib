@@ -41,6 +41,23 @@ void testTensor()
 	NNHardAssert(causedProblems, "Tensor::reshape failed to yield an error for an incompatible shape!");
 }
 
+template <bool TransA, bool TransB>
+void slowMatrixMultiply(Tensor<double> &A, Tensor<double> &B, Tensor<double> &C)
+{
+	C.fill(0);
+	
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			for(size_t k = 0; k < (TransA ? A.size(0) : A.size(1)); ++k)
+			{
+				C(i, j) += (TransA ? A(k, i) : A(i, k)) * (TransB ? B(j, k) : B(k, j));
+			}
+		}
+	}
+}
+
 void testAlgebra()
 {
 	Tensor<double> A(10, 5);
@@ -50,26 +67,51 @@ void testAlgebra()
 	
 	A.rand();
 	B.rand();
-	C.fill(0);
 	
-	for(size_t i = 0; i < C.size(0); ++i)
-	{
-		for(size_t j = 0; j < C.size(1); ++j)
-		{
-			for(size_t k = 0; k < A.size(1); ++k)
-			{
-				C(i, j) += A(i, k) * B(k, j);
-			}
-		}
-	}
-	
+	slowMatrixMultiply<false, false>(A, B, C);
 	Algebra<double>::gemm<false, false>(A, B, C2);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<false, false> failed!");
+		}
+	}
+	
+	B.resize(3, 5);
+	slowMatrixMultiply<false, true>(A, B, C);
+	Algebra<double>::gemm<false, true>(A, B, C2);
+	
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<false, true> failed!");
+		}
+	}
+	
+	A.resize(5, 10);
+	slowMatrixMultiply<true, true>(A, B, C);
+	Algebra<double>::gemm<true, true>(A, B, C2);
+	
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<true, true> failed!");
+		}
+	}
+	
+	B.resize(5, 3);
+	slowMatrixMultiply<true, false>(A, B, C);
+	Algebra<double>::gemm<true, false>(A, B, C2);
+	
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<true, false> failed!");
 		}
 	}
 }
