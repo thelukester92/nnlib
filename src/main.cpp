@@ -151,6 +151,22 @@ void testNeuralNet()
 	{
 		NNHardAssert(fabs(inBlame(0, i) - perceptron.inBlame()(0, i)) < 1e-9, "Linear::backward failed!");
 	}
+	
+	TanH<double> tanh;
+	tanh.resizeInput(perceptron.output().shape());
+	
+	tanh.forward(perceptron.output());
+	for(size_t i = 0; i < tanh.output().size(1); ++i)
+	{
+		NNHardAssert(fabs(tanh.output()(0, i) - ::tanh(perceptron.output()(0, i))) < 1e-9, "TanH::forward failed!");
+	}
+	
+	tanh.backward(perceptron.output(), blame);
+	for(size_t i = 0; i < tanh.inBlame().size(1); ++i)
+	{
+		double dy = blame(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
+		NNHardAssert(fabs(tanh.inBlame()(0, i) - dy) < 1e-9, "TanH::backward failed!");
+	}
 }
 
 int main()

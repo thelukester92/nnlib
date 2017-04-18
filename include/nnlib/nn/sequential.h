@@ -1,5 +1,5 @@
-#ifndef SEQUENTIAL_H
-#define SEQUENTIAL_H
+#ifndef NN_SEQUENTIAL_H
+#define NN_SEQUENTIAL_H
 
 #include "container.h"
 

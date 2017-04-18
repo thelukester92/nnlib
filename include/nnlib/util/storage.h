@@ -125,6 +125,33 @@ public:
 		return m_size;
 	}
 	
+	bool operator==(const Storage &other) const
+	{
+		if(this == &other)
+		{
+			return true;
+		}
+		if(m_size != other.m_size)
+		{
+			return false;
+		}
+		for(size_t i = 0; i < other.m_size; ++i)
+		{
+			if(m_ptr[i] != other.m_ptr[i])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	bool operator!=(const Storage &other) const
+	{
+		return !(*this == other);
+	}
+	
+	// MARK: Element access
+	
 	T &operator[](size_t i)
 	{
 		return m_ptr[i];
@@ -154,6 +181,8 @@ public:
 	{
 		return m_ptr[m_size - 1];
 	}
+	
+	// MARK: Iterators
 	
 	T *begin()
 	{

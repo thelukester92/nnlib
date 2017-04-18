@@ -1,5 +1,5 @@
-#ifndef MODULE_H
-#define MODULE_H
+#ifndef NN_MODULE_H
+#define NN_MODULE_H
 
 #include "../util/tensor.h"
 

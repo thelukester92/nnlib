@@ -1,8 +1,10 @@
 /// Neural Networks
 #include "nnlib/nn/container.h"
 #include "nnlib/nn/linear.h"
+#include "nnlib/nn/map.h"
 #include "nnlib/nn/module.h"
 #include "nnlib/nn/sequential.h"
+#include "nnlib/nn/tanh.h"
 
 /// Utilities
 #include "nnlib/util/algebra.h"

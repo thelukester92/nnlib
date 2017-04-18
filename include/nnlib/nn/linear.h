@@ -1,5 +1,5 @@
-#ifndef LINEAR_H
-#define LINEAR_H
+#ifndef NN_LINEAR_H
+#define NN_LINEAR_H
 
 #include "module.h"
 #include "../util/algebra.h"

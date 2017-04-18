@@ -1,5 +1,5 @@
-#ifndef CONTAINER_H
-#define CONTAINER_H
+#ifndef NN_CONTAINER_H
+#define NN_CONTAINER_H
 
 #include "module.h"
 
