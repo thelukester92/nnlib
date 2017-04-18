@@ -179,6 +179,16 @@ void testNeuralNet()
 		target(0, i) = ::tanh(target(0, i));
 	}
 	
+	double dy1 = 1.0 - ::tanh(perceptron.output()(0, 0)) * ::tanh(perceptron.output()(0, 0));
+	double dy2 = 1.0 - ::tanh(perceptron.output()(0, 1)) * ::tanh(perceptron.output()(0, 1));
+	
+	inBlame = {
+		weights(0, 0) * blame(0, 0) * dy1 + weights(0, 1) * blame(0, 1) * dy2,
+		weights(1, 0) * blame(0, 0) * dy1 + weights(1, 1) * blame(0, 1) * dy2,
+		weights(2, 0) * blame(0, 0) * dy1 + weights(2, 1) * blame(0, 1) * dy2
+	};
+	inBlame.resize(1, 3);
+	
 	Sequential<double> nn(&perceptron, &tanh);
 	nn.forward(inp);
 	nn.backward(inp, blame);
@@ -186,6 +196,11 @@ void testNeuralNet()
 	for(size_t i = 0; i < target.size(); ++i)
 	{
 		NNHardAssert(fabs(target(0, i) - nn.output()(0, i)) < 1e-9, "Sequential::forward failed!");
+	}
+	
+	for(size_t i = 0; i < inBlame.size(); ++i)
+	{
+		NNHardAssert(fabs(inBlame(0, i) - nn.inBlame()(0, i)) < 1e-9, "Sequential::backward failed!");
 	}
 	
 	nn.remove(0);

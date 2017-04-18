@@ -94,7 +94,7 @@ public:
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outBlame) override
 	{
 		const Tensor<T> *blame = &outBlame;
-		for(size_t i = components() - 1; i > 1; --i)
+		for(size_t i = components() - 1; i > 0; --i)
 		{
 			blame = &m_components[i]->backward(m_components[i - 1]->output(), *blame);
 		}

@@ -75,6 +75,7 @@ public:
 		m_dims		= { values.size() };
 		m_strides	= { 1 };
 		*m_data		= values;
+		return *this;
 	}
 	
 	/// Fill this with values of that.
@@ -84,6 +85,7 @@ public:
 		m_dims		= { values.size() };
 		m_strides	= { 1 };
 		*m_data		= values;
+		return *this;
 	}
 	
 	/// Move a tensor to this.
@@ -93,6 +95,7 @@ public:
 		m_strides	= other.m_strides;
 		m_data		= other.m_data;
 		m_shared	= other.m_shared;
+		return *this;
 	}
 	
 	// MARK: Size and shape methods.
