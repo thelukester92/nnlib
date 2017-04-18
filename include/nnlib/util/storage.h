@@ -115,6 +115,11 @@ public:
 		return m_ptr;
 	}
 	
+	const T *ptr() const
+	{
+		return m_ptr;
+	}
+	
 	size_t size() const
 	{
 		return m_size;

@@ -1,4 +1,5 @@
 /// Utilities
+#include "nnlib/util/algebra.h"
 #include "nnlib/util/error.h"
 #include "nnlib/util/random.h"
 #include "nnlib/util/storage.h"

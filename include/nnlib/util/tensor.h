@@ -4,8 +4,8 @@
 #include <memory>
 
 #include "error.h"
+#include "random.h"
 #include "storage.h"
-#include "algebra.h"
 
 namespace nnlib
 {
@@ -183,7 +183,7 @@ public:
 		return *this;
 	}
 	
-	// MARK: Element access methods.
+	// MARK: Element/data access methods.
 	
 	/// Element access given a multidimensional index.
 	T &operator()(const Storage<size_t> &indices)
@@ -191,13 +191,26 @@ public:
 		return (*m_data)[indexOf(indices)];
 	}
 	
+	/// Element access given a multidimensional index.
 	template <typename ... Ts>
 	T &operator()(Ts... indices)
 	{
 		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
 	}
 	
-	// MARK: iterators
+	/// Direct storage access.
+	Storage<T> &storage()
+	{
+		return *m_data;
+	}
+	
+	/// Direct storage access.
+	const Storage<T> &storage() const
+	{
+		return *m_data;
+	}
+	
+	// MARK: Iterators
 	
 	TensorIterator<T> begin()
 	{

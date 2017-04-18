@@ -7,27 +7,27 @@ using namespace nnlib;
 void testTensor()
 {
 	Tensor<double> vector(5);
-	NNAssert(vector.size() == 5, "Tensor::Tensor yielded the wrong tensor size!");
-	NNAssert(vector.dims() == 1, "Tensor::Tensor yielded the wrong number of dimensions!");
-	NNAssert(vector.size(0) == 5, "Tensor::Tensor yielded the wrong 0th dimension size!");
+	NNHardAssert(vector.size() == 5, "Tensor::Tensor yielded the wrong tensor size!");
+	NNHardAssert(vector.dims() == 1, "Tensor::Tensor yielded the wrong number of dimensions!");
+	NNHardAssert(vector.size(0) == 5, "Tensor::Tensor yielded the wrong 0th dimension size!");
 	
 	vector.fill(3.14);
 	for(const double &value : vector)
 	{
-		NNAssert(fabs(value - 3.14) < 1e-9, "Tensor::fill failed!");
+		NNHardAssert(fabs(value - 3.14) < 1e-9, "Tensor::fill failed!");
 	}
 	
 	Tensor<double> tensor(6, 3, 2);
-	NNAssert(tensor.size() == 6*3*2, "Tensor::Tensor yielded the wrong tensor size!");
-	NNAssert(tensor.dims() == 3, "Tensor::Tensor yielded the wrong number of dimensions!");
-	NNAssert(tensor.size(0) == 6, "Tensor::Tensor yielded the wrong 0th dimension size!");
-	NNAssert(tensor.size(1) == 3, "Tensor::Tensor yielded the wrong 1st dimension size!");
-	NNAssert(tensor.size(2) == 2, "Tensor::Tensor yielded the wrong 2nd dimension size!");
+	NNHardAssert(tensor.size() == 6*3*2, "Tensor::Tensor yielded the wrong tensor size!");
+	NNHardAssert(tensor.dims() == 3, "Tensor::Tensor yielded the wrong number of dimensions!");
+	NNHardAssert(tensor.size(0) == 6, "Tensor::Tensor yielded the wrong 0th dimension size!");
+	NNHardAssert(tensor.size(1) == 3, "Tensor::Tensor yielded the wrong 1st dimension size!");
+	NNHardAssert(tensor.size(2) == 2, "Tensor::Tensor yielded the wrong 2nd dimension size!");
 	
 	Tensor<double> reshaped = tensor.reshape(9, 4);
-	NNAssert(reshaped.dims() == 2, "Tensor::reshape yielded the wrong number of dimensions!");
-	NNAssert(reshaped.size(0) == 9, "Tensor::reshape yielded the wrong 0th dimension size!");
-	NNAssert(reshaped.size(1) == 4, "Tensor::reshape yielded the wrong 1st dimension size!");
+	NNHardAssert(reshaped.dims() == 2, "Tensor::reshape yielded the wrong number of dimensions!");
+	NNHardAssert(reshaped.size(0) == 9, "Tensor::reshape yielded the wrong 0th dimension size!");
+	NNHardAssert(reshaped.size(1) == 4, "Tensor::reshape yielded the wrong 1st dimension size!");
 	
 	bool causedProblems = false;
 	try
@@ -38,7 +38,40 @@ void testTensor()
 	{
 		causedProblems = true;
 	}
-	NNAssert(causedProblems, "Tensor::reshape failed to yield an error for an incompatible shape!");
+	NNHardAssert(causedProblems, "Tensor::reshape failed to yield an error for an incompatible shape!");
+}
+
+void testAlgebra()
+{
+	Tensor<double> A(10, 5);
+	Tensor<double> B(5, 3);
+	Tensor<double> C(10, 3);
+	Tensor<double> C2(10, 3);
+	
+	A.rand();
+	B.rand();
+	C.fill(0);
+	
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			for(size_t k = 0; k < A.size(1); ++k)
+			{
+				C(i, j) += A(i, k) * B(k, j);
+			}
+		}
+	}
+	
+	Algebra<double>::gemm<false, false>(A, B, C2);
+	
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm failed!");
+		}
+	}
 }
 
 void testNeuralNet()
@@ -66,6 +99,10 @@ int main()
 	cout << "===== Testing Tensor =====" << endl;
 	testTensor();
 	cout << "Tensor test passed!" << endl;
+	
+	cout << "===== Testing Algebra =====" << endl;
+	testAlgebra();
+	cout << "Algebra test passed!" << endl;
 	
 	testNeuralNet();
 	return 0;
