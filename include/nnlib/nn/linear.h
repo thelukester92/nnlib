@@ -12,19 +12,60 @@ template <typename T = double>
 class Linear : public Module<T>
 {
 public:
+	/// Standard inps -> outs layer.
 	Linear(size_t inps, size_t outs, size_t bats = 1) :
 		m_weights(inps, outs),
 		m_weightsBlame(inps, outs),
 		m_inBlame(bats, inps),
 		m_output(bats, outs)
-	{}
+	{
+		reset();
+	}
 	
+	/// any -> outs layer; adding to a sequential will set input size.
 	Linear(size_t outs) :
 		m_weights(0, outs),
 		m_weightsBlame(0, outs),
 		m_inBlame(1, 0),
 		m_output(1, outs)
 	{}
+	
+	/// Set weights to normally distributed random values.
+	Linear &reset()
+	{
+		m_weights.randn();
+		return *this;
+	}
+	
+	/// Set the number of inputs.
+	Linear &inputs(size_t inps)
+	{
+		m_inBlame.resize(m_inBlame.size(0), inps);
+		return *this;
+	}
+	
+	/// Set the number of outputs.
+	Linear &outputs(size_t outs)
+	{
+		m_output.resize(m_output.size(0), outs);
+		return *this;
+	}
+	
+	/// Set the batch size.
+	Linear &batch(size_t bats)
+	{
+		m_inBlame.resize(bats, m_inBlame.size(1));
+		m_output.resize(bats, m_output.size(1));
+		return *this;
+	}
+	
+	/// Get the weights of this layer.
+	Tensor<T> &weights()
+	{
+		return m_weights;
+	}
+	
+	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override

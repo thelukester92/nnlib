@@ -26,6 +26,14 @@ public:
 		m_shared(m_data)
 	{}
 	
+	/// Create a vector with the given data.
+	Tensor(const std::initializer_list<T> &values) :
+		m_dims({ values.size() }),
+		m_strides({ 1 }),
+		m_data(new Storage<T>(values)),
+		m_shared(m_data)
+	{}
+	
 	/// Create a tensor with the given size and shape.
 	explicit Tensor(const Storage<size_t> &dims) :
 		m_data(new Storage<T>()),
@@ -45,13 +53,38 @@ public:
 	}
 	
 	/// Create a tensor as a view of another tensor with the same shape.
-	/// \note Non-rvalue tensors can use default shallow copy.
+	Tensor(Tensor &other) :
+		m_dims(other.m_dims),
+		m_strides(other.m_strides),
+		m_data(other.m_data),
+		m_shared(other.m_shared)
+	{}
+	
+	/// Create a tensor as a view of another tensor with the same shape.
 	Tensor(Tensor &&other) :
 		m_dims(other.m_dims),
 		m_strides(other.m_strides),
 		m_data(other.m_data),
 		m_shared(other.m_shared)
 	{}
+	
+	/// Fill this with values of that.
+	/// Resizes this to a 1-dimensional tensor.
+	Tensor &operator=(const Storage<T> &values)
+	{
+		m_dims		= { values.size() };
+		m_strides	= { 1 };
+		*m_data		= values;
+	}
+	
+	/// Fill this with values of that.
+	/// Resizes this to a 1-dimensional tensor.
+	Tensor &operator=(const std::initializer_list<T> &values)
+	{
+		m_dims		= { values.size() };
+		m_strides	= { 1 };
+		*m_data		= values;
+	}
 	
 	/// Move a tensor to this.
 	Tensor &operator=(Tensor &&other)

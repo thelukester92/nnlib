@@ -118,24 +118,39 @@ void testAlgebra()
 
 void testNeuralNet()
 {
-	Linear<double> perceptron;
+	Linear<double> perceptron(3, 2);
+	Tensor<double> &weights = perceptron.weights();
 	
-	/*
-	Sequential neuralDecomposition(
-		new Concat(
-			new Sequential(
-				new Linear(100),
-				new Activation<Sin>()
-			),
-			new Sequential(
-				new Linear(10),
-				new Activation<Tanh>()
-			),
-			new Linear(10)
-		),
-		new Linear(10)
-	);
-	*/
+	Tensor<double> inp = { 1.0, 2.0, 3.14 };
+	inp.resize(1, 3);
+	
+	Tensor<double> target = {
+		weights(0, 0) * inp(0, 0) + weights(1, 0) * inp(0, 1) + weights(2, 0) * inp(0, 2),
+		weights(0, 1) * inp(0, 0) + weights(1, 1) * inp(0, 1) + weights(2, 1) * inp(0, 2)
+	};
+	target.resize(1, 2);
+	
+	Tensor<double> blame = { 1.5, -88.0 };
+	blame.resize(1, 2);
+	
+	Tensor<double> inBlame = {
+		weights(0, 0) * blame(0, 0) + weights(0, 1) * blame(0, 1),
+		weights(1, 0) * blame(0, 0) + weights(1, 1) * blame(0, 1),
+		weights(2, 0) * blame(0, 0) + weights(2, 1) * blame(0, 1)
+	};
+	inBlame.resize(1, 3);
+	
+	perceptron.forward(inp);
+	for(size_t i = 0; i < target.size(); ++i)
+	{
+		NNHardAssert(fabs(target(0, i) - perceptron.output()(0, i)) < 1e-9, "Linear::forward failed!");
+	}
+	
+	perceptron.backward(inp, blame);
+	for(size_t i = 0; i < target.size(); ++i)
+	{
+		NNHardAssert(fabs(inBlame(0, i) - perceptron.inBlame()(0, i)) < 1e-9, "Linear::backward failed!");
+	}
 }
 
 int main()
@@ -148,6 +163,9 @@ int main()
 	testAlgebra();
 	cout << "Algebra test passed!" << endl;
 	
+	cout << "===== Testing Neural Networks =====" << endl;
 	testNeuralNet();
+	cout << "Neural networks test passed!" << endl;
+	
 	return 0;
 }

@@ -13,12 +13,6 @@ class Module
 public:
 	virtual ~Module() {}
 	
-	/// Set the batch size of this module.
-	virtual void batch(size_t bats)
-	{
-		NNAssert(false, "This module does not support batch processing!");
-	}
-	
 	/// Change the input dimensions of this module.
 	virtual void resizeInput(const Storage<size_t> &dims)
 	{
