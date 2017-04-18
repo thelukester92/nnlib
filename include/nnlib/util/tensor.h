@@ -102,10 +102,18 @@ public:
 		return t;
 	}
 	
+	/// Creates a new tensor with a copy of this data but a new shape.
+	/// The shape must be compatible.
 	template <typename ... Ts>
 	Tensor reshape(Ts... dims) const
 	{
 		return reshape({ static_cast<size_t>(dims)... });
+	}
+	
+	/// Get the entire list of dimensions.
+	const Storage<size_t> &shape() const
+	{
+		return m_dims;
 	}
 	
 	/// Get the number of dimensions in this tensor.

@@ -77,7 +77,7 @@ public:
 		return *this;
 	}
 	
-	void resize(size_t n, const T &defaultValue = 0)
+	Storage &resize(size_t n, const T &defaultValue = 0)
 	{
 		if(n > m_capacity)
 		{
@@ -91,6 +91,23 @@ public:
 			m_capacity = n;
 		}
 		m_size = n;
+		return *this;
+	}
+	
+	Storage &push_back(const T &value)
+	{
+		resize(m_size + 1);
+		m_ptr[m_size - 1] = value;
+		return *this;
+	}
+	
+	void erase(size_t index)
+	{
+		for(size_t i = index + 1; i < m_size; ++i)
+		{
+			m_ptr[i - 1] = m_ptr[i];
+		}
+		--m_size;
 	}
 	
 	T *ptr()
@@ -113,9 +130,39 @@ public:
 		return m_ptr[i];
 	}
 	
+	T &front()
+	{
+		return *m_ptr;
+	}
+	
+	const T &front() const
+	{
+		return *m_ptr;
+	}
+	
+	T &back()
+	{
+		return m_ptr[m_size - 1];
+	}
+	
+	const T &back() const
+	{
+		return m_ptr[m_size - 1];
+	}
+	
+	T *begin()
+	{
+		return m_ptr;
+	}
+	
 	const T *begin() const
 	{
 		return m_ptr;
+	}
+	
+	T *end()
+	{
+		return m_ptr + m_size;
 	}
 	
 	const T *end() const

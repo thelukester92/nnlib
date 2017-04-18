@@ -5,4 +5,6 @@
 #include "nnlib/util/tensor.h"
 
 /// Neural Networks
+#include "nnlib/nn/container.h"
 #include "nnlib/nn/module.h"
+#include "nnlib/nn/sequential.h"
