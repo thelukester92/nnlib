@@ -11,6 +11,14 @@ template <typename T = double>
 class Module
 {
 public:
+	virtual ~Module() {}
+	
+	/// Set the batch size of this module.
+	virtual void batch(size_t bats)
+	{
+		NNAssert(false, "This module does not support batch processing!");
+	}
+	
 	/// Change the input dimensions of this module.
 	virtual void resizeInput(const Storage<size_t> &dims)
 	{
@@ -57,13 +65,13 @@ public:
 	virtual Tensor<T> &inBlame() = 0;
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
-	virtual Storage<Tensor<T> *> &parameters()
+	virtual Storage<Tensor<T> *> parameters()
 	{
 		return {};
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters' blame.
-	virtual Storage<Tensor<T> *> &blame()
+	virtual Storage<Tensor<T> *> blame()
 	{
 		return {};
 	}

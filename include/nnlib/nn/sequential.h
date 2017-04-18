@@ -13,18 +13,48 @@ class Sequential : public Container<T>
 using Container<T>::components;
 using Container<T>::m_components;
 public:
+	Sequential() {}
+	
+	template <typename M, typename ... Ms>
+	Sequential(Ms *...components)
+	{
+		add(components...);
+	}
+	
+	template <typename M, typename ... Ms>
+	void add(M *component, Ms *...more)
+	{
+		add(component);
+		add(more...);
+	}
+	
 	// MARK: Container methods
 	
 	/// Add a component to this container, enforcing compatibility.
 	virtual void add(Module<T> *component) override
 	{
-		
+		m_components.push_back(component);
+		if(components() > 1)
+		{
+			component->resizeInput(m_components[m_components.size() - 2]->output().shape());
+		}
 	}
 	
 	/// Remove and return a specific component from this container, enforcing compatibility.
 	virtual Module<T> *remove(size_t index) override
 	{
+		Module<T> *comp = m_components[index];
+		m_components.erase(index);
 		
+		if(index > 0)
+		{
+			for(size_t i = index, j = components(); i < j; ++i)
+			{
+				m_components[i]->resizeInput(m_components[i - 1]->output().shape());
+			}
+		}
+		
+		return comp;
 	}
 	
 	// MARK: Module methods
@@ -52,7 +82,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		const Tensor<T> *inp = &input;
+		Tensor<T> *inp = const_cast<Tensor<T> *>(&input);
 		for(Module<T> *component : m_components)
 		{
 			inp = &component->forward(*inp);

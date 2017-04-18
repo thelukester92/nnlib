@@ -69,55 +69,57 @@ void testAlgebra()
 	B.rand();
 	
 	slowMatrixMultiply<false, false>(A, B, C);
-	Algebra<double>::gemm<false, false>(A, B, C2);
+	Algebra<double>::gemm(A, B, C2);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<false, false> failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm failed!");
 		}
 	}
 	
 	B.resize(3, 5);
 	slowMatrixMultiply<false, true>(A, B, C);
-	Algebra<double>::gemm<false, true>(A, B, C2);
+	Algebra<double>::gemmNT(A, B, C2);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<false, true> failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemmNT failed!");
 		}
 	}
 	
 	A.resize(5, 10);
 	slowMatrixMultiply<true, true>(A, B, C);
-	Algebra<double>::gemm<true, true>(A, B, C2);
+	Algebra<double>::gemmTT(A, B, C2);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<true, true> failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemmTT failed!");
 		}
 	}
 	
 	B.resize(5, 3);
 	slowMatrixMultiply<true, false>(A, B, C);
-	Algebra<double>::gemm<true, false>(A, B, C2);
+	Algebra<double>::gemmTN(A, B, C2);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm<true, false> failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemmTN failed!");
 		}
 	}
 }
 
 void testNeuralNet()
 {
+	Linear<double> perceptron;
+	
 	/*
 	Sequential neuralDecomposition(
 		new Concat(

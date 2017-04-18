@@ -11,6 +11,14 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
+	virtual ~Container()
+	{
+		for(Module<T> *comp : m_components)
+		{
+			delete comp;
+		}
+	}
+	
 	/// Get a specific component from this container.
 	Module<T> *component(size_t index)
 	{
@@ -38,7 +46,7 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters.
-	virtual Storage<Tensor<T> *> &parameters() override
+	virtual Storage<Tensor<T> *> parameters() override
 	{
 		Storage<Tensor<T> *> params;
 		for(Module<T> *comp : m_components)
@@ -52,7 +60,7 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters' blame.
-	virtual Storage<Tensor<T> *> &blame() override
+	virtual Storage<Tensor<T> *> blame() override
 	{
 		Storage<Tensor<T> *> blams;
 		for(Module<T> *comp : m_components)

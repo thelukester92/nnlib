@@ -35,7 +35,7 @@ public:
 	}
 	
 	/// Create a tensor with the given size and shape.
-	/// \note This method includes the default constructor.
+	/// \note This includes the default constructor.
 	template <typename ... Ts>
 	explicit Tensor(Ts... dims) :
 		m_data(new Storage<T>()),
@@ -67,7 +67,16 @@ public:
 	/// Resize this tensor in place and, if necessary, resizes its underlying storage.
 	Tensor &resize(const Storage<size_t> &dims)
 	{
-		m_dims = dims;
+		// Don't allow a 0-dimensional tensor.
+		if(dims.size() > 0)
+		{
+			m_dims = dims;
+		}
+		else
+		{
+			m_dims = { 0 };
+		}
+		
 		m_strides.resize(m_dims.size());
 		
 		m_strides[m_strides.size() - 1] = 1;
