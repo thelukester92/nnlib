@@ -6,6 +6,8 @@ using namespace nnlib;
 
 void testTensor()
 {
+	// MARK: Basics
+	
 	Tensor<double> vector(5);
 	NNHardAssert(vector.size() == 5, "Tensor::Tensor yielded the wrong tensor size!");
 	NNHardAssert(vector.dims() == 1, "Tensor::Tensor yielded the wrong number of dimensions!");
@@ -39,6 +41,21 @@ void testTensor()
 		causedProblems = true;
 	}
 	NNHardAssert(causedProblems, "Tensor::reshape failed to yield an error for an incompatible shape!");
+	
+	// MARK: Narrowing
+	
+	Tensor<double> base(3, 5);
+	double value = 0;
+	for(double &val : base)
+	{
+		val = value++;
+	}
+	
+	Tensor<double> narrowed1 = base.narrow(1, 1, 2);
+	for(double &val : narrowed1)
+	{
+		cout << val << endl;
+	}
 }
 
 template <bool TransA, bool TransB>

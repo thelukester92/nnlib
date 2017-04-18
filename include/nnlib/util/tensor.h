@@ -22,6 +22,7 @@ public:
 	Tensor(const Storage<T> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
+		m_offset(0),
 		m_data(new Storage<T>(values)),
 		m_shared(m_data)
 	{}
@@ -30,12 +31,14 @@ public:
 	Tensor(const std::initializer_list<T> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
+		m_offset(0),
 		m_data(new Storage<T>(values)),
 		m_shared(m_data)
 	{}
 	
 	/// Create a tensor with the given size and shape.
 	explicit Tensor(const Storage<size_t> &dims) :
+		m_offset(0),
 		m_data(new Storage<T>()),
 		m_shared(m_data)
 	{
@@ -46,6 +49,7 @@ public:
 	/// \note This includes the default constructor.
 	template <typename ... Ts>
 	explicit Tensor(Ts... dims) :
+		m_offset(0),
 		m_data(new Storage<T>()),
 		m_shared(m_data)
 	{
@@ -56,6 +60,7 @@ public:
 	Tensor(Tensor &other) :
 		m_dims(other.m_dims),
 		m_strides(other.m_strides),
+		m_offset(other.m_offset),
 		m_data(other.m_data),
 		m_shared(other.m_shared)
 	{}
@@ -64,6 +69,7 @@ public:
 	Tensor(Tensor &&other) :
 		m_dims(other.m_dims),
 		m_strides(other.m_strides),
+		m_offset(other.m_offset),
 		m_data(other.m_data),
 		m_shared(other.m_shared)
 	{}
@@ -74,6 +80,7 @@ public:
 	{
 		m_dims		= { values.size() };
 		m_strides	= { 1 };
+		m_offset	= 0;
 		*m_data		= values;
 		return *this;
 	}
@@ -84,6 +91,7 @@ public:
 	{
 		m_dims		= { values.size() };
 		m_strides	= { 1 };
+		m_offset	= 0;
 		*m_data		= values;
 		return *this;
 	}
@@ -93,6 +101,7 @@ public:
 	{
 		m_dims		= other.m_dims;
 		m_strides	= other.m_strides;
+		m_offset	= other.m_offset;
 		m_data		= other.m_data;
 		m_shared	= other.m_shared;
 		return *this;
@@ -121,7 +130,7 @@ public:
 			m_strides[i - 1] = m_strides[i] * m_dims[i];
 		}
 		
-		m_data->resize(m_strides[0] * m_dims[0]);
+		m_data->resize(m_offset + m_strides[0] * m_dims[0]);
 		return *this;
 	}
 	
@@ -153,6 +162,17 @@ public:
 	Tensor reshape(Ts... dims) const
 	{
 		return reshape({ static_cast<size_t>(dims)... });
+	}
+	
+	/// Creates a new tensor with a subview of this data.
+	Tensor narrow(size_t dim, size_t index, size_t size)
+	{
+		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
+		NNAssert(index + size < m_dims[dim], "Out of dimension bounds!");
+		Tensor t = *this;
+		t.m_offset = m_offset + index * m_strides[dim];
+		t.m_dims[dim] = size;
+		return t;
 	}
 	
 	/// Get the entire list of dimensions.
@@ -279,6 +299,7 @@ public:
 private:
 	Storage<size_t> m_dims;					///< The length along each dimension.
 	Storage<size_t> m_strides;				///< Strides between dimensions.
+	size_t m_offset;						///< Offset of data for this view.
 	Storage<T> *m_data;						///< The actual data.
 	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
 	
@@ -286,11 +307,12 @@ private:
 	size_t indexOf(const Storage<size_t> &indices)
 	{
 		NNAssert(indices.size() == m_dims.size(), "Incorrect number of dimensions!");
-		size_t sum = 0;
+		size_t sum = m_offset;
 		for(size_t i = 0, j = indices.size(); i < j; ++i)
 		{
 			sum += indices[i] * m_strides[i];
 		}
+		NNAssert(sum < m_data->size(), "Index out of bounds!");
 		return sum;
 	}
 };
