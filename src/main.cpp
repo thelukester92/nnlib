@@ -118,6 +118,8 @@ void testAlgebra()
 
 void testNeuralNet()
 {
+	// MARK: Linear Test
+	
 	Linear<double> perceptron(3, 2);
 	Tensor<double> &weights = perceptron.weights();
 	
@@ -152,6 +154,8 @@ void testNeuralNet()
 		NNHardAssert(fabs(inBlame(0, i) - perceptron.inBlame()(0, i)) < 1e-9, "Linear::backward failed!");
 	}
 	
+	// MARK: TanH Test
+	
 	TanH<double> tanh;
 	tanh.resizeInput(perceptron.output().shape());
 	
@@ -167,6 +171,25 @@ void testNeuralNet()
 		double dy = blame(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
 		NNHardAssert(fabs(tanh.inBlame()(0, i) - dy) < 1e-9, "TanH::backward failed!");
 	}
+	
+	// MARK: Sequential Test
+	
+	for(size_t i = 0; i < target.size(1); ++i)
+	{
+		target(0, i) = ::tanh(target(0, i));
+	}
+	
+	Sequential<double> nn(&perceptron, &tanh);
+	nn.forward(inp);
+	nn.backward(inp, blame);
+	
+	for(size_t i = 0; i < target.size(); ++i)
+	{
+		NNHardAssert(fabs(target(0, i) - nn.output()(0, i)) < 1e-9, "Sequential::forward failed!");
+	}
+	
+	nn.remove(0);
+	nn.remove(0);
 }
 
 int main()

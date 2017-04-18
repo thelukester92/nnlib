@@ -15,14 +15,14 @@ using Container<T>::m_components;
 public:
 	Sequential() {}
 	
-	template <typename M, typename ... Ms>
-	Sequential(Ms *...components)
+	template <typename ... Ms>
+	Sequential(Module<T> *component, Ms *...components)
 	{
-		add(components...);
+		add(component, components...);
 	}
 	
-	template <typename M, typename ... Ms>
-	void add(M *component, Ms *...more)
+	template <typename ... Ms>
+	void add(Module<T> *component, Ms *...more)
 	{
 		add(component);
 		add(more...);
