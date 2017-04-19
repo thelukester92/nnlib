@@ -1,6 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
+#include <iostream>
+#include <iomanip>
 #include <memory>
 
 #include "error.h"
@@ -18,7 +20,6 @@ class Tensor
 {
 public:
 	/// Create a vector with the given data.
-	/// \note This conflicts with the dimensions constructor when T = size_t
 	Tensor(const Storage<T> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
@@ -35,15 +36,6 @@ public:
 		m_data(new Storage<T>(values)),
 		m_shared(m_data)
 	{}
-	
-	/// Create a tensor with the given size and shape.
-	explicit Tensor(const Storage<size_t> &dims) :
-		m_offset(0),
-		m_data(new Storage<T>()),
-		m_shared(m_data)
-	{
-		resize(dims);
-	}
 	
 	/// Create a tensor with the given size and shape.
 	/// \note This includes the default constructor.
@@ -168,7 +160,7 @@ public:
 	Tensor narrow(size_t dim, size_t index, size_t size)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
-		NNAssert(index + size < m_dims[dim], "Out of dimension bounds!");
+		NNAssert(index + size <= m_dims[dim], "Out of dimension bounds!");
 		Tensor t = *this;
 		t.m_offset = m_offset + index * m_strides[dim];
 		t.m_dims[dim] = size;
@@ -257,8 +249,21 @@ public:
 	}
 	
 	/// Element access given a multidimensional index.
+	const T &operator()(const Storage<size_t> &indices) const
+	{
+		return (*m_data)[indexOf(indices)];
+	}
+	
+	/// Element access given a multidimensional index.
 	template <typename ... Ts>
 	T &operator()(Ts... indices)
+	{
+		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
+	/// Element access given a multidimensional index.
+	template <typename ... Ts>
+	const T &operator()(Ts... indices) const
 	{
 		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
 	}
@@ -296,6 +301,7 @@ public:
 	{
 		return TensorIterator<const T>(this, true);
 	}
+	
 private:
 	Storage<size_t> m_dims;					///< The length along each dimension.
 	Storage<size_t> m_strides;				///< Strides between dimensions.
@@ -304,7 +310,7 @@ private:
 	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
-	size_t indexOf(const Storage<size_t> &indices)
+	size_t indexOf(const Storage<size_t> &indices) const
 	{
 		NNAssert(indices.size() == m_dims.size(), "Incorrect number of dimensions!");
 		size_t sum = m_offset;
@@ -376,6 +382,38 @@ private:
 	Tensor<TT> *m_tensor;
 	Storage<size_t> m_indices;
 };
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
+{
+	if(t.dims() == 1)
+	{
+		for(size_t i = 0; i < t.size(0); ++i)
+		{
+			out << t(i) << "\n";
+		}
+	}
+	else if(t.dims() == 2)
+	{
+		for(size_t i = 0; i < t.size(0); ++i)
+		{
+			for(size_t j = 0; j < t.size(1); ++j)
+			{
+				out << std::setw(5) << t(i, j);
+			}
+			out << "\n";
+		}
+	}
+	
+	out << "Tensor [" << t.size(0);
+	for(size_t i = 1; i < t.dims(); ++i)
+	{
+		out << " x " << t.size(i);
+	}
+	out << "]";
+	
+	return out;
+}
 
 }
 

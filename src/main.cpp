@@ -44,17 +44,27 @@ void testTensor()
 	
 	// MARK: Narrowing
 	
-	Tensor<double> base(3, 5);
-	double value = 0;
-	for(double &val : base)
+	Tensor<size_t> base(3, 5);
+	size_t value = 0;
+	for(size_t &val : base)
 	{
 		val = value++;
 	}
 	
-	Tensor<double> narrowed1 = base.narrow(1, 1, 2);
-	for(double &val : narrowed1)
+	Tensor<size_t> narrowed1 = base.narrow(1, 1, 2);
+	Tensor<size_t> expected1 = { 1, 2, 6, 7, 11, 12 };
+	
+	Tensor<size_t> narrowed2 = narrowed1.narrow(0, 1, 2);
+	Tensor<size_t> expected2 = { 6, 7, 11, 12 };
+	
+	for(auto i = narrowed1.begin(), j = expected1.begin(), k = narrowed1.end(); i != k; ++i, ++j)
 	{
-		cout << val << endl;
+		NNHardAssert(*i == *j, "Tensor::narrow failed!");
+	}
+	
+	for(auto i = narrowed2.begin(), j = expected2.begin(), k = narrowed2.end(); i != k; ++i, ++j)
+	{
+		NNHardAssert(*i == *j, "Tensor::narrow failed!");
 	}
 }
 
