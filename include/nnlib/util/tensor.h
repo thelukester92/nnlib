@@ -191,7 +191,7 @@ public:
 	Tensor reshape(const Storage<size_t> &dims) const
 	{
 		Tensor t(dims);
-		NNAssert(t.size() == m_data->size(), "Incompatible dimensions for reshaping!");
+		NNAssert(t.size() == size(), "Incompatible dimensions for reshaping!");
 		auto k = t.begin();
 		for(const T &value : *this)
 		{
@@ -276,8 +276,13 @@ public:
 	/// Copies the shape and data from another tensor.
 	Tensor &copy(const Tensor &other)
 	{
-		*this = *const_cast<Tensor *>(&other); // this is safe because we're about to reshape
-		reshape(m_dims);
+		reshape(other.m_dims);
+		auto i = other.begin();
+		for(T &value : *this)
+		{
+			value = *i;
+			++i;
+		}
 		return *this;
 	}
 	
@@ -542,7 +547,7 @@ private:
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 {
-	out << std::setprecision(5) << std::fixed;
+	out << std::left << std::setprecision(5) << std::fixed;
 	
 	if(t.dims() == 1)
 	{
@@ -563,11 +568,12 @@ std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 		}
 	}
 	
-	out << "Tensor of dimension " << t.size(0);
+	out << "[ Tensor of dimension " << t.size(0);
 	for(size_t i = 1; i < t.dims(); ++i)
 	{
 		out << " x " << t.size(i);
 	}
+	out << " ]";
 	
 	return out;
 }

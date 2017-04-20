@@ -295,6 +295,8 @@ void testNeuralNet()
 	
 	// MARK: Optimization Test
 	
+	RandomEngine::seed(0);
+	
 	Sequential<> trainNet(
 		new Linear<>(5, 10), new TanH<>(),
 		new Linear<>(10, 3), new TanH<>()
@@ -305,6 +307,9 @@ void testNeuralNet()
 		new Linear<>(10, 3), new TanH<>()
 	);
 	
+	SSE<> critic(trainNet);
+	SGD<Sequential, SSE> optimizer = makeOptimizer<SGD>(trainNet, critic).learningRate(0.001);
+	
 	Tensor<double> testFeat = Tensor<double>(100, 5).rand();
 	Tensor<double> testLab(100, 3);
 	for(size_t i = 0; i < 100; ++i)
@@ -312,21 +317,15 @@ void testNeuralNet()
 		testLab.narrow(0, i).copy(targetNet.forward(testFeat.narrow(0, i)));
 	}
 	
-	SSE<> critic(trainNet);
-	SGD<Sequential, SSE> optimizer = makeOptimizer<SGD>(trainNet, critic).learningRate(0.001);
-	
-	for(size_t i = 0;; ++i)
+	for(size_t i = 0; i < 10000; ++i)
 	{
 		Tensor<double> feat = Tensor<double>(1, 5).rand();
-		
-		trainNet.batch(1);
-		critic.batch(1);
 		optimizer.step(feat, targetNet.forward(feat));
-		
-		trainNet.batch(100);
-		critic.batch(100);
-		cout << "\r" << critic.forward(trainNet.forward(testFeat), testLab).sum() << flush;
 	}
+	
+	trainNet.batch(100);
+	critic.batch(100);
+	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab).sum() < 50, "SGD failed!");
 }
 
 int main()

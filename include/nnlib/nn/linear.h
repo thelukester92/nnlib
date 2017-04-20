@@ -71,7 +71,7 @@ public:
 		Algebra<T>::gemm(input, m_weights, m_output);
 		
 		// output (bats x outs) += addBuffer (bats x 1) x bias (1 x outs)
-		// Algebra<T>::ger(m_addBuffer, m_bias, m_output);
+		Algebra<T>::ger(m_addBuffer, m_bias, m_output);
 		
 		return m_output;
 	}
@@ -83,7 +83,7 @@ public:
 		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
 		
 		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer^T (bats x 1)
-		// Algebra<T>::gemv(outGrad, m_addBuffer, m_biasGrad, true);
+		Algebra<T>::gemv(outGrad, m_addBuffer, m_biasGrad, true);
 		
 		// weightsGrad (inps x outs) += input^T (bats x inps) x outGrad (bats x outs)
 		Algebra<T>::gemm(input, outGrad, m_weightsGrad, true);
