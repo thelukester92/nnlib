@@ -19,6 +19,7 @@ public:
 	{
 		m_parameters = Tensor<T>::flatten(model.parameters());
 		m_grads = Tensor<T>::flatten(model.grad());
+		m_velocity.resize(m_grads.size()).fill(0.0);
 	}
 	
 	SGD &learningRate(T learningRate)
@@ -48,14 +49,28 @@ public:
 	/// Perform a single step of training given an input and a target.
 	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		m_grads.scale(m_momentum);
+		// update parameters
+		Algebra<T>::axpy(m_velocity, m_parameters, m_momentum);
+		
+		// calculate gradient
+		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
-		Algebra<T>::axpy(m_grads, m_parameters, m_learningRate);
+		
+		// put parameters back
+		Algebra<T>::axpy(m_velocity, m_parameters, -m_momentum);
+		
+		// update velocity
+		m_velocity.scale(m_momentum);
+		Algebra<T>::axpy(m_grads, m_velocity, m_learningRate);
+		
+		// update position
+		Algebra<T>::axpy(m_velocity, m_parameters);
 	}
 	
 private:
 	Tensor<T> m_parameters;
 	Tensor<T> m_grads;
+	Tensor<T> m_velocity;
 	T m_learningRate;
 	T m_momentum;
 };

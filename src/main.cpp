@@ -320,9 +320,18 @@ void testNeuralNet()
 	
 	for(size_t i = 0; i < 10000; ++i)
 	{
+		trainNet.batch(1);
+		critic.batch(1);
+		
 		Tensor<double> feat = Tensor<double>(1, 5).rand();
 		optimizer.step(feat, targetNet.forward(feat));
+		
+		trainNet.batch(100);
+		critic.batch(100);
+		
+		cout << "\r" << critic.forward(trainNet.forward(testFeat), testLab).sum() << flush;
 	}
+	cout << endl;
 	
 	trainNet.batch(100);
 	critic.batch(100);
