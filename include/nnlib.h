@@ -12,6 +12,7 @@
 
 /// Optimizers
 #include "nnlib/optimizers/optimizer.h"
+#include "nnlib/optimizers/rmsprop.h"
 #include "nnlib/optimizers/sgd.h"
 
 /// Utilities
