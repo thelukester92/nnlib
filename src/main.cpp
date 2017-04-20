@@ -201,15 +201,15 @@ void testNeuralNet()
 	};
 	target.resize(1, 2);
 	
-	Tensor<double> blame = { 1.5, -88.0 };
-	blame.resize(1, 2);
+	Tensor<double> grad = { 1.5, -88.0 };
+	grad.resize(1, 2);
 	
-	Tensor<double> inBlame = {
-		weights(0, 0) * blame(0, 0) + weights(0, 1) * blame(0, 1),
-		weights(1, 0) * blame(0, 0) + weights(1, 1) * blame(0, 1),
-		weights(2, 0) * blame(0, 0) + weights(2, 1) * blame(0, 1)
+	Tensor<double> inGrad = {
+		weights(0, 0) * grad(0, 0) + weights(0, 1) * grad(0, 1),
+		weights(1, 0) * grad(0, 0) + weights(1, 1) * grad(0, 1),
+		weights(2, 0) * grad(0, 0) + weights(2, 1) * grad(0, 1)
 	};
-	inBlame.resize(1, 3);
+	inGrad.resize(1, 3);
 	
 	perceptron.forward(inp);
 	for(size_t i = 0; i < target.size(); ++i)
@@ -217,10 +217,10 @@ void testNeuralNet()
 		NNHardAssert(fabs(target(0, i) - perceptron.output()(0, i)) < 1e-9, "Linear::forward failed!");
 	}
 	
-	perceptron.backward(inp, blame);
+	perceptron.backward(inp, grad);
 	for(size_t i = 0; i < target.size(); ++i)
 	{
-		NNHardAssert(fabs(inBlame(0, i) - perceptron.inBlame()(0, i)) < 1e-9, "Linear::backward failed!");
+		NNHardAssert(fabs(inGrad(0, i) - perceptron.inGrad()(0, i)) < 1e-9, "Linear::backward failed!");
 	}
 	
 	// MARK: TanH Test
@@ -234,11 +234,11 @@ void testNeuralNet()
 		NNHardAssert(fabs(tanh.output()(0, i) - ::tanh(perceptron.output()(0, i))) < 1e-9, "TanH::forward failed!");
 	}
 	
-	tanh.backward(perceptron.output(), blame);
-	for(size_t i = 0; i < tanh.inBlame().size(1); ++i)
+	tanh.backward(perceptron.output(), grad);
+	for(size_t i = 0; i < tanh.inGrad().size(1); ++i)
 	{
-		double dy = blame(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
-		NNHardAssert(fabs(tanh.inBlame()(0, i) - dy) < 1e-9, "TanH::backward failed!");
+		double dy = grad(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
+		NNHardAssert(fabs(tanh.inGrad()(0, i) - dy) < 1e-9, "TanH::backward failed!");
 	}
 	
 	// MARK: Sequential Test
@@ -251,25 +251,25 @@ void testNeuralNet()
 	double dy1 = 1.0 - ::tanh(perceptron.output()(0, 0)) * ::tanh(perceptron.output()(0, 0));
 	double dy2 = 1.0 - ::tanh(perceptron.output()(0, 1)) * ::tanh(perceptron.output()(0, 1));
 	
-	inBlame = {
-		weights(0, 0) * blame(0, 0) * dy1 + weights(0, 1) * blame(0, 1) * dy2,
-		weights(1, 0) * blame(0, 0) * dy1 + weights(1, 1) * blame(0, 1) * dy2,
-		weights(2, 0) * blame(0, 0) * dy1 + weights(2, 1) * blame(0, 1) * dy2
+	inGrad = {
+		weights(0, 0) * grad(0, 0) * dy1 + weights(0, 1) * grad(0, 1) * dy2,
+		weights(1, 0) * grad(0, 0) * dy1 + weights(1, 1) * grad(0, 1) * dy2,
+		weights(2, 0) * grad(0, 0) * dy1 + weights(2, 1) * grad(0, 1) * dy2
 	};
-	inBlame.resize(1, 3);
+	inGrad.resize(1, 3);
 	
 	Sequential<double> nn(&perceptron, &tanh);
 	nn.forward(inp);
-	nn.backward(inp, blame);
+	nn.backward(inp, grad);
 	
 	for(size_t i = 0; i < target.size(); ++i)
 	{
 		NNHardAssert(fabs(target(0, i) - nn.output()(0, i)) < 1e-9, "Sequential::forward failed!");
 	}
 	
-	for(size_t i = 0; i < inBlame.size(); ++i)
+	for(size_t i = 0; i < inGrad.size(); ++i)
 	{
-		NNHardAssert(fabs(inBlame(0, i) - nn.inBlame()(0, i)) < 1e-9, "Sequential::backward failed!");
+		NNHardAssert(fabs(inGrad(0, i) - nn.inGrad()(0, i)) < 1e-9, "Sequential::backward failed!");
 	}
 	
 	nn.remove(0);

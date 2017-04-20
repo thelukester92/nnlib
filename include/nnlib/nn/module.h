@@ -16,7 +16,7 @@ public:
 	/// Change the input dimensions of this module.
 	virtual void resizeInput(const Storage<size_t> &dims)
 	{
-		inBlame().resize(dims);
+		inGrad().resize(dims);
 	}
 	
 	/// Change the input dimensions of this module.
@@ -49,14 +49,14 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
 	
-	/// Backward propagate input and output blame, returning input blame.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outBlame) = 0;
+	/// Backward propagate input and output gradient, returning input gradient.
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
 	
 	/// Cached output.
 	virtual Tensor<T> &output() = 0;
 	
-	/// Cached input blame.
-	virtual Tensor<T> &inBlame() = 0;
+	/// Cached input gradient.
+	virtual Tensor<T> &inGrad() = 0;
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
 	virtual Storage<Tensor<T> *> parameters()
@@ -64,8 +64,8 @@ public:
 		return {};
 	}
 	
-	/// A vector of tensors filled with (views of) this module's parameters' blame.
-	virtual Storage<Tensor<T> *> blame()
+	/// A vector of tensors filled with (views of) this module's parameters' gradient.
+	virtual Storage<Tensor<T> *> grad()
 	{
 		return {};
 	}

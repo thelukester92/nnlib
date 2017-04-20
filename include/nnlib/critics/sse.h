@@ -13,19 +13,19 @@ class SSE : public Critic<double>
 public:
 	SSE(size_t outs = 0, size_t bats = 1) :
 		m_output(bats, outs),
-		m_inBlame(bats, outs)
+		m_inGrad(bats, outs)
 	{}
 	
 	SSE &outputs(size_t outs)
 	{
 		m_output.resize(m_output.size(0), outs);
-		m_inBlame.resize(m_inBlame.size(0), outs);
+		m_inGrad.resize(m_inGrad.size(0), outs);
 	}
 	
 	SSE &batch(size_t bats)
 	{
 		m_output.resize(bats, m_output.size(1));
-		m_inBlame.resize(bats, m_inBlame.size(1));
+		m_inGrad.resize(bats, m_inGrad.size(1));
 	}
 	
 	/// Loss = sum_i( 1/2 * (target(i) - input(i))^2 )
@@ -47,11 +47,11 @@ public:
 	{
 		NNAssert(input.shape() == target.shape() && input.shape() == m_output.shape(), "Incompatible operands to SSE!");
 		auto inp = input.begin(), tar = target.begin();
-		for(auto blame = m_inBlame.begin(), end = m_inBlame.end(); blame != end; ++inp, ++tar, ++blame)
+		for(auto grad = m_inGrad.begin(), end = m_inGrad.end(); grad != end; ++inp, ++tar, ++grad)
 		{
-			*blame = *tar - *inp;
+			*grad = *tar - *inp;
 		}
-		return m_inBlame;
+		return m_inGrad;
 	}
 	
 	/// Output buffer (the loss).
@@ -60,15 +60,15 @@ public:
 		return m_output;
 	}
 	
-	/// Input blame buffer (the gradient).
-	virtual Tensor<T> &inBlame() override
+	/// Input gradient buffer.
+	virtual Tensor<T> &inGrad() override
 	{
-		return m_inBlame;
+		return m_inGrad;
 	}
 
 private:
-	Tensor<T> m_output;		///< The loss.
-	Tensor<T> m_inBlame;	///< The gradient of the loss w.r.t. the input.
+	Tensor<T> m_output;	///< The loss.
+	Tensor<T> m_inGrad;	///< The gradient of the loss w.r.t. the input.
 };
 
 }

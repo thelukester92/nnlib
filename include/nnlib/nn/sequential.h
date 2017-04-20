@@ -75,7 +75,7 @@ public:
 		m_components.back()->resizeOutput(dims);
 		for(size_t i = components() - 1; i > 0; --i)
 		{
-			m_components[i - 1]->resizeOutput(m_components[i]->inBlame().shape());
+			m_components[i - 1]->resizeOutput(m_components[i]->inGrad().shape());
 		}
 	}
 	
@@ -90,15 +90,15 @@ public:
 		return *inp;
 	}
 	
-	/// Backward propagate input and output blame, returning input blame.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outBlame) override
+	/// Backward propagate input and output gradient, returning input gradient.
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		const Tensor<T> *blame = &outBlame;
+		const Tensor<T> *grad = &outGrad;
 		for(size_t i = components() - 1; i > 0; --i)
 		{
-			blame = &m_components[i]->backward(m_components[i - 1]->output(), *blame);
+			grad = &m_components[i]->backward(m_components[i - 1]->output(), *grad);
 		}
-		return m_components[0]->backward(input, *blame);
+		return m_components[0]->backward(input, *grad);
 	}
 	
 	/// Cached output.
@@ -107,10 +107,10 @@ public:
 		return m_components.back()->output();
 	}
 	
-	/// Cached input blame.
-	virtual Tensor<T> &inBlame() override
+	/// Cached input gradient.
+	virtual Tensor<T> &inGrad() override
 	{
-		return m_components.front()->inBlame();
+		return m_components.front()->inGrad();
 	}
 };
 

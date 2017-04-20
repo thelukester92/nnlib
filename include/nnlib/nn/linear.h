@@ -15,10 +15,10 @@ public:
 	/// Standard inps -> outs layer.
 	Linear(size_t inps, size_t outs, size_t bats = 1) :
 		m_weights(inps, outs),
-		m_weightsBlame(inps, outs),
+		m_weightsGrad(inps, outs),
 		m_bias(outs),
-		m_biasBlame(outs),
-		m_inBlame(bats, inps),
+		m_biasGrad(outs),
+		m_inGrad(bats, inps),
 		m_output(bats, outs),
 		m_addBuffer(bats)
 	{
@@ -28,10 +28,10 @@ public:
 	/// any -> outs layer; adding to a sequential will set input size.
 	Linear(size_t outs) :
 		m_weights(0, outs),
-		m_weightsBlame(0, outs),
+		m_weightsGrad(0, outs),
 		m_bias(outs),
-		m_biasBlame(outs),
-		m_inBlame(1, 0),
+		m_biasGrad(outs),
+		m_inGrad(1, 0),
 		m_output(1, outs),
 		m_addBuffer(1)
 	{}
@@ -46,7 +46,7 @@ public:
 	/// Set the number of inputs.
 	Linear &inputs(size_t inps)
 	{
-		m_inBlame.resize(m_inBlame.size(0), inps);
+		m_inGrad.resize(m_inGrad.size(0), inps);
 		return *this;
 	}
 	
@@ -54,7 +54,7 @@ public:
 	Linear &outputs(size_t outs)
 	{
 		m_bias.resize(outs);
-		m_biasBlame.resize(outs);
+		m_biasGrad.resize(outs);
 		m_output.resize(m_output.size(0), outs);
 		return *this;
 	}
@@ -62,7 +62,7 @@ public:
 	/// Set the batch size.
 	Linear &batch(size_t bats)
 	{
-		m_inBlame.resize(bats, m_inBlame.size(1));
+		m_inGrad.resize(bats, m_inGrad.size(1));
 		m_output.resize(bats, m_output.size(1));
 		m_addBuffer.resize(bats);
 		return *this;
@@ -112,22 +112,22 @@ public:
 		return m_output;
 	}
 	
-	/// Backward propagate input and output blame, returning input blame.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outBlame) override
+	/// Backward propagate input and output gradient, returning input gradient.
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
-		NNAssert(outBlame.dims() == 2, "Linear expects Matrix output blame!");
+		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
 		
-		// biasBlame (outs x 1) += outBlame^T (outs x bats) x addBuffer^T (bats x 1)
-		Algebra<T>::gemv(outBlame, m_addBuffer, m_biasBlame, true);
+		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer^T (bats x 1)
+		Algebra<T>::gemv(outGrad, m_addBuffer, m_biasGrad, true);
 		
-		// weightsBlame (inps x outs) += input^T (bats x inps) x outBlame (bats x outs)
-		Algebra<T>::gemm(input, outBlame, m_weightsBlame, true);
+		// weightsGrad (inps x outs) += input^T (bats x inps) x outGrad (bats x outs)
+		Algebra<T>::gemm(input, outGrad, m_weightsGrad, true);
 		
-		// inBlame (bats x inps) = outBlame (bats x outs) x weights^T (outs x inps)
-		Algebra<T>::gemm(outBlame, m_weights, m_inBlame, false, true);
+		// inGrad (bats x inps) = outGrad (bats x outs) x weights^T (outs x inps)
+		Algebra<T>::gemm(outGrad, m_weights, m_inGrad, false, true);
 		
-		return m_inBlame;
+		return m_inGrad;
 	}
 	
 	/// Cached output.
@@ -136,10 +136,10 @@ public:
 		return m_output;
 	}
 	
-	/// Cached input blame.
-	virtual Tensor<T> &inBlame() override
+	/// Cached input gradient.
+	virtual Tensor<T> &inGrad() override
 	{
-		return m_inBlame;
+		return m_inGrad;
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
@@ -148,20 +148,20 @@ public:
 		return { &m_weights, &m_bias };
 	}
 	
-	/// A vector of tensors filled with (views of) this module's parameters' blame.
-	virtual Storage<Tensor<T> *> blame() override
+	/// A vector of tensors filled with (views of) this module's parameters' gradient.
+	virtual Storage<Tensor<T> *> grad() override
 	{
-		return { &m_weightsBlame, &m_biasBlame };
+		return { &m_weightsGrad, &m_biasGrad };
 	}
 	
 private:
 	Tensor<T> m_weights;		///< Module weights.
-	Tensor<T> m_weightsBlame;	///< Blame on the weights.
+	Tensor<T> m_weightsGrad;	///< Gradient of the error w.r.t. the weights.
 	
 	Tensor<T> m_bias;			///< Network bias.
-	Tensor<T> m_biasBlame;		///< Blame on the bias.
+	Tensor<T> m_biasGrad;		///< Gradient of the error w.r.t. the bias.
 	
-	Tensor<T> m_inBlame;		///< Input blame buffer.
+	Tensor<T> m_inGrad;		///< Input gradient buffer.
 	Tensor<T> m_output;			///< Output buffer.
 	
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.

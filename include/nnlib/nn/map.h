@@ -12,7 +12,7 @@ class Map : public Module<T>
 {
 public:
 	Map(size_t outs = 0, size_t bats = 1) :
-		m_inBlame(bats, outs),
+		m_inGrad(bats, outs),
 		m_output(bats, outs)
 	{}
 	
@@ -27,14 +27,14 @@ public:
 	/// Change the input dimensions of this module.
 	virtual void resizeInput(const Storage<size_t> &dims) override
 	{
-		m_inBlame.resize(dims);
+		m_inGrad.resize(dims);
 		m_output.resize(dims);
 	}
 	
 	/// Change the output dimensions of this module.
 	virtual void resizeOutput(const Storage<size_t> &dims) override
 	{
-		m_inBlame.resize(dims);
+		m_inGrad.resize(dims);
 		m_output.resize(dims);
 	}
 	
@@ -50,17 +50,17 @@ public:
 		return m_output;
 	}
 	
-	/// Backward propagate input and output blame, returning input blame.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outBlame) override
+	/// Backward propagate input and output gradient, returning input gradient.
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssert(input.shape() == m_output.shape(), "Incompatible input shape!");
-		NNAssert(outBlame.shape() == m_output.shape(), "Incompatible output blame shape!");
-		auto i = input.begin(), j = input.end(), b = outBlame.begin();
-		for(auto k = m_output.begin(), l = m_inBlame.begin(); i != j; ++i, ++b, ++k, ++l)
+		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible output gradient shape!");
+		auto i = input.begin(), j = input.end(), b = outGrad.begin();
+		for(auto k = m_output.begin(), l = m_inGrad.begin(); i != j; ++i, ++b, ++k, ++l)
 		{
 			*l = *b * backward(*i, *k);
 		}
-		return m_inBlame;
+		return m_inGrad;
 	}
 	
 	/// Cached output.
@@ -69,14 +69,14 @@ public:
 		return m_output;
 	}
 	
-	/// Cached input blame.
-	virtual Tensor<T> &inBlame() override
+	/// Cached input gradient.
+	virtual Tensor<T> &inGrad() override
 	{
-		return m_inBlame;
+		return m_inGrad;
 	}
 	
 private:
-	Tensor<T> m_inBlame;
+	Tensor<T> m_inGrad;
 	Tensor<T> m_output;
 };
 

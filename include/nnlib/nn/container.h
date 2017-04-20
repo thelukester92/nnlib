@@ -59,13 +59,13 @@ public:
 		return params;
 	}
 	
-	/// A vector of tensors filled with (views of) each sub-module's parameters' blame.
-	virtual Storage<Tensor<T> *> blame() override
+	/// A vector of tensors filled with (views of) each sub-module's parameters' gradient.
+	virtual Storage<Tensor<T> *> grad() override
 	{
 		Storage<Tensor<T> *> blams;
 		for(Module<T> *comp : m_components)
 		{
-			for(Tensor<T> *blam : comp->blame())
+			for(Tensor<T> *blam : comp->grad())
 			{
 				blams.push_back(blam);
 			}
