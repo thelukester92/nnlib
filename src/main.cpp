@@ -66,6 +66,12 @@ void testTensor()
 	{
 		NNHardAssert(*i == *j, "Tensor::narrow failed!");
 	}
+	
+	Tensor<size_t> subbed = base.sub({ { 1, 2 }, { 1, 2 } });
+	for(auto i = subbed.begin(), j = expected2.begin(), k = subbed.end(); i != k; ++i, ++j)
+	{
+		NNHardAssert(*i == *j, "Tensor::sub failed!");
+	}
 }
 
 template <bool TransA, bool TransB>

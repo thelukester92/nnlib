@@ -157,13 +157,42 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
-	Tensor narrow(size_t dim, size_t index, size_t size)
+	Tensor narrow(size_t dim, size_t index, size_t size = 1)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
 		NNAssert(index + size <= m_dims[dim], "Out of dimension bounds!");
 		Tensor t = *this;
 		t.m_offset = m_offset + index * m_strides[dim];
 		t.m_dims[dim] = size;
+		return t;
+	}
+	
+	/// Creates a new tensor with a subview of this data.
+	Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims)
+	{
+		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
+		
+		Tensor t = *this;
+		size_t dim = 0;
+		for(const std::initializer_list<size_t> &params : dims)
+		{
+			NNAssert(params.size() <= 2, "Invalid parameters for subtensor!");
+			if(params.size() == 1)
+			{
+				size_t index = *params.begin();
+				t.m_offset = t.m_offset + index * m_strides[dim];
+				t.m_dims[dim] = m_dims[dim] - index;
+			}
+			else if(params.size() == 2)
+			{
+				size_t index = *params.begin();
+				size_t size = *(params.begin() + 1);
+				t.m_offset = t.m_offset + index * m_strides[dim];
+				t.m_dims[dim] = size;
+			}
+			++dim;
+		}
+		
 		return t;
 	}
 	
