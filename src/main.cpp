@@ -75,7 +75,7 @@ void testTensor()
 }
 
 template <bool TransA, bool TransB>
-void slowMatrixMultiply(Tensor<double> &A, Tensor<double> &B, Tensor<double> &C)
+void slowMatrixMultiply(const Tensor<double> &A, const Tensor<double> &B, Tensor<double> &C)
 {
 	C.fill(0);
 	
@@ -159,6 +159,14 @@ void testAlgebra()
 		}
 	}
 	
+	Tensor<double> mv(outerProduct.size(0));
+	Tensor<double> actual(outerProduct.size(0), 1);
+	slowMatrixMultiply<false, false>(outerProduct, vec2.reshape(outerProduct.size(1), 1), actual);
+	Algebra<double>::gemv(outerProduct, vec2, mv);
+	for(size_t i = 0; i < mv.size(); ++i)
+	{
+		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Algebra::ger failed!");
+	}
 }
 
 void testNeuralNet()
