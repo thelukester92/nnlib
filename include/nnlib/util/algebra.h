@@ -39,6 +39,12 @@ public:
 	{
 		cblas_dger(o, M, N, alpha, X, strideX, Y, strideY, A, lda);
 	}
+	
+	/// Vector + Vector (scaled)
+	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_daxpy(N, alpha, X, strideX, Y, strideY);
+	}
 };
 
 /// Single-precision BLAS.
@@ -63,6 +69,12 @@ public:
 	static void ger(CBLAS_ORDER o, size_t M, size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY, T *A, size_t lda)
 	{
 		cblas_sger(o, M, N, alpha, X, strideX, Y, strideY, A, lda);
+	}
+	
+	/// Vector + Vector (scaled)
+	static void axpy(size_t N, T alpha, T *X, size_t strideX, T *Y, size_t strideY)
+	{
+		cblas_saxpy(N, alpha, X, strideX, Y, strideY);
 	}
 };
 
@@ -141,6 +153,14 @@ public:
 			const_cast<T *>(B.ptr()), B.stride(0),
 			C.ptr(), C.stride(0)
 		);
+	}
+	
+	/// Scaled vector addition. Need to reset B manually if necessary.
+	static void axpy(const Tensor<T> &A, Tensor<T> &B, T alpha = 1)
+	{
+		NNAssert(A.dims() == 1 && B.dims() == 1, "Cannot call axpy with non-vector operands!");
+		NNAssert(A.size() == B.size(), "Incompatible operands for axpy!");
+		BLAS<T>::axpy(A.size(), alpha, const_cast<T *>(A.ptr()), A.stride(0), B.ptr(), B.stride(0));
 	}
 };
 

@@ -11,6 +11,9 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
+	using Module<T>::inputs;
+	using Module<T>::outputs;
+	
 	Map(size_t outs = 0, size_t bats = 1) :
 		m_inGrad(bats, outs),
 		m_output(bats, outs)
@@ -23,20 +26,6 @@ public:
 	virtual T backward(const T &x, const T &y) = 0;
 	
 	// MARK: Module methods
-	
-	/// Change the input dimensions of this module.
-	virtual void resizeInput(const Storage<size_t> &dims) override
-	{
-		m_inGrad.resize(dims);
-		m_output.resize(dims);
-	}
-	
-	/// Change the output dimensions of this module.
-	virtual void resizeOutput(const Storage<size_t> &dims) override
-	{
-		m_inGrad.resize(dims);
-		m_output.resize(dims);
-	}
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
@@ -73,6 +62,24 @@ public:
 	virtual Tensor<T> &inGrad() override
 	{
 		return m_inGrad;
+	}
+	
+	/// Set the input shape of this module, including batch.
+	/// In a map, input shape is always equal to output shape.
+	virtual Map &inputs(const Storage<size_t> &dims) override
+	{
+		Module<T>::inputs(dims);
+		Module<T>::outputs(dims);
+		return *this;
+	}
+	
+	/// Set the output shape of this module, including batch.
+	/// In a map, input shape is always equal to output shape.
+	virtual Map &outputs(const Storage<size_t> &dims) override
+	{
+		Module<T>::inputs(dims);
+		Module<T>::outputs(dims);
+		return *this;
 	}
 	
 private:

@@ -13,39 +13,6 @@ class Module
 public:
 	virtual ~Module() {}
 	
-	/// Change the input dimensions of this module.
-	virtual void resizeInput(const Storage<size_t> &dims)
-	{
-		inGrad().resize(dims);
-	}
-	
-	/// Change the input dimensions of this module.
-	template <typename ... Ts>
-	void resizeInput(Ts... dims)
-	{
-		resizeInput({ static_cast<size_t>(dims)... });
-	}
-	
-	/// Change the output dimensions of this module.
-	virtual void resizeOutput(const Storage<size_t> &dims)
-	{
-		output().resize(dims);
-	}
-	
-	/// Change the output dimensions of this module.
-	template <typename ... Ts>
-	void resizeOutput(Ts... dims)
-	{
-		resizeOutput({ static_cast<size_t>(dims)... });
-	}
-	
-	/// Change both the input and output dimensions of this module.
-	virtual void resize(const Storage<size_t> &inDims, const Storage<size_t> &outDims)
-	{
-		resizeInput(inDims);
-		resizeOutput(outDims);
-	}
-	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
 	
@@ -57,6 +24,56 @@ public:
 	
 	/// Cached input gradient.
 	virtual Tensor<T> &inGrad() = 0;
+	
+	/// Get the input shape of this module, including batch.
+	virtual const Storage<size_t> &inputs() const
+	{
+		return const_cast<Module<T> *>(this)->inGrad().shape();
+	}
+	
+	/// Set the input shape of this module, including batch.
+	/// By default, this resizes the input gradient and resets the batch to dims[0].
+	virtual Module &inputs(const Storage<size_t> &dims)
+	{
+		inGrad().resize(dims);
+		return batch(dims[0]);
+	}
+	
+	/// Get the output shape of this module, including batch.
+	virtual const Storage<size_t> &outputs() const
+	{
+		return const_cast<Module<T> *>(this)->output().shape();
+	}
+	
+	/// Set the output shape of this module, including batch.
+	/// By default, this resizes the output and resets the batch to dims[0].
+	virtual Module &outputs(const Storage<size_t> &dims)
+	{
+		output().resize(dims);
+		return batch(dims[0]);
+	}
+	
+	/// Get the batch size of this module.
+	/// By default, this returns the first dimension of the input shape.
+	virtual size_t batch() const
+	{
+		return const_cast<Module<T> *>(this)->inGrad().size(0);
+	}
+	
+	/// Set the batch size of this module.
+	/// By default, this resizes the first dimension of the input gradient and output.
+	virtual Module &batch(size_t bats)
+	{
+		Storage<size_t> dims = inGrad().shape();
+		dims[0] = bats;
+		inGrad().resize(dims);
+		
+		dims = output().shape();
+		dims[0] = bats;
+		output().resize(dims);
+		
+		return *this;
+	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
 	virtual Storage<Tensor<T> *> parameters()

@@ -20,6 +20,19 @@ public:
 		m_grads = Tensor<T>::flatten(model.grad());
 	}
 	
+	SGD &learningRate(T learningRate)
+	{
+		m_learningRate = learningRate;
+		return *this;
+	}
+	
+	T learningRate() const
+	{
+		return m_learningRate;
+	}
+	
+	// MARK: Critic methods
+	
 	/// Perform a single step of training given an input and a target.
 	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
 	{

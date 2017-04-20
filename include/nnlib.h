@@ -10,6 +10,10 @@
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/tanh.h"
 
+/// Optimizers
+#include "nnlib/optimizers/optimizer.h"
+#include "nnlib/optimizers/sgd.h"
+
 /// Utilities
 #include "nnlib/util/algebra.h"
 #include "nnlib/util/error.h"

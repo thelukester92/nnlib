@@ -88,6 +88,23 @@ void testTensor()
 	{
 		NNHardAssert(fabs(*i - *j) < 1e-9, "Tensor::flatten failed!");
 	}
+	
+	// MARK: Selection
+	
+	Tensor<double> orig = Tensor<double>(10, 5, 3).rand();
+	Tensor<double> slice = orig.select(1, 3);
+	
+	NNHardAssert(slice.dims() == 2, "Tensor::select failed to set the correct number of dimensions!");
+	NNHardAssert(slice.size(0) == 10, "Tensor::select failed to set the correct 0th dimension size!");
+	NNHardAssert(slice.size(1) == 3, "Tensor::select failed to set the correct 1st dimension size!");
+	
+	for(size_t x = 0; x < 10; ++x)
+	{
+		for(size_t y = 0; y < 3; ++y)
+		{
+			NNHardAssert(fabs(orig(x, 3, y) - slice(x, y)) < 1e-9, "Tensor::select failed!");
+		}
+	}
 }
 
 template <bool TransA, bool TransB>
@@ -226,7 +243,7 @@ void testNeuralNet()
 	// MARK: TanH Test
 	
 	TanH<double> tanh;
-	tanh.resizeInput(perceptron.output().shape());
+	tanh.inputs(perceptron.outputs());
 	
 	tanh.forward(perceptron.output());
 	for(size_t i = 0; i < tanh.output().size(1); ++i)
@@ -272,8 +289,44 @@ void testNeuralNet()
 		NNHardAssert(fabs(inGrad(0, i) - nn.inGrad()(0, i)) < 1e-9, "Sequential::backward failed!");
 	}
 	
+	// avoid double deallocation since nn's modules were not dynamically allocated
 	nn.remove(0);
 	nn.remove(0);
+	
+	// MARK: Optimization Test
+	
+	Sequential<> trainNet(
+		new Linear<>(5, 10), new TanH<>(),
+		new Linear<>(10, 3), new TanH<>()
+	);
+	
+	Sequential<> targetNet(
+		new Linear<>(5, 10), new TanH<>(),
+		new Linear<>(10, 3), new TanH<>()
+	);
+	
+	Tensor<double> testFeat = Tensor<double>(100, 5).rand();
+	Tensor<double> testLab(100, 3);
+	for(size_t i = 0; i < 100; ++i)
+	{
+		testLab.narrow(0, i).copy(targetNet.forward(testFeat.narrow(0, i)));
+	}
+	
+	SSE<> critic(trainNet);
+	SGD<Sequential, SSE> optimizer = makeOptimizer<SGD>(trainNet, critic).learningRate(0.001);
+	
+	for(size_t i = 0;; ++i)
+	{
+		Tensor<double> feat = Tensor<double>(1, 5).rand();
+		
+		trainNet.batch(1);
+		critic.batch(1);
+		optimizer.step(feat, targetNet.forward(feat));
+		
+		trainNet.batch(100);
+		critic.batch(100);
+		cout << "\r" << critic.forward(trainNet.forward(testFeat), testLab).sum() << flush;
+	}
 }
 
 int main()

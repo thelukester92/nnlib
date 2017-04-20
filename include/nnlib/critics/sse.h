@@ -11,22 +11,16 @@ template <typename T = double>
 class SSE : public Critic<double>
 {
 public:
-	SSE(size_t outs = 0, size_t bats = 1) :
-		m_output(bats, outs),
-		m_inGrad(bats, outs)
+	template <typename M>
+	SSE(const M &model) :
+		m_output(model.outputs(), true),
+		m_inGrad(model.outputs(), true)
 	{}
 	
-	SSE &outputs(size_t outs)
-	{
-		m_output.resize(m_output.size(0), outs);
-		m_inGrad.resize(m_inGrad.size(0), outs);
-	}
-	
-	SSE &batch(size_t bats)
-	{
-		m_output.resize(bats, m_output.size(1));
-		m_inGrad.resize(bats, m_inGrad.size(1));
-	}
+	SSE(const Storage<size_t> &shape) :
+		m_output(shape, true),
+		m_inGrad(shape, true)
+	{}
 	
 	/// Loss = sum_i( 1/2 * (target(i) - input(i))^2 )
 	virtual Tensor<T> &forward(const Tensor<T> &input, const Tensor<T> &target) override

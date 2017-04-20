@@ -127,6 +127,17 @@ public:
 	}
 	
 	/// Move a tensor to this.
+	Tensor &operator=(Tensor &other)
+	{
+		m_dims		= other.m_dims;
+		m_strides	= other.m_strides;
+		m_offset	= other.m_offset;
+		m_data		= other.m_data;
+		m_shared	= other.m_shared;
+		return *this;
+	}
+	
+	/// Move a tensor to this.
 	Tensor &operator=(Tensor &&other)
 	{
 		m_dims		= other.m_dims;
@@ -199,6 +210,8 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
+	/// This completely eliminates the dimth dimension.
+	/// The resulting tensor has one less dimension than this.
 	Tensor select(size_t dim, size_t index)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
@@ -211,6 +224,8 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
+	/// This reduces the dimth dimension to size.
+	/// The resulting tensor has the same number of dimensions as this.
 	Tensor narrow(size_t dim, size_t index, size_t size = 1)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
@@ -222,6 +237,8 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
+	/// This performs narrow on each dimension.
+	/// The resulting tensor has the same number of dimensions as this.
 	Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
 		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
@@ -259,7 +276,7 @@ public:
 	/// Copies the shape and data from another tensor.
 	Tensor &copy(const Tensor &other)
 	{
-		*this = other;
+		*this = *const_cast<Tensor *>(&other); // this is safe because we're about to reshape
 		reshape(m_dims);
 		return *this;
 	}

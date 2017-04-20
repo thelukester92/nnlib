@@ -13,6 +13,10 @@ class Sequential : public Container<T>
 using Container<T>::components;
 using Container<T>::m_components;
 public:
+	using Container<T>::inputs;
+	using Container<T>::outputs;
+	using Container<T>::batch;
+	
 	Sequential() {}
 	
 	template <typename ... Ms>
@@ -22,10 +26,11 @@ public:
 	}
 	
 	template <typename ... Ms>
-	void add(Module<T> *component, Ms *...more)
+	Sequential &add(Module<T> *component, Ms *...more)
 	{
 		add(component);
 		add(more...);
+		return *this;
 	}
 	
 	// MARK: Container methods
@@ -36,7 +41,7 @@ public:
 		m_components.push_back(component);
 		if(components() > 1)
 		{
-			component->resizeInput(m_components[m_components.size() - 2]->output().shape());
+			resizeDown(m_components.size() - 1);
 		}
 	}
 	
@@ -48,36 +53,14 @@ public:
 		
 		if(index > 0)
 		{
-			for(size_t i = index, j = components(); i < j; ++i)
-			{
-				m_components[i]->resizeInput(m_components[i - 1]->output().shape());
-			}
+			resizeUp(index - 1);
+			resizeDown(index);
 		}
 		
 		return comp;
 	}
 	
 	// MARK: Module methods
-	
-	/// Change the input dimensions of this module, enforcing compatibility.
-	virtual void resizeInput(const Storage<size_t> &dims) override
-	{
-		m_components.front()->resizeInput(dims);
-		for(size_t i = 1, j = components(); i < j; ++i)
-		{
-			m_components[i]->resizeInput(m_components[i - 1]->output().shape());
-		}
-	}
-	
-	/// Change the output dimensions of this module.
-	virtual void resizeOutput(const Storage<size_t> &dims) override
-	{
-		m_components.back()->resizeOutput(dims);
-		for(size_t i = components() - 1; i > 0; --i)
-		{
-			m_components[i - 1]->resizeOutput(m_components[i]->inGrad().shape());
-		}
-	}
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
@@ -111,6 +94,52 @@ public:
 	virtual Tensor<T> &inGrad() override
 	{
 		return m_components.front()->inGrad();
+	}
+	
+	/// Set the input shape of this module, including batch.
+	virtual Sequential &inputs(const Storage<size_t> &dims) override
+	{
+		m_components.front()->inputs(dims);
+		resizeDown();
+		return *this;
+	}
+	
+	/// Set the output shape of this module, including batch.
+	virtual Sequential &outputs(const Storage<size_t> &dims) override
+	{
+		m_components.back()->outputs(dims);
+		resizeUp();
+		return *this;
+	}
+	
+	/// Set the batch size of this module.
+	virtual Sequential &batch(size_t bats) override
+	{
+		for(Module<T> *component : m_components)
+		{
+			component->batch(bats);
+		}
+		return *this;
+	}
+	
+private:
+	Sequential &resizeDown(size_t start = 1)
+	{
+		for(size_t i = start, count = components(); i < count; ++i)
+		{
+			m_components[i]->inputs(m_components[i-1]->outputs());
+		}
+		return *this;
+	}
+	
+	Sequential &resizeUp(size_t start = (size_t) -1)
+	{
+		start = std::min(start, components() - 1);
+		for(size_t i = start; i > 0; --i)
+		{
+			m_components[i - 1]->outputs(m_components[i]->inputs());
+		}
+		return *this;
 	}
 };
 
