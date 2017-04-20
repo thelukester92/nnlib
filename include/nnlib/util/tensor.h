@@ -19,6 +19,34 @@ template <typename T>
 class Tensor
 {
 public:
+	/// Flatten a number of tensors into a vector and give the original tensors views into the new one.
+	static Tensor flatten(const std::initializer_list<Tensor *> &tensors)
+	{
+		size_t size = 0;
+		for(Tensor *t : tensors)
+		{
+			size += t->size();
+		}
+		
+		Tensor flattened(size);
+		size_t offset = 0;
+		for(Tensor *t : tensors)
+		{
+			size_t i = offset;
+			for(const T &value : *t)
+			{
+				flattened(i) = value;
+				++i;
+			}
+			t->m_data = flattened.m_data;	// make t share data with flattened
+			t->m_offset = offset;			// give t the appropriate offset in flattened
+			t->resize(t->shape());			// reset strides of t to be contiguous
+			offset = i;
+		}
+		
+		return flattened;
+	}
+	
 	/// Create a vector with the given data.
 	Tensor(const Storage<T> &values) :
 		m_dims({ values.size() }),
@@ -121,8 +149,12 @@ public:
 		{
 			m_strides[i - 1] = m_strides[i] * m_dims[i];
 		}
-		
-		m_data->resize(m_offset + m_strides[0] * m_dims[0]);
+		size_t newSize = m_offset + m_strides[0] * m_dims[0];
+		if(newSize > m_data->size())
+		{
+			// only resize if necessary, because other tensors may share this data and need it all
+			m_data->resize(newSize);
+		}
 		return *this;
 	}
 	
@@ -194,6 +226,12 @@ public:
 		}
 		
 		return t;
+	}
+	
+	/// Creates a new tensor with a copy (not a view) of this data.
+	Tensor copy()
+	{
+		return reshape(m_dims);
 	}
 	
 	/// Get the entire list of dimensions.

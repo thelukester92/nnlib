@@ -72,6 +72,22 @@ void testTensor()
 	{
 		NNHardAssert(*i == *j, "Tensor::sub failed!");
 	}
+	
+	// MARK: Flattening
+	
+	Tensor<double> a = Tensor<double>(5).rand(), b = Tensor<double>(7, 3).rand();
+	Tensor<double> aCopy = a.copy(), bCopy = b.copy();
+	Tensor<double> c = Tensor<double>::flatten({ &a, &b });
+	
+	for(auto i = a.begin(), j = aCopy.begin(), end = a.end(); i != end; ++i, ++j)
+	{
+		NNHardAssert(fabs(*i - *j) < 1e-9, "Tensor::flatten failed!");
+	}
+	
+	for(auto i = b.begin(), j = bCopy.begin(), end = b.end(); i != end; ++i, ++j)
+	{
+		NNHardAssert(fabs(*i - *j) < 1e-9, "Tensor::flatten failed!");
+	}
 }
 
 template <bool TransA, bool TransB>
