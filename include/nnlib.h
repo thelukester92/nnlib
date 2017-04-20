@@ -1,3 +1,7 @@
+/// Critics
+#include "nnlib/critics/critic.h"
+#include "nnlib/critics/sse.h"
+
 /// Neural Networks
 #include "nnlib/nn/container.h"
 #include "nnlib/nn/linear.h"

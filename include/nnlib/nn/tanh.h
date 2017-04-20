@@ -12,6 +12,7 @@ template <typename T = double>
 class TanH : public Map<T>
 {
 public:
+	using Map<T>::Map;
 	using Map<T>::forward;
 	using Map<T>::backward;
 	

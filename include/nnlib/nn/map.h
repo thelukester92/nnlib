@@ -11,6 +11,11 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
+	Map(size_t outs = 0, size_t bats = 1) :
+		m_inBlame(bats, outs),
+		m_output(bats, outs)
+	{}
+	
 	/// Single element forward.
 	virtual T forward(const T &x) = 0;
 	

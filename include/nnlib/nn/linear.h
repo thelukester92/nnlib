@@ -82,6 +82,22 @@ public:
 	
 	// MARK: Module methods
 	
+	/// Change the input dimensions of this module.
+	virtual void resizeInput(const Storage<size_t> &dims) override
+	{
+		NNAssert(dims.size() == 2, "Input must be a matrix!");
+		batch(dims[0]);
+		inputs(dims[1]);
+	}
+	
+	/// Change the input dimensions of this module.
+	virtual void resizeOutput(const Storage<size_t> &dims) override
+	{
+		NNAssert(dims.size() == 2, "Output must be a matrix!");
+		batch(dims[0]);
+		outputs(dims[1]);
+	}
+	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{

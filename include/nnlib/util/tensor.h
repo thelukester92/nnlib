@@ -281,6 +281,18 @@ public:
 		return *this;
 	}
 	
+	// MARK: Statistical methods
+	
+	T sum() const
+	{
+		T result = 0;
+		for(const T &v : *this)
+		{
+			result += v;
+		}
+		return result;
+	}
+	
 	// MARK: Element/data access methods.
 	
 	/// Element access given a multidimensional index.
@@ -439,6 +451,8 @@ private:
 template <typename T>
 std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 {
+	out << std::setprecision(5) << std::fixed;
+	
 	if(t.dims() == 1)
 	{
 		for(size_t i = 0; i < t.size(0); ++i)
@@ -452,7 +466,7 @@ std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 		{
 			for(size_t j = 0; j < t.size(1); ++j)
 			{
-				out << std::setw(5) << t(i, j);
+				out << std::setw(10) << t(i, j);
 			}
 			out << "\n";
 		}
