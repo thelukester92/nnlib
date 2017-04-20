@@ -20,7 +20,7 @@ class Tensor
 {
 public:
 	/// Flatten a number of tensors into a vector and give the original tensors views into the new one.
-	static Tensor flatten(const std::initializer_list<Tensor *> &tensors)
+	static Tensor flatten(const Storage<Tensor *> &tensors)
 	{
 		size_t size = 0;
 		for(Tensor *t : tensors)
@@ -64,6 +64,16 @@ public:
 		m_data(new Storage<T>(values)),
 		m_shared(m_data)
 	{}
+	
+	/// Create a tensor with the given size and shape.
+	/// \note This uses a dummy bool to differentiate this from the const Storage<T> & constructor.
+	Tensor(const Storage<size_t> &dims, bool) :
+		m_offset(0),
+		m_data(new Storage<T>()),
+		m_shared(m_data)
+	{
+		resize(dims);
+	}
 	
 	/// Create a tensor with the given size and shape.
 	/// \note This includes the default constructor.
@@ -189,6 +199,18 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
+	Tensor select(size_t dim, size_t index)
+	{
+		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
+		NNAssert(index < m_dims[dim], "Out of dimension bounds!");
+		Tensor t = *this;
+		t.m_offset += index * t.m_strides[dim];
+		t.m_dims.erase(dim);
+		t.m_strides.erase(dim);
+		return t;
+	}
+	
+	/// Creates a new tensor with a subview of this data.
 	Tensor narrow(size_t dim, size_t index, size_t size = 1)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
@@ -228,10 +250,18 @@ public:
 		return t;
 	}
 	
-	/// Creates a new tensor with a copy (not a view) of this data.
+	/// Creates a new tensor with the same shape and a copy (not a view) of this data.
 	Tensor copy()
 	{
 		return reshape(m_dims);
+	}
+	
+	/// Copies the shape and data from another tensor.
+	Tensor &copy(const Tensor &other)
+	{
+		*this = other;
+		reshape(m_dims);
+		return *this;
 	}
 	
 	/// Get the entire list of dimensions.
@@ -247,9 +277,15 @@ public:
 	}
 	
 	/// Get the total number of elements in this tensor.
+	/// \todo find a faster way, maybe cache it.
 	size_t size() const
 	{
-		return m_data->size();
+		size_t result = 1;
+		for(size_t s : m_dims)
+		{
+			result *= s;
+		}
+		return result;
 	}
 	
 	/// Get the size of a given dimension.
@@ -510,12 +546,11 @@ std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 		}
 	}
 	
-	out << "Tensor [" << t.size(0);
+	out << "Tensor of dimension " << t.size(0);
 	for(size_t i = 1; i < t.dims(); ++i)
 	{
 		out << " x " << t.size(i);
 	}
-	out << "]";
 	
 	return out;
 }
