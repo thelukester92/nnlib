@@ -308,7 +308,8 @@ void testNeuralNet()
 	);
 	
 	SSE<> critic(trainNet);
-	SGD<Sequential, SSE> optimizer = makeOptimizer<SGD>(trainNet, critic).learningRate(0.001);
+	SGD<Sequential, SSE> optimizer(trainNet, critic);
+	optimizer.learningRate(0.001);
 	
 	Tensor<double> testFeat = Tensor<double>(100, 5).rand();
 	Tensor<double> testLab(100, 3);
