@@ -377,6 +377,16 @@ public:
 		return *this;
 	}
 	
+	/// Multiply this tensor by a scalar.
+	Tensor &scale(T alpha)
+	{
+		for(T &v : *this)
+		{
+			v *= alpha;
+		}
+		return *this;
+	}
+	
 	// MARK: Statistical methods
 	
 	T sum() const
