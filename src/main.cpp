@@ -114,39 +114,51 @@ void testAlgebra()
 	
 	B.resize(3, 5);
 	slowMatrixMultiply<false, true>(A, B, C);
-	Algebra<double>::gemmNT(A, B, C2);
+	Algebra<double>::gemm(A, B, C2, false, true);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemmNT failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm(..., false, true) failed!");
 		}
 	}
 	
 	A.resize(5, 10);
 	slowMatrixMultiply<true, true>(A, B, C);
-	Algebra<double>::gemmTT(A, B, C2);
+	Algebra<double>::gemm(A, B, C2, true, true);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemmTT failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm(..., true, true) failed!");
 		}
 	}
 	
 	B.resize(5, 3);
 	slowMatrixMultiply<true, false>(A, B, C);
-	Algebra<double>::gemmTN(A, B, C2);
+	Algebra<double>::gemm(A, B, C2, true, false);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemmTN failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm(..., true, false) failed!");
 		}
 	}
+	
+	Tensor<double> vec1 = Tensor<double>(10).rand(), vec2 = Tensor<double>(5).rand();
+	Tensor<double> outerProduct(10, 5);
+	Algebra<double>::ger(vec1, vec2, outerProduct);
+	for(size_t i = 0; i < vec1.size(); ++i)
+	{
+		for(size_t j = 0; j < vec2.size(); ++j)
+		{
+			NNHardAssert(fabs(outerProduct(i, j) - vec1(i) * vec2(j)) < 1e-9, "Algebra::ger failed!");
+		}
+	}
+	
 }
 
 void testNeuralNet()

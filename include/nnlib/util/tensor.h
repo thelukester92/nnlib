@@ -239,6 +239,18 @@ public:
 		return *this;
 	}
 	
+	/// Set every element in this tensor to 0.
+	Tensor &zeros()
+	{
+		return fill(0);
+	}
+	
+	/// Set every element in this tensor to 1.
+	Tensor &ones()
+	{
+		return fill(1);
+	}
+	
 	/// Set every element in this tensor to a uniformly distributed random value.
 	Tensor &rand(const T &from = -1, const T &to = 1)
 	{
@@ -295,6 +307,18 @@ public:
 	const T &operator()(Ts... indices) const
 	{
 		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
+	/// Direct raw pointer access.
+	T *ptr()
+	{
+		return m_data->ptr() + m_offset;
+	}
+	
+	/// Direct raw pointer access.
+	const T *ptr() const
+	{
+		return m_data->ptr() + m_offset;
 	}
 	
 	/// Direct storage access.
