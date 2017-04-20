@@ -181,7 +181,7 @@ public:
 			{
 				size_t index = *params.begin();
 				t.m_offset = t.m_offset + index * m_strides[dim];
-				t.m_dims[dim] = m_dims[dim] - index;
+				t.m_dims[dim] = 1;
 			}
 			else if(params.size() == 2)
 			{
