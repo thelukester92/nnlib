@@ -19,7 +19,6 @@ public:
 	{
 		m_parameters = Tensor<T>::flatten(model.parameters());
 		m_grads = Tensor<T>::flatten(model.grad());
-		m_velocity.resize(m_grads.size()).fill(0.0);
 		m_meanSquare.resize(m_grads.size()).fill(0.0);
 	}
 	
@@ -34,16 +33,6 @@ public:
 		return m_learningRate;
 	}
 	
-	T isqrt(T number)
-	{
-		float x = number * 0.5f;
-		float y = number;
-		long i = *(long *) &y;
-		i = 0x5f3759df - (i >> 1);
-		y = *(float *) &i;
-		return y * (1.5f - (x * y * y));
-	}
-	
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
@@ -53,23 +42,29 @@ public:
 		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
 		
-		// update moment
+		// update mean square
 		auto g = m_grads.begin();
-		for(T &v : m_velocity)
+		for(T &n : m_meanSquare)
 		{
-			v *= m_gamma;
-			v += (1 - m_gamma) * *g * *g;
+			n *= m_gamma;
+			n += (1 - m_gamma) * *g * *g;
 			++g;
 		}
 		
 		// update parameters
-		
+		g = m_grads.begin();
+		auto n = m_meanSquare.begin();
+		for(T &p : m_parameters)
+		{
+			p -= m_learningRate * *g / (sqrt(*n) + 1e-8);
+			++g;
+			++n;
+		}
 	}
 	
 private:
 	Tensor<T> m_parameters;
 	Tensor<T> m_grads;
-	Tensor<T> m_velocity;
 	Tensor<T> m_meanSquare;
 	T m_learningRate;
 	T m_gamma;
