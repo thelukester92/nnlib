@@ -49,22 +49,19 @@ public:
 	/// Perform a single step of training given an input and a target.
 	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		// update parameters
-		Algebra<T>::axpy(m_velocity, m_parameters, m_momentum);
-		
 		// calculate gradient
 		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
 		
-		// put parameters back
-		Algebra<T>::axpy(m_velocity, m_parameters, -m_momentum);
-		
-		// update velocity
+		// apply momentum
 		m_velocity.scale(m_momentum);
 		Algebra<T>::axpy(m_grads, m_velocity);
 		
-		// update position
-		Algebra<T>::axpy(m_velocity, m_parameters, m_learningRate);
+		// Nesterov step
+		Algebra<T>::axpy(m_velocity, m_grads, m_momentum);
+		
+		// update parameters
+		Algebra<T>::axpy(m_grads, m_parameters, m_learningRate);
 	}
 	
 private:
