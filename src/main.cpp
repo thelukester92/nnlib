@@ -308,7 +308,7 @@ void testNeuralNet()
 	);
 	
 	SSE<> critic(trainNet);
-	Adam<Sequential, SSE> optimizer(trainNet, critic);
+	RMSProp<Sequential, SSE> optimizer(trainNet, critic);
 	optimizer.learningRate(0.001);
 	
 	Tensor<double> testFeat = Tensor<double>(100, 5).rand();
@@ -318,7 +318,7 @@ void testNeuralNet()
 		testLab.narrow(0, i).copy(targetNet.forward(testFeat.narrow(0, i)));
 	}
 	
-	for(size_t i = 0; i < 10000; ++i)
+	for(size_t i = 0;; ++i)
 	{
 		trainNet.batch(10);
 		targetNet.batch(10);

@@ -91,7 +91,7 @@ public:
 		}
 		
 		// update parameters
-		T lr = m_learningRate / (1 - m_normalize1) / sqrt(m_normalize2);
+		T lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
 		m = m_velocity.begin(), n = m_meanSquare.begin();
 		for(T &p : m_parameters)
 		{

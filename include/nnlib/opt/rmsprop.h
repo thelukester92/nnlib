@@ -42,23 +42,13 @@ public:
 		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
 		
-		// update mean square
-		auto g = m_grads.begin();
-		for(T &n : m_meanSquare)
+		for(size_t i = 0, end = m_grads.size(); i != end; ++i)
 		{
-			n *= m_gamma;
-			n += (1 - m_gamma) * *g * *g;
-			++g;
-		}
-		
-		// update parameters
-		g = m_grads.begin();
-		auto n = m_meanSquare.begin();
-		for(T &p : m_parameters)
-		{
-			p -= m_learningRate * *g / (sqrt(*n) + 1e-8);
-			++g;
-			++n;
+			// update mean square
+			m_meanSquare(i) = m_gamma * m_meanSquare(i) + (1 - m_gamma) * m_grads(i) * m_grads(i);
+			
+			// update parameters
+			m_parameters(i) -= m_learningRate * m_grads(i) / (sqrt(m_meanSquare(i)) + 1e-8);
 		}
 	}
 	
