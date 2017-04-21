@@ -322,10 +322,10 @@ void testNeuralNet()
 	targetNet.batch(10);
 	critic.batch(10);
 	
-	for(size_t i = 0; i < 10000; ++i)
+	for(size_t i = 0; i < 100000; ++i)
 	{
 		Tensor<double> feat = Tensor<double>(10, 5).rand();
-		optimizer.step(feat, targetNet.forward(feat));
+		optimizer.hammerStep(feat, targetNet.forward(feat));
 	}
 	
 	trainNet.batch(100);
