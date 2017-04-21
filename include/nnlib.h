@@ -20,6 +20,8 @@
 /// Utilities
 #include "nnlib/util/algebra.h"
 #include "nnlib/util/error.h"
+#include "nnlib/util/file.h"
+#include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
 #include "nnlib/util/storage.h"
 #include "nnlib/util/tensor.h"

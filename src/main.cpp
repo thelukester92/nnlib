@@ -31,17 +31,6 @@ void testTensor()
 	NNHardAssert(reshaped.size(0) == 9, "Tensor::reshape yielded the wrong 0th dimension size!");
 	NNHardAssert(reshaped.size(1) == 4, "Tensor::reshape yielded the wrong 1st dimension size!");
 	
-	bool causedProblems = false;
-	try
-	{
-		tensor.reshape(3, 3);
-	}
-	catch(const std::runtime_error &e)
-	{
-		causedProblems = true;
-	}
-	NNHardAssert(causedProblems, "Tensor::reshape failed to yield an error for an incompatible shape!");
-	
 	// MARK: Narrowing
 	
 	Tensor<size_t> base(3, 5);
@@ -333,6 +322,14 @@ void testNeuralNet()
 	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab).sum() < 10, "SGD failed!");
 }
 
+void testMNIST()
+{
+	File<double>::loadArff("../data/mnist.train.arff");
+	File<double>::loadArff("../data/mnist.test.arff");
+	
+	cout << "loaded!" << endl;
+}
+
 int main()
 {
 	cout << "===== Testing Tensor =====" << endl;
@@ -346,6 +343,10 @@ int main()
 	cout << "===== Testing Neural Networks =====" << endl;
 	testNeuralNet();
 	cout << "Neural networks test passed!" << endl;
+	
+	cout << "===== Testing on MNIST =====" << endl;
+	testMNIST();
+	cout << "MNIST test passed!" << endl;
 	
 	return 0;
 }
