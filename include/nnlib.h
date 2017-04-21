@@ -12,6 +12,7 @@
 
 /// Optimization
 #include "nnlib/opt/adam.h"
+#include "nnlib/opt/nadam.h"
 #include "nnlib/opt/optimizer.h"
 #include "nnlib/opt/rmsprop.h"
 #include "nnlib/opt/sgd.h"

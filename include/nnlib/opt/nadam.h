@@ -1,5 +1,5 @@
-#ifndef ADAM_H
-#define ADAM_H
+#ifndef NADAM_H
+#define NADAM_H
 
 #include "optimizer.h"
 
@@ -7,12 +7,12 @@ namespace nnlib
 {
 
 template <template <typename> class M, template <typename> class C, typename T = double>
-class Adam : public Optimizer<M, C, T>
+class Nadam : public Optimizer<M, C, T>
 {
 using Optimizer<M, C, T>::m_model;
 using Optimizer<M, C, T>::m_critic;
 public:
-	Adam(M<T> &model, C<T> &critic) :
+	Nadam(M<T> &model, C<T> &critic) :
 		Optimizer<M, C, T>(model, critic),
 		m_learningRate(0.001),
 		m_beta1(0.9),
@@ -34,7 +34,7 @@ public:
 		m_normalize2 = 1;
 	}
 	
-	Adam &learningRate(T learningRate)
+	Nadam &learningRate(T learningRate)
 	{
 		m_learningRate = learningRate;
 		return *this;
@@ -45,7 +45,7 @@ public:
 		return m_learningRate;
 	}
 	
-	Adam &beta1(T beta1)
+	Nadam &beta1(T beta1)
 	{
 		m_beta1 = beta1;
 		return *this;
@@ -56,7 +56,7 @@ public:
 		return m_beta1;
 	}
 	
-	Adam &beta2(T beta2)
+	Nadam &beta2(T beta2)
 	{
 		m_beta2 = beta2;
 		return *this;
@@ -91,7 +91,7 @@ public:
 			m_variance(i) = m_beta2 * m_variance(i) + (1 - m_beta2) * m_grads(i) * m_grads(i);
 			
 			// update parameters
-			m_parameters(i) -= lr * m_mean(i) / (sqrt(m_variance(i)) + 1e-8);
+			m_parameters(i) -= lr * ((1 - m_beta1) * m_grads(i) + m_beta1 * m_mean(i)) / (sqrt(m_variance(i)) + 1e-8);
 		}
 	}
 	

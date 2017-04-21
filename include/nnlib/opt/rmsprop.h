@@ -19,7 +19,7 @@ public:
 	{
 		m_parameters = Tensor<T>::flatten(model.parameters());
 		m_grads = Tensor<T>::flatten(model.grad());
-		m_meanSquare.resize(m_grads.size()).fill(0.0);
+		m_variance.resize(m_grads.size()).fill(0.0);
 	}
 	
 	RMSProp &learningRate(T learningRate)
@@ -44,18 +44,18 @@ public:
 		
 		for(size_t i = 0, end = m_grads.size(); i != end; ++i)
 		{
-			// update mean square
-			m_meanSquare(i) = m_gamma * m_meanSquare(i) + (1 - m_gamma) * m_grads(i) * m_grads(i);
+			// update variance
+			m_variance(i) = m_gamma * m_variance(i) + (1 - m_gamma) * m_grads(i) * m_grads(i);
 			
 			// update parameters
-			m_parameters(i) -= m_learningRate * m_grads(i) / (sqrt(m_meanSquare(i)) + 1e-8);
+			m_parameters(i) -= m_learningRate * m_grads(i) / (sqrt(m_variance(i)) + 1e-8);
 		}
 	}
 	
 private:
 	Tensor<T> m_parameters;
 	Tensor<T> m_grads;
-	Tensor<T> m_meanSquare;
+	Tensor<T> m_variance;
 	T m_learningRate;
 	T m_gamma;
 };
