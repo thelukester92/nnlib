@@ -308,7 +308,7 @@ void testNeuralNet()
 	);
 	
 	SSE<> critic(trainNet);
-	RMSProp<Sequential, SSE> optimizer(trainNet, critic);
+	SGD<Sequential, SSE> optimizer(trainNet, critic);
 	optimizer.learningRate(0.001);
 	
 	Tensor<double> testFeat = Tensor<double>(100, 5).rand();
@@ -318,25 +318,19 @@ void testNeuralNet()
 		testLab.narrow(0, i).copy(targetNet.forward(testFeat.narrow(0, i)));
 	}
 	
-	for(size_t i = 0;; ++i)
+	trainNet.batch(10);
+	targetNet.batch(10);
+	critic.batch(10);
+	
+	for(size_t i = 0; i < 10000; ++i)
 	{
-		trainNet.batch(10);
-		targetNet.batch(10);
-		critic.batch(10);
-		
 		Tensor<double> feat = Tensor<double>(10, 5).rand();
 		optimizer.step(feat, targetNet.forward(feat));
-		
-		trainNet.batch(100);
-		critic.batch(100);
-		
-		cout << "\r" << critic.forward(trainNet.forward(testFeat), testLab).sum() << flush;
 	}
-	cout << endl;
 	
 	trainNet.batch(100);
 	critic.batch(100);
-	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab).sum() < 50, "SGD failed!");
+	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab).sum() < 10, "SGD failed!");
 }
 
 int main()

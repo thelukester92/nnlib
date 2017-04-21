@@ -76,28 +76,22 @@ public:
 		m_normalize2 *= m_beta2;
 		++m_steps;
 		
+		T lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
+		
 		// calculate gradient
 		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
 		
-		// update momentum and mean square
-		auto m = m_velocity.begin(), n = m_meanSquare.begin();
-		for(T &g : m_grads)
+		for(size_t i = 0, end = m_grads.size(); i != end; ++i)
 		{
-			*m *= m_beta1;
-			*m += (1 - m_beta1) * g;
-			*n *= m_beta2;
-			*n += (1 - m_beta2) * g * g;
-		}
-		
-		// update parameters
-		T lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
-		m = m_velocity.begin(), n = m_meanSquare.begin();
-		for(T &p : m_parameters)
-		{
-			p -= lr * *m / (sqrt(*n) + 1e-8);
-			++m;
-			++n;
+			// update momentum
+			m_velocity(i) = m_beta1 * m_velocity(i) + (1 - m_beta1) * m_grads(i);
+			
+			// update mean square
+			m_meanSquare(i) = m_beta2 * m_meanSquare(i) + (1 - m_beta2) * m_grads(i) * m_grads(i);
+			
+			// update parameters
+			m_parameters(i) -= lr * m_velocity(i) / (sqrt(m_meanSquare(i)) + 1e-8);
 		}
 	}
 	
