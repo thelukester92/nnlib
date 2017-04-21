@@ -15,7 +15,6 @@ public:
 	RMSProp(M<T> &model, C<T> &critic) :
 		Optimizer<M, C, T>(model, critic),
 		m_learningRate(0.001),
-		m_momentum(0.1),
 		m_gamma(0.9)
 	{
 		m_parameters = Tensor<T>::flatten(model.parameters());
@@ -35,17 +34,6 @@ public:
 		return m_learningRate;
 	}
 	
-	RMSProp &momentum(T momentum)
-	{
-		m_momentum = momentum;
-		return *this;
-	}
-	
-	T momentum() const
-	{
-		return m_momentum;
-	}
-	
 	T isqrt(T number)
 	{
 		float x = number * 0.5f;
@@ -61,27 +49,21 @@ public:
 	/// Perform a single step of training given an input and a target.
 	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		// update parameters
-		Algebra<T>::axpy(m_velocity, m_parameters, m_momentum);
-		
 		// calculate gradient
 		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
 		
-		// put parameters back
-		Algebra<T>::axpy(m_velocity, m_parameters, -m_momentum);
-		
-		// update velocity
-		m_velocity.scale(m_momentum);
-		Algebra<T>::axpy(m_grads, m_velocity);
-		
-		// update position
-		auto m = m_meanSquare.begin(), v = m_velocity.begin();
-		for(auto p = m_parameters.begin(), end = m_parameters.end(); p != end; ++m, ++v, ++p)
+		// update moment
+		auto g = m_grads.begin();
+		for(T &v : m_velocity)
 		{
-			*m = m_gamma * *m + (1 - m_gamma) * *v * *v;
-			*p += m_learningRate * *v * isqrt(*m);
+			v *= m_gamma;
+			v += (1 - m_gamma) * *g * *g;
+			++g;
 		}
+		
+		// update parameters
+		
 	}
 	
 private:
@@ -90,7 +72,6 @@ private:
 	Tensor<T> m_velocity;
 	Tensor<T> m_meanSquare;
 	T m_learningRate;
-	T m_momentum;
 	T m_gamma;
 };
 

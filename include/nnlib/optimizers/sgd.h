@@ -61,7 +61,7 @@ public:
 		Algebra<T>::axpy(m_velocity, m_grads, m_momentum);
 		
 		// update parameters
-		Algebra<T>::axpy(m_grads, m_parameters, m_learningRate);
+		Algebra<T>::axpy(m_grads, m_parameters, -m_learningRate);
 	}
 	
 private:
