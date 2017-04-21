@@ -11,6 +11,7 @@
 #include "nnlib/nn/tanh.h"
 
 /// Optimization
+#include "nnlib/opt/adam.h"
 #include "nnlib/opt/optimizer.h"
 #include "nnlib/opt/rmsprop.h"
 #include "nnlib/opt/sgd.h"
