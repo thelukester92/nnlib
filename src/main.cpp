@@ -325,7 +325,7 @@ void testNeuralNet()
 	for(size_t i = 0; i < 100000; ++i)
 	{
 		Tensor<double> feat = Tensor<double>(10, 5).rand();
-		optimizer.hammerStep(feat, targetNet.forward(feat));
+		optimizer.step(feat, targetNet.forward(feat));
 	}
 	
 	trainNet.batch(100);
