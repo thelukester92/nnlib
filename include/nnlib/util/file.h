@@ -21,8 +21,8 @@ public:
 	struct Relation
 	{
 		std::string name;
-		std::vector<std::string> attrNames;
-		std::vector<std::unordered_map<std::string, size_t>> attrVals;
+		Storage<std::string> attrNames;
+		Storage<std::unordered_map<std::string, size_t>> attrVals;
 	};
 	static T unknown;
 	

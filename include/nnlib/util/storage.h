@@ -13,7 +13,7 @@ template <typename T>
 class Storage
 {
 public:
-	Storage(size_t n = 0, const T &defaultValue = 0) :
+	Storage(size_t n = 0, const T &defaultValue = T()) :
 		m_ptr(new T[n]),
 		m_size(n),
 		m_capacity(n)
@@ -77,7 +77,7 @@ public:
 		return *this;
 	}
 	
-	Storage &resize(size_t n, const T &defaultValue = 0)
+	Storage &resize(size_t n, const T &defaultValue = T())
 	{
 		if(n > m_capacity)
 		{

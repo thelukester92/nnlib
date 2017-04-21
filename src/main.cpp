@@ -324,10 +324,11 @@ void testNeuralNet()
 
 void testMNIST()
 {
-	File<double>::loadArff("../data/mnist.train.arff");
+	File<double>::Relation rel;
+	File<double>::loadArff("../data/mnist.train.arff", &rel);
 	File<double>::loadArff("../data/mnist.test.arff");
 	
-	cout << "loaded!" << endl;
+	
 }
 
 int main()
