@@ -135,70 +135,70 @@ void testAlgebra()
 	B.rand();
 	
 	slowMatrixMultiply<false, false>(A, B, C);
-	Algebra<double>::gemm(A, B, C2);
+	C2.multiplyMM(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMM failed!");
 		}
 	}
 	
 	B.resize(3, 5);
 	slowMatrixMultiply<false, true>(A, B, C);
-	Algebra<double>::gemm(A, B, C2, false, true);
+	C2.multiplyMMT(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm(..., false, true) failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMMT failed!");
 		}
 	}
 	
 	A.resize(5, 10);
 	slowMatrixMultiply<true, true>(A, B, C);
-	Algebra<double>::gemm(A, B, C2, true, true);
+	C2.multiplyMTMT(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm(..., true, true) failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMTMT failed!");
 		}
 	}
 	
 	B.resize(5, 3);
 	slowMatrixMultiply<true, false>(A, B, C);
-	Algebra<double>::gemm(A, B, C2, true, false);
+	C2.multiplyMTM(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Algebra::gemm(..., true, false) failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMTM failed!");
 		}
 	}
 	
 	Tensor<double> vec1 = Tensor<double>(10).rand(), vec2 = Tensor<double>(5).rand();
 	Tensor<double> outerProduct(10, 5);
-	Algebra<double>::ger(vec1, vec2, outerProduct);
+	outerProduct.multiplyVTV(vec1, vec2);
 	for(size_t i = 0; i < vec1.size(); ++i)
 	{
 		for(size_t j = 0; j < vec2.size(); ++j)
 		{
-			NNHardAssert(fabs(outerProduct(i, j) - vec1(i) * vec2(j)) < 1e-9, "Algebra::ger failed!");
+			NNHardAssert(fabs(outerProduct(i, j) - vec1(i) * vec2(j)) < 1e-9, "Tensor::multiplyVTV failed!");
 		}
 	}
 	
 	Tensor<double> mv(outerProduct.size(0));
 	Tensor<double> actual(outerProduct.size(0), 1);
 	slowMatrixMultiply<false, false>(outerProduct, vec2.reshape(outerProduct.size(1), 1), actual);
-	Algebra<double>::gemv(outerProduct, vec2, mv);
+	mv.multiplyMV(outerProduct, vec2);
 	for(size_t i = 0; i < mv.size(); ++i)
 	{
-		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Algebra::ger failed!");
+		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Tensor::multiplyMV failed!");
 	}
 }
 

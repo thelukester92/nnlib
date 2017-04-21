@@ -8,6 +8,7 @@
 #include "error.h"
 #include "random.h"
 #include "storage.h"
+#include "algebra.h"
 
 namespace nnlib
 {
@@ -384,6 +385,103 @@ public:
 		{
 			v *= alpha;
 		}
+		return *this;
+	}
+	
+	// MARK: Algebra
+	
+	Tensor &multiplyMM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		Algebra<T>::multiplyMM(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			B.ptr(), B.size(0), B.size(1), B.stride(0),
+			ptr(), size(0), size(1), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	Tensor &multiplyMTM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		Algebra<T>::multiplyMTM(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			B.ptr(), B.size(0), B.size(1), B.stride(0),
+			ptr(), size(0), size(1), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	Tensor &multiplyMMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		Algebra<T>::multiplyMMT(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			B.ptr(), B.size(0), B.size(1), B.stride(0),
+			ptr(), size(0), size(1), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	Tensor &multiplyMTMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		Algebra<T>::multiplyMTMT(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			B.ptr(), B.size(0), B.size(1), B.stride(0),
+			ptr(), size(0), size(1), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	Tensor &multiplyMV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
+		Algebra<T>::multiplyMV(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			x.ptr(), x.size(), x.stride(0),
+			ptr(), size(), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	Tensor &multiplyMTV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
+		Algebra<T>::multiplyMTV(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			x.ptr(), x.size(), x.stride(0),
+			ptr(), size(), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	Tensor &multiplyVTV(const Tensor<T> &x, const Tensor<T> &y, T alpha = 1)
+	{
+		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
+		Algebra<T>::multiplyVTV(
+			x.ptr(), x.size(), x.stride(0),
+			y.ptr(), y.size(), y.stride(0),
+			ptr(), size(0), size(1), stride(0),
+			alpha
+		);
+		return *this;
+	}
+	
+	Tensor &addVV(const Tensor<T> &x, T alpha = 1)
+	{
+		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
+		Algebra<T>::addVV(
+			x.ptr(), x.size(), x.stride(0),
+			ptr(), size(), stride(0),
+			alpha
+		);
 		return *this;
 	}
 	

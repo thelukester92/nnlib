@@ -55,13 +55,13 @@ public:
 		
 		// apply momentum
 		m_velocity.scale(m_momentum);
-		Algebra<T>::axpy(m_grads, m_velocity);
+		m_velocity.addVV(m_grads);
 		
 		// Nesterov step
-		Algebra<T>::axpy(m_velocity, m_grads, m_momentum);
+		m_grads.addVV(m_velocity, m_momentum);
 		
 		// update parameters
-		Algebra<T>::axpy(m_grads, m_parameters, -m_learningRate);
+		m_parameters.addVV(m_grads, -m_learningRate);
 	}
 	
 private:

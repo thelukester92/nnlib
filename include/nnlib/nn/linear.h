@@ -68,10 +68,10 @@ public:
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
 		
 		// output (bats x outs) = input (bats x inps) x weights (inps x outs)
-		Algebra<T>::gemm(input, m_weights, m_output);
+		m_output.multiplyMM(input, m_weights);
 		
 		// output (bats x outs) += addBuffer (bats x 1) x bias (1 x outs)
-		Algebra<T>::ger(m_addBuffer, m_bias, m_output);
+		m_output.multiplyVTV(m_addBuffer, m_bias);
 		
 		return m_output;
 	}
@@ -82,14 +82,14 @@ public:
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
 		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
 		
-		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer^T (bats x 1)
-		Algebra<T>::gemv(outGrad, m_addBuffer, m_biasGrad, true);
+		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer (bats x 1)
+		m_biasGrad.multiplyMTV(outGrad, m_addBuffer);
 		
 		// weightsGrad (inps x outs) += input^T (bats x inps) x outGrad (bats x outs)
-		Algebra<T>::gemm(input, outGrad, m_weightsGrad, true);
+		m_weightsGrad.multiplyMTM(input, outGrad);
 		
 		// inGrad (bats x inps) = outGrad (bats x outs) x weights^T (outs x inps)
-		Algebra<T>::gemm(outGrad, m_weights, m_inGrad, false, true);
+		m_inGrad.multiplyMMT(outGrad, m_weights);
 		
 		return m_inGrad;
 	}
