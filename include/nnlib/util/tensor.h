@@ -238,6 +238,14 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
+	/// This reduces the dimth dimension to size.
+	/// The resulting tensor has the same number of dimensions as this.
+	const Tensor narrow(size_t dim, size_t index, size_t size = 1) const
+	{
+		return const_cast<Tensor *>(this)->narrow(dim, index, size);
+	}
+	
+	/// Creates a new tensor with a subview of this data.
 	/// This performs narrow on each dimension.
 	/// The resulting tensor has the same number of dimensions as this.
 	Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims)
@@ -493,6 +501,32 @@ public:
 		for(const T &v : *this)
 		{
 			result += v;
+		}
+		return result;
+	}
+	
+	T min() const
+	{
+		T result = *begin();
+		for(const T &v : *this)
+		{
+			if(v < result)
+			{
+				result = v;
+			}
+		}
+		return result;
+	}
+	
+	T max() const
+	{
+		T result = *begin();
+		for(const T &v : *this)
+		{
+			if(v > result)
+			{
+				result = v;
+			}
 		}
 		return result;
 	}

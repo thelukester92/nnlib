@@ -25,7 +25,7 @@ public:
 	/// L = 1/2 sum_i( (input(i) - target(i))^2 )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.shape() == target.shape() && input.shape() == m_output.shape(), "Incompatible operands to SSE!");
+		NNAssert(input.shape() == target.shape(), "Incompatible operands to SSE!");
 		auto tar = target.begin();
 		T diff, sum = 0;
 		for(const T &inp : input)
@@ -40,7 +40,7 @@ public:
 	/// dL/di = input(i) - target(i)
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.shape() == target.shape() && input.shape() == m_output.shape(), "Incompatible operands to SSE!");
+		NNAssert(input.shape() == target.shape() && input.shape() == m_inGrad.shape(), "Incompatible operands to SSE!");
 		auto inp = input.begin(), tar = target.begin();
 		for(T &g : m_inGrad)
 		{

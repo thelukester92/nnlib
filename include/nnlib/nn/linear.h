@@ -2,7 +2,6 @@
 #define NN_LINEAR_H
 
 #include "module.h"
-#include "../util/algebra.h"
 
 namespace nnlib
 {
@@ -149,7 +148,7 @@ private:
 	Tensor<T> m_bias;			///< Network bias.
 	Tensor<T> m_biasGrad;		///< Gradient of the error w.r.t. the bias.
 	
-	Tensor<T> m_inGrad;		///< Input gradient buffer.
+	Tensor<T> m_inGrad;			///< Input gradient buffer.
 	Tensor<T> m_output;			///< Output buffer.
 	
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.

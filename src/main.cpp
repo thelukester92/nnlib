@@ -288,12 +288,14 @@ void testNeuralNet()
 	
 	Sequential<> trainNet(
 		new Linear<>(5, 10), new TanH<>(),
-		new Linear<>(10, 3), new TanH<>()
+		new Linear<>(10, 3), new TanH<>(),
+		new LogSoftMax<>()
 	);
 	
 	Sequential<> targetNet(
 		new Linear<>(5, 10), new TanH<>(),
-		new Linear<>(10, 3), new TanH<>()
+		new Linear<>(10, 3), new TanH<>(),
+		new LogSoftMax<>()
 	);
 	
 	SSE<> critic(trainNet);
