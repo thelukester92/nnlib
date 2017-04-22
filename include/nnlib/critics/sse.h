@@ -6,7 +6,7 @@
 namespace nnlib
 {
 
-/// Squared error critic.
+/// Sum squared error critic.
 template <typename T = double>
 class SSE : public Critic<double>
 {
@@ -22,36 +22,33 @@ public:
 		m_inGrad(shape, true)
 	{}
 	
-	/// Loss = (input(i) - target(i))^2
-	virtual Tensor<T> &forward(const Tensor<T> &input, const Tensor<T> &target) override
+	/// L = 1/2 sum_i( (input(i) - target(i))^2 )
+	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssert(input.shape() == target.shape() && input.shape() == m_output.shape(), "Incompatible operands to SSE!");
-		auto inp = input.begin(), tar = target.begin();
-		T diff;
-		for(auto out = m_output.begin(), end = m_output.end(); out != end; ++inp, ++tar, ++out)
+		auto tar = target.begin();
+		T diff, sum = 0;
+		for(const T &inp : input)
 		{
-			diff = *inp - *tar;
-			*out = diff * diff;
+			diff = inp - *tar;
+			sum += diff * diff;
+			++tar;
 		}
-		return m_output;
+		return sum * 0.5;
 	}
 	
-	/// Grad(Loss) = input(i) - target(i)
+	/// dL/di = input(i) - target(i)
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssert(input.shape() == target.shape() && input.shape() == m_output.shape(), "Incompatible operands to SSE!");
 		auto inp = input.begin(), tar = target.begin();
-		for(auto grad = m_inGrad.begin(), end = m_inGrad.end(); grad != end; ++inp, ++tar, ++grad)
+		for(T &g : m_inGrad)
 		{
-			*grad = *inp - *tar;
+			g = *inp - *tar;
+			++inp;
+			++tar;
 		}
 		return m_inGrad;
-	}
-	
-	/// Output buffer (the loss).
-	virtual Tensor<T> &output() override
-	{
-		return m_output;
 	}
 	
 	/// Input gradient buffer.

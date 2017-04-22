@@ -311,7 +311,7 @@ void testNeuralNet()
 	targetNet.batch(10);
 	critic.batch(10);
 	
-	for(size_t i = 0; i < 10000; ++i)
+	for(size_t i = 0; i < 1000; ++i)
 	{
 		Tensor<double> feat = Tensor<double>(10, 5).rand();
 		optimizer.step(feat, targetNet.forward(feat));
@@ -319,7 +319,7 @@ void testNeuralNet()
 	
 	trainNet.batch(100);
 	critic.batch(100);
-	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab).sum() < 10, "SGD failed!");
+	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab) < 25, "SGD failed!");
 }
 
 void testMNIST()
