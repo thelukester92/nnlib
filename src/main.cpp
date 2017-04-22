@@ -288,17 +288,17 @@ void testNeuralNet()
 	
 	Sequential<> trainNet(
 		new Linear<>(5, 10), new TanH<>(),
-		new Linear<>(10, 3), new TanH<>(),
+		new Linear<>(3), new TanH<>(),
 		new LogSoftMax<>()
 	);
 	
 	Sequential<> targetNet(
 		new Linear<>(5, 10), new TanH<>(),
-		new Linear<>(10, 3), new TanH<>(),
+		new Linear<>(3), new TanH<>(),
 		new LogSoftMax<>()
 	);
 	
-	SSE<> critic(trainNet);
+	MSE<> critic(trainNet);
 	auto optimizer = makeOptimizer<SGD>(trainNet, critic);
 	optimizer.learningRate(0.001);
 	
@@ -326,11 +326,59 @@ void testNeuralNet()
 
 void testMNIST()
 {
-	File<double>::Relation rel;
-	File<double>::loadArff("../data/mnist.train.arff", &rel);
-	File<double>::loadArff("../data/mnist.test.arff");
+	cout << "Setting up..." << endl;
 	
+	File<>::Relation rel;
+	Tensor<double> train = File<>::loadArff("../data/mnist.train.arff", &rel);
+	Tensor<double> test = File<>::loadArff("../data/mnist.test.arff");
 	
+	Tensor<double> trainFeat = train.sub({ {}, { 0, train.size(1) - 1 } }).scale(1.0 / 255.0);
+	Tensor<double> trainLab = train.sub({ {}, { train.size(1) - 1 } });
+	
+	trainLab = Tensor<double>(train.size(0), 10);
+	for(size_t i = 0; i < train.size(0); ++i)
+	{
+		size_t j = train(i, train.size(1) - 1);
+		trainLab(i, j) = 1;
+	}
+	
+	Tensor<double> testFeat = test.sub({ {}, { 0, test.size(1) - 1 } }).scale(1.0 / 255.0);
+	Tensor<double> testLab = test.sub({ {}, { test.size(1) - 1 } });
+	
+	testLab = Tensor<double>(test.size(0), 10);
+	for(size_t i = 0; i < test.size(0); ++i)
+	{
+		size_t j = test(i, train.size(1) - 1);
+		testLab(i, j) = 1;
+	}
+	
+	Sequential<> nn(
+		new Linear<>(trainFeat.size(1), 300), new TanH<>(),
+		new Linear<>(100), new TanH<>(),
+		new Linear<>(10), new TanH<>(),
+		new LogSoftMax<>()
+	);
+	MSE<> critic(nn);
+	auto optimizer = makeOptimizer<SGD>(nn, critic).learningRate(0.001);
+	
+	cout << "Training..." << endl;
+	
+	for(size_t i = 0; i < 100; ++i)
+	{
+		nn.batch(1);
+		critic.batch(1);
+		
+		for(size_t j = 0, jend = 100; j < jend; ++j)
+		{
+			size_t idx = Random<size_t>::uniform(trainFeat.size(0));
+			optimizer.step(trainFeat.narrow(0, idx), trainLab.narrow(0, idx));
+		}
+		
+		nn.batch(testFeat.size(0));
+		critic.batch(testFeat.size(0));
+		
+		cout << "@ " << i << "\t" << critic.forward(nn.forward(testFeat), testLab) << endl;
+	}
 }
 
 int main()

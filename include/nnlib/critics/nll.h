@@ -22,40 +22,40 @@ public:
 		m_inGrad(shape, true)
 	{}
 	
-	/// L = sum_i( -input(target(i)) )
+	/// L = 1/n sum_i( -input(target(i)) )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.shape() == target.shape(), "Incompatible operands to NLL!");
-		NNAssert(input.dims() == 2, "Input to NNL must be a Matrix!");
-		NNAssert(target.size(1) == 1, "Target for NNL must be a single integer!");
+		NNAssert(input.size(0) == target.size(0), "Incompatible operands to NLL!");
+		NNAssert(input.dims() == 2, "Input to NLL must be a Matrix!");
+		NNAssert(target.size(1) == 1, "Target for NLL must be a single integer!");
 		
 		T sum = 0;
 		size_t j;
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
-			NNAssert(target(i, 0) >= 0, "Target for NNL must be positive!");
+			NNAssert(target(i, 0) >= 0, "Target for NLL must be positive!");
 			j = target(i, 0);
 			sum -= input(i, j);
 		}
 		
-		return sum;
+		return sum / input.size(0);
 	}
 	
 	/// dL/di = target == i ? -1 : 0
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.shape() == target.shape(), "Incompatible operands to NLL!");
-		NNAssert(input.dims() == 2, "Input to NNL must be a Matrix!");
-		NNAssert(target.size(1) == 1, "Target for NNL must be a single integer!");
+		NNAssert(input.size(0) == target.size(0), "Incompatible operands to NLL!");
+		NNAssert(input.dims() == 2, "Input to NLL must be a Matrix!");
+		NNAssert(target.size(1) == 1, "Target for NLL must be a single integer!");
 		
 		m_inGrad.fill(0);
 		
 		size_t j;
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
-			NNAssert(target(i, 0) >= 0, "Target for NNL must be positive!");
+			NNAssert(target(i, 0) >= 0, "Target for NLL must be positive!");
 			j = target(i, 0);
-			m_inGrad(i, j) = -1;
+			m_inGrad(i, j) = -1.0;// / input.size(0);
 		}
 		
 		return m_inGrad;

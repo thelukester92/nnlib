@@ -6,6 +6,8 @@
 #include <exception>
 #include <stdexcept>
 
+/// \todo stack trace
+
 namespace nnlib
 {
 

@@ -110,6 +110,10 @@ public:
 	{
 		NNAssert(dims.size() == 2, "Linear only works with matrix inputs!");
 		Module<T>::inputs(dims);
+		m_weights.resize(m_inGrad.size(1), m_output.size(1));
+		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
+		m_bias.resize(m_output.size(1));
+		m_biasGrad.resize(m_output.size(1));
 		return reset();
 	}
 	
@@ -118,6 +122,7 @@ public:
 	{
 		NNAssert(dims.size() == 2, "Linear only works with matrix outputs!");
 		Module<T>::outputs(dims);
+		m_weights.resize(m_inGrad.size(1), m_output.size(1));
 		return reset();
 	}
 	
