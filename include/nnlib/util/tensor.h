@@ -276,6 +276,14 @@ public:
 		return t;
 	}
 	
+	/// Creates a new tensor with a subview of this data.
+	/// This performs narrow on each dimension.
+	/// The resulting tensor has the same number of dimensions as this.
+	const Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims) const
+	{
+		return const_cast<Tensor *>(this)->sub(dims);
+	}
+	
 	/// Creates a new tensor with the same shape and a copy (not a view) of this data.
 	Tensor copy()
 	{
