@@ -15,7 +15,7 @@ public:
 	SGD(M<T> &model, C<T> &critic) :
 		Optimizer<M, C, T>(model, critic),
 		m_learningRate(0.001),
-		m_momentum(0.1)
+		m_momentum(0)
 	{
 		m_parameters = Tensor<T>::flatten(model.parameters());
 		m_grads = Tensor<T>::flatten(model.grad());
@@ -53,12 +53,15 @@ public:
 		m_grads.fill(0);
 		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
 		
-		// apply momentum
-		m_velocity.scale(m_momentum);
-		m_velocity.addVV(m_grads);
-		
-		// Nesterov step
-		m_grads.addVV(m_velocity, m_momentum);
+		if(m_momentum)
+		{
+			// apply momentum
+			m_velocity.scale(m_momentum);
+			m_velocity.addVV(m_grads);
+			
+			// Nesterov step
+			m_grads.addVV(m_velocity, m_momentum);
+		}
 		
 		// update parameters
 		m_parameters.addVV(m_grads, -m_learningRate);
