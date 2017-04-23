@@ -42,8 +42,9 @@ public:
 	/// Set weights to normally distributed random values.
 	Linear &reset()
 	{
-		m_weights.randn();
-		m_bias.randn();
+		T range = 1.0 / sqrt(m_weights.size(1));
+		m_weights.rand(-range, range);
+		m_bias.rand(-range, range);
 		return *this;
 	}
 	
