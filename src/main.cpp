@@ -383,7 +383,7 @@ void testMNIST()
 		// cout << "@ " << i << "\t" << critic.forward(nn.forward(testFeat), testLab) << endl;
 	}
 	
-	cout << "Done in " << timer.elapsed() << endl;
+	cout << "Done in " << timer.elapsed() << " seconds!" << endl;
 }
 
 int main()
