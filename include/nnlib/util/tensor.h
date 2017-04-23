@@ -345,10 +345,7 @@ public:
 	/// Set every element in this tensor to value.
 	Tensor &fill(const T &value)
 	{
-		for(T &v : *this)
-		{
-			v = value;
-		}
+		std::fill(begin(), end(), value);
 		return *this;
 	}
 	
@@ -635,7 +632,7 @@ private:
 };
 
 template <typename T>
-class TensorIterator
+class TensorIterator : public std::iterator<std::forward_iterator_tag, T, T, const T *, T &>
 {
 using TT = typename std::remove_const<T>::type;
 public:

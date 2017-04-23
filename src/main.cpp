@@ -364,11 +364,12 @@ void testMNIST()
 	auto optimizer = makeOptimizer<SGD>(nn, critic).learningRate(0.001);
 	
 	cout << "Training..." << endl;
+	Timer<> timer;
 	
 	for(size_t i = 0; i < 100; ++i)
 	{
-		nn.batch(1);
-		critic.batch(1);
+		// nn.batch(1);
+		// critic.batch(1);
 		
 		for(size_t j = 0, jend = 100; j < jend; ++j)
 		{
@@ -376,30 +377,32 @@ void testMNIST()
 			optimizer.step(trainFeat.narrow(0, idx), trainLab.narrow(0, idx));
 		}
 		
-		nn.batch(testFeat.size(0));
-		critic.batch(testFeat.size(0));
+		// nn.batch(testFeat.size(0));
+		// critic.batch(testFeat.size(0));
 		
-		cout << "@ " << i << "\t" << critic.forward(nn.forward(testFeat), testLab) << endl;
+		// cout << "@ " << i << "\t" << critic.forward(nn.forward(testFeat), testLab) << endl;
 	}
+	
+	cout << "Done in " << timer.elapsed() << endl;
 }
 
 int main()
 {
 	cout << "===== Testing Tensor =====" << endl;
 	testTensor();
-	cout << "Tensor test passed!" << endl;
+	cout << "Tensor test passed!" << endl << endl;
 	
 	cout << "===== Testing Algebra =====" << endl;
 	testAlgebra();
-	cout << "Algebra test passed!" << endl;
+	cout << "Algebra test passed!" << endl << endl;
 	
 	cout << "===== Testing Neural Networks =====" << endl;
 	testNeuralNet();
-	cout << "Neural networks test passed!" << endl;
+	cout << "Neural networks test passed!" << endl << endl;
 	
 	cout << "===== Testing on MNIST =====" << endl;
 	testMNIST();
-	cout << "MNIST test passed!" << endl;
+	cout << "MNIST test passed!" << endl << endl;
 	
 	return 0;
 }
