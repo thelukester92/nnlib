@@ -3,10 +3,12 @@
 
 #include <math.h>
 #include <iostream>
+#include "timer.h"
 
 namespace nnlib
 {
 
+template <typename T = double>
 class Progress
 {
 public:
@@ -19,15 +21,29 @@ public:
 		size_t leading			= (length - middle) / 2;
 		size_t trailing			= length - middle - leading;
 		
+		if(current == 0)
+			timer.reset();
+		
 		out << "\r[";
 		for(size_t i = 1; i < leading; ++i)
 			out << (i < head ? "=" : (i == head ? ">" : " "));
 		out << " " << current << " / " << total << " ";
 		for(size_t i = leading + middle; i <= leading + middle + trailing; ++i)
 			out << (i < head ? "=" : (i == head ? ">" : " "));
-		out << "]" << end << std::flush;
+		out << "]";
+		
+		if(current == total)
+			out << " Done in " << timer.elapsed() << " seconds! ^_^";
+		
+		out << end << std::flush;
 	}
+	
+private:
+	static Timer<T> timer;
 };
+
+template <typename T>
+Timer<T> Progress<T>::timer;
 
 }
 

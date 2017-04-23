@@ -364,26 +364,17 @@ void testMNIST()
 	auto optimizer = makeOptimizer<SGD>(nn, critic).learningRate(0.001);
 	
 	cout << "Training..." << endl;
-	Timer<> timer;
 	
 	for(size_t i = 0; i < 100; ++i)
 	{
-		// nn.batch(1);
-		// critic.batch(1);
-		
 		for(size_t j = 0, jend = 100; j < jend; ++j)
 		{
 			size_t idx = Random<size_t>::uniform(trainFeat.size(0));
 			optimizer.step(trainFeat.narrow(0, idx), trainLab.narrow(0, idx));
 		}
-		
-		// nn.batch(testFeat.size(0));
-		// critic.batch(testFeat.size(0));
-		
-		// cout << "@ " << i << "\t" << critic.forward(nn.forward(testFeat), testLab) << endl;
+		Progress<>::display(i, 100);
 	}
-	
-	cout << "Done in " << timer.elapsed() << " seconds!" << endl;
+	Progress<>::display(100, 100, '\n');
 }
 
 int main()
