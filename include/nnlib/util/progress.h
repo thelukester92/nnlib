@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <iomanip>
 #include "timer.h"
 
 namespace nnlib
@@ -24,6 +25,7 @@ public:
 		if(current == 0)
 			timer.reset();
 		
+		out << std::setprecision(3) << std::fixed;
 		out << "\r[";
 		for(size_t i = 1; i < leading; ++i)
 			out << (i < head ? "=" : (i == head ? ">" : " "));
@@ -32,8 +34,10 @@ public:
 			out << (i < head ? "=" : (i == head ? ">" : " "));
 		out << "]";
 		
-		if(current == total)
-			out << " Done in " << timer.elapsed() << " seconds! ^_^";
+		if(current < total)
+			out << " " << timer.elapsed() << "s";
+		else
+			out << " Done in " << timer.elapsed() << "s! ^_^";
 		
 		out << end << std::flush;
 	}
