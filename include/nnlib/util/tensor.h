@@ -14,11 +14,15 @@ namespace nnlib
 {
 
 template <typename T>
+class Batcher;
+
+template <typename T>
 class TensorIterator;
 
 template <typename T>
 class Tensor
 {
+friend class Batcher<T>;
 public:
 	/// Flatten a number of tensors into a vector and give the original tensors views into the new one.
 	static Tensor flatten(const Storage<Tensor *> &tensors)
@@ -245,14 +249,14 @@ public:
 		return const_cast<Tensor *>(this)->narrow(dim, index, size);
 	}
 	
-	/// Creates a new tensor with a subview of this data.
+	/// Fills t with a subview of this data and returns t.
 	/// This performs narrow on each dimension.
 	/// The resulting tensor has the same number of dimensions as this.
-	Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims)
+	Tensor &sub(Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
 		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
+		NNAssert(t.shape() == shape(), "Incompatible sub tensor!");
 		
-		Tensor t = *this;
 		size_t dim = 0;
 		for(const std::initializer_list<size_t> &params : dims)
 		{
@@ -276,6 +280,23 @@ public:
 		return t;
 	}
 	
+	/// Fills t with a subview of this data and returns t.
+	/// This performs narrow on each dimension.
+	/// The resulting tensor has the same number of dimensions as this.
+	const Tensor &sub(const Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims) const
+	{
+		return const_cast<Tensor *>(this)->sub(*const_cast<Tensor *>(&t), dims);
+	}
+	
+	/// Creates a new tensor with a subview of this data.
+	/// This performs narrow on each dimension.
+	/// The resulting tensor has the same number of dimensions as this.
+	Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims)
+	{
+		Tensor t = *this;
+		return sub(t, dims);
+	}
+	
 	/// Creates a new tensor with a subview of this data.
 	/// This performs narrow on each dimension.
 	/// The resulting tensor has the same number of dimensions as this.
@@ -285,7 +306,7 @@ public:
 	}
 	
 	/// Creates a new tensor with the same shape and a copy (not a view) of this data.
-	Tensor copy()
+	Tensor copy() const
 	{
 		return reshape(m_dims);
 	}
@@ -293,11 +314,26 @@ public:
 	/// Copies the shape and data from another tensor.
 	Tensor &copy(const Tensor &other)
 	{
-		reshape(other.m_dims);
+		resize(other.shape());
 		auto i = other.begin();
 		for(T &value : *this)
 		{
 			value = *i;
+			++i;
+		}
+		return *this;
+	}
+	
+	/// Swaps data with another tensor.
+	Tensor &swap(Tensor &other)
+	{
+		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
+		auto i = other.begin();
+		for(T &v : *this)
+		{
+			T t = v;
+			v = *i;
+			*i = t;
 			++i;
 		}
 		return *this;

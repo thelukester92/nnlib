@@ -21,6 +21,7 @@
 
 /// Utilities
 #include "nnlib/util/algebra.h"
+#include "nnlib/util/batcher.h"
 #include "nnlib/util/error.h"
 #include "nnlib/util/file.h"
 #include "nnlib/util/progress.h"
