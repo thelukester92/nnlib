@@ -34,39 +34,51 @@ class Random
 public:
 	Random() = delete;
 	
+	/// Uniform distribution of integers in [0, to)
 	template <typename U = T>
 	static typename std::enable_if<std::is_integral<U>::value, T>::type uniform(T to)
 	{
-		return std::uniform_int_distribution<T>(0, to)(RandomEngine::engine());
+		NNAssert(to > 0, "Invalid range for uniform distribution!");
+		return std::uniform_int_distribution<T>(0, to - 1)(RandomEngine::engine());
 	}
 	
+	/// Uniform distribution of integers in [from, to)
 	template <typename U = T>
 	static typename std::enable_if<std::is_integral<U>::value, T>::type uniform(T from, T to)
 	{
+		NNAssert(to > from, "Invalid range for uniform distribution!");
 		return std::uniform_int_distribution<T>(from, to)(RandomEngine::engine());
 	}
 	
+	/// Uniform distribution of floating point numbers in [0, to)
 	template <typename U = T>
 	static typename std::enable_if<!std::is_integral<U>::value, T>::type uniform(T to)
 	{
+		NNAssert(to > 0, "Invalid range for uniform distribution!");
 		return std::uniform_real_distribution<T>(0, to)(RandomEngine::engine());
 	}
 	
+	/// Uniform distribution of floating point numbers in [from, to)
 	template <typename U = T>
 	static typename std::enable_if<!std::is_integral<U>::value, T>::type uniform(T from, T to)
 	{
+		NNAssert(to > from, "Invalid range for uniform distribution!");
 		return std::uniform_real_distribution<T>(from, to)(RandomEngine::engine());
 	}
 	
+	/// Normal distribution of floating point numbers.
 	template <typename U = T>
 	static typename std::enable_if<!std::is_integral<U>::value, T>::type normal(T mean = 0.0, T stddev = 1.0)
 	{
+		NNAssert(stddev > 0, "Standard deviation must be positive!");
 		return std::normal_distribution<T>(mean, stddev)(RandomEngine::engine());
 	}
 	
+	/// Normal distribution of floating point numbers, constrained to be in [mean-cap, mean+cap]
 	template <typename U = T>
 	static typename std::enable_if<!std::is_integral<U>::value, T>::type normal(T mean, T stddev, T cap)
 	{
+		NNAssert(stddev > 0, "Standard deviation must be positive!");
 		T n;
 		std::normal_distribution<T> dist(mean, stddev);
 		do

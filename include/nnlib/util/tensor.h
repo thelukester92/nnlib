@@ -339,6 +339,22 @@ public:
 		return *this;
 	}
 	
+	/// Swaps data with another tensor.
+	/// Allows rvalue references, as it may be a temporary that references persistant Storage.
+	Tensor &swap(Tensor &&other)
+	{
+		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
+		auto i = other.begin();
+		for(T &v : *this)
+		{
+			T t = v;
+			v = *i;
+			*i = t;
+			++i;
+		}
+		return *this;
+	}
+	
 	/// Get the entire list of dimensions.
 	const Storage<size_t> &shape() const
 	{

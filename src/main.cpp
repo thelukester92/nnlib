@@ -364,6 +364,23 @@ void testMNIST()
 
 int main()
 {
+	Tensor<double> foo(6, 3), bar(6, 2);
+	foo.rand();
+	bar.rand();
+	
+	Batcher<> batcher(foo, bar, 3);
+	cout << "FOO:\n" << foo << endl << endl;
+	cout << "BAR:\n" << bar << endl << endl;
+	
+	for(size_t i = 0; i < batcher.batches(); ++i)
+	{
+		cout << "FEATURES " << i << ":\n" << batcher.features() << endl << endl;
+		cout << "LABELS " << i << "  :\n" << batcher.labels() << endl << endl;
+		
+	}
+	
+	/*
+	
 	cout << "===== Testing Tensor =====" << endl;
 	testTensor();
 	cout << "Tensor test passed!" << endl << endl;
@@ -379,6 +396,8 @@ int main()
 	cout << "===== Testing on MNIST =====" << endl;
 	testMNIST();
 	cout << "MNIST test passed!" << endl << endl;
+	
+	*/
 	
 	return 0;
 }

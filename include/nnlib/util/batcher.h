@@ -45,6 +45,11 @@ public:
 		return m_featBatch.size(0);
 	}
 	
+	size_t batches() const
+	{
+		return m_feat.size(0) / m_featBatch.size(0);
+	}
+	
 	Batcher &reset()
 	{
 		m_offset = 0;
@@ -75,12 +80,12 @@ public:
 		return true;
 	}
 	
-	const Tensor<T> &features() const
+	Tensor<T> &features()
 	{
 		return m_featBatch;
 	}
 	
-	const Tensor<T> &labels() const
+	Tensor<T> &labels()
 	{
 		return m_labBatch;
 	}
