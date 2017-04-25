@@ -355,6 +355,24 @@ public:
 		return *this;
 	}
 	
+	/// Swap two dimensions (rows and columns by default).
+	/// This returns a new tensor that shares data with the original.
+	Tensor transpose(size_t dim1 = 1, size_t dim2 = 0)
+	{
+		NNAssert(dim1 < dims() && dim2 < dims(), "Invalid dimensions for transposition!");
+		Tensor t = *this;
+		
+		size_t temp = t.m_strides[dim1];
+		t.m_strides[dim1] = t.m_strides[dim2];
+		t.m_strides[dim2] = temp;
+		
+		temp = t.m_dims[dim1];
+		t.m_dims[dim1] = t.m_dims[dim2];
+		t.m_dims[dim2] = temp;
+		
+		return t;
+	}
+	
 	/// Get the entire list of dimensions.
 	const Storage<size_t> &shape() const
 	{

@@ -94,6 +94,28 @@ void testTensor()
 			NNHardAssert(fabs(orig(x, 3, y) - slice(x, y)) < 1e-9, "Tensor::select failed!");
 		}
 	}
+	
+	// MARK: Transposition
+	
+	Tensor<double> notTransposed = Tensor<double>(5, 3).rand();
+	Tensor<double> transposed(3, 5);
+	for(size_t i = 0; i < 3; ++i)
+	{
+		for(size_t j = 0; j < 5; ++j)
+		{
+			transposed(i, j) = notTransposed(j, i);
+		}
+	}
+	
+	Tensor<double> alsoTransposed = notTransposed.transpose();
+	NNHardAssert(transposed.shape() == alsoTransposed.shape(), "Tensor::transpose failed!");
+	for(size_t i = 0; i < 3; ++i)
+	{
+		for(size_t j = 0; j < 5; ++j)
+		{
+			NNHardAssert(fabs(transposed(i, j) - alsoTransposed(i, j)) < 1e-9, "Tensor::transpose failed!");
+		}
+	}
 }
 
 template <bool TransA, bool TransB>
