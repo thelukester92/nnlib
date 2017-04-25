@@ -328,10 +328,10 @@ void testMNIST()
 {
 	cout << "Setting up..." << endl;
 	
-	File<>::Relation rel;
+	Relation rel;
 	Tensor<double> train = File<>::loadArff("../data/mnist.train.arff", &rel);
 	Tensor<double> test = File<>::loadArff("../data/mnist.test.arff");
-	size_t outs = rel.attrVals.back().size();
+	size_t outs = rel.attrVals(rel.size() - 1).size();
 	
 	Tensor<double> trainFeat = train.sub({ {}, { 0, train.size(1) - 1 } }).scale(1.0 / 255.0);
 	Tensor<double> trainLab = train.sub({ {}, { train.size(1) - 1 } });

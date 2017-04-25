@@ -14,16 +14,56 @@
 namespace nnlib
 {
 
+class Relation
+{
+public:
+	const std::string &name() const
+	{
+		return m_name;
+	}
+	
+	Relation &name(const std::string &newName)
+	{
+		m_name = newName;
+		return *this;
+	}
+	
+	size_t size() const
+	{
+		return m_attrNames.size();
+	}
+	
+	size_t size(size_t i) const
+	{
+		return m_attrVals[i].size();
+	}
+	
+	const std::string &attrName(size_t i)
+	{
+		return m_attrNames[i];
+	}
+	
+	const std::unordered_map<std::string, size_t> &attrVals(size_t i)
+	{
+		return m_attrVals[i];
+	}
+	
+	Relation &addAttribute(const std::string &attrName, const std::unordered_map<std::string, size_t> &attrVals)
+	{
+		m_attrNames.push_back(attrName);
+		m_attrVals.push_back(attrVals);
+		return *this;
+	}
+private:
+	std::string m_name;
+	Storage<std::string> m_attrNames;
+	Storage<std::unordered_map<std::string, size_t>> m_attrVals;
+};
+
 template <typename T = double>
 class File
 {
 public:
-	struct Relation
-	{
-		std::string name;
-		Storage<std::string> attrNames;
-		Storage<std::unordered_map<std::string, size_t>> attrVals;
-	};
 	static T unknown;
 	
 	/// Load a weka .arff file.
@@ -48,14 +88,14 @@ public:
 					char *ptr = const_cast<char *>(line.c_str());
 					skipWhitespace(&ptr);
 					char *end = tokenEnd(ptr);
-					rel.name = std::string(ptr, end - ptr);
+					rel.name(std::string(ptr, end - ptr));
 				}
 				else if(startsWith(line, "@attribute"))
 				{
 					char *ptr = const_cast<char *>(line.c_str() + 10);
 					skipWhitespace(&ptr);
 					char *end = tokenEnd(ptr);
-					rel.attrNames.push_back(std::string(ptr, end - ptr));
+					std::string attrName(ptr, end - ptr);
 					
 					ptr = end;
 					skipWhitespace(&ptr);
@@ -79,7 +119,7 @@ public:
 					else
 						NNHardAssert(strncmp(ptr, "numeric", 7) == 0 || strncmp(ptr, "integer", 7) == 0 || strncmp(ptr, "real", 4) == 0, "Unrecognized attribute type!");
 					
-					rel.attrVals.push_back(attrVals);
+					rel.addAttribute(attrName, attrVals);
 				}
 				else if(startsWith(line, "@data"))
 					break;
@@ -99,7 +139,7 @@ public:
 			if(*ptr == '\0')
 				continue;
 			
-			Tensor<T> *rowPtr = new Tensor<T>(rel.attrNames.size());
+			Tensor<T> *rowPtr = new Tensor<T>(rel.size());
 			Tensor<T> &row = *rowPtr;
 			rows.push_back(rowPtr);
 			
@@ -109,8 +149,8 @@ public:
 				skipWhitespace(&ptr);
 				if(*ptr == '\0')
 					break;
-				NNHardAssert(i < rel.attrNames.size(), "Too many columns on row " + std::to_string(rows.size()));
-				if(rel.attrVals[i].size() == 0)
+				NNHardAssert(i < rel.size(), "Too many columns on row " + std::to_string(rows.size()));
+				if(rel.size(i) == 0)
 				{
 					if(*ptr == '?')
 					{
@@ -126,21 +166,21 @@ public:
 				else
 				{
 					char *end = tokenEnd(ptr, ",");
-					auto j = rel.attrVals[i].find(std::string(ptr, end - ptr));
-					NNHardAssert(j != rel.attrVals[i].end(), "Invalid nominal value '" + std::string(ptr, end - ptr) + "'");
+					auto j = rel.attrVals(i).find(std::string(ptr, end - ptr));
+					NNHardAssert(j != rel.attrVals(i).end(), "Invalid nominal value '" + std::string(ptr, end - ptr) + "'");
 					row(i) = j->second;
 					ptr = end;
 				}
 				++i;
 			}
-			NNHardAssert(i == rel.attrNames.size(), "Not enough columns on row " + std::to_string(rows.size()));
+			NNHardAssert(i == rel.size(), "Not enough columns on row " + std::to_string(rows.size()));
 		}
 		fin.close();
 		
 		if(relPtr != nullptr)
 			*relPtr = rel;
 		
-		Tensor<T> flattened = Tensor<T>::flatten(rows).resize(rows.size(), rel.attrNames.size());
+		Tensor<T> flattened = Tensor<T>::flatten(rows).resize(rows.size(), rel.size());
 		for(auto *i : rows)
 			delete i;
 		
@@ -176,18 +216,18 @@ public:
 		
 		if(relPtr != nullptr)
 		{
-			NNHardAssert(relPtr->attrNames.size() == m.cols(), "Incompatible relation!");
-			fout << "@relation " << quoted(relPtr->name) << "\n";
-			for(size_t i = 0; i < relPtr->attrNames.size(); ++i)
+			NNHardAssert(relPtr->size() == m.cols(), "Incompatible relation!");
+			fout << "@relation " << quoted(relPtr->name()) << "\n";
+			for(size_t i = 0; i < relPtr->size(); ++i)
 			{
-				fout << "@attribute " << quoted(relPtr->attrNames[i]) << " ";
-				if(relPtr->attrVals[i].size() == 0)
+				fout << "@attribute " << quoted(relPtr->attrName(i)) << " ";
+				if(relPtr->size(i) == 0)
 					fout << "real";
 				else
 				{
 					bool first = false;
 					fout << "{";
-					for(auto &p : relPtr->attrVals[i])
+					for(auto &p : relPtr->attrVals(i))
 					{
 						if(first)
 							first = false;
