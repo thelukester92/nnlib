@@ -211,12 +211,14 @@ public:
 	/// Save a weka .arff file.
 	static void saveArff(const Tensor<T> &m, const std::string &filename, Relation *relPtr = nullptr)
 	{
+		NNHardAssert(m.dims() == 2, "Can only save a matrix to an arff file!");
+		
 		std::ofstream fout(filename.c_str());
 		NNHardAssert(fout.is_open(), "Could not open file '" + filename + "'!");
 		
 		if(relPtr != nullptr)
 		{
-			NNHardAssert(relPtr->size() == m.cols(), "Incompatible relation!");
+			NNHardAssert(relPtr->size() == m.size(1), "Incompatible relation!");
 			fout << "@relation " << quoted(relPtr->name()) << "\n";
 			for(size_t i = 0; i < relPtr->size(); ++i)
 			{
@@ -242,16 +244,16 @@ public:
 		else
 		{
 			fout << "@relation Untitled\n";
-			for(size_t i = 0; i < m.cols(); ++i)
+			for(size_t i = 0; i < m.size(1); ++i)
 				fout << "@attribute attr" << i << " real\n";
 		}
 		
 		fout << "@data\n";
 		
-		for(size_t i = 0; i < m.rows(); ++i)
+		for(size_t i = 0; i < m.size(0); ++i)
 		{
 			fout << m(i, 0);
-			for(size_t j = 1; j < m.cols(); ++j)
+			for(size_t j = 1; j < m.size(1); ++j)
 				fout << "," << m(i, j);
 			fout << "\n";
 		}
