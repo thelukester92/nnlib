@@ -52,6 +52,7 @@ public:
 	
 	Batcher &reset()
 	{
+		std::cout << "HERE" << std::endl;
 		m_offset = 0;
 		for(size_t i = 0, end = m_feat.size(0); i < end; ++i)
 		{
