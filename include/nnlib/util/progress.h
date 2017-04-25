@@ -18,15 +18,15 @@ public:
 		size_t degreeCurrent	= current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));
 		size_t degreeTotal		= (size_t) ceil(log(total) / log(10)) + 1;
 		size_t middle			= degreeCurrent + degreeTotal + 5;
-		size_t head				= current == total ? length+1 : length * (current + 1) / double(total);
+		size_t head				= current == total ? length+1 : length * current / double(total);
 		size_t leading			= (length - middle) / 2;
 		size_t trailing			= length - middle - leading;
 		
 		if(current == 0)
 			timer.reset();
 		
-		out << std::setprecision(3) << std::fixed;
-		out << "\r[";
+		out << std::setprecision(1) << std::fixed;
+		out << "\r\33[2K[";
 		for(size_t i = 1; i < leading; ++i)
 			out << (i < head ? "=" : (i == head ? ">" : " "));
 		out << " " << current << " / " << total << " ";
@@ -35,7 +35,10 @@ public:
 		out << "]";
 		
 		if(current < total)
+		{
 			out << " " << timer.elapsed() << "s";
+			out << " / " << (timer.elapsed() / current * total) << "s";
+		}
 		else
 			out << " Done in " << timer.elapsed() << "s! ^_^";
 		

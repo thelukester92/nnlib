@@ -346,20 +346,27 @@ void testMNIST()
 		new LogSoftMax<>()
 	);
 	NLL<> critic(nn);
-	auto optimizer = makeOptimizer<SGD>(nn, critic).learningRate(0.001);
+	auto optimizer = makeOptimizer<RMSProp>(nn, critic).learningRate(0.001);
+	
+	Batcher<> batcher(trainFeat, trainLab, 100);
+	nn.batch(batcher.batch());
+	critic.batch(batcher.batch());
 	
 	cout << "Training..." << endl;
 	
-	for(size_t i = 0; i < 100; ++i)
+	size_t epochs = 10;
+	size_t k = 0, tot = epochs * batcher.batches();
+	for(size_t i = 0; i < epochs; ++i)
 	{
-		for(size_t j = 0, jend = 100; j < jend; ++j)
+		batcher.reset();
+		do
 		{
-			size_t idx = Random<size_t>::uniform(trainFeat.size(0));
-			optimizer.step(trainFeat.narrow(0, idx), trainLab.narrow(0, idx));
+			Progress<>::display(k++, tot);
+			optimizer.step(batcher.features(), batcher.labels());
 		}
-		Progress<>::display(i, 100);
+		while(batcher.next());
 	}
-	Progress<>::display(100, 100, '\n');
+	Progress<>::display(tot, tot, '\n');
 }
 
 int main()
