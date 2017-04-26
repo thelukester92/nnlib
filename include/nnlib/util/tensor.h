@@ -568,6 +568,20 @@ public:
 		return *this;
 	}
 	
+	Tensor &addMM(const Tensor<T> &A, T alpha = 1)
+	{
+		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
+		for(size_t i = 0, end = size(0); i < end; ++i)
+		{
+			Algebra<T>::addVV(
+				A.ptr() + i * A.stride(0), A.size(1), A.stride(1),
+				ptr() + i * stride(0), size(1), stride(1),
+				alpha
+			);
+		}
+		return *this;
+	}
+	
 	// MARK: Statistical methods
 	
 	T sum() const

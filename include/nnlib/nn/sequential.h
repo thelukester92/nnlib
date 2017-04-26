@@ -25,6 +25,7 @@ public:
 		add(component, components...);
 	}
 	
+	/// Add multiple components.
 	template <typename ... Ms>
 	Sequential &add(Module<T> *component, Ms *...more)
 	{
@@ -109,16 +110,6 @@ public:
 	{
 		m_components.back()->outputs(dims);
 		resizeUp();
-		return *this;
-	}
-	
-	/// Set the batch size of this module.
-	virtual Sequential &batch(size_t bats) override
-	{
-		for(Module<T> *component : m_components)
-		{
-			component->batch(bats);
-		}
 		return *this;
 	}
 	

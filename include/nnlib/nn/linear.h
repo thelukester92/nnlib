@@ -39,7 +39,7 @@ public:
 		m_addBuffer(1)
 	{}
 	
-	/// Set weights to normally distributed random values.
+	/// Set weights to uniformly distributed random values.
 	Linear &reset()
 	{
 		T range = 1.0 / sqrt(m_weights.size(1));

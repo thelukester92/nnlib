@@ -9,6 +9,7 @@
 #include "nnlib/nn/logsoftmax.h"
 #include "nnlib/nn/map.h"
 #include "nnlib/nn/module.h"
+#include "nnlib/nn/recurrent.h"
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/tanh.h"
 

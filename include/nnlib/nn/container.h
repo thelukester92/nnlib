@@ -31,6 +31,15 @@ public:
 		return m_components.size();
 	}
 	
+	/// Add multiple components to this container.
+	template <typename ... Ms>
+	Container &add(Module<T> *component, Ms *...more)
+	{
+		add(component);
+		add(more...);
+		return *this;
+	}
+	
 	/// Add a component to this container.
 	virtual void add(Module<T> *component)
 	{
@@ -43,6 +52,16 @@ public:
 		Module<T> *comp = m_components[index];
 		m_components.erase(index);
 		return comp;
+	}
+	
+	/// Set the batch size of this module.
+	virtual Container &batch(size_t bats) override
+	{
+		for(Module<T> *component : m_components)
+		{
+			component->batch(bats);
+		}
+		return *this;
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters.
