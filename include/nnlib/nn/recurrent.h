@@ -19,9 +19,9 @@ public:
 	using Container<T>::outputs;
 	
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
-		m_inputModule(new Sequential<T>(new Linear<T>(inps, outs), new TanH<T>())),
-		m_feedbackModule(new Sequential<T>(new Linear<T>(outs, outs), new TanH<T>(outs))),
-		m_outputModule(new Sequential<T>(new Linear<T>(outs, outs), new TanH<T>())),
+		m_inputModule(new Linear<T>(inps, outs)),
+		m_feedbackModule(new Linear<T>(outs, outs)),
+		m_outputModule(new Sequential<T>(new Linear<T>(outs, outs), new TanH<>())),
 		m_inputs(0, bats, outs),
 		m_feedbacks(0, bats, outs),
 		m_outputs(0, bats, outs),
@@ -34,8 +34,8 @@ public:
 	
 	Recurrent &reset()
 	{
-		dynamic_cast<Linear<T> *>(m_inputModule->component(0))->reset();
-		dynamic_cast<Linear<T> *>(m_feedbackModule->component(0))->reset();
+		m_inputModule->reset();
+		m_feedbackModule->reset();
 		dynamic_cast<Linear<T> *>(m_outputModule->component(0))->reset();
 		m_outGrad.fill(0);
 		m_step = 0;
@@ -51,15 +51,15 @@ public:
 			Tensor<T>(m_outputs.size(1), m_outputs.size(2)) :
 			m_outputs.select(0, m_step - 1);
 		
-		m_inputs.resize(m_step, m_inputs.size(1), m_inputs.size(2));
+		m_inputs.resize(m_step + 1, m_inputs.size(1), m_inputs.size(2));
 		m_inputs.select(0, m_step).copy(m_inputModule->forward(input));
 		
-		m_feedbacks.resize(m_step, m_feedbacks.size(1), m_feedbacks.size(2));
+		m_feedbacks.resize(m_step + 1, m_feedbacks.size(1), m_feedbacks.size(2));
 		m_feedbacks.select(0, m_step).copy(m_feedbackModule->forward(prevOutput));
 		
 		m_buffer.zeros().addMM(m_inputs.select(0, m_step)).addMM(m_feedbacks.select(0, m_step));
 		
-		m_outputs.resize(m_step, m_outputs.size(1), m_outputs.size(2));
+		m_outputs.resize(m_step + 1, m_outputs.size(1), m_outputs.size(2));
 		m_outputs.select(0, m_step).copy(m_outputModule->forward(m_buffer));
 		++m_step;
 		
@@ -124,15 +124,15 @@ public:
 	}
 	
 private:
-	Sequential<T> *m_inputModule;		///< Process inputs to be the size of the outputs.
-	Sequential<T> *m_feedbackModule;	///< Process past output.
-	Sequential<T> *m_outputModule;		///< Combine input and feedback for new output.
-	Tensor<T> m_inputs;					///< Processed inputs for each time step.
-	Tensor<T> m_feedbacks;				///< Feedbacks for each time step.
-	Tensor<T> m_outputs;				///< Outputs for each time step.
-	Tensor<T> m_buffer;					///< Input + Feedback temporary buffer.
-	Tensor<T> m_outGrad;				///< outGrad(t - 1).
-	size_t m_step;						///< Current time step.
+	Linear<T> *m_inputModule;		///< Process inputs to be the size of the outputs.
+	Linear<T> *m_feedbackModule;	///< Process past output.
+	Sequential<T> *m_outputModule;	///< Combine input and feedback for new output.
+	Tensor<T> m_inputs;				///< Processed inputs for each time step.
+	Tensor<T> m_feedbacks;			///< Feedbacks for each time step.
+	Tensor<T> m_outputs;			///< Outputs for each time step.
+	Tensor<T> m_buffer;				///< Input + Feedback temporary buffer.
+	Tensor<T> m_outGrad;			///< outGrad(t - 1).
+	size_t m_step;					///< Current time step.
 };
 
 }

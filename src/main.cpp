@@ -348,7 +348,8 @@ void testNeuralNet()
 
 void testRecurrent()
 {
-	Recurrent<> recurrent(1, 5);
+	Recurrent<> recurrent(1, 1);
+	
 }
 
 void testMNIST()
