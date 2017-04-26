@@ -346,12 +346,6 @@ void testNeuralNet()
 	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab) < 25, "SGD failed!");
 }
 
-void testRecurrent()
-{
-	Recurrent<> recurrent(1, 1);
-	
-}
-
 void testMNIST()
 {
 	cout << "Setting up..." << endl;
@@ -410,10 +404,6 @@ int main()
 	cout << "===== Testing Neural Networks =====" << endl;
 	testNeuralNet();
 	cout << "Neural networks test passed!" << endl << endl;
-	
-	cout << "===== Testing Recurrent Networks =====" << endl;
-	testRecurrent();
-	cout << "Recurrent networks test passed!" << endl << endl;
 	
 	cout << "===== Testing on MNIST =====" << endl;
 	testMNIST();
