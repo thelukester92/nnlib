@@ -213,6 +213,37 @@ void testAlgebra()
 	}
 }
 
+void testRecurrentNet()
+{
+	size_t steps = 1000;
+	RandomEngine::seed(0);
+	
+	Tensor<double> sequence(steps, 1, 1);
+	for(size_t i = 0; i < steps; ++i)
+	{
+		sequence(i, 0, 0) = sin(0.1 * i);
+	}
+	Tensor<double> seqFrom = sequence.narrow(0, 0, steps - 1);
+	Tensor<double> seqTo = sequence.narrow(0, 1, steps - 1);
+	
+	Sequencer<> rnn(
+		new Sequential<>(
+			new Recurrent<>(1, 10),
+			new Linear<>(10, 1)
+		),
+		seqFrom.size()
+	);
+	MSE<> critic(rnn);
+	auto optimizer = makeOptimizer<SGD>(rnn, critic).learningRate(0.01 / steps);
+	
+	for(size_t epoch = 0; epoch < 100; ++epoch)
+	{
+		optimizer.step(seqFrom, seqTo);
+	}
+	
+	NNHardAssert(critic.forward(rnn.forward(seqFrom), seqTo) < 1e-2, "Recurrent neural network failed!");
+}
+
 void testNeuralNet()
 {
 	// MARK: Linear Test
@@ -395,91 +426,6 @@ void testMNIST()
 
 int main()
 {
-	size_t steps = 1000;
-	RandomEngine::seed(12345);
-	
-	Tensor<double> sequence(steps, 1, 1);
-	for(size_t i = 0; i < steps; ++i)
-	{
-		sequence(i, 0, 0) = sin(0.1 * i);
-	}
-	
-	/*
-	Sequencer<> rnn(
-		new Sequential<>(
-			new Recurrent<>(1, 10),
-			new Linear<>(10, 1)
-		)
-	);
-	*/
-	
-	// Sequential<> rnn(
-		Recurrent<> rnn(1, 1);
-	//	new Linear<>(10, 1)
-	//);
-	//*/
-	MSE<> critic(rnn);
-	auto optimizer = makeOptimizer<SGD>(rnn, critic);
-	
-	Tensor<double> params = Tensor<double>::flatten(rnn.parameters());
-	Tensor<double> grads = Tensor<double>::flatten(rnn.grad());
-	Tensor<double> state = Tensor<double>::flatten(rnn.innerState());
-	Tensor<double> states(steps, state.size(0));
-	
-	state.fill(0);
-	cout << "Before:" << endl;
-	double foo = 0;
-	for(size_t i = 0; i < steps - 1; ++i)
-	{
-		foo += critic.forward(rnn.forward(sequence.select(0, i)), sequence.select(0, i + 1));
-	}
-	cout << foo << endl;
-	
-	double lr = 0.01 / steps;
-	for(size_t epoch = 0;; ++epoch)
-	{
-		state.fill(0);
-		for(size_t i = 0; i < steps - 1; ++i)
-		{
-			rnn.forward(sequence.select(0, i));
-			states.select(0, i).copy(state);
-		}
-		
-		grads.fill(0);
-		for(size_t i = steps - 1; i > 1; --i)
-		{
-			state.copy(states.select(0, i - 1));
-			rnn.backward(sequence.select(0, i - 1), critic.backward(rnn.output(), sequence.select(0, i)));
-			
-			/*
-			if(i == 2)
-			{
-				cout << "penultimate: " << grads << endl;
-			}
-			else if(i == 1)
-			{
-				cout << "ultimate: " << grads << endl;
-				// return 0;
-			}
-			*/
-		}
-		params.addVV(grads, -lr);
-		
-		// state.copy(states.select(0, 0));
-		// cout << rnn.output()(0, 0) << "\t" << sequence(0, 0, 0) << endl;
-		
-		state.fill(0);
-		foo = 0;
-		for(size_t i = 0; i < steps - 1; ++i)
-		{
-			foo += critic.forward(rnn.forward(sequence.select(0, i)), sequence.select(0, i + 1));
-		}
-		cout << "\r\33[2Kafter: " << setprecision(3) << fixed << foo << "\t" << epoch << flush;
-	}
-	cout << endl;
-	
-	return 0;
-	
 	cout << "===== Testing Tensor =====" << endl;
 	testTensor();
 	cout << "Tensor test passed!" << endl << endl;
@@ -491,6 +437,10 @@ int main()
 	cout << "===== Testing Neural Networks =====" << endl;
 	testNeuralNet();
 	cout << "Neural networks test passed!" << endl << endl;
+	
+	cout << "===== Testing Recurrent Neural Networks =====" << endl;
+	testRecurrentNet();
+	cout << "Recurrent neural networks test passed!" << endl << endl;
 	
 	cout << "===== Testing on MNIST =====" << endl;
 	testMNIST();

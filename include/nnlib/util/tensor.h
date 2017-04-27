@@ -236,6 +236,14 @@ public:
 	}
 	
 	/// Creates a new tensor with a subview of this data.
+	/// This completely eliminates the dimth dimension.
+	/// The resulting tensor has one less dimension than this.
+	const Tensor select(size_t dim, size_t index) const
+	{
+		return const_cast<Tensor *>(this)->select(dim, index);
+	}
+	
+	/// Creates a new tensor with a subview of this data.
 	/// This reduces the dimth dimension to size.
 	/// The resulting tensor has the same number of dimensions as this.
 	Tensor narrow(size_t dim, size_t index, size_t size = 1)

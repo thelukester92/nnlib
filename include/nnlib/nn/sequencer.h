@@ -17,6 +17,7 @@ public:
 	using Container<T>::inputs;
 	using Container<T>::outputs;
 	using Container<T>::batch;
+	using Container<T>::add;
 	
 	Sequencer(Module<T> *module, size_t seqLen = 0) :
 		m_module(module),
@@ -74,7 +75,7 @@ public:
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be seqLen X batch X inputs!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be seqLen X batch X outputs!");
 		
-		for(size_t i = input.size(0); i > 1; --i)
+		for(size_t i = input.size(0) - 1; i > 0; --i)
 		{
 			m_state.copy(m_states.select(0, i - 1));
 			m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), outGrad.select(0, i)));
