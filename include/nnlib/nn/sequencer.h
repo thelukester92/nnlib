@@ -18,12 +18,35 @@ public:
 	using Container<T>::outputs;
 	using Container<T>::batch;
 	
-	Sequencer(Module<T> *module) :
+	Sequencer(Module<T> *module, size_t seqLen = 0) :
 		m_module(module),
-		m_inGrad(module->inputs()),
-		m_output(module->outputs())
+		m_state(Tensor<T>::flatten(module->innerState())),
+		m_states(seqLen, m_state.size(0))
 	{
+		Storage<size_t> inps = { seqLen };
+		for(size_t size : m_module->inputs())
+			inps.push_back(size);
+		m_inGrad.resize(inps);
+		
+		Storage<size_t> outs = { seqLen };
+		for(size_t size : m_module->outputs())
+			outs.push_back(size);
+		m_output.resize(outs);
+		
 		add(module);
+	}
+	
+	Sequencer &seqLen(size_t seqLen)
+	{
+		m_inGrad.resizeDim(0, seqLen);
+		m_output.resizeDim(0, seqLen);
+		m_states.resizeDim(0, seqLen);
+		return *this;
+	}
+	
+	size_t seqLen() const
+	{
+		return m_states.size(0);
 	}
 	
 	// MARK: Module methods
@@ -33,9 +56,13 @@ public:
 	{
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be seqLen X batch X inputs!");
 		
+		/// \todo only reset the state if required
+		m_state.fill(0);
+		
 		for(size_t i = 0, end = input.size(0); i < end; ++i)
 		{
 			m_output.select(0, i).copy(m_module->forward(input.select(0, i)));
+			m_states.select(0, i).copy(m_state);
 		}
 		
 		return m_output;
@@ -47,8 +74,9 @@ public:
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be seqLen X batch X inputs!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be seqLen X batch X outputs!");
 		
-		for(size_t i = input.size(0); i > 0; --i)
+		for(size_t i = input.size(0); i > 1; --i)
 		{
+			m_state.copy(m_states.select(0, i - 1));
 			m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), outGrad.select(0, i)));
 		}
 		
@@ -108,8 +136,12 @@ public:
 	
 private:
 	Module<T> *m_module;
+	
 	Tensor<T> m_output;
 	Tensor<T> m_inGrad;
+	
+	Tensor<T> m_state;
+	Tensor<T> m_states;
 };
 
 }

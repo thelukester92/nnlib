@@ -404,11 +404,23 @@ int main()
 		sequence(i, 0, 0) = sin(0.1 * i);
 	}
 	
-	Sequential<> rnn(
-		new Recurrent<>(1, 10),
-		new Linear<>(10, 1)
+	/*
+	Sequencer<> rnn(
+		new Sequential<>(
+			new Recurrent<>(1, 10),
+			new Linear<>(10, 1)
+		)
 	);
+	*/
+	
+	// Sequential<> rnn(
+		Recurrent<> rnn(1, 1);
+	//	new Linear<>(10, 1)
+	//);
+	//*/
 	MSE<> critic(rnn);
+	auto optimizer = makeOptimizer<SGD>(rnn, critic);
+	
 	Tensor<double> params = Tensor<double>::flatten(rnn.parameters());
 	Tensor<double> grads = Tensor<double>::flatten(rnn.grad());
 	Tensor<double> state = Tensor<double>::flatten(rnn.innerState());
@@ -423,7 +435,7 @@ int main()
 	}
 	cout << foo << endl;
 	
-	double lr = 0.1;
+	double lr = 0.01 / steps;
 	for(size_t epoch = 0;; ++epoch)
 	{
 		state.fill(0);
@@ -438,6 +450,18 @@ int main()
 		{
 			state.copy(states.select(0, i - 1));
 			rnn.backward(sequence.select(0, i - 1), critic.backward(rnn.output(), sequence.select(0, i)));
+			
+			/*
+			if(i == 2)
+			{
+				cout << "penultimate: " << grads << endl;
+			}
+			else if(i == 1)
+			{
+				cout << "ultimate: " << grads << endl;
+				// return 0;
+			}
+			*/
 		}
 		params.addVV(grads, -lr);
 		
@@ -450,12 +474,11 @@ int main()
 		{
 			foo += critic.forward(rnn.forward(sequence.select(0, i)), sequence.select(0, i + 1));
 		}
-		cout << "\rafter: " << setprecision(3) << fixed << foo << "\t" << epoch << flush;
+		cout << "\r\33[2Kafter: " << setprecision(3) << fixed << foo << "\t" << epoch << flush;
 	}
 	cout << endl;
 	
 	return 0;
-	
 	
 	cout << "===== Testing Tensor =====" << endl;
 	testTensor();

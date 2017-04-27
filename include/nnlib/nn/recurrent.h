@@ -76,7 +76,8 @@ public:
 		m_outputModule->backward(m_state, outGrad);
 		m_outputModule->inGrad().addMM(m_stateGrad);
 		m_stateGrad.copy(m_feedbackModule->backward(m_prevState, m_outputModule->inGrad()));
-		return m_inputModule->backward(input, m_outputModule->inGrad());
+		m_inputModule->backward(input, m_outputModule->inGrad());
+		return m_inputModule->inGrad();
 	}
 	
 	/// Cached output.

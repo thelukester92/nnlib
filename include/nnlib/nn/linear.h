@@ -83,10 +83,10 @@ public:
 		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
 		
 		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer (bats x 1)
-		m_biasGrad.multiplyMTV(outGrad, m_addBuffer);
+		m_biasGrad.multiplyMTV(outGrad, m_addBuffer, 1, 1);
 		
 		// weightsGrad (inps x outs) += input^T (bats x inps) x outGrad (bats x outs)
-		m_weightsGrad.multiplyMTM(input, outGrad);
+		m_weightsGrad.multiplyMTM(input, outGrad, 1, 1);
 		
 		// inGrad (bats x inps) = outGrad (bats x outs) x weights^T (outs x inps)
 		m_inGrad.multiplyMMT(outGrad, m_weights);
