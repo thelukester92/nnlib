@@ -55,12 +55,15 @@ public:
 	
 	Storage &operator=(const Storage &copy)
 	{
-		resize(copy.size());
-		size_t index = 0;
-		for(const T &value : copy)
+		if(this != &copy)
 		{
-			m_ptr[index] = value;
-			++index;
+			resize(copy.size());
+			size_t index = 0;
+			for(const T &value : copy)
+			{
+				m_ptr[index] = value;
+				++index;
+			}
 		}
 		return *this;
 	}

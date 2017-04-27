@@ -155,7 +155,7 @@ public:
 	
 	// MARK: Size and shape methods.
 	
-	/// Resize this tensor in place and, if necessary, resizes its underlying storage.
+	/// Resize this tensor in place and, if necessary, resize its underlying storage.
 	Tensor &resize(const Storage<size_t> &dims)
 	{
 		// Don't allow a 0-dimensional tensor.
@@ -189,6 +189,13 @@ public:
 	Tensor &resize(Ts... dims)
 	{
 		return resize({ static_cast<size_t>(dims)... });
+	}
+	
+	/// Resize one dimension of this tensor in place and, if necessary, resize its underlying storage.
+	Tensor &resizeDim(size_t dim, size_t size)
+	{
+		m_dims[dim] = size;
+		return resize(m_dims);
 	}
 	
 	/// Creates a new tensor with a copy of this data but a new shape.

@@ -15,6 +15,11 @@ template <typename T = double>
 class Recurrent : public Container<T>
 {
 public:
+	using Container<T>::add;
+	using Container<T>::inputs;
+	using Container<T>::outputs;
+	using Container<T>::batch;
+	
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
 		m_inputModule(new Linear<T>(inps, outs, bats)),
 		m_feedbackModule(new Linear<T>(outs, outs, bats)),
@@ -24,7 +29,20 @@ public:
 		m_prevState(bats, outs),
 		m_resetStateGrad(true)
 	{
-		this->add(m_outputModule, m_inputModule, m_feedbackModule);
+		add(m_inputModule, m_feedbackModule, m_outputModule);
+		m_state.fill(0);
+	}
+	
+	Recurrent(Module<T> *inputModule, Module<T> *feedbackModule, Module<T> *outputModule) :
+		m_inputModule(inputModule),
+		m_feedbackModule(feedbackModule),
+		m_outputModule(outputModule),
+		m_state(m_outputModule->outputs(), true),
+		m_stateGrad(m_outputModule->outputs(), true),
+		m_prevState(m_outputModule->outputs(), true),
+		m_resetStateGrad(true)
+	{
+		add(m_inputModule, m_feedbackModule, m_outputModule);
 		m_state.fill(0);
 	}
 	
@@ -63,6 +81,31 @@ public:
 	virtual Tensor<T> &inGrad() override
 	{
 		return m_inputModule->inGrad();
+	}
+	
+	/// Set the input shape of this module, including batch.
+	virtual Recurrent &inputs(const Storage<size_t> &dims) override
+	{
+		m_inputModule->inputs(dims);
+		return batch(dims[0]);
+	}
+	
+	/// Set the output shape of this module, including batch.
+	virtual Recurrent &outputs(const Storage<size_t> &dims) override
+	{
+		m_feedbackModule->outputs(dims);
+		m_outputModule->outputs(dims);
+		return batch(dims[0]);
+	}
+	
+	/// Set the batch size of this module.
+	virtual Recurrent &batch(size_t bats) override
+	{
+		Container<T>::batch(bats);
+		m_state.resizeDim(0, bats);
+		m_stateGrad.resizeDim(0, bats);
+		m_prevState.resizeDim(0, bats);
+		return *this;
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.

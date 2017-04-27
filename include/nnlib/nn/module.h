@@ -64,14 +64,8 @@ public:
 	/// By default, this resizes the first dimension of the input gradient and output.
 	virtual Module &batch(size_t bats)
 	{
-		Storage<size_t> dims = inGrad().shape();
-		dims[0] = bats;
-		inGrad().resize(dims);
-		
-		dims = output().shape();
-		dims[0] = bats;
-		output().resize(dims);
-		
+		inGrad().resizeDim(0, bats);
+		output().resizeDim(0, bats);
 		return *this;
 	}
 	
