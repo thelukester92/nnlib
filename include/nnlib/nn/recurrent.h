@@ -48,9 +48,11 @@ public:
 	
 	Recurrent &reset()
 	{
-		m_State.fill(0);
+		m_state.fill(0);
 		return *this;
 	}
+	
+	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
