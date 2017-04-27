@@ -21,7 +21,8 @@ public:
 		m_outputModule(new Sequential<T>(new Linear<T>(outs, outs, bats), new TanH<>())),
 		m_state(bats, outs),
 		m_stateGrad(bats, outs),
-		m_prevState(bats, outs)
+		m_prevState(bats, outs),
+		m_resetStateGrad(true)
 	{
 		this->add(m_outputModule, m_inputModule, m_feedbackModule);
 		m_state.fill(0);
@@ -34,12 +35,18 @@ public:
 		m_inputModule->forward(input);
 		m_feedbackModule->forward(m_prevState);
 		m_state.copy(m_inputModule->output()).addMM(m_feedbackModule->output());
+		m_resetStateGrad = true;
 		return m_outputModule->forward(m_state);
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
+		if(m_resetStateGrad)
+		{
+			m_resetStateGrad = false;
+			m_stateGrad.fill(0);
+		}
 		m_outputModule->backward(m_state, outGrad);
 		m_outputModule->inGrad().addMM(m_stateGrad);
 		m_stateGrad.copy(m_feedbackModule->backward(m_prevState, m_outputModule->inGrad()));
@@ -58,14 +65,6 @@ public:
 		return m_inputModule->inGrad();
 	}
 	
-	/// A vector of tensors filled with (views of) this module's parameters' gradient.
-	virtual Storage<Tensor<T> *> grad() override
-	{
-		Storage<Tensor<T> *> grads = Container<T>::grad();
-		grads.push_back(&m_stateGrad);
-		return grads;
-	}
-	
 	/// A vector of tensors filled with (views of) this module's internal state.
 	virtual Storage<Tensor<T> *> innerState() override
 	{
@@ -82,6 +81,8 @@ private:
 	Tensor<T> m_state;
 	Tensor<T> m_stateGrad;
 	Tensor<T> m_prevState;
+	
+	bool m_resetStateGrad;
 };
 
 }
