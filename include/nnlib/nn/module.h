@@ -86,6 +86,13 @@ public:
 	{
 		return {};
 	}
+	
+	/// A vector of tensors filled with (views of) this module's internal state.
+	/// By default, this is only the calculated output.
+	virtual Storage<Tensor<T> *> innerState()
+	{
+		return { &output() };
+	}
 };
 
 }

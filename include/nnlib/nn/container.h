@@ -91,6 +91,20 @@ public:
 		}
 		return blams;
 	}
+	
+	/// A vector of tensors filled with (views of) each sub-module's internal state.
+	virtual Storage<Tensor<T> *> innerState() override
+	{
+		Storage<Tensor<T> *> states;
+		for(Module<T> *comp : m_components)
+		{
+			for(Tensor<T> *state : comp->innerState())
+			{
+				states.push_back(state);
+			}
+		}
+		return states;
+	}
 protected:
 	Storage<Module<T> *> m_components;
 };

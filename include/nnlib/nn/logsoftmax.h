@@ -37,8 +37,6 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	/// \note This module expects backward to be run immediately after forward (i.e. m_output is known).
-	/// \note In effect, this module type is stateful.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
