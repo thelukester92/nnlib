@@ -491,6 +491,7 @@ public:
 	Tensor &multiplyMM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Algebra<T>::multiplyMM(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
@@ -503,6 +504,7 @@ public:
 	Tensor &multiplyMTM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Algebra<T>::multiplyMTM(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
@@ -515,6 +517,7 @@ public:
 	Tensor &multiplyMMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Algebra<T>::multiplyMMT(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
@@ -527,6 +530,7 @@ public:
 	Tensor &multiplyMTMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Algebra<T>::multiplyMTMT(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
@@ -539,6 +543,7 @@ public:
 	Tensor &multiplyMV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
 		Algebra<T>::multiplyMV(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.size(), x.stride(0),
@@ -551,6 +556,7 @@ public:
 	Tensor &multiplyMTV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
 		Algebra<T>::multiplyMTV(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.size(), x.stride(0),

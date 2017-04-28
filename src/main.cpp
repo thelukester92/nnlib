@@ -211,6 +211,25 @@ void testAlgebra()
 	{
 		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Tensor::multiplyMV failed!");
 	}
+	
+	// Make sure tensor enforces contiguous matrices for multiplication
+	
+	Tensor<double> foo = Tensor<double>(10, 10, 10).rand();
+	Tensor<double> bar = foo.select(2, 1);
+	Tensor<double> bat = Tensor<double>(10, 10).rand();
+	Tensor<double> baz(10, 10);
+	Tensor<double> baaz(10, 10);
+	
+	bool problem = false;
+	try
+	{
+		baz.multiplyMM(bar, bat);
+	}
+	catch(std::runtime_error &e)
+	{
+		problem = true;
+	}
+	NNHardAssert(problem, "Non-contiguous matrix multiplcation failed to raise an error!");
 }
 
 void testRecurrentNet()
