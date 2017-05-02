@@ -626,8 +626,8 @@ public:
 		return *this;
 	}
 	
-	/// Elementwise product.
-	Tensor &hadamardProduct(const Tensor<T> &x)
+	/// Hadamard/elementwise/pointwise product.
+	Tensor &pointwiseProduct(const Tensor<T> &x)
 	{
 		NNAssert(shape() == x.shape(), "Incompatible operands!");
 		auto i = x.begin();

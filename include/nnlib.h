@@ -6,6 +6,7 @@
 /// Neural Networks
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/container.h"
+#include "nnlib/nn/identity.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/logistic.h"
 #include "nnlib/nn/logsoftmax.h"

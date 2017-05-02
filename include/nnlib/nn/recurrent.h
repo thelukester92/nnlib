@@ -52,6 +52,7 @@ public:
 	Recurrent &reset()
 	{
 		m_state.fill(0);
+		m_resetStateGrad = true;
 		return *this;
 	}
 	
