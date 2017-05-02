@@ -9,8 +9,7 @@
 namespace nnlib
 {
 
-/// Vanilla recurrent module.
-/// output(t) = squash(feedback(output(t - 1)) + squash(input(t)))
+/// A simple recurrent module.
 template <typename T = double>
 class Recurrent : public Container<T>
 {
@@ -20,39 +19,42 @@ public:
 	using Container<T>::batch;
 	
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
-		m_inputModule(new Linear<T>(inps, outs, bats)),
-		m_feedbackModule(new Linear<T>(outs, outs, bats)),
-		m_outputModule(new Sequential<T>(new Linear<T>(outs, outs, bats), new TanH<>())),
+		m_inpMod(new Linear<T>(inps, outs, bats)),
+		m_memMod(new Linear<T>(outs, outs, bats)),
+		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, bats), new TanH<>())),
 		m_state(bats, outs),
+		m_statePrev(bats, outs),
 		m_stateGrad(bats, outs),
-		m_prevState(bats, outs),
-		m_resetStateGrad(true)
+		m_resetGrad(true)
 	{
-		Container<T>::add(m_inputModule);
-		Container<T>::add(m_feedbackModule);
-		Container<T>::add(m_outputModule);
-		m_state.fill(0);
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
+		reset();
 	}
 	
-	Recurrent(Module<T> *inputModule, Module<T> *feedbackModule, Module<T> *outputModule) :
-		m_inputModule(inputModule),
-		m_feedbackModule(feedbackModule),
-		m_outputModule(outputModule),
-		m_state(m_outputModule->outputs(), true),
-		m_stateGrad(m_outputModule->outputs(), true),
-		m_prevState(m_outputModule->outputs(), true),
-		m_resetStateGrad(true)
+	Recurrent(Module<T> *inpMod, Module<T> *memMod, Module<T> *outMod) :
+		m_inpMod(inpMod),
+		m_memMod(memMod),
+		m_outMod(outMod),
+		m_state(m_outMod->outputs(), true),
+		m_statePrev(m_outMod->outputs(), true),
+		m_stateGrad(m_outMod->outputs(), true),
+		m_resetGrad(true)
 	{
-		Container<T>::add(m_inputModule);
-		Container<T>::add(m_feedbackModule);
-		Container<T>::add(m_outputModule);
-		m_state.fill(0);
+		NNAssert(m_inpMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
+		NNAssert(m_memMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
+		NNAssert(m_outMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
+		reset();
 	}
 	
 	Recurrent &reset()
 	{
 		m_state.fill(0);
-		m_resetStateGrad = true;
+		m_resetGrad = true;
 		return *this;
 	}
 	
@@ -69,53 +71,58 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		m_prevState.copy(m_state);
-		m_inputModule->forward(input);
-		m_feedbackModule->forward(m_prevState);
-		m_state.copy(m_inputModule->output()).addMM(m_feedbackModule->output());
-		m_resetStateGrad = true;
-		return m_outputModule->forward(m_state);
+		m_resetGrad = true;
+		
+		m_statePrev.copy(m_state);
+		m_inpMod->forward(input);
+		m_memMod->forward(m_statePrev);
+		
+		m_state.copy(m_inpMod->output()).addMM(m_memMod->output());
+		return m_outMod->forward(m_state);
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		if(m_resetStateGrad)
+		if(m_resetGrad)
 		{
-			m_resetStateGrad = false;
+			m_resetGrad = false;
 			m_stateGrad.fill(0);
 		}
-		m_outputModule->backward(m_state, outGrad);
-		m_outputModule->inGrad().addMM(m_stateGrad);
-		m_stateGrad.copy(m_feedbackModule->backward(m_prevState, m_outputModule->inGrad()));
-		m_inputModule->backward(input, m_outputModule->inGrad());
-		return m_inputModule->inGrad();
+		
+		m_outMod->backward(m_state, outGrad);
+		m_outMod->inGrad().addMM(m_stateGrad);
+		m_stateGrad.copy(m_memMod->backward(m_statePrev, m_outMod->inGrad()));
+		return m_inpMod->backward(input, m_outMod->inGrad());
 	}
 	
 	/// Cached output.
 	virtual Tensor<T> &output() override
 	{
-		return m_outputModule->output();
+		return m_outMod->output();
 	}
 	
 	/// Cached input gradient.
 	virtual Tensor<T> &inGrad() override
 	{
-		return m_inputModule->inGrad();
+		return m_inpMod->inGrad();
 	}
 	
 	/// Set the input shape of this module, including batch.
 	virtual Recurrent &inputs(const Storage<size_t> &dims) override
 	{
-		m_inputModule->inputs(dims);
+		m_inpMod->inputs(dims);
 		return batch(dims[0]);
 	}
 	
 	/// Set the output shape of this module, including batch.
 	virtual Recurrent &outputs(const Storage<size_t> &dims) override
 	{
-		m_feedbackModule->outputs(dims);
-		m_outputModule->outputs(dims);
+		m_memMod->outputs(dims);
+		m_outMod->outputs(dims);
+		m_state.resize(dims);
+		m_statePrev.resize(dims);
+		m_stateGrad.resize(dims);
 		return batch(dims[0]);
 	}
 	
@@ -124,8 +131,8 @@ public:
 	{
 		Container<T>::batch(bats);
 		m_state.resizeDim(0, bats);
+		m_statePrev.resizeDim(0, bats);
 		m_stateGrad.resizeDim(0, bats);
-		m_prevState.resizeDim(0, bats);
 		return *this;
 	}
 	
@@ -134,19 +141,19 @@ public:
 	{
 		Storage<Tensor<T> *> states = Container<T>::innerState();
 		states.push_back(&m_state);
-		states.push_back(&m_prevState);
+		states.push_back(&m_statePrev);
 		return states;
 	}
 private:
-	Module<T> *m_inputModule;
-	Module<T> *m_feedbackModule;
-	Module<T> *m_outputModule;
+	Module<T> *m_inpMod;
+	Module<T> *m_memMod;
+	Module<T> *m_outMod;
 	
 	Tensor<T> m_state;
+	Tensor<T> m_statePrev;
 	Tensor<T> m_stateGrad;
-	Tensor<T> m_prevState;
 	
-	bool m_resetStateGrad;
+	bool m_resetGrad;
 };
 
 }

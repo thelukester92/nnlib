@@ -240,7 +240,7 @@ void testRecurrentNet()
 	Tensor<double> sequence(steps, 1, 1);
 	for(size_t i = 0; i < steps; ++i)
 	{
-		sequence(i, 0, 0) = sin(0.1 * i);
+		sequence(i, 0, 0) = sin(0.1 * i) + 0.1 * i;
 	}
 	Tensor<double> seqFrom = sequence.narrow(0, 0, steps - 1);
 	Tensor<double> seqTo = sequence.narrow(0, 1, steps - 1);
@@ -255,9 +255,10 @@ void testRecurrentNet()
 	MSE<> critic(rnn);
 	auto optimizer = makeOptimizer<SGD>(rnn, critic).learningRate(0.01 / steps);
 	
-	for(size_t epoch = 0; epoch < 100; ++epoch)
+	for(size_t epoch = 0; epoch < 1000; ++epoch)
 	{
 		optimizer.step(seqFrom, seqTo);
+		cout << critic.forward(rnn.forward(seqFrom), seqTo) << endl;
 	}
 	
 	NNHardAssert(critic.forward(rnn.forward(seqFrom), seqTo) < 1e-2, "Recurrent neural network failed!");
