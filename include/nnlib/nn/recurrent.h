@@ -58,7 +58,7 @@ public:
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
-	virtual void add(Module<T> *component) override
+	virtual Recurrent &add(Module<T> *component) override
 	{
 		throw std::runtime_error("Cannot add components to a recurrent module!");
 	}
