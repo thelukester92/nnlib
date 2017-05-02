@@ -37,13 +37,14 @@ public:
 	// MARK: Container methods
 	
 	/// Add a component to this container, enforcing compatibility.
-	virtual void add(Module<T> *component) override
+	virtual Sequential &add(Module<T> *component) override
 	{
 		m_components.push_back(component);
 		if(components() > 1)
 		{
 			resizeDown(m_components.size() - 1);
 		}
+		return *this;
 	}
 	
 	/// Remove and return a specific component from this container, enforcing compatibility.

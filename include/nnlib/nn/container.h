@@ -41,9 +41,10 @@ public:
 	}
 	
 	/// Add a component to this container.
-	virtual void add(Module<T> *component)
+	virtual Container &add(Module<T> *component)
 	{
 		m_components.push_back(component);
+		return *this;
 	}
 	
 	/// Remove and return a specific component from this container.
