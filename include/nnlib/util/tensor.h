@@ -626,6 +626,19 @@ public:
 		return *this;
 	}
 	
+	/// Elementwise product.
+	Tensor &hadamardProduct(const Tensor<T> &x)
+	{
+		NNAssert(shape() == x.shape(), "Incompatible operands!");
+		auto i = x.begin();
+		for(T &el : *this)
+		{
+			el *= *i;
+			++i;
+		}
+		return *this;
+	}
+	
 	// MARK: Statistical methods
 	
 	T sum() const
