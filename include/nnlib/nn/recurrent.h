@@ -15,7 +15,6 @@ template <typename T = double>
 class Recurrent : public Container<T>
 {
 public:
-	using Container<T>::add;
 	using Container<T>::inputs;
 	using Container<T>::outputs;
 	using Container<T>::batch;
@@ -29,7 +28,9 @@ public:
 		m_prevState(bats, outs),
 		m_resetStateGrad(true)
 	{
-		add(m_inputModule, m_feedbackModule, m_outputModule);
+		Container<T>::add(m_inputModule);
+		Container<T>::add(m_feedbackModule);
+		Container<T>::add(m_outputModule);
 		m_state.fill(0);
 	}
 	
@@ -42,7 +43,9 @@ public:
 		m_prevState(m_outputModule->outputs(), true),
 		m_resetStateGrad(true)
 	{
-		add(m_inputModule, m_feedbackModule, m_outputModule);
+		Container<T>::add(m_inputModule);
+		Container<T>::add(m_feedbackModule);
+		Container<T>::add(m_outputModule);
 		m_state.fill(0);
 	}
 	
@@ -50,6 +53,14 @@ public:
 	{
 		m_state.fill(0);
 		return *this;
+	}
+	
+	// MARK: Container methods
+	
+	/// Cannot add a component to this container.
+	virtual void add(Module<T> *component) override
+	{
+		throw std::runtime_error("Cannot add components to a recurrent module!");
 	}
 	
 	// MARK: Module methods
