@@ -52,6 +52,29 @@ public:
 		return flattened;
 	}
 	
+	/// Create a vecor that copies data from a number of tensors.
+	static Tensor concat(const Storage<Tensor *> &tensors)
+	{
+		size_t size = 0;
+		for(Tensor *t : tensors)
+		{
+			size += t->size();
+		}
+		
+		Tensor concatenated(size);
+		size_t i = 0;
+		for(Tensor *t : tensors)
+		{
+			for(const T &value : *t)
+			{
+				concatenated(i) = value;
+				++i;
+			}
+		}
+		
+		return concatenated;
+	}
+	
 	/// Create a vector with the given data.
 	Tensor(const Storage<T> &values) :
 		m_dims({ values.size() }),
