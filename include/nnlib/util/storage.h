@@ -104,13 +104,14 @@ public:
 		return *this;
 	}
 	
-	void erase(size_t index)
+	Storage &erase(size_t index)
 	{
 		for(size_t i = index + 1; i < m_size; ++i)
 		{
 			m_ptr[i - 1] = m_ptr[i];
 		}
 		--m_size;
+		return *this;
 	}
 	
 	T *ptr()

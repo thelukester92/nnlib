@@ -52,29 +52,6 @@ public:
 		return flattened;
 	}
 	
-	/// Create a vecor that copies data from a number of tensors.
-	static Tensor concat(const Storage<Tensor *> &tensors)
-	{
-		size_t size = 0;
-		for(Tensor *t : tensors)
-		{
-			size += t->size();
-		}
-		
-		Tensor concatenated(size);
-		size_t i = 0;
-		for(Tensor *t : tensors)
-		{
-			for(const T &value : *t)
-			{
-				concatenated(i) = value;
-				++i;
-			}
-		}
-		
-		return concatenated;
-	}
-	
 	/// Create a vector with the given data.
 	Tensor(const Storage<T> &values) :
 		m_dims({ values.size() }),
@@ -358,6 +335,26 @@ public:
 		{
 			value = *i;
 			++i;
+		}
+		return *this;
+	}
+	
+	/// Concatenate a number of tensors along the given dimension.
+	/// Does not affect original tensors.
+	template <typename ... Ts>
+	Tensor &concat(size_t dim, const Ts & ...more)
+	{
+		NNAssert(dim < dims(), "Invalid dimension for concatenation!");
+		std::initializer_list<std::reference_wrapper<const Tensor>> tensors = { more... };
+		auto i = begin();
+		for(const Tensor &t : tensors)
+		{
+			NNAssert(Storage<size_t>(shape()).erase(dim) == Storage<size_t>(t.shape()).erase(dim), "Incompatible operands for concatenation!");
+			for(const T &v : t)
+			{
+				*i = v;
+				++i;
+			}
 		}
 		return *this;
 	}
@@ -787,6 +784,14 @@ public:
 		}
 	}
 	
+	TensorIterator &advance(size_t dim = (size_t) -1)
+	{
+		dim = std::min(dim, m_tensor->dims());
+		--m_indices.back();
+		++m_indices[dim];
+		return ++*this;
+	}
+	
 	TensorIterator &operator++()
 	{
 		size_t dim = m_indices.size() - 1;
@@ -798,6 +803,12 @@ public:
 			++m_indices[dim];
 		}
 		return *this;
+	}
+	
+	TensorIterator operator++(int)
+	{
+		TensorIterator it = *this;
+		return ++it;
 	}
 	
 	T &operator*()
