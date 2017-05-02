@@ -394,6 +394,36 @@ void testNeuralNet()
 	trainNet.batch(100);
 	critic.batch(100);
 	NNHardAssert(critic.forward(trainNet.forward(testFeat), testLab) < 25, "SGD failed!");
+	
+	// MARK: Concat test
+	
+	Linear<> *comp1 = new Linear<>(10, 5);
+	Sequential<> *comp2 = new Sequential<>(new Linear<>(10, 10), new TanH<>(), new Linear<>(10, 25), new TanH<>());
+	TanH<> *comp3 = new TanH<>(10);
+	
+	Tensor<double> inMat = Tensor<double>(10).rand().resize(1, 10);
+	Tensor<double> outMat(1, 5 + 25 + 10);
+	outMat.sub({ {}, {  0, 5 } }).copy(comp1->forward(inMat));
+	outMat.sub({ {}, {  5, 25 } }).copy(comp2->forward(inMat));
+	outMat.sub({ {}, { 30, 10 } }).copy(comp3->forward(inMat));
+	
+	Concat<> concat(comp1, comp2, comp3);
+	concat.forward(inMat);
+	
+	NNHardAssert(MSE<>(concat).forward(outMat, concat.output()) < 1e-9, "Concat::forward failed!");
+	
+	Tensor<double> blam1 = Tensor<double>(comp1->output().shape(), true).rand();
+	Tensor<double> blam2 = Tensor<double>(comp2->output().shape(), true).rand();
+	Tensor<double> blam3 = Tensor<double>(comp3->output().shape(), true).rand();
+	Tensor<double> inGrad2(inMat.shape(), true);
+	inGrad2.addMM(comp1->backward(inMat, blam1));
+	inGrad2.addMM(comp2->backward(inMat, blam2));
+	inGrad2.addMM(comp3->backward(inMat, blam3));
+	
+	Tensor<double> blam = Tensor<double>::flatten({ &blam1, &blam2, &blam3 }).resize(1, 40);
+	concat.backward(inMat, blam);
+	
+	NNHardAssert(MSE<>(inMat.shape()).forward(inGrad2, concat.inGrad()) < 1e-9, "Concat::backward failed!");
 }
 
 void testMNIST()

@@ -4,6 +4,7 @@
 #include "nnlib/critics/mse.h"
 
 /// Neural Networks
+#include "nnlib/nn/concat.h"
 #include "nnlib/nn/container.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/logistic.h"
