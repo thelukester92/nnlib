@@ -10,6 +10,7 @@
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/logistic.h"
 #include "nnlib/nn/logsoftmax.h"
+#include "nnlib/nn/lstm.h"
 #include "nnlib/nn/map.h"
 #include "nnlib/nn/module.h"
 #include "nnlib/nn/recurrent.h"

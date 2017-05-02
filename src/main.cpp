@@ -229,7 +229,7 @@ void testAlgebra()
 	{
 		problem = true;
 	}
-	NNHardAssert(problem, "Non-contiguous matrix multiplcation failed to raise an error!");
+	NNAssert(problem, "Non-contiguous matrix multiplcation failed to raise an error!");
 }
 
 void testRecurrentNet()
@@ -247,7 +247,7 @@ void testRecurrentNet()
 	
 	Sequencer<> rnn(
 		new Sequential<>(
-			new Recurrent<>(1, 10),
+			new LSTM<>(1, 10),
 			new Linear<>(10, 1)
 		),
 		seqFrom.size()
@@ -255,9 +255,10 @@ void testRecurrentNet()
 	MSE<> critic(rnn);
 	auto optimizer = makeOptimizer<SGD>(rnn, critic).learningRate(0.01 / steps);
 	
-	for(size_t epoch = 0; epoch < 100; ++epoch)
+	for(size_t epoch = 0; epoch < 10000; ++epoch)
 	{
 		optimizer.step(seqFrom, seqTo);
+		cout << critic.forward(rnn.forward(seqFrom), seqTo) << endl;
 	}
 	
 	NNHardAssert(critic.forward(rnn.forward(seqFrom), seqTo) < 1e-2, "Recurrent neural network failed!");
