@@ -174,7 +174,65 @@ public:
 		return m_inGrad;
 	}
 	
-	/// \todo resizing
+	/// Set the input shape of this module, including batch.
+	virtual LSTM &inputs(const Storage<size_t> &dims) override
+	{
+		m_inpGateX->inputs(dims);
+		m_fgtGateX->inputs(dims);
+		m_inpModX->inputs(dims);
+		m_outGateX->inputs(dims);
+		return batch(dims[0]);
+	}
+	
+	/// Set the output shape of this module, including batch.
+	virtual Recurrent &outputs(const Storage<size_t> &dims) override
+	{
+		m_inpGateY->outputs(dims);
+		m_inpGateH->outputs(dims);
+		m_inpGate->outputs(dims);
+		m_fgtGateY->outputs(dims);
+		m_fgtGateH->outputs(dims);
+		m_fgtGate->outputs(dims);
+		m_inpModY->outputs(dims);
+		m_inpMod->outputs(dims);
+		m_outGateY->outputs(dims);
+		m_outGateH->outputs(dims);
+		m_outGate->outputs(dims);
+		m_outMod->outputs(dims);
+		
+		/// \todo resize state and buffers
+		
+		return batch(dims[0]);
+	}
+	
+	/// Set the batch size of this module.
+	virtual Recurrent &batch(size_t bats) override
+	{
+		Container<T>::batch(bats);
+		
+		
+		
+		/// \todo fill this in
+		
+		
+		
+		m_state.resizeDim(0, bats);
+		m_statePrev.resizeDim(0, bats);
+		m_stateGrad.resizeDim(0, bats);
+		return *this;
+	}
+	
+	/// A vector of tensors filled with (views of) this module's internal state.
+	virtual Storage<Tensor<T> *> innerState() override
+	{
+		/// \todo fix this method
+		
+		
+		Storage<Tensor<T> *> states = Container<T>::innerState();
+		states.push_back(&m_state);
+		states.push_back(&m_statePrev);
+		return states;
+	}
 private:
 	Module<T> *m_inpGateX;
 	Module<T> *m_inpGateY;
