@@ -28,6 +28,10 @@ public:
 		m_inpModX(new Linear<T>(inps, outs, bats)),
 		m_inpModY(new Linear<T>(outs, outs, bats)),
 		m_inpMod(new TanH<T>(outs, bats)),
+		m_outGateX(new Linear<T>(inps, outs, bats)),
+		m_outGateY(new Linear<T>(outs, outs, bats)),
+		m_outGateH(new Linear<T>(outs, outs, bats)),
+		m_outGate(new Logistic<T>(outs, bats)),
 		m_outMod(new TanH<T>(outs, bats)),
 		m_inGrad(bats, inps),
 		m_inpAdd(bats, outs),
@@ -52,6 +56,10 @@ public:
 		Container<T>::add(m_inpModX);
 		Container<T>::add(m_inpModY);
 		Container<T>::add(m_inpMod);
+		Container<T>::add(m_outGateX);
+		Container<T>::add(m_outGateY);
+		Container<T>::add(m_outGateH);
+		Container<T>::add(m_outGate);
 		Container<T>::add(m_outMod);
 		reset();
 	}
@@ -90,7 +98,7 @@ public:
 		m_fgtGateX->forward(input);
 		m_fgtGateY->output().addMM(m_fgtGateY->forward(m_prevOutput));
 		m_fgtGateY->output().addMM(m_fgtGateH->forward(m_prevState));
-		m_fgtGate->foward(m_fgtGateX->output());
+		m_fgtGate->forward(m_fgtGateX->output());
 		
 		// input value
 		m_inpModX->forward(input);
@@ -179,6 +187,10 @@ private:
 	Module<T> *m_inpModX;
 	Module<T> *m_inpModY;
 	Module<T> *m_inpMod;
+	Module<T> *m_outGateX;
+	Module<T> *m_outGateY;
+	Module<T> *m_outGateH;
+	Module<T> *m_outGate;
 	Module<T> *m_outMod;
 	
 	Tensor<T> m_inGrad;
