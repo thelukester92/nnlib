@@ -19,7 +19,7 @@ class Batcher;
 template <typename T>
 class TensorIterator;
 
-template <typename T>
+template <typename T = double>
 class Tensor
 {
 friend class Batcher<T>;

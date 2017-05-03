@@ -3,6 +3,8 @@
 
 #ifdef __APPLE__
 	#include <Accelerate/Accelerate.h>
+#else
+	#include <cblas.h>
 #endif
 
 #include "error.h"
