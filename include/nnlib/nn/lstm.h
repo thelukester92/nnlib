@@ -64,6 +64,54 @@ public:
 		reset();
 	}
 	
+	LSTM(size_t outs) :
+		m_inpGateX(new Linear<T>(0, outs, 1)),
+		m_inpGateY(new Linear<T>(outs, outs, 1)),
+		m_inpGateH(new Linear<T>(outs, outs, 1)),
+		m_inpGate(new Logistic<T>(outs, 1)),
+		m_fgtGateX(new Linear<T>(0, outs, 1)),
+		m_fgtGateY(new Linear<T>(outs, outs, 1)),
+		m_fgtGateH(new Linear<T>(outs, outs, 1)),
+		m_fgtGate(new Logistic<T>(outs, 1)),
+		m_inpModX(new Linear<T>(0, outs, 1)),
+		m_inpModY(new Linear<T>(outs, outs, 1)),
+		m_inpMod(new TanH<T>(outs, 1)),
+		m_outGateX(new Linear<T>(0, outs, 1)),
+		m_outGateY(new Linear<T>(outs, outs, 1)),
+		m_outGateH(new Linear<T>(outs, outs, 1)),
+		m_outGate(new Logistic<T>(outs, 1)),
+		m_outMod(new TanH<T>(outs, 1)),
+		m_inGrad(1, 0),
+		m_inpAdd(1, outs),
+		m_fgtAdd(1, outs),
+		m_outAdd(1, outs),
+		m_outGrad(1, outs),
+		m_state(1, outs),
+		m_prevState(1, outs),
+		m_prevOutput(1, outs),
+		m_stateGrad(1, outs),
+		m_gradBuffer(1, outs),
+		m_resetGrad(true)
+	{
+		Container<T>::add(m_inpGateX);
+		Container<T>::add(m_inpGateY);
+		Container<T>::add(m_inpGateH);
+		Container<T>::add(m_inpGate);
+		Container<T>::add(m_fgtGateX);
+		Container<T>::add(m_fgtGateY);
+		Container<T>::add(m_fgtGateH);
+		Container<T>::add(m_fgtGate);
+		Container<T>::add(m_inpModX);
+		Container<T>::add(m_inpModY);
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_outGateX);
+		Container<T>::add(m_outGateY);
+		Container<T>::add(m_outGateH);
+		Container<T>::add(m_outGate);
+		Container<T>::add(m_outMod);
+		reset();
+	}
+	
 	LSTM &reset()
 	{
 		m_outMod->output().fill(0);

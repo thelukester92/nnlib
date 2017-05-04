@@ -33,6 +33,21 @@ public:
 		reset();
 	}
 	
+	Recurrent(size_t outs) :
+		m_inpMod(new Linear<T>(0, outs, 1)),
+		m_memMod(new Linear<T>(outs, outs, 1)),
+		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, 1), new TanH<>())),
+		m_state(1, outs),
+		m_statePrev(1, outs),
+		m_stateGrad(1, outs),
+		m_resetGrad(true)
+	{
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
+		reset();
+	}
+	
 	Recurrent(Module<T> *inpMod, Module<T> *memMod, Module<T> *outMod) :
 		m_inpMod(inpMod),
 		m_memMod(memMod),

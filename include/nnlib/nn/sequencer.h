@@ -50,15 +50,17 @@ public:
 		return m_states.size(0);
 	}
 	
+	Sequencer &forget()
+	{
+		m_state.fill(0);
+	}
+	
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be seqLen X batch X inputs!");
-		
-		/// \todo only reset the state if required
-		m_state.fill(0);
 		
 		for(size_t i = 0, end = input.size(0); i < end; ++i)
 		{
