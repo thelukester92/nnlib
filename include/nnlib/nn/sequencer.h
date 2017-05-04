@@ -131,7 +131,9 @@ public:
 	/// Set the batch size of this module.
 	virtual Sequencer &batch(size_t bats) override
 	{
-		
+		m_module->batch(bats);
+		m_output.resizeDim(1, bats);
+		m_inGrad.resizeDim(1, bats);
 		return *this;
 	}
 	

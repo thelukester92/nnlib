@@ -100,6 +100,92 @@ private:
 	size_t m_batch;
 };
 
+/// This variation of Batcher yields sequences of batches (for sequential data).
+/// Unlike the regular Batcher, the SequenceBatcher only yields one batch per reset,
+/// so there is no "next" method.
+template <typename T = double>
+class SequenceBatcher
+{
+public:
+	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t seqLen = 1, size_t bats = 1) :
+		m_feat(feat),
+		m_lab(lab),
+		m_featBatch(seqLen, bats, m_feat.size(1)),
+		m_labBatch(seqLen, bats, m_lab.size(1)),
+		m_batch(bats),
+		m_seqLen(seqLen)
+	{
+		NNAssert(feat.dims() == 2 && lab.dims() == 2, "SequenceBatcher only works with matrix inputs!");
+		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels!");
+		NNAssert(bats <= feat.size(0), "Invalid batch size!");
+		reset();
+	}
+	
+	SequenceBatcher &seqLen(size_t seqLen)
+	{
+		m_seqLen = seqLen;
+		reset();
+		return *this;
+	}
+	
+	size_t seqLen() const
+	{
+		return m_seqLen;
+	}
+	
+	SequenceBatcher &batch(size_t bats)
+	{
+		NNAssert(bats <= m_feat.size(0), "Invalid batch size!");
+		m_batch = bats;
+		reset();
+		return *this;
+	}
+	
+	size_t batch() const
+	{
+		return m_batch;
+	}
+	
+	SequenceBatcher &reset()
+	{
+		Storage<size_t> indices(m_batch);
+		for(size_t &index : indices)
+		{
+			index = Random<size_t>::uniform(m_feat.size(0) - m_seqLen + 1);
+		}
+		
+		for(size_t i = 0; i < m_seqLen; ++i)
+		{
+			for(size_t j = 0; j < m_batch; ++j)
+			{
+				m_featBatch.sub({ { i }, { j }, {} }).copy(m_feat.sub({ { indices[j] }, {} }));
+				m_labBatch.sub({ { i }, { j }, {} }).copy(m_lab.sub({ { indices[j] }, {} }));
+				++indices[j];
+			}
+		}
+		
+		return *this;
+	}
+	
+	Tensor<T> &features()
+	{
+		return m_featBatch;
+	}
+	
+	Tensor<T> &labels()
+	{
+		return m_labBatch;
+	}
+	
+private:
+	const Tensor<T> &m_feat;
+	const Tensor<T> &m_lab;
+	Tensor<T> m_featBatch;
+	Tensor<T> m_labBatch;
+	size_t m_batch;
+	size_t m_seqLen;
+};
+
 }
 
 #endif

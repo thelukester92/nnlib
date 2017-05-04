@@ -337,29 +337,6 @@ public:
 		return *this;
 	}
 	
-	/// Concatenate a number of tensors along the given dimension.
-	/// Does not affect original tensors.
-	template <typename ... Ts>
-	Tensor &concat(size_t dim, const Ts & ...more)
-	{
-		NNAssert(dim < dims(), "Invalid dimension for concatenation!");
-		
-		std::initializer_list<std::reference_wrapper<const Tensor>> tensors = { more... };
-		auto i = begin();
-		for(const Tensor &t : tensors)
-		{
-			NNAssert(Storage<size_t>(shape()).erase(dim) == Storage<size_t>(t.shape()).erase(dim), "Incompatible operands for concatenation!");
-			for(const T &v : t)
-			{
-				*i = v;
-				++i;
-			}
-		}
-		NNAssert(i == end(), "Insufficient number of elements in concatenated tensors!");
-		
-		return *this;
-	}
-	
 	/// Swaps data with another tensor.
 	Tensor &swap(Tensor &other)
 	{

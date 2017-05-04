@@ -13,12 +13,10 @@ class MSE : public Critic<double>
 public:
 	template <typename M>
 	MSE(const M &model) :
-		m_output(model.outputs(), true),
 		m_inGrad(model.outputs(), true)
 	{}
 	
 	MSE(const Storage<size_t> &shape) :
-		m_output(shape, true),
 		m_inGrad(shape, true)
 	{}
 	
@@ -59,7 +57,6 @@ public:
 	}
 
 private:
-	Tensor<T> m_output;	///< The loss.
 	Tensor<T> m_inGrad;	///< The gradient of the loss w.r.t. the input.
 };
 
