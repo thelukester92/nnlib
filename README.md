@@ -3,6 +3,7 @@
 nnlib is an all-header library for building, training, and using neural networks.
 It is designed to be both easy-to-use and efficient, using BLAS to accelerate math calculations.
 nnlib depends on OpenBLAS (on Linux) or the Accelerate framework (on OS X).
+For examples on how to use nnlib, see the [examples repository](https://github.com/thelukester92/nnlib-examples).
 
 # Get Started
 

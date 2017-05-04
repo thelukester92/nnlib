@@ -9,7 +9,6 @@ UNAME:=$(shell uname -s)
 
 prefix?=/usr/local
 INSTALL_INC:=$(prefix)/include
-INSTALL_FLAGS:=-fPIC -shared
 INSTALL_INC_FILES:=$(shell find $(INC) -type f)
 INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
 
