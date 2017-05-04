@@ -166,7 +166,7 @@ public:
 		m_outAdd.copy(m_outGate->output()).pointwiseProduct(m_state);
 		
 		// final output
-		return m_outMod->forward(m_outGate->output());
+		return m_outMod->forward(m_outAdd);
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
@@ -303,6 +303,7 @@ public:
 		states.push_back(&m_prevOutput);
 		return states;
 	}
+	
 private:
 	Module<T> *m_inpGateX;
 	Module<T> *m_inpGateY;
