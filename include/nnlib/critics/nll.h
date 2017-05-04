@@ -51,16 +51,12 @@ public:
 		m_inGrad.fill(0);
 		T weight = -1.0 / input.size(0);
 		
-		std::cout << "::";
-		
 		size_t j;
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
 			NNAssert(target(i, 0) >= 0, "Target for NLL must be positive!");
 			j = target(i, 0);
 			m_inGrad(i, j) = weight;
-			
-			std::cout << target(i, 0) << " became " << j << std::endl;
 		}
 		
 		return m_inGrad;
