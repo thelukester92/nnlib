@@ -124,6 +124,14 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
+		if(m_resetGrad)
+		{
+			m_resetGrad = false;
+			m_outGrad.fill(0);
+			m_stateGrad.fill(0);
+		}
+		
+		// update output gradient
 		m_outGrad.addMM(outGrad);
 		
 		// backprop to hidden state
@@ -177,16 +185,22 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual LSTM &inputs(const Storage<size_t> &dims) override
 	{
+		NNAssert(dims.size() == 2, "LSTM expects matrix inputs!");
+		
 		m_inpGateX->inputs(dims);
 		m_fgtGateX->inputs(dims);
 		m_inpModX->inputs(dims);
 		m_outGateX->inputs(dims);
+		m_inGrad.resize(dims);
+		
 		return batch(dims[0]);
 	}
 	
 	/// Set the output shape of this module, including batch.
-	virtual Recurrent &outputs(const Storage<size_t> &dims) override
+	virtual LSTM &outputs(const Storage<size_t> &dims) override
 	{
+		NNAssert(dims.size() == 2, "LSTM expects matrix outputs!");
+		
 		m_inpGateY->outputs(dims);
 		m_inpGateH->outputs(dims);
 		m_inpGate->outputs(dims);
@@ -200,37 +214,45 @@ public:
 		m_outGate->outputs(dims);
 		m_outMod->outputs(dims);
 		
-		/// \todo resize state and buffers
+		m_inpAdd.resize(dims);
+		m_fgtAdd.resize(dims);
+		m_outAdd.resize(dims);
+		m_outGrad.resize(dims);
+		m_state.resize(dims);
+		m_prevState.resize(dims);
+		m_prevOutput.resize(dims);
+		m_stateGrad.resize(dims);
+		m_gradBuffer.resize(dims);
 		
 		return batch(dims[0]);
 	}
 	
 	/// Set the batch size of this module.
-	virtual Recurrent &batch(size_t bats) override
+	virtual LSTM &batch(size_t bats) override
 	{
 		Container<T>::batch(bats);
 		
-		
-		
-		/// \todo fill this in
-		
-		
-		
+		m_inGrad.resizeDim(0, bats);
+		m_inpAdd.resizeDim(0, bats);
+		m_fgtAdd.resizeDim(0, bats);
+		m_outAdd.resizeDim(0, bats);
+		m_outGrad.resizeDim(0, bats);
 		m_state.resizeDim(0, bats);
-		m_statePrev.resizeDim(0, bats);
+		m_prevState.resizeDim(0, bats);
+		m_prevOutput.resizeDim(0, bats);
 		m_stateGrad.resizeDim(0, bats);
+		m_gradBuffer.resizeDim(0, bats);
+		
 		return *this;
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
 	virtual Storage<Tensor<T> *> innerState() override
 	{
-		/// \todo fix this method
-		
-		
 		Storage<Tensor<T> *> states = Container<T>::innerState();
 		states.push_back(&m_state);
-		states.push_back(&m_statePrev);
+		states.push_back(&m_prevState);
+		states.push_back(&m_prevOutput);
 		return states;
 	}
 private:

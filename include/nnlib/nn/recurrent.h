@@ -133,6 +133,7 @@ public:
 		m_state.resizeDim(0, bats);
 		m_statePrev.resizeDim(0, bats);
 		m_stateGrad.resizeDim(0, bats);
+		m_resetGrad = true;
 		return *this;
 	}
 	
