@@ -22,6 +22,7 @@ public:
 		m_batch(bats)
 	{
 		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels!");
+		NNAssert(bats <= feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	
