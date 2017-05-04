@@ -27,16 +27,9 @@ public:
 	
 	Batcher &batch(size_t bats)
 	{
-		Storage<size_t> featShape = m_feat.shape();
-		NNAssert(bats <= featShape[0], "Invalid batch size!");
-		featShape[0] = bats;
-		m_featBatch.resize(featShape);
-		
-		Storage<size_t> labShape = m_lab.shape();
-		NNAssert(bats <= labShape[0], "Invalid batch size!");
-		labShape[0] = bats;
-		m_labBatch.resize(labShape);
-		
+		NNAssert(bats <= m_feat.size(0), "Invalid batch size!");
+		m_featBatch.resizeDim(0, bats);
+		m_labBatch.resizeDim(0, bats);
 		return *this;
 	}
 	
@@ -57,6 +50,7 @@ public:
 		{
 			size_t j = Random<size_t>::uniform(end);
 			m_feat.select(0, i).swap(m_feat.select(0, j));
+			m_lab.select(0, i).swap(m_lab.select(0, j));
 		}
 		return *this;
 	}
@@ -75,8 +69,10 @@ public:
 				return false;
 			}
 		}
-		m_featBatch.m_offset = m_offset * m_featBatch.stride(0);
-		m_labBatch.m_offset = m_offset * m_labBatch.stride(0);
+		
+		m_feat.sub(m_featBatch, { { m_offset, m_featBatch.size(0) }, {} });
+		m_lab.sub(m_labBatch, { { m_offset, m_featBatch.size(0) }, {} });
+		
 		return true;
 	}
 	

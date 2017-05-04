@@ -41,10 +41,11 @@ public:
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssert(input.shape() == target.shape() && input.shape() == m_inGrad.shape(), "Incompatible operands to MSE!");
+		T norm = 2.0 / input.size();
 		auto inp = input.begin(), tar = target.begin();
 		for(T &g : m_inGrad)
 		{
-			g = *inp - *tar;
+			g = norm * (*inp - *tar);
 			++inp;
 			++tar;
 		}

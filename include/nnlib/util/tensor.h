@@ -14,15 +14,11 @@ namespace nnlib
 {
 
 template <typename T>
-class Batcher;
-
-template <typename T>
 class TensorIterator;
 
 template <typename T = double>
 class Tensor
 {
-friend class Batcher<T>;
 public:
 	/// Flatten a number of tensors into a vector and give the original tensors views into the new one.
 	static Tensor flatten(const Storage<Tensor *> &tensors)
@@ -270,7 +266,7 @@ public:
 	Tensor &sub(Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
 		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
-		NNAssert(t.shape() == shape(), "Incompatible sub tensor!");
+		t.m_offset = m_offset;
 		
 		size_t dim = 0;
 		for(const std::initializer_list<size_t> &params : dims)
@@ -279,14 +275,16 @@ public:
 			if(params.size() == 1)
 			{
 				size_t index = *params.begin();
-				t.m_offset = t.m_offset + index * m_strides[dim];
+				NNAssert(index < m_dims[dim], "Incompatible index!");
+				t.m_offset += index * m_strides[dim];
 				t.m_dims[dim] = 1;
 			}
 			else if(params.size() == 2)
 			{
 				size_t index = *params.begin();
 				size_t size = *(params.begin() + 1);
-				t.m_offset = t.m_offset + index * m_strides[dim];
+				NNAssert(index + size <= m_dims[dim], "Incompatible index and size!");
+				t.m_offset += index * m_strides[dim];
 				t.m_dims[dim] = size;
 			}
 			++dim;
