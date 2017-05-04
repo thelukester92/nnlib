@@ -42,6 +42,7 @@ public:
 		m_prevState(bats, outs),
 		m_prevOutput(bats, outs),
 		m_stateGrad(bats, outs),
+		m_curStateGrad(bats, outs),
 		m_gradBuffer(bats, outs),
 		m_resetGrad(true)
 	{
@@ -90,6 +91,7 @@ public:
 		m_prevState(1, outs),
 		m_prevOutput(1, outs),
 		m_stateGrad(1, outs),
+		m_curStateGrad(1, outs),
 		m_gradBuffer(1, outs),
 		m_resetGrad(true)
 	{
@@ -181,38 +183,41 @@ public:
 		
 		// update output gradient
 		m_outGrad.addMM(outGrad);
+		m_outMod->backward(m_outAdd, m_outGrad);
 		
 		// backprop to hidden state
-		m_stateGrad.copy(m_outGrad).pointwiseProduct(m_outGate->output());
+		m_curStateGrad.copy(m_outMod->inGrad()).pointwiseProduct(m_outGate->output());
+		m_curStateGrad.addMM(m_stateGrad);
 		
-		// backprop through output gate (m_outGrad must go last here)
-		m_outGate->backward(m_outGateX->output(), m_outGrad);
+		// backprop through output gate
+		m_gradBuffer.copy(m_outMod->inGrad()).pointwiseProduct(m_state);
+		m_outGate->backward(m_outGateX->output(), m_gradBuffer);
 		m_inGrad.copy(m_outGateX->backward(input, m_outGate->inGrad()));
-		m_stateGrad.addMM(m_outGateH->backward(m_state, m_outGate->inGrad()));
+		m_stateGrad.copy(m_outGateH->backward(m_state, m_outGate->inGrad()));
 		m_outGrad.copy(m_outGateY->backward(m_prevOutput, m_outGate->inGrad()));
 		
 		// backprop through input value
-		m_gradBuffer.copy(m_stateGrad).pointwiseProduct(m_inpGate->output());
+		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_inpGate->output());
 		m_inpMod->backward(m_inpModX->output(), m_gradBuffer);
 		m_inGrad.addMM(m_inpModX->backward(input, m_inpMod->inGrad()));
 		m_outGrad.addMM(m_inpModY->backward(m_prevOutput, m_inpMod->inGrad()));
 		
 		// backprop through forget gate
-		m_gradBuffer.copy(m_stateGrad).pointwiseProduct(m_prevState);
+		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_prevState);
 		m_fgtGate->backward(m_fgtGateX->output(), m_gradBuffer);
 		m_inGrad.addMM(m_fgtGateX->backward(input, m_fgtGate->inGrad()));
 		m_stateGrad.addMM(m_fgtGateH->backward(m_prevState, m_fgtGate->inGrad()));
 		m_outGrad.addMM(m_fgtGateY->backward(m_prevOutput, m_fgtGate->inGrad()));
 		
 		// backprop through input gate
-		m_gradBuffer.copy(m_stateGrad).pointwiseProduct(m_inpMod->output());
+		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_inpMod->output());
 		m_inpGate->backward(m_inpGateX->output(), m_gradBuffer);
 		m_inGrad.addMM(m_inpGateX->backward(input, m_inpGate->inGrad()));
 		m_stateGrad.addMM(m_inpGateH->backward(m_prevState, m_inpGate->inGrad()));
-		m_outGrad.addMM(m_fgtGateY->backward(m_prevOutput, m_inpGate->inGrad()));
+		m_outGrad.addMM(m_inpGateY->backward(m_prevOutput, m_inpGate->inGrad()));
 		
 		// backprop to hidden state
-		m_gradBuffer.copy(m_stateGrad).pointwiseProduct(m_fgtGate->output());
+		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_fgtGate->output());
 		m_stateGrad.addMM(m_gradBuffer);
 		
 		return m_inGrad;
@@ -270,6 +275,7 @@ public:
 		m_prevState.resize(dims);
 		m_prevOutput.resize(dims);
 		m_stateGrad.resize(dims);
+		m_curStateGrad.resize(dims);
 		m_gradBuffer.resize(dims);
 		
 		return batch(dims[0]);
@@ -289,6 +295,7 @@ public:
 		m_prevState.resizeDim(0, bats);
 		m_prevOutput.resizeDim(0, bats);
 		m_stateGrad.resizeDim(0, bats);
+		m_curStateGrad.resizeDim(0, bats);
 		m_gradBuffer.resizeDim(0, bats);
 		
 		return *this;
@@ -301,6 +308,7 @@ public:
 		states.push_back(&m_state);
 		states.push_back(&m_prevState);
 		states.push_back(&m_prevOutput);
+		states.push_back(&m_outAdd);
 		return states;
 	}
 	
@@ -332,6 +340,7 @@ private:
 	Tensor<T> m_prevState;
 	Tensor<T> m_prevOutput;
 	Tensor<T> m_stateGrad;
+	Tensor<T> m_curStateGrad;
 	Tensor<T> m_gradBuffer;
 	
 	bool m_resetGrad;
