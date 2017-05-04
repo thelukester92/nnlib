@@ -18,29 +18,29 @@ public:
 		m_feat(copy ? feat.copy() : feat),
 		m_lab(copy ? lab.copy() : lab),
 		m_featBatch(m_feat),
-		m_labBatch(m_lab)
+		m_labBatch(m_lab),
+		m_batch(bats)
 	{
 		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels!");
-		batch(bats);
 		reset();
 	}
 	
 	Batcher &batch(size_t bats)
 	{
 		NNAssert(bats <= m_feat.size(0), "Invalid batch size!");
-		m_featBatch.resizeDim(0, bats);
-		m_labBatch.resizeDim(0, bats);
+		m_batch = bats;
+		reset();
 		return *this;
 	}
 	
 	size_t batch() const
 	{
-		return m_featBatch.size(0);
+		return m_batch;
 	}
 	
 	size_t batches() const
 	{
-		return m_feat.size(0) / m_featBatch.size(0);
+		return m_feat.size(0) / m_batch;
 	}
 	
 	Batcher &reset()
@@ -52,13 +52,17 @@ public:
 			m_feat.select(0, i).swap(m_feat.select(0, j));
 			m_lab.select(0, i).swap(m_lab.select(0, j));
 		}
+		
+		m_feat.sub(m_featBatch, { { m_offset, m_batch }, {} });
+		m_lab.sub(m_labBatch, { { m_offset, m_batch }, {} });
+		
 		return *this;
 	}
 	
 	bool next(bool autoReset = false)
 	{
-		m_offset += m_featBatch.size(0);
-		if(m_offset + m_featBatch.size(0) > m_feat.size(0))
+		m_offset += m_batch;
+		if(m_offset + m_batch > m_feat.size(0))
 		{
 			if(autoReset)
 			{
@@ -70,8 +74,8 @@ public:
 			}
 		}
 		
-		m_feat.sub(m_featBatch, { { m_offset, m_featBatch.size(0) }, {} });
-		m_lab.sub(m_labBatch, { { m_offset, m_featBatch.size(0) }, {} });
+		m_feat.sub(m_featBatch, { { m_offset, m_batch }, {} });
+		m_lab.sub(m_labBatch, { { m_offset, m_batch }, {} });
 		
 		return true;
 	}
@@ -92,6 +96,7 @@ private:
 	Tensor<T> m_featBatch;
 	Tensor<T> m_labBatch;
 	size_t m_offset;
+	size_t m_batch;
 };
 
 }
