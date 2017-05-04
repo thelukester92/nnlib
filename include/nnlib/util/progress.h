@@ -37,7 +37,8 @@ public:
 		if(current < total)
 		{
 			out << " " << timer.elapsed() << "s";
-			out << " / " << (timer.elapsed() / current * total) << "s";
+			if(current > 0)
+				out << " / " << (timer.elapsed() / current * total) << "s";
 		}
 		else
 			out << " Done in " << timer.elapsed() << "s! ^_^";
