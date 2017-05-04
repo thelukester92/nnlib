@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <vector>
 #include <unordered_map>
+#include <limits>
 #include "tensor.h"
 #include "error.h"
 
@@ -252,9 +253,20 @@ public:
 		
 		for(size_t i = 0; i < m.size(0); ++i)
 		{
-			fout << m(i, 0);
+			if(m(i, 0) == unknown)
+				fout << "?";
+			else
+				fout << m(i, 0);
+			
 			for(size_t j = 1; j < m.size(1); ++j)
-				fout << "," << m(i, j);
+			{
+				fout << ",";
+				if(m(i, j) == unknown)
+					fout << "?";
+				else
+					fout << m(i, j);
+			}
+			
 			fout << "\n";
 		}
 	}
@@ -323,7 +335,7 @@ private:
 };
 
 template <typename T>
-T File<T>::unknown = -1e308;
+T File<T>::unknown = std::numeric_limits<T>::lowest();
 
 }
 

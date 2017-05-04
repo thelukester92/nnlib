@@ -343,6 +343,7 @@ public:
 	Tensor &concat(size_t dim, const Ts & ...more)
 	{
 		NNAssert(dim < dims(), "Invalid dimension for concatenation!");
+		
 		std::initializer_list<std::reference_wrapper<const Tensor>> tensors = { more... };
 		auto i = begin();
 		for(const Tensor &t : tensors)
@@ -354,6 +355,8 @@ public:
 				++i;
 			}
 		}
+		NNAssert(i == end(), "Insufficient number of elements in concatenated tensors!");
+		
 		return *this;
 	}
 	
