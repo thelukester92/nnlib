@@ -504,6 +504,16 @@ public:
 		return *this;
 	}
 	
+	/// Shift this tensor by a scalar.
+	Tensor &shift(T alpha)
+	{
+		for(T &v : *this)
+		{
+			v += alpha;
+		}
+		return *this;
+	}
+	
 	// MARK: Algebra
 	
 	Tensor &multiplyMM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
@@ -670,6 +680,13 @@ public:
 			}
 		}
 		return result;
+	}
+	
+	Tensor &normalize(T from = 0.0, T to = 1.0)
+	{
+		NNAssert(to > from, "Invalid normalization range!");
+		T small = min(), large = max();
+		return shift(-small).scale((to - from) / (large - small)).shift(from);
 	}
 	
 	// MARK: Element/data access methods.
