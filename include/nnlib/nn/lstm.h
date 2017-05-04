@@ -193,7 +193,6 @@ public:
 		m_gradBuffer.copy(m_outMod->inGrad()).pointwiseProduct(m_state);
 		m_outGate->backward(m_outGateX->output(), m_gradBuffer);
 		m_inGrad.copy(m_outGateX->backward(input, m_outGate->inGrad()));
-		m_stateGrad.copy(m_outGateH->backward(m_state, m_outGate->inGrad()));
 		m_outGrad.copy(m_outGateY->backward(m_prevOutput, m_outGate->inGrad()));
 		
 		// backprop through input value
@@ -206,7 +205,7 @@ public:
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_prevState);
 		m_fgtGate->backward(m_fgtGateX->output(), m_gradBuffer);
 		m_inGrad.addMM(m_fgtGateX->backward(input, m_fgtGate->inGrad()));
-		m_stateGrad.addMM(m_fgtGateH->backward(m_prevState, m_fgtGate->inGrad()));
+		m_stateGrad.copy(m_fgtGateH->backward(m_prevState, m_fgtGate->inGrad()));
 		m_outGrad.addMM(m_fgtGateY->backward(m_prevOutput, m_fgtGate->inGrad()));
 		
 		// backprop through input gate
