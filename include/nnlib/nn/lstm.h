@@ -144,8 +144,8 @@ public:
 		
 		// forget gate
 		m_fgtGateX->forward(input);
-		m_fgtGateY->output().addMM(m_fgtGateY->forward(m_prevOutput));
-		m_fgtGateY->output().addMM(m_fgtGateH->forward(m_prevState));
+		m_fgtGateX->output().addMM(m_fgtGateY->forward(m_prevOutput));
+		m_fgtGateX->output().addMM(m_fgtGateH->forward(m_prevState));
 		m_fgtGate->forward(m_fgtGateX->output());
 		
 		// input value
