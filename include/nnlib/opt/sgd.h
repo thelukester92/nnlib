@@ -47,7 +47,7 @@ public:
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
-	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual SGD &step(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		// calculate gradient
 		m_grads.fill(0);
@@ -65,6 +65,8 @@ public:
 		
 		// update parameters
 		m_parameters.addVV(m_grads, -m_learningRate);
+		
+		return *this;
 	}
 	
 private:

@@ -62,7 +62,7 @@ public:
 		Container<T>::add(m_outGateH);
 		Container<T>::add(m_outGate);
 		Container<T>::add(m_outMod);
-		reset();
+		forget();
 	}
 	
 	LSTM(size_t outs) :
@@ -111,10 +111,10 @@ public:
 		Container<T>::add(m_outGateH);
 		Container<T>::add(m_outGate);
 		Container<T>::add(m_outMod);
-		reset();
+		forget();
 	}
 	
-	LSTM &reset()
+	LSTM &forget()
 	{
 		m_outMod->output().fill(0);
 		m_state.fill(0);

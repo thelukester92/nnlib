@@ -28,7 +28,7 @@ public:
 	}
 	
 	/// Perform a single step of training given an input and a target.
-	virtual void step(const Tensor<T> &input, const Tensor<T> &target) = 0;
+	virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
 	
 protected:
 	M<T> &m_model;

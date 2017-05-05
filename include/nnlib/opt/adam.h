@@ -70,7 +70,7 @@ public:
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
-	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual Adam &step(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		m_normalize1 *= m_beta1;
 		m_normalize2 *= m_beta2;
@@ -93,6 +93,8 @@ public:
 			// update parameters
 			m_parameters(i) -= lr * m_mean(i) / (sqrt(m_variance(i)) + 1e-8);
 		}
+		
+		return *this;
 	}
 	
 private:

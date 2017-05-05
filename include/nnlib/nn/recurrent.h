@@ -30,7 +30,7 @@ public:
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
-		reset();
+		forget();
 	}
 	
 	Recurrent(size_t outs) :
@@ -45,7 +45,7 @@ public:
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
-		reset();
+		forget();
 	}
 	
 	Recurrent(Module<T> *inpMod, Module<T> *memMod, Module<T> *outMod) :
@@ -63,10 +63,10 @@ public:
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
-		reset();
+		forget();
 	}
 	
-	Recurrent &reset()
+	Recurrent &forget()
 	{
 		m_state.fill(0);
 		m_resetGrad = true;

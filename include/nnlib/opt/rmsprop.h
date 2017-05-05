@@ -36,7 +36,7 @@ public:
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
-	virtual void step(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual RMSProp &step(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		// calculate gradient
 		m_grads.fill(0);
@@ -50,6 +50,8 @@ public:
 			// update parameters
 			m_parameters(i) -= m_learningRate * m_grads(i) / (sqrt(m_variance(i)) + 1e-8);
 		}
+		
+		return *this;
 	}
 	
 private:
