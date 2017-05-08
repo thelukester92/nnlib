@@ -23,6 +23,14 @@ public:
 	
 	virtual ~Optimizer() {}
 	
+	/// Batch the model and critic.
+	Optimizer &batch(size_t bats)
+	{
+		m_model.batch(bats);
+		m_critic.batch(bats);
+		return *this;
+	}
+	
 	/// Get the model.
 	Module<T> &model()
 	{
