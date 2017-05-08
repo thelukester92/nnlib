@@ -4,6 +4,9 @@
 using namespace std;
 using namespace nnlib;
 
+/// This file is a series of unit tests for nnlib.
+/// For better demos, see https://github.com/thelukester92/nnlib-examples.git.
+
 void testTensor()
 {
 	// MARK: Basics
@@ -232,37 +235,6 @@ void testAlgebra()
 	NNAssert(problem, "Non-contiguous matrix multiplcation failed to raise an error!");
 }
 
-void testRecurrentNet()
-{
-	size_t steps = 1000;
-	RandomEngine::seed(0);
-	
-	Tensor<double> sequence(steps, 1, 1);
-	for(size_t i = 0; i < steps; ++i)
-	{
-		sequence(i, 0, 0) = sin(0.1 * i) + 0.1 * i;
-	}
-	Tensor<double> seqFrom = sequence.narrow(0, 0, steps - 1);
-	Tensor<double> seqTo = sequence.narrow(0, 1, steps - 1);
-	
-	Sequencer<> rnn(
-		new Sequential<>(
-			new LSTM<>(1, 10),
-			new Linear<>(10, 1)
-		),
-		seqFrom.size()
-	);
-	MSE<> critic(rnn);
-	auto optimizer = makeOptimizer<SGD>(rnn, critic).learningRate(0.01 / steps);
-	
-	for(size_t epoch = 0; epoch < 100; ++epoch)
-	{
-		optimizer.step(seqFrom, seqTo);
-	}
-	
-	// NNHardAssert(critic.forward(rnn.forward(seqFrom), seqTo) < 1e-2, "Recurrent neural network failed!");
-}
-
 void testNeuralNet()
 {
 	// MARK: Linear Test
@@ -426,53 +398,6 @@ void testNeuralNet()
 	NNHardAssert(MSE<>(inMat.shape()).forward(inGrad2, concat.inGrad()) < 1e-9, "Concat::backward failed!");
 }
 
-void testMNIST()
-{
-	cout << "Setting up..." << endl;
-	
-	Relation rel;
-	Tensor<double> train = File<>::loadArff("../data/mnist.train.arff", &rel);
-	Tensor<double> test = File<>::loadArff("../data/mnist.test.arff");
-	size_t outs = rel.attrVals(rel.size() - 1).size();
-	
-	Tensor<double> trainFeat = train.sub({ {}, { 0, train.size(1) - 1 } }).scale(1.0 / 255.0);
-	Tensor<double> trainLab = train.sub({ {}, { train.size(1) - 1 } });
-	
-	Tensor<double> testFeat = test.sub({ {}, { 0, test.size(1) - 1 } }).scale(1.0 / 255.0);
-	Tensor<double> testLab = test.sub({ {}, { test.size(1) - 1 } });
-	
-	Sequential<> nn(
-		new Linear<>(trainFeat.size(1), 300), new TanH<>(),
-		new Linear<>(100), new TanH<>(),
-		new Linear<>(outs), new TanH<>(),
-		new LogSoftMax<>()
-	);
-	NLL<> critic(nn);
-	auto optimizer = makeOptimizer<RMSProp>(nn, critic).learningRate(0.001);
-	
-	Batcher<> batcher(trainFeat, trainLab, 100);
-	nn.batch(batcher.batch());
-	critic.batch(batcher.batch());
-	
-	cout << "Training..." << endl;
-	
-	size_t epochs = 10;
-	size_t k = 0, tot = epochs * batcher.batches();
-	for(size_t i = 0; i < epochs; ++i)
-	{
-		batcher.reset();
-		do
-		{
-			Progress<>::display(k++, tot);
-			optimizer.step(batcher.features(), batcher.labels());
-		}
-		while(batcher.next());
-	}
-	Progress<>::display(tot, tot, '\n');
-}
-
-#include <unistd.h>
-
 int main()
 {
 	cout << "===== Testing Tensor =====" << endl;
@@ -487,13 +412,7 @@ int main()
 	testNeuralNet();
 	cout << "Neural networks test passed!" << endl << endl;
 	
-	cout << "===== Testing Recurrent Neural Networks =====" << endl;
-	testRecurrentNet();
-	cout << "Recurrent neural networks test passed!" << endl << endl;
-	
-	cout << "===== Testing on MNIST =====" << endl;
-	testMNIST();
-	cout << "MNIST test passed!" << endl << endl;
+	cout << "All unit tests passed!" << endl;
 	
 	return 0;
 }
