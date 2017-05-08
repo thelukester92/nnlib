@@ -1,12 +1,16 @@
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
-#include "../critics/critic.h"
-#include "../nn/module.h"
 #include "../util/tensor.h"
 
 namespace nnlib
 {
+
+template <typename T>
+class Module;
+
+template <typename T>
+class Critic;
 
 template <typename T = double>
 class Optimizer
