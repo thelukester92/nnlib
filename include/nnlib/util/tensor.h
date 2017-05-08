@@ -327,7 +327,7 @@ public:
 	/// Copies the shape and data from another tensor.
 	Tensor &copy(const Tensor &other)
 	{
-		resize(other.shape());
+		NNAssert(size() == other.size(), "Incompatible tensor for copying!");
 		auto i = other.begin();
 		for(T &value : *this)
 		{
