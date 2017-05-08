@@ -4,6 +4,7 @@
 #include <math.h>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include "timer.h"
 
 namespace nnlib
@@ -25,7 +26,6 @@ public:
 		if(current == 0)
 			timer.reset();
 		
-		out << std::setprecision(1) << std::fixed;
 		out << "\r\33[2K[";
 		for(size_t i = 1; i < leading; ++i)
 			out << (i < head ? "=" : (i == head ? ">" : " "));
@@ -36,17 +36,42 @@ public:
 		
 		if(current < total)
 		{
-			out << " " << timer.elapsed() << "s";
+			out << " " << ftime(timer.elapsed());
 			if(current > 0)
-				out << " / " << (timer.elapsed() / current * total) << "s";
+				out << " / " << ftime(timer.elapsed() / current * total);
 		}
 		else
-			out << " Done in " << timer.elapsed() << "s! ^_^";
+			out << " Done in " << ftime(timer.elapsed()) << "! ^_^";
 		
 		out << end << std::flush;
 	}
 	
 private:
+	static std::string ftime(T t)
+	{
+		std::ostringstream out;
+		out << std::setprecision(1) << std::fixed;
+		
+		size_t m = t / 60;
+		t -= m * 60;
+		
+		size_t h = m / 60;
+		m -= h * 60;
+		
+		size_t d = h / 24;
+		h -= d * 24;
+		
+		if(d > 0)
+			out << d << "d ";
+		if(d > 0 || h > 0)
+			out << h << "h ";
+		if(d > 0 || h > 0 || m > 0)
+			out << m << "m ";
+		out << t << "s";
+		
+		return out.str();
+	}
+	
 	static Timer<T> timer;
 };
 
