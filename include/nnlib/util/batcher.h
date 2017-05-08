@@ -101,19 +101,19 @@ private:
 };
 
 /// This variation of Batcher yields sequences of batches (for sequential data).
-/// Unlike the regular Batcher, the SequenceBatcher only yields one batch per reset,
+/// Unlike the regular Batcher, the SequenceBatcher only yields one sequence per reset,
 /// so there is no "next" method.
 template <typename T = double>
 class SequenceBatcher
 {
 public:
-	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t seqLen = 1, size_t bats = 1) :
+	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 0, size_t bats = 1) :
 		m_feat(feat),
 		m_lab(lab),
-		m_featBatch(seqLen, bats, m_feat.size(1)),
-		m_labBatch(seqLen, bats, m_lab.size(1)),
+		m_featBatch(sequenceLength, bats, m_feat.size(1)),
+		m_labBatch(sequenceLength, bats, m_lab.size(1)),
 		m_batch(bats),
-		m_seqLen(seqLen)
+		m_sequenceLength(sequenceLength)
 	{
 		NNAssert(feat.dims() == 2 && lab.dims() == 2, "SequenceBatcher only works with matrix inputs!");
 		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels!");
@@ -121,16 +121,16 @@ public:
 		reset();
 	}
 	
-	SequenceBatcher &seqLen(size_t seqLen)
+	SequenceBatcher &sequenceLength(size_t sequenceLength)
 	{
-		m_seqLen = seqLen;
+		m_sequenceLength = sequenceLength;
 		reset();
 		return *this;
 	}
 	
-	size_t seqLen() const
+	size_t sequenceLength() const
 	{
-		return m_seqLen;
+		return m_sequenceLength;
 	}
 	
 	SequenceBatcher &batch(size_t bats)
@@ -151,15 +151,15 @@ public:
 		Storage<size_t> indices(m_batch);
 		for(size_t &index : indices)
 		{
-			index = Random<size_t>::uniform(m_feat.size(0) - m_seqLen + 1);
+			index = Random<size_t>::uniform(m_feat.size(0) - m_sequenceLength + 1);
 		}
 		
-		for(size_t i = 0; i < m_seqLen; ++i)
+		for(size_t i = 0; i < m_sequenceLength; ++i)
 		{
 			for(size_t j = 0; j < m_batch; ++j)
 			{
-				m_featBatch.sub({ { i }, { j }, {} }).copy(m_feat.sub({ { indices[j] }, {} }));
-				m_labBatch.sub({ { i }, { j }, {} }).copy(m_lab.sub({ { indices[j] }, {} }));
+				m_featBatch.sub({ { i }, { j }, {} }).copy(m_feat.narrow(0, indices[j]));
+				m_labBatch.sub({ { i }, { j }, {} }).copy(m_lab.narrow(0, indices[j]));
 				++indices[j];
 			}
 		}
@@ -183,7 +183,7 @@ private:
 	Tensor<T> m_featBatch;
 	Tensor<T> m_labBatch;
 	size_t m_batch;
-	size_t m_seqLen;
+	size_t m_sequenceLength;
 };
 
 }

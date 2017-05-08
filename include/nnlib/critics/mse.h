@@ -30,7 +30,7 @@ public:
 		return sum / input.size();
 	}
 	
-	/// dL/di = input(i) - target(i)
+	/// dL/di = 2/n (input(i) - target(i))
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssert(input.shape() == target.shape() && input.shape() == m_inGrad.shape(), "Incompatible operands to MSE!");

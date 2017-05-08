@@ -8,8 +8,8 @@ namespace nnlib
 
 /// A container module that accepts sequential inputs and processes them
 /// one at a time, essentially abstracting away BPTT.
-/// Input should be a 3D tensor: sequence length X batch size X inputs.
-/// Output should be a 3D tensor: sequence length X batch size X outputs.
+/// Input should be a 3D tensor: sequence X batch size X inputs.
+/// Output should be a 3D tensor: sequence X batch size X outputs.
 template <typename T = double>
 class Sequencer : public Container<T>
 {
@@ -19,17 +19,17 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
-	Sequencer(Module<T> *module, size_t seqLen = 0) :
+	Sequencer(Module<T> *module, size_t sequenceLength = 0) :
 		m_module(module),
 		m_state(Tensor<T>::flatten(module->innerState())),
-		m_states(seqLen, m_state.size(0))
+		m_states(sequenceLength, m_state.size(0))
 	{
-		Storage<size_t> inps = { seqLen };
+		Storage<size_t> inps = { sequenceLength };
 		for(size_t size : m_module->inputs())
 			inps.push_back(size);
 		m_inGrad.resize(inps);
 		
-		Storage<size_t> outs = { seqLen };
+		Storage<size_t> outs = { sequenceLength };
 		for(size_t size : m_module->outputs())
 			outs.push_back(size);
 		m_output.resize(outs);
@@ -37,15 +37,15 @@ public:
 		add(module);
 	}
 	
-	Sequencer &seqLen(size_t seqLen)
+	Sequencer &sequenceLength(size_t sequenceLength)
 	{
-		m_inGrad.resizeDim(0, seqLen);
-		m_output.resizeDim(0, seqLen);
-		m_states.resizeDim(0, seqLen);
+		m_inGrad.resizeDim(0, sequenceLength);
+		m_output.resizeDim(0, sequenceLength);
+		m_states.resizeDim(0, sequenceLength);
 		return *this;
 	}
 	
-	size_t seqLen() const
+	size_t sequenceLength() const
 	{
 		return m_states.size(0);
 	}
@@ -60,7 +60,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be seqLen X batch X inputs!");
+		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
 		
 		for(size_t i = 0, end = input.size(0); i < end; ++i)
 		{
@@ -74,8 +74,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be seqLen X batch X inputs!");
-		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be seqLen X batch X outputs!");
+		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
+		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be sequence x batch x outputs!");
 		
 		for(size_t i = input.size(0) - 1; i > 0; --i)
 		{
@@ -101,7 +101,7 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual Sequencer &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a seqLen x batch x inputs input tensor!");
+		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
 		
 		Storage<size_t> newDims = dims;
 		newDims.erase(0);
@@ -117,7 +117,7 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual Sequencer &outputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a seqLen x batch x outputs output tensor!");
+		NNAssert(dims.size() == 3, "Sequencer expects a sequenceLength x batch x outputs output tensor!");
 		
 		Storage<size_t> newDims = dims;
 		newDims.erase(0);
@@ -137,6 +137,12 @@ public:
 		m_output.resizeDim(1, bats);
 		m_inGrad.resizeDim(1, bats);
 		return *this;
+	}
+	
+	/// Get the batch size of this module.
+	virtual size_t batch() const override
+	{
+		return m_output.size(1);
 	}
 	
 private:
