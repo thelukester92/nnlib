@@ -342,7 +342,7 @@ void testNeuralNet()
 		new LogSoftMax<>()
 	);
 	
-	MSE<> critic(trainNet);
+	MSE<> critic(trainNet.outputs());
 	SGD<> optimizer(trainNet, critic);
 	optimizer.learningRate(0.001);
 	
@@ -382,7 +382,7 @@ void testNeuralNet()
 	Concat<> concat(comp1, comp2, comp3);
 	concat.forward(inMat);
 	
-	NNHardAssert(MSE<>(concat).forward(outMat, concat.output()) < 1e-9, "Concat::forward failed!");
+	NNHardAssert(MSE<>(concat.outputs()).forward(outMat, concat.output()) < 1e-9, "Concat::forward failed!");
 	
 	Tensor<double> blam1 = Tensor<double>(comp1->output().shape(), true).rand();
 	Tensor<double> blam2 = Tensor<double>(comp2->output().shape(), true).rand();

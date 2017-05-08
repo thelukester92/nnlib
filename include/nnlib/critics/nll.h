@@ -11,11 +11,6 @@ template <typename T = double>
 class NLL : public Critic<double>
 {
 public:
-	template <typename M>
-	NLL(const M &model) :
-		m_inGrad(model.outputs(), true)
-	{}
-	
 	NLL(const Storage<size_t> &shape) :
 		m_inGrad(shape, true)
 	{}

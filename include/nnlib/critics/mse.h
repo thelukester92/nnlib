@@ -11,11 +11,6 @@ template <typename T = double>
 class MSE : public Critic<double>
 {
 public:
-	template <typename M>
-	MSE(const M &model) :
-		m_inGrad(model.outputs(), true)
-	{}
-	
 	MSE(const Storage<size_t> &shape) :
 		m_inGrad(shape, true)
 	{}
