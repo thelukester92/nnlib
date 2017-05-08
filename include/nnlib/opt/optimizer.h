@@ -1,28 +1,32 @@
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
+#include "../critics/critic.h"
+#include "../nn/module.h"
 #include "../util/tensor.h"
 
 namespace nnlib
 {
 
-template <template<typename> class M, template<typename> class C, typename T = double>
+template <typename T = double>
 class Optimizer
 {
 public:
-	Optimizer(M<T> &model, C<T> &critic) :
+	Optimizer(Module<T> &model, Critic<T> &critic) :
 		m_model(model),
 		m_critic(critic)
 	{}
 	
+	virtual ~Optimizer() {}
+	
 	/// Get the model.
-	M<T> &model()
+	Module<T> &model()
 	{
 		return m_model;
 	}
 	
 	/// Get the critic.
-	C<T> &critic()
+	Critic<T> &critic()
 	{
 		return m_critic;
 	}
@@ -31,15 +35,9 @@ public:
 	virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
 	
 protected:
-	M<T> &m_model;
-	C<T> &m_critic;
+	Module<T> &m_model;
+	Critic<T> &m_critic;
 };
-
-template <template <template <typename> class, template <typename> class, typename> class O, template <typename> class M, template <typename> class C, typename T = double>
-O<M, C, T> makeOptimizer(M<T> &model, C<T> &critic)
-{
-	return O<M, C, T>(model, critic);
-}
 
 }
 

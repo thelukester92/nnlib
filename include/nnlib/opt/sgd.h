@@ -6,14 +6,14 @@
 namespace nnlib
 {
 
-template <template <typename> class M, template <typename> class C, typename T = double>
-class SGD : public Optimizer<M, C, T>
+template <typename T = double>
+class SGD : public Optimizer<T>
 {
-using Optimizer<M, C, T>::m_model;
-using Optimizer<M, C, T>::m_critic;
+using Optimizer<T>::m_model;
+using Optimizer<T>::m_critic;
 public:
-	SGD(M<T> &model, C<T> &critic) :
-		Optimizer<M, C, T>(model, critic),
+	SGD(Module<T> &model, Critic<T> &critic) :
+		Optimizer<T>(model, critic),
 		m_learningRate(0.001),
 		m_momentum(0)
 	{
