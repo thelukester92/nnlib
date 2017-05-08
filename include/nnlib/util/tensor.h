@@ -39,9 +39,10 @@ public:
 				flattened(i) = value;
 				++i;
 			}
-			t->m_data = flattened.m_data;	// make t share data with flattened
-			t->m_offset = offset;			// give t the appropriate offset in flattened
-			t->resize(t->shape());			// reset strides of t to be contiguous
+			t->m_data = flattened.m_data;		// make t share data with flattened
+			t->m_shared = flattened.m_shared;	// ARC
+			t->m_offset = offset;				// give t the appropriate offset in flattened
+			t->resize(t->shape());				// reset strides of t to be contiguous
 			offset = i;
 		}
 		
