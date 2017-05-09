@@ -444,16 +444,14 @@ void testRNN()
 	
 	size_t seqs = 100;
 	size_t bats = 1;
-	size_t epochs = 1000;
+	size_t epochs = 10000;
 	double validation = 0.33;
-	double learningRate = 0.0001;
+	double learningRate = 0.001;
 	
 	Sequencer<> rnn(
 		new Sequential<>(
 			new Linear<>(1, 32),
-			new TanH<>(),
-			new Linear<>(32),
-			new TanH<>(),
+			new LSTM<>(32),
 			new Linear<>(1)
 		),
 		seqs,
@@ -477,6 +475,7 @@ void testRNN()
 	for(size_t i = 0; i < epochs; ++i)
 	{
 		batcher.reset();
+		rnn.forget();
 		optimizer.step(batcher.features(), batcher.labels());
 		
 		preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
