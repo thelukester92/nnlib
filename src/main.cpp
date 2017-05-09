@@ -437,59 +437,53 @@ void plot(const string &filename, Sequencer<> &model, const Tensor<> &train, con
 
 void testRNN()
 {
-	Tensor<> data(500);
-	for(size_t i = 0; i < data.size(0); ++i)
-		data(i) = sin(0.1 * i);
-	data.normalize();
+	Tensor<> sequence = { 8, 6, 7, 5, 3, 0, 9, 1, 2, 4 };
+	size_t sequenceLength = sequence.size(0) - 1;
 	
-	size_t seqs = 100;
-	size_t bats = 1;
-	size_t epochs = 10000;
-	double validation = 0.33;
-	double learningRate = 0.001;
+	Tensor<> expectedOut = {
+		0.49605, 0.58459, 0.67011, 0.67758, 0.62128,
+		0.38235, 0.69360, 0.48573, 0.48518
+	};
 	
-	Sequencer<> rnn(
-		new Sequential<>(
-			new Linear<>(1, 32),
-			new LSTM<>(32),
-			new Linear<>(1)
-		),
-		seqs,
-		bats
+	Tensor<> expectedInGrad = {
+		-1.43229, -0.97700, -0.56715, -0.50216, -0.42033,
+		-1.66733, -0.15554, -0.42984, -0.46831
+	};
+	
+	LSTM<> *lstm;
+	Sequencer<> nn(
+		lstm = new LSTM<>(1, 1),
+		sequenceLength
 	);
-	MSE<> critic(rnn.outputs(), bats);
-	SGD<> optimizer(rnn, critic);
-	optimizer.learningRate(learningRate);
+	nn.parameters().copy({
+		0.2, 0,
+		-0.1, 0,
+		0.25, 0,
+		-0.2, 0,
+		0.5, 0,
+		1.0, 0,
+		0.1, 0,
+		0.2, 0,
+		0.5, 0,
+		0.1, 0,
+		0.3, 0
+	});
+	MSE<> critic(nn.outputs());
 	
-	Tensor<> train = data.narrow(0, 0, (1.0 - validation) * data.size(0));
-	Tensor<> test = data.narrow(0, train.size(0), data.size(0) - train.size(0));
+	nn.forget();
+	nn.forward(sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1));
 	
-	Tensor<> trainFeat = train.narrow(0, 0, train.size(0) - 1);
-	Tensor<> trainLab = train.narrow(0, 1, train.size(0) - 1);
+	NNHardAssert(MSE<>(expectedOut.shape()).forward(nn.output().reshape(expectedOut.size(0)), expectedOut) < 1e-9, "Sequencer(LSTM)::forward failed!");
 	
-	Tensor<> preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
-	cout << "initial error: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << endl;
+	nn.backward(
+		sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1),
+		critic.backward(
+			nn.output(),
+			sequence.narrow(0, 1, sequenceLength).resize(sequenceLength, 1, 1)
+		)
+	);
 	
-	SequenceBatcher<> batcher(trainFeat.resize(trainFeat.size(0), 1), trainLab.resize(trainLab.size(0), 1), seqs, bats);
-	
-	for(size_t i = 0; i < epochs; ++i)
-	{
-		batcher.reset();
-		rnn.forget();
-		optimizer.step(batcher.features(), batcher.labels());
-		
-		preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
-		
-		Progress<>::display(i, epochs);
-		
-		cout << "\terror: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << flush;
-	}
-	Progress<>::display(epochs, epochs, '\n');
-	
-	preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
-	cout << "final error: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << endl;
-	
-	plot("plot.arff", rnn, train, test);
+	NNHardAssert(MSE<>(expectedInGrad.shape()).forward(nn.inGrad().reshape(expectedInGrad.size(0)), expectedInGrad) < 1e-9, "Sequencer(LSTM)::backward failed!");
 }
 
 int main()

@@ -16,6 +16,10 @@ template <typename T = double>
 class LSTM : public Container<T>
 {
 public:
+	using Container<T>::inputs;
+	using Container<T>::outputs;
+	using Container<T>::batch;
+	
 	LSTM(size_t inps, size_t outs, size_t bats = 1) :
 		m_inpGateX(new Linear<T>(inps, outs, bats)),
 		m_inpGateY(new Linear<T>(outs, outs, bats)),
@@ -311,7 +315,7 @@ public:
 		return states;
 	}
 	
-private:
+//private:
 	Module<T> *m_inpGateX;
 	Module<T> *m_inpGateY;
 	Module<T> *m_inpGateH;

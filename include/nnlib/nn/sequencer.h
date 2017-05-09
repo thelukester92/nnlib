@@ -79,16 +79,10 @@ public:
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be sequence x batch x outputs!");
 		
-		Tensor<> zero(outGrad.select(0, 0).shape(), true);
-		zero.fill(0);
-		
-		for(size_t i = input.size(0) - 1; i > 0; --i)
+		for(int i = input.size(0) - 1; i >= 0; --i)
 		{
-			m_state.copy(m_states.select(0, i - 1));
-			if(i == input.size(0) - 1)
-				m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), outGrad.select(0, i)));
-			else
-				m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), zero));
+			m_state.copy(m_states.select(0, i));
+			m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), outGrad.select(0, i)));
 		}
 		
 		return m_inGrad;
