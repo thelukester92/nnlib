@@ -398,6 +398,84 @@ void testNeuralNet()
 	NNHardAssert(MSE<>(inMat.shape()).forward(inGrad2, concat.inGrad()) < 1e-9, "Concat::backward failed!");
 }
 
+Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)
+{
+	size_t sequenceLength = model.sequenceLength();
+	size_t bats = model.batch();
+	
+	model.forget();
+	model.sequenceLength(1);
+	model.batch(1);
+	
+	for(size_t i = 0; i < context.size(0); ++i)
+	{
+		model.forward(context.narrow(0, i));
+	}
+	
+	Tensor<> result(length, 1, 1);
+	for(size_t i = 0; i < length; ++i)
+	{
+		result.narrow(0, i).copy(model.forward(model.output()));
+	}
+	
+	model.sequenceLength(sequenceLength);
+	model.batch(bats);
+	
+	return result;
+}
+
+void testRNN()
+{
+	Tensor<> data(1000);
+	for(size_t i = 0; i < data.size(0); ++i)
+		data(i) = sin(0.5 * i);
+	data.normalize();
+	
+	size_t seqs = 100;
+	size_t bats = 20;
+	size_t epochs = 10000;
+	double validation = 0.33;
+	
+	Sequencer<> rnn(
+		new Sequential<>(
+			new Linear<>(1, 10),
+			new LSTM<>(10),
+			new Linear<>(1)
+		),
+		seqs,
+		bats
+	);
+	MSE<> critic(rnn.outputs(), bats);
+	Nadam<> optimizer(rnn, critic);
+	
+	Tensor<> train = data.narrow(0, 0, (1.0 - validation) * data.size(0));
+	Tensor<> test = data.narrow(0, train.size(0), data.size(0) - train.size(0));
+	
+	Tensor<> trainFeat = train.narrow(0, 0, train.size(0) - 1);
+	Tensor<> trainLab = train.narrow(0, 1, train.size(0) - 1);
+	
+	Tensor<> preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
+	cout << "initial error: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << endl;
+	
+	SequenceBatcher<> batcher(trainFeat.resize(trainFeat.size(0), 1), trainLab.resize(trainLab.size(0), 1), seqs, bats);
+	
+	for(size_t i = 0; i < epochs; ++i)
+	{
+		batcher.reset();
+		optimizer.step(batcher.features(), batcher.labels());
+		
+		preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
+		
+		Progress<>::display(i, epochs);
+		
+		cout << "\terror: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << flush;
+	}
+	Progress<>::display(epochs, epochs, '\n');
+	
+	preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
+	cout << "final error: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << endl;
+}
+
 int main()
 {
 	cout << "===== Testing Tensor =====" << endl;
@@ -411,6 +489,10 @@ int main()
 	cout << "===== Testing Neural Networks =====" << endl;
 	testNeuralNet();
 	cout << "Neural networks test passed!" << endl << endl;
+	
+	cout << "===== Testing Recurrent Neural Networks =====" << endl;
+	testRNN();
+	cout << "Recurrent neural networks test passed!" << endl << endl;
 	
 	cout << "All unit tests passed!" << endl;
 	

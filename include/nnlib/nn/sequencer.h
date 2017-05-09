@@ -19,7 +19,7 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
-	Sequencer(Module<T> *module, size_t sequenceLength = 0) :
+	Sequencer(Module<T> *module, size_t sequenceLength = 0, size_t bats = 1) :
 		m_module(module),
 		m_state(Tensor<T>::flatten(module->innerState())),
 		m_states(sequenceLength, m_state.size(0))
@@ -35,6 +35,7 @@ public:
 		m_output.resize(outs);
 		
 		add(module);
+		batch(bats);
 	}
 	
 	Sequencer &sequenceLength(size_t sequenceLength)
@@ -53,6 +54,7 @@ public:
 	Sequencer &forget()
 	{
 		m_state.fill(0);
+		return *this;
 	}
 	
 	// MARK: Module methods
