@@ -21,7 +21,7 @@ public:
 	
 	Sequencer(Module<T> *module, size_t sequenceLength = 0, size_t bats = 1) :
 		m_module(module),
-		m_state(Tensor<T>::flatten(module->innerState())),
+		m_state(module->state()),
 		m_states(sequenceLength, m_state.size(0))
 	{
 		Storage<size_t> inps = { sequenceLength };
@@ -113,7 +113,6 @@ public:
 		m_output.resizeDim(0, dims[0]);
 		m_output.resizeDim(1, dims[1]);
 		
-		m_state = Tensor<T>::flatten(m_module->innerState());
 		m_states.resizeDim(1, m_state.size(0));
 		
 		return *this;
@@ -132,7 +131,6 @@ public:
 		m_inGrad.resizeDim(0, dims[0]);
 		m_inGrad.resizeDim(1, dims[1]);
 		
-		m_state = Tensor<T>::flatten(m_module->innerState());
 		m_states.resizeDim(1, m_state.size(0));
 		
 		return *this;
@@ -145,7 +143,6 @@ public:
 		m_output.resizeDim(1, bats);
 		m_inGrad.resizeDim(1, bats);
 		
-		m_state = Tensor<T>::flatten(m_module->innerState());
 		m_states.resizeDim(1, m_state.size(0));
 		
 		return *this;
@@ -163,7 +160,7 @@ private:
 	Tensor<T> m_output;
 	Tensor<T> m_inGrad;
 	
-	Tensor<T> m_state;
+	Tensor<T> &m_state;
 	Tensor<T> m_states;
 };
 

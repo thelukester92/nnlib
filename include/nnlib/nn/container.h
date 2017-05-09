@@ -66,12 +66,12 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters.
-	virtual Storage<Tensor<T> *> parameters() override
+	virtual Storage<Tensor<T> *> parameterList() override
 	{
 		Storage<Tensor<T> *> params;
 		for(Module<T> *comp : m_components)
 		{
-			for(Tensor<T> *param : comp->parameters())
+			for(Tensor<T> *param : comp->parameterList())
 			{
 				params.push_back(param);
 			}
@@ -80,12 +80,12 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters' gradient.
-	virtual Storage<Tensor<T> *> grad() override
+	virtual Storage<Tensor<T> *> gradList() override
 	{
 		Storage<Tensor<T> *> blams;
 		for(Module<T> *comp : m_components)
 		{
-			for(Tensor<T> *blam : comp->grad())
+			for(Tensor<T> *blam : comp->gradList())
 			{
 				blams.push_back(blam);
 			}
@@ -94,12 +94,12 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's internal state.
-	virtual Storage<Tensor<T> *> innerState() override
+	virtual Storage<Tensor<T> *> stateList() override
 	{
 		Storage<Tensor<T> *> states;
 		for(Module<T> *comp : m_components)
 		{
-			for(Tensor<T> *state : comp->innerState())
+			for(Tensor<T> *state : comp->stateList())
 			{
 				states.push_back(state);
 			}

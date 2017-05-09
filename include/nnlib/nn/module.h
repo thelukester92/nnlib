@@ -70,23 +70,46 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
-	virtual Storage<Tensor<T> *> parameters()
+	virtual Storage<Tensor<T> *> parameterList()
 	{
 		return {};
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters' gradient.
-	virtual Storage<Tensor<T> *> grad()
+	virtual Storage<Tensor<T> *> gradList()
 	{
 		return {};
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
 	/// By default, this is only the calculated output.
-	virtual Storage<Tensor<T> *> innerState()
+	virtual Storage<Tensor<T> *> stateList()
 	{
 		return { &output() };
 	}
+	
+	/// A flattened tensor of all of this module's parameters.
+	Tensor<T> &parameters()
+	{
+		return m_flatParameters = Tensor<T>::flatten(parameterList());
+	}
+	
+	/// A flattened tensor of all of this module's parameters' gradients.
+	Tensor<T> &grad()
+	{
+		return m_flatGrad = Tensor<T>::flatten(gradList());
+	}
+	
+	/// A flattened tensor of all of this module's internal states.
+	Tensor<T> &state()
+	{
+		return m_flatState = Tensor<T>::flatten(stateList());
+	}
+	
+protected:
+	Tensor<T> m_flatParameters;
+	Tensor<T> m_flatGrad;
+	Tensor<T> m_flatState;
 };
 
 }

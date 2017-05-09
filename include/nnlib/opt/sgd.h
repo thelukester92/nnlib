@@ -14,8 +14,8 @@ using Optimizer<T>::m_critic;
 public:
 	SGD(Module<T> &model, Critic<T> &critic) :
 		Optimizer<T>(model, critic),
-		m_parameters(Tensor<T>::flatten(model.parameters())),
-		m_grads(Tensor<T>::flatten(model.grad())),
+		m_parameters(model.parameters()),
+		m_grads(model.grad()),
 		m_velocity(m_grads.size(0)),
 		m_learningRate(0.001),
 		m_momentum(0)
@@ -71,8 +71,8 @@ public:
 	}
 	
 private:
-	Tensor<T> m_parameters;
-	Tensor<T> m_grads;
+	Tensor<T> &m_parameters;
+	Tensor<T> &m_grads;
 	Tensor<T> m_velocity;
 	T m_learningRate;
 	T m_momentum;

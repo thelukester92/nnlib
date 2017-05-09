@@ -14,11 +14,11 @@ using Optimizer<T>::m_critic;
 public:
 	RMSProp(Module<T> &model, Critic<T> &critic) :
 		Optimizer<T>(model, critic),
+		m_parameters(model.parameters()),
+		m_grads(model.grad()),
 		m_learningRate(0.001),
 		m_gamma(0.9)
 	{
-		m_parameters = Tensor<T>::flatten(model.parameters());
-		m_grads = Tensor<T>::flatten(model.grad());
 		m_variance.resize(m_grads.size()).fill(0.0);
 	}
 	
@@ -55,8 +55,8 @@ public:
 	}
 	
 private:
-	Tensor<T> m_parameters;
-	Tensor<T> m_grads;
+	Tensor<T> &m_parameters;
+	Tensor<T> &m_grads;
 	Tensor<T> m_variance;
 	T m_learningRate;
 	T m_gamma;

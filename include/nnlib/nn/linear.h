@@ -136,13 +136,13 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
-	virtual Storage<Tensor<T> *> parameters() override
+	virtual Storage<Tensor<T> *> parameterList() override
 	{
 		return { &m_weights, &m_bias };
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters' gradient.
-	virtual Storage<Tensor<T> *> grad() override
+	virtual Storage<Tensor<T> *> gradList() override
 	{
 		return { &m_weightsGrad, &m_biasGrad };
 	}

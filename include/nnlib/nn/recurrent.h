@@ -153,7 +153,7 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
-	virtual Storage<Tensor<T> *> innerState() override
+	virtual Storage<Tensor<T> *> stateList() override
 	{
 		Storage<Tensor<T> *> states = Container<T>::innerState();
 		states.push_back(&m_state);
