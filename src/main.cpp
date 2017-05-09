@@ -437,21 +437,20 @@ void plot(const string &filename, Sequencer<> &model, const Tensor<> &train, con
 
 void testRNN()
 {
-	Tensor<> data(1000);
+	Tensor<> data(2000);
 	for(size_t i = 0; i < data.size(0); ++i)
-		data(i) = sin(0.25 * i);
+		data(i) = sin(0.1 * i);
 	data.normalize();
 	
-	size_t seqs = 100;
-	size_t bats = 10;
+	size_t seqs = 50;
+	size_t bats = 64;
 	size_t epochs = 1000;
 	double validation = 0.33;
-	double learningRate = 0.001 / bats;
+	double learningRate = 0.01;
 	
 	Sequencer<> rnn(
 		new Sequential<>(
-			new Linear<>(1, 10),
-			new LSTM<>(10),
+			new LSTM<>(1, 32),
 			new Linear<>(1)
 		),
 		seqs,
@@ -460,10 +459,6 @@ void testRNN()
 	MSE<> critic(rnn.outputs(), bats);
 	Nadam<> optimizer(rnn, critic);
 	optimizer.learningRate(learningRate);
-	
-	cout << &optimizer.foo() << endl;
-	cout << &rnn.grad() << endl;
-	// exit(1);
 	
 	Tensor<> train = data.narrow(0, 0, (1.0 - validation) * data.size(0));
 	Tensor<> test = data.narrow(0, train.size(0), data.size(0) - train.size(0));
