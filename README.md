@@ -5,6 +5,8 @@ It is designed to be both easy-to-use and efficient, using BLAS to accelerate ma
 nnlib depends on OpenBLAS (on Linux) or the Accelerate framework (on OS X).
 For examples on how to use nnlib, see the [examples repository](https://github.com/thelukester92/nnlib-examples).
 
+By the way, nnlib does not work and you should not use it.
+
 # Get Started
 
 Run the following commands to clone the repo and install the headers.
