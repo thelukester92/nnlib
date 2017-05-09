@@ -424,17 +424,29 @@ Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)
 	return result;
 }
 
+void plot(const string &filename, Sequencer<> &model, const Tensor<> &train, const Tensor<> &test)
+{
+	Tensor<> preds = extrapolate(model, train.reshape(train.size(0), 1, 1), test.size(0));
+	Tensor<> full(train.size(0) + test.size(0), 3);
+	full.fill(File<>::unknown);
+	full.sub({ { 0, train.size(0) }, { 0 } }).copy(train.reshape(train.size(0), 1));
+	full.sub({ { train.size(0), test.size(0) }, { 1 } }).copy(test.reshape(test.size(0), 1));
+	full.sub({ { train.size(0), test.size(0) }, { 2 } }).copy(preds);
+	File<>::saveArff(full, filename);
+}
+
 void testRNN()
 {
 	Tensor<> data(1000);
 	for(size_t i = 0; i < data.size(0); ++i)
-		data(i) = sin(0.5 * i);
+		data(i) = sin(0.25 * i);
 	data.normalize();
 	
 	size_t seqs = 100;
-	size_t bats = 20;
-	size_t epochs = 10000;
+	size_t bats = 10;
+	size_t epochs = 1000;
 	double validation = 0.33;
+	double learningRate = 0.001 / bats;
 	
 	Sequencer<> rnn(
 		new Sequential<>(
@@ -447,6 +459,11 @@ void testRNN()
 	);
 	MSE<> critic(rnn.outputs(), bats);
 	Nadam<> optimizer(rnn, critic);
+	optimizer.learningRate(learningRate);
+	
+	cout << &optimizer.foo() << endl;
+	cout << &rnn.grad() << endl;
+	// exit(1);
 	
 	Tensor<> train = data.narrow(0, 0, (1.0 - validation) * data.size(0));
 	Tensor<> test = data.narrow(0, train.size(0), data.size(0) - train.size(0));
@@ -474,6 +491,8 @@ void testRNN()
 	
 	preds = extrapolate(rnn, train.resize(train.size(0), 1, 1), test.size(0));
 	cout << "final error: " << MSE<>(preds.size(0), false).forward(preds, test.resize(test.size(0), 1, 1)) << endl;
+	
+	plot("plot.arff", rnn, train, test);
 }
 
 int main()
