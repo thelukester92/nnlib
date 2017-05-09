@@ -14,12 +14,13 @@ using Optimizer<T>::m_critic;
 public:
 	SGD(Module<T> &model, Critic<T> &critic) :
 		Optimizer<T>(model, critic),
+		m_parameters(Tensor<T>::flatten(model.parameters())),
+		m_grads(Tensor<T>::flatten(model.grad())),
+		m_velocity(m_grads.size(0)),
 		m_learningRate(0.001),
 		m_momentum(0)
 	{
-		m_parameters = Tensor<T>::flatten(model.parameters());
-		m_grads = Tensor<T>::flatten(model.grad());
-		m_velocity.resize(m_grads.size()).fill(0.0);
+		m_velocity.fill(0.0);
 	}
 	
 	SGD &learningRate(T learningRate)

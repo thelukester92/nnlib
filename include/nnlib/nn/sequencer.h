@@ -111,6 +111,9 @@ public:
 		m_output.resizeDim(0, dims[0]);
 		m_output.resizeDim(1, dims[1]);
 		
+		m_state = Tensor<T>::flatten(m_module->innerState());
+		m_states.resizeDim(1, m_state.size(0));
+		
 		return *this;
 	}
 	
@@ -127,6 +130,9 @@ public:
 		m_inGrad.resizeDim(0, dims[0]);
 		m_inGrad.resizeDim(1, dims[1]);
 		
+		m_state = Tensor<T>::flatten(m_module->innerState());
+		m_states.resizeDim(1, m_state.size(0));
+		
 		return *this;
 	}
 	
@@ -136,6 +142,10 @@ public:
 		m_module->batch(bats);
 		m_output.resizeDim(1, bats);
 		m_inGrad.resizeDim(1, bats);
+		
+		m_state = Tensor<T>::flatten(m_module->innerState());
+		m_states.resizeDim(1, m_state.size(0));
+		
 		return *this;
 	}
 	
