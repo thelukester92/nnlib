@@ -5,7 +5,9 @@ It is designed to be both easy-to-use and efficient, using BLAS to accelerate ma
 nnlib depends on OpenBLAS (on Linux) or the Accelerate framework (on OS X).
 For examples on how to use nnlib, see the [examples repository](https://github.com/thelukester92/nnlib-examples).
 
-By the way, nnlib does not work and you should not use it.
+This library is *experimental*.
+I want it to become a useful, general purpose library to use as an alternative to popular frameworks like Torch, but it is not yet ready.
+Use at your own risk, and expect commits to break code.
 
 # Get Started
 
