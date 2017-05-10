@@ -113,8 +113,8 @@ public:
 		m_output.resizeDim(0, dims[0]);
 		m_output.resizeDim(1, dims[1]);
 		
-		m_states.resizeDim(1, m_state.size(0));
 		m_module->state();
+		m_states.resizeDim(1, m_state.size(0));
 		
 		return *this;
 	}
@@ -132,8 +132,8 @@ public:
 		m_inGrad.resizeDim(0, dims[0]);
 		m_inGrad.resizeDim(1, dims[1]);
 		
-		m_states.resizeDim(1, m_state.size(0));
 		m_module->state();
+		m_states.resizeDim(1, m_state.size(0));
 		
 		return *this;
 	}
@@ -146,8 +146,8 @@ public:
 		m_inGrad.resizeDim(1, bats);
 		
 		/// \note this is stupid, the way I re-flatten state
-		m_states.resizeDim(1, m_state.size(0));
 		m_module->state();
+		m_states.resizeDim(1, m_state.size(0));
 		
 		return *this;
 	}
