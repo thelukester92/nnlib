@@ -16,11 +16,19 @@ namespace nnlib
 template <typename T>
 class TensorIterator;
 
+/// \brief The standard input and output type in nnlib.
+///
+/// A tensor can be a vector (one dimension), a matrix (two dimensions), or a higher-order tensor.
+/// Tensors provide views into Storage objects, and multiple tensors can share the same Storage.
 template <typename T = double>
 class Tensor
 {
 public:
-	/// Flatten a number of tensors into a vector and give the original tensors views into the new one.
+	/// \brief Flattens a number of tensors into a vector.
+	///
+	/// Each tensor in the parameter becomes a subview into a single shared Storage.
+	/// \param tensors A list of tensors to flatten.
+	/// \return The flattened tensor.
 	static Tensor flatten(const Storage<Tensor *> &tensors)
 	{
 		size_t size = 0;
@@ -49,7 +57,11 @@ public:
 		return flattened;
 	}
 	
-	/// Create a vector with the given data.
+	/// \brief Create a tensor with the given data.
+	///
+	/// This performs a deep copy of the data given in the parameter.
+	/// The constructed tensor is one-dimensional (a vector).
+	/// \param values A Storage containing the values to store in the new tensor.
 	Tensor(const Storage<T> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
@@ -58,7 +70,11 @@ public:
 		m_shared(m_data)
 	{}
 	
-	/// Create a vector with the given data.
+	/// \brief Create a tensor with the given data.
+	///
+	/// This performs a deep copy of the data given in the parameter.
+	/// The constructed tensor is one-dimensional (a vector).
+	/// \param values An initializer_list containing the values to store in the new tensor.
 	Tensor(const std::initializer_list<T> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
@@ -67,8 +83,11 @@ public:
 		m_shared(m_data)
 	{}
 	
-	/// Create a tensor with the given size and shape.
-	/// \note This uses a dummy bool to differentiate this from the const Storage<T> & constructor.
+	/// \brief Create a tensor with the given shape.
+	///
+	/// This creates an n-dimensional tensor where n is the size of the input parameter.
+	/// \param dims A Storage containing the dimension sizes for the new tensor.
+	/// \note This contructor uses a dummy bool to differentiate itself from the const Storage<T> & constructor. This is important when T = size_t.
 	Tensor(const Storage<size_t> &dims, bool) :
 		m_offset(0),
 		m_data(new Storage<T>()),
@@ -77,8 +96,11 @@ public:
 		resize(dims);
 	}
 	
-	/// Create a tensor with the given size and shape.
-	/// \note This includes the default constructor.
+	/// \brief Create a tensor with the given shape.
+	///
+	/// This creates an n-dimensional tensor where n is the size of the input parameter.
+	/// \param dims A parameter pack containing the dimension sizes for the new tensor.
+	/// \note This is the default constructor when `sizeof...(dims) == 0`.
 	template <typename ... Ts>
 	explicit Tensor(Ts... dims) :
 		m_offset(0),
@@ -88,7 +110,11 @@ public:
 		resize(dims...);
 	}
 	
-	/// Create a tensor as a view of another tensor with the same shape.
+	/// \brief Create a tensor as a view of another tensor with the same shape.
+	///
+	/// The new tensor shares the parameter's storage and copies the parameter's shape.
+	/// \param other The tensor with which to share storage and from which to copy shape.
+	/// \note This is not a copy constructor. It essentially performs a shallow copy.
 	Tensor(Tensor &other) :
 		m_dims(other.m_dims),
 		m_strides(other.m_strides),
@@ -97,7 +123,10 @@ public:
 		m_shared(other.m_shared)
 	{}
 	
-	/// Create a tensor as a view of another tensor with the same shape.
+	/// \brief Move constructor for a tensor.
+	///
+	/// The new tensor shares the parameter's storage and copies the parameter's shape.
+	/// \param other The tensor with which to share storage and from which to copy shape.
 	Tensor(Tensor &&other) :
 		m_dims(other.m_dims),
 		m_strides(other.m_strides),
@@ -106,8 +135,10 @@ public:
 		m_shared(other.m_shared)
 	{}
 	
-	/// Fill this with values of that.
-	/// Resizes this to a 1-dimensional tensor.
+	/// \brief Replace tensor contents with new values.
+	///
+	/// Resizes the tensor to be a vector (one-dimensional) and copies data from values.
+	/// \param values A Storage containing the values to store in the new tensor.
 	Tensor &operator=(const Storage<T> &values)
 	{
 		m_dims		= { values.size() };
@@ -117,8 +148,10 @@ public:
 		return *this;
 	}
 	
-	/// Fill this with values of that.
-	/// Resizes this to a 1-dimensional tensor.
+	/// \brief Replace tensor contents with new values.
+	///
+	/// Resizes the tensor to be a vector (one-dimensional) and copies data from values.
+	/// \param values An initializer_list containing the values to store in the new tensor.
 	Tensor &operator=(const std::initializer_list<T> &values)
 	{
 		m_dims		= { values.size() };
@@ -128,7 +161,11 @@ public:
 		return *this;
 	}
 	
-	/// Move a tensor to this.
+	/// \brief Make this tensor a view of another tensor and copy its shape.
+	///
+	/// This tensor will share the parameter's storage and copy the parameter's shape.
+	/// \param other The tensor with which to share storage and from which to copy shape.
+	/// \note This essentially performs a shallow copy.
 	Tensor &operator=(Tensor &other)
 	{
 		m_dims		= other.m_dims;
@@ -139,7 +176,11 @@ public:
 		return *this;
 	}
 	
-	/// Move a tensor to this.
+	/// \brief Move assignment for a tensor.
+	///
+	/// This tensor will share the parameter's storage and copy the parameter's shape.
+	/// \param other The tensor with which to share storage and from which to copy shape.
+	/// \note This essentially performs a shallow copy.
 	Tensor &operator=(Tensor &&other)
 	{
 		m_dims		= other.m_dims;
@@ -152,7 +193,10 @@ public:
 	
 	// MARK: Size and shape methods.
 	
-	/// Resize this tensor in place and, if necessary, resize its underlying storage.
+	/// \brief Resize this tensor in place and, if necessary, resize its underlying storage.
+	///
+	/// \param dims The new shape for the tensor.
+	/// \return The tensor, for chaining.
 	Tensor &resize(const Storage<size_t> &dims)
 	{
 		// Don't allow a 0-dimensional tensor.
@@ -181,50 +225,73 @@ public:
 		return *this;
 	}
 	
-	/// Resize this tensor in place and, if necessary, resizes its underlying storage.
+	/// \brief Resize this tensor in place and, if necessary, resize its underlying storage.
+	///
+	/// \param dims A parameter pack containing the new shape for the tensor. Must not be empty.
+	/// \return The tensor, for chaining.
 	template <typename ... Ts>
 	Tensor &resize(Ts... dims)
 	{
 		return resize({ static_cast<size_t>(dims)... });
 	}
 	
-	/// Resize one dimension of this tensor in place and, if necessary, resize its underlying storage.
+	/// \brief Resize one dimension of this tensor in place and, if necessary, resize its underlying storage.
+	///
+	/// \param dim Which dimension to resize.
+	/// \param size The new size of the given dimension.
+	/// \return The tensor, for chaining.
 	Tensor &resizeDim(size_t dim, size_t size)
 	{
 		m_dims[dim] = size;
 		return resize(m_dims);
 	}
 	
-	/// Creates a new tensor with a view of this data but a new shape.
+	/// \brief Creates a new tensor with a view of this tensor's storage but (perhaps) a new shape.
+	///
+	/// \param dims A Storage containing the new shape.
+	/// \return A tensor that views the same storage as this tensor.
 	Tensor view(const Storage<size_t> &dims)
 	{
 		Tensor t = *this;
 		return t.resize(dims);
 	}
 	
-	/// Creates a new tensor with a view of this data but a new shape.
+	/// \brief Creates a new tensor with a view of this tensor's storage but (perhaps) a new shape.
+	///
+	/// \param dims A parameter pack containing the new shape.
+	/// \return A tensor that views the same storage as this tensor.
 	template <typename ... Ts>
 	Tensor view(Ts... dims)
 	{
 		return view({ static_cast<size_t>(dims)... });
 	}
 	
-	/// Creates a new tensor with a view of this data but a new shape.
+	/// \brief Creates a new constant tensor with a view of this tensor's storage but (perhaps) a new shape.
+	///
+	/// \param dims A Storage containing the new shape.
+	/// \return A constant tensor that views the same storage as this tensor.
 	const Tensor view(const Storage<size_t> &dims) const
 	{
 		Tensor t = *const_cast<Tensor *>(this);
 		return t.resize(dims);
 	}
 	
-	/// Creates a new tensor with a view of this data but a new shape.
+	/// \brief Creates a new constant tensor with a view of this tensor's storage but (perhaps) a new shape.
+	///
+	/// \param dims A parameter pack containing the new shape.
+	/// \return A constant tensor that views the same storage as this tensor.
 	template <typename ... Ts>
 	const Tensor view(Ts... dims) const
 	{
 		return view({ static_cast<size_t>(dims)... });
 	}
 	
-	/// Creates a new tensor with a copy of this data but a new shape.
-	/// The shape must be compatible.
+	/// \brief Creates a new tensor with a copy of this tensor's data and a new shape.
+	///
+	/// This performs a deep copy of the data.
+	/// The given shape must be compatible; that is, the resulting tensor must have as much data as this tensor.
+	/// \param dims A Storage containing the new shape.
+	/// \return A tensor that with the given shape and a copy of the data in this tensor.
 	Tensor reshape(const Storage<size_t> &dims) const
 	{
 		Tensor t(dims);
@@ -238,17 +305,25 @@ public:
 		return t;
 	}
 	
-	/// Creates a new tensor with a copy of this data but a new shape.
-	/// The shape must be compatible.
+	/// \brief Creates a new tensor with a copy of this tensor's data and a new shape.
+	///
+	/// This performs a deep copy of the data.
+	/// The given shape must be compatible; that is, the resulting tensor must have as much data as this tensor.
+	/// \param dims A parameter pack containing the new shape.
+	/// \return A tensor that with the given shape and a copy of the data in this tensor.
 	template <typename ... Ts>
 	Tensor reshape(Ts... dims) const
 	{
 		return reshape({ static_cast<size_t>(dims)... });
 	}
 	
-	/// Creates a new tensor with a subview of this data.
-	/// This completely eliminates the dimth dimension.
-	/// The resulting tensor has one less dimension than this.
+	/// \brief Creates a new tensor with a subview of this tensor's data.
+	///
+	/// This results in a tensor with one less dimension than this tensor, essentially eliminating the given dimension.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param dim Which dimension to eliminate.
+	/// \param index Which part of the dimension to keep in the resulting tensor.
+	/// \return A tensor containing the subview.
 	Tensor select(size_t dim, size_t index)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
@@ -260,17 +335,27 @@ public:
 		return t;
 	}
 	
-	/// Creates a new tensor with a subview of this data.
-	/// This completely eliminates the dimth dimension.
-	/// The resulting tensor has one less dimension than this.
+	/// \brief Creates a new constant tensor with a subview of this tensor's data.
+	///
+	/// This results in a tensor with one less dimension than this tensor, essentially eliminating the given dimension.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param dim Which dimension to eliminate.
+	/// \param index Which part of the dimension to keep in the resulting tensor.
+	/// \return A constant tensor containing the subview.
 	const Tensor select(size_t dim, size_t index) const
 	{
 		return const_cast<Tensor *>(this)->select(dim, index);
 	}
 	
-	/// Creates a new tensor with a subview of this data.
-	/// This reduces the dimth dimension to size.
-	/// The resulting tensor has the same number of dimensions as this.
+	/// \brief Creates a new tensor with a subview of this tensor's data.
+	///
+	/// This results in a tensor with the same number of dimensions as this tensor.
+	/// The given dimension is narrowed to a specific range, which may be one or more slices in length.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param dim Which dimension to narrow.
+	/// \param index Which part of the dimension to keep in the resulting tensor.
+	/// \param size The length of the dimension to keep in the resulting tensor.
+	/// \return A tensor containing the subview.
 	Tensor narrow(size_t dim, size_t index, size_t size = 1)
 	{
 		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
@@ -281,17 +366,32 @@ public:
 		return t;
 	}
 	
-	/// Creates a new tensor with a subview of this data.
-	/// This reduces the dimth dimension to size.
-	/// The resulting tensor has the same number of dimensions as this.
+	/// \brief Creates a new constant tensor with a subview of this tensor's data.
+	///
+	/// This results in a tensor with the same number of dimensions as this tensor.
+	/// The given dimension is narrowed to a specific range, which may be one or more slices in length.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param dim Which dimension to narrow.
+	/// \param index Which part of the dimension to keep in the resulting tensor.
+	/// \param size The length of the dimension to keep in the resulting tensor.
+	/// \return A constant tensor containing the subview.
 	const Tensor narrow(size_t dim, size_t index, size_t size = 1) const
 	{
 		return const_cast<Tensor *>(this)->narrow(dim, index, size);
 	}
 	
-	/// Fills t with a subview of this data and returns t.
-	/// This performs narrow on each dimension.
-	/// The resulting tensor has the same number of dimensions as this.
+	/// \brief Makes the given tensor a subview of this tensor's data.
+	///
+	/// The parameter tensor ends up with the same number of dimensions as this tensor.
+	/// This method narrows each dimension according to the values given initializer_list.
+	/// Each element in the initializer_list refers to one dimension, in order, and may be
+	/// empty (`{}`) for keeping the full dimension,
+	/// a single element (i.e. `{3}`) for narrowing to a single slice,
+	/// or two elements (i.e. `{3, 2}`) for narrowing a range.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param t The tensor to use for the subview.
+	/// \param dims An initializer_list describing how to narrow each dimension.
+	/// \return This tensor, for chaining.
 	Tensor &sub(Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
 		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
@@ -322,38 +422,70 @@ public:
 		return t;
 	}
 	
-	/// Fills t with a subview of this data and returns t.
-	/// This performs narrow on each dimension.
-	/// The resulting tensor has the same number of dimensions as this.
+	/// \brief Makes the given tensor a subview of this tensor's data.
+	///
+	/// The parameter tensor ends up with the same number of dimensions as this tensor.
+	/// This method narrows each dimension according to the values given initializer_list.
+	/// Each element in the initializer_list refers to one dimension, in order, and may be
+	/// empty (`{}`) for keeping the full dimension,
+	/// a single element (i.e. `{3}`) for narrowing to a single slice,
+	/// or two elements (i.e. `{3, 2}`) for narrowing a range.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param t The tensor to use for the subview.
+	/// \param dims An initializer_list describing how to narrow each dimension.
+	/// \return This tensor, for chaining.
 	const Tensor &sub(const Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims) const
 	{
 		return const_cast<Tensor *>(this)->sub(*const_cast<Tensor *>(&t), dims);
 	}
 	
-	/// Creates a new tensor with a subview of this data.
-	/// This performs narrow on each dimension.
-	/// The resulting tensor has the same number of dimensions as this.
+	/// \brief Creates a new tensor as a subview of this tensor's data.
+	///
+	/// The new tensor will have the same number of dimensions as this tensor.
+	/// This method narrows each dimension according to the values given initializer_list.
+	/// Each element in the initializer_list refers to one dimension, in order, and may be
+	/// empty (`{}`) for keeping the full dimension,
+	/// a single element (i.e. `{3}`) for narrowing to a single slice,
+	/// or two elements (i.e. `{3, 2}`) for narrowing a range.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param dims An initializer_list describing how to narrow each dimension.
+	/// \return The narrowed tensor.
 	Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
 		Tensor t = *this;
 		return sub(t, dims);
 	}
 	
-	/// Creates a new tensor with a subview of this data.
-	/// This performs narrow on each dimension.
-	/// The resulting tensor has the same number of dimensions as this.
+	/// \brief Creates a new const tensor as a subview of this tensor's data.
+	///
+	/// The new tensor will have the same number of dimensions as this tensor.
+	/// This method narrows each dimension according to the values given initializer_list.
+	/// Each element in the initializer_list refers to one dimension, in order, and may be
+	/// empty (`{}`) for keeping the full dimension,
+	/// a single element (i.e. `{3}`) for narrowing to a single slice,
+	/// or two elements (i.e. `{3, 2}`) for narrowing a range.
+	/// The resulting tensor is not a copy, but a view.
+	/// \param dims An initializer_list describing how to narrow each dimension.
+	/// \return The narrowed const tensor.
 	const Tensor sub(const std::initializer_list<const std::initializer_list<size_t>> &dims) const
 	{
 		return const_cast<Tensor *>(this)->sub(dims);
 	}
 	
-	/// Creates a new tensor with the same shape and a copy (not a view) of this data.
+	/// \brief Creates a new tensor as a copy this tensor.
+	///
+	/// This is a deep copy, and the resulting tensor will have the same shape as this tensor.
+	/// \return A copy of this tensor.
 	Tensor copy() const
 	{
 		return reshape(m_dims);
 	}
 	
-	/// Copies the shape and data from another tensor.
+	/// \brief Copies the data and shape from another tensor to this tensor.
+	///
+	/// This is a deep copy, and the tensor will have the same shape as the parameter tensor.
+	/// \param other The tensor to copy.
+	/// \return This tensor, for chaining.
 	Tensor &copy(const Tensor &other)
 	{
 		NNAssert(size() == other.size(), "Incompatible tensor for copying!");
@@ -366,7 +498,11 @@ public:
 		return *this;
 	}
 	
-	/// Swaps data with another tensor.
+	/// \brief Swaps the data between two tensors.
+	///
+	/// The given tensor must have the same shape as this tensor.
+	/// \param other The tensor with which to swap.
+	/// \return This tensor, for chaining.
 	Tensor &swap(Tensor &other)
 	{
 		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
@@ -381,8 +517,12 @@ public:
 		return *this;
 	}
 	
-	/// Swaps data with another tensor.
-	/// Allows rvalue references, as it may be a temporary that references persistant Storage.
+	/// \brief Swaps the data between two tensors.
+	///
+	/// The given tensor must have the same shape as this tensor.
+	/// \param other The tensor with which to swap.
+	/// \return This tensor, for chaining.
+	/// \note It is alright to use an rvalue reference here, as the temporary tensor is using persistant storage.
 	Tensor &swap(Tensor &&other)
 	{
 		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
@@ -397,8 +537,13 @@ public:
 		return *this;
 	}
 	
-	/// Swap two dimensions (rows and columns by default).
-	/// This returns a new tensor that shares data with the original.
+	/// \brief Creates a new tensor as a view of this tensor in which two dimensions are switched.
+	///
+	/// By default, this will switch the first and second dimension, which are rows and columns in a matrix.
+	/// The resulting tensor has a view, not a copy, of this tensor.
+	/// \param dim1 The first dimension to switch.
+	/// \param dim2 The second dimension to switch.
+	/// \return A tensor with a subview of this tensor but with the dimensions switched.
 	Tensor transpose(size_t dim1 = 1, size_t dim2 = 0)
 	{
 		NNAssert(dim1 < dims() && dim2 < dims(), "Invalid dimensions for transposition!");
@@ -415,20 +560,20 @@ public:
 		return t;
 	}
 	
-	/// Get the entire list of dimensions.
+	/// Gets the list of dimension sizes.
 	const Storage<size_t> &shape() const
 	{
 		return m_dims;
 	}
 	
-	/// Get the number of dimensions in this tensor.
+	/// Gets the number of dimensions in this tensor.
 	size_t dims() const
 	{
 		return m_dims.size();
 	}
 	
-	/// Get the total number of elements in this tensor.
-	/// \todo find a faster way, maybe cache it.
+	/// Calculates the total number of elements in this tensor.
+	/// \todo Find a faster way; maybe cache the result.
 	size_t size() const
 	{
 		size_t result = 1;
@@ -439,14 +584,21 @@ public:
 		return result;
 	}
 	
-	/// Get the size of a given dimension.
+	/// Gets the size of a given dimension.
 	size_t size(size_t dim) const
 	{
 		NNAssert(dim < m_dims.size(), "Invalid dimension!");
 		return m_dims[dim];
 	}
 	
-	/// Get the stride of a given dimension.
+	/// \brief Gets the stride of a given dimension.
+	///
+	/// The stide is the distance between elements in the given dimension.
+	/// If the dimension is contiguous, the stride in that dimension is 1.
+	/// In a completely contiguous tensor, the stride between elements in dimension d
+	/// is equal to the stride of dimension d+1 times the size of dimension d+1.
+	/// \param dim The dimension from which to get stride.
+	/// \return The stride of the given dimension.
 	size_t stride(size_t dim) const
 	{
 		return m_strides[dim];
@@ -454,26 +606,30 @@ public:
 	
 	// MARK: Element manipulation methods.
 	
-	/// Set every element in this tensor to value.
+	/// Sets every element in this tensor to the given value.
 	Tensor &fill(const T &value)
 	{
 		std::fill(begin(), end(), value);
 		return *this;
 	}
 	
-	/// Set every element in this tensor to 0.
+	/// Sets every element in this tensor to 0.
 	Tensor &zeros()
 	{
 		return fill(0);
 	}
 	
-	/// Set every element in this tensor to 1.
+	/// Sets every element in this tensor to 1.
 	Tensor &ones()
 	{
 		return fill(1);
 	}
 	
-	/// Set every element in this tensor to a uniformly distributed random value.
+	/// \brief Sets every element in this tensor to a uniformly distributed random value.
+	///
+	/// \param from The lowest value in the uniform distribution.
+	/// \param to The highest value in the uniform distribution.
+	/// \return This tensor, for chaining.
 	Tensor &rand(const T &from = -1, const T &to = 1)
 	{
 		for(T &v : *this)
@@ -483,7 +639,11 @@ public:
 		return *this;
 	}
 	
-	/// Set every element in this tensor to a normally distributed random value.
+	/// \brief Sets every element in this tensor to a normally distributed random value.
+	///
+	/// \param mean The mean of the normal distribution.
+	/// \param stddev The standard deviation of the normal distribution.
+	/// \return This tensor, for chaining.
 	Tensor &randn(const T &mean = 0, const T &stddev = 1)
 	{
 		for(T &v : *this)
@@ -493,7 +653,14 @@ public:
 		return *this;
 	}
 	
-	/// Set every element in this tensor to a normally distributed random value, capped.
+	/// \brief Sets every element in this tensor to a normally distributed random value, capped.
+	///
+	/// This resamples from the distribution when it finds a value too far away from the mean,
+	/// which may be slow for a small threshold.
+	/// \param mean The mean of the normal distribution.
+	/// \param stddev The standard deviation of the normal distribution.
+	/// \param cap The threshold value for the maximum allowed distance away from the mean.
+	/// \return This tensor, for chaining.
 	Tensor &randn(const T &mean, const T &stddev, const T &cap)
 	{
 		for(T &v : *this)
@@ -503,7 +670,10 @@ public:
 		return *this;
 	}
 	
-	/// Multiply this tensor by a scalar.
+	/// \brief Multiplies this tensor by a scalar.
+	///
+	/// \param alpha The scalar.
+	/// \return This tensor, for chaining.
 	Tensor &scale(T alpha)
 	{
 		for(T &v : *this)
@@ -513,7 +683,10 @@ public:
 		return *this;
 	}
 	
-	/// Shift this tensor by a scalar.
+	/// \brief Adds a scalar to each element in this tensor.
+	///
+	/// \param alpha The scalar.
+	/// \return This tensor, for chaining.
 	Tensor &shift(T alpha)
 	{
 		for(T &v : *this)
@@ -525,6 +698,7 @@ public:
 	
 	// MARK: Algebra
 	
+	/// \todo document this method
 	Tensor &multiplyMM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
