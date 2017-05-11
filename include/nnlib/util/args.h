@@ -335,11 +335,25 @@ public:
 		return m_data.at(opt).b;
 	}
 	
+	bool getFlag(std::string opt)
+	{
+		auto i = m_longToChar.find(opt);
+		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
+		return getFlag(i->second);
+	}
+	
 	int getInt(char opt)
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Int, "Attempted to get an incompatible type!");
 		return m_data.at(opt).i;
+	}
+	
+	int getInt(std::string opt)
+	{
+		auto i = m_longToChar.find(opt);
+		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
+		return getInt(i->second);
 	}
 	
 	double getDouble(char opt, double def = 0)
@@ -349,11 +363,25 @@ public:
 		return m_data.at(opt).d;
 	}
 	
+	double getDouble(std::string opt)
+	{
+		auto i = m_longToChar.find(opt);
+		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
+		return getDouble(i->second);
+	}
+	
 	std::string getString(char opt, std::string def = "")
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::String, "Attempted to get an incompatible type!");
 		return m_data.at(opt).s;
+	}
+	
+	std::string getString(std::string opt)
+	{
+		auto i = m_longToChar.find(opt);
+		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
+		return getString(i->second);
 	}
 	
 private:
