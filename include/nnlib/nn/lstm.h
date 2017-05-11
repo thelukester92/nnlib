@@ -315,7 +315,7 @@ public:
 		return states;
 	}
 	
-//private:
+private:
 	Module<T> *m_inpGateX;
 	Module<T> *m_inpGateY;
 	Module<T> *m_inpGateH;
