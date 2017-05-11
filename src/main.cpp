@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <math.h>
 #include "nnlib.h"
 using namespace std;
@@ -119,6 +120,18 @@ void testTensor()
 			NNHardAssert(fabs(transposed(i, j) - alsoTransposed(i, j)) < 1e-9, "Tensor::transpose failed!");
 		}
 	}
+	
+	ostringstream fout;
+	Archive out(nullptr, &fout);
+	out << alsoTransposed;
+	
+	Tensor<> deserialized;
+	istringstream fin(fout.str());
+	Archive in(&fin, nullptr);
+	in >> deserialized;
+	
+	NNHardAssert(alsoTransposed.shape() == deserialized.shape(), "Tensor::save and/or Tensor::load failed!");
+	NNHardAssert(MSE<>(alsoTransposed.shape(), false).forward(alsoTransposed, deserialized) < 1e-9, "Tensor::save and/or Tensor::load failed!");
 }
 
 template <bool TransA, bool TransB>

@@ -9,6 +9,7 @@
 #include "random.h"
 #include "storage.h"
 #include "algebra.h"
+#include "archive.h"
 
 namespace nnlib
 {
@@ -945,6 +946,23 @@ public:
 	TensorIterator<const T> end() const
 	{
 		return TensorIterator<const T>(this, true);
+	}
+	
+	// MARK: Serialization
+	
+	void save(Archive &out) const
+	{
+		out << m_dims;
+		for(const T &x : *this)
+			out << x;
+	}
+	
+	void load(Archive &in)
+	{
+		in >> m_dims;
+		resize(m_dims);
+		for(T &x : *this)
+			in >> x;
 	}
 	
 private:

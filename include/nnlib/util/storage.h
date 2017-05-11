@@ -2,6 +2,7 @@
 #define STORAGE_H
 
 #include <initializer_list>
+#include "archive.h"
 
 namespace nnlib
 {
@@ -207,6 +208,24 @@ public:
 	{
 		return m_ptr + m_size;
 	}
+	
+	// MARK: Serialization
+	
+	void save(Archive &out) const
+	{
+		out << m_size;
+		for(const T &x : *this)
+			out << x;
+	}
+	
+	void load(Archive &in)
+	{
+		in >> m_size;
+		resize(m_size);
+		for(T &x : *this)
+			in >> x;
+	}
+	
 private:
 	T *m_ptr;			///< The data itself.
 	size_t m_size;		///< Number of elements being used.

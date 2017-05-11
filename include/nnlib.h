@@ -28,6 +28,7 @@
 
 /// Utilities
 #include "nnlib/util/algebra.h"
+#include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"
 #include "nnlib/util/error.h"
