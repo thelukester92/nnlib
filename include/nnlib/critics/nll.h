@@ -13,7 +13,9 @@ class NLL : public Critic<double>
 public:
 	NLL(const Storage<size_t> &shape) :
 		m_inGrad(shape, true)
-	{}
+	{
+		NNAssert(shape.size() == 2, "Input to NLL must be a matrix!");
+	}
 	
 	/// L = 1/n sum_i( -input(target(i)) )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override

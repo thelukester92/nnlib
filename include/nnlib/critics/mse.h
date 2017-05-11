@@ -16,12 +16,15 @@ public:
 	MSE(const Storage<size_t> &shape, bool average = true) :
 		m_inGrad(shape, true),
 		m_average(average)
-	{}
+	{
+		NNAssert(shape.size() == 2, "Expected matrix input to MSE!");
+	}
 	
 	/// L = 1/n sum_i( (input(i) - target(i))^2 )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssert(input.shape() == target.shape(), "Incompatible operands to MSE!");
+		NNAssert(input.dims() == 2, "Expected matrix input to MSE!");
 		auto tar = target.begin();
 		T diff, sum = 0;
 		for(const T &inp : input)
@@ -41,6 +44,7 @@ public:
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssert(input.shape() == target.shape() && input.shape() == m_inGrad.shape(), "Incompatible operands to MSE!");
+		NNAssert(input.dims() == 2, "Expected matrix input to MSE!");
 		
 		T norm = 2.0;
 		if(m_average)

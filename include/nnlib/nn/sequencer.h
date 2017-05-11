@@ -19,7 +19,7 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
-	Sequencer(Module<T> *module, size_t sequenceLength = 0, size_t bats = 1) :
+	Sequencer(Module<T> *module, size_t sequenceLength = 1) :
 		m_module(module),
 		m_state(module->state()),
 		m_states(sequenceLength, m_state.size(0))
@@ -35,9 +35,15 @@ public:
 		m_output.resize(outs);
 		
 		add(module);
-		batch(bats);
 	}
 	
+	/// Get the module used by this sequencer.
+	Module<T> &module()
+	{
+		return *m_module;
+	}
+	
+	/// Set the length of the sequence this module uses.
 	Sequencer &sequenceLength(size_t sequenceLength)
 	{
 		m_inGrad.resizeDim(0, sequenceLength);
@@ -46,6 +52,7 @@ public:
 		return *this;
 	}
 	
+	/// Get the length of the sequence this module uses.
 	size_t sequenceLength() const
 	{
 		return m_states.size(0);

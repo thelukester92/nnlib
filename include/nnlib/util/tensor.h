@@ -195,6 +195,34 @@ public:
 		return resize(m_dims);
 	}
 	
+	/// Creates a new tensor with a view of this data but a new shape.
+	Tensor view(const Storage<size_t> &dims)
+	{
+		Tensor t = *this;
+		return t.resize(dims);
+	}
+	
+	/// Creates a new tensor with a view of this data but a new shape.
+	template <typename ... Ts>
+	Tensor view(Ts... dims)
+	{
+		return view({ static_cast<size_t>(dims)... });
+	}
+	
+	/// Creates a new tensor with a view of this data but a new shape.
+	const Tensor view(const Storage<size_t> &dims) const
+	{
+		Tensor t = *const_cast<Tensor *>(this);
+		return t.resize(dims);
+	}
+	
+	/// Creates a new tensor with a view of this data but a new shape.
+	template <typename ... Ts>
+	const Tensor view(Ts... dims) const
+	{
+		return view({ static_cast<size_t>(dims)... });
+	}
+	
 	/// Creates a new tensor with a copy of this data but a new shape.
 	/// The shape must be compatible.
 	Tensor reshape(const Storage<size_t> &dims) const
