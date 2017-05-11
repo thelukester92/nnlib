@@ -154,7 +154,7 @@ public:
 			if(arg.length() > 1 && arg[0] == '-' && arg[1] == '-')
 			{
 				auto i = m_longToChar.find(std::string(arg.c_str() + 2));
-				NNHardAssert(i != m_longToChar.end(), "Unexpected argument!");
+				NNHardAssert(i != m_longToChar.end(), "Unexpected argument '" + std::string(arg.c_str() + 2) + "'!");
 				opt = i->second;
 			}
 			else if(arg.length() > 1 && arg[0] == '-')
@@ -162,7 +162,7 @@ public:
 				for(size_t i = 1; i < arg.length() - 1; ++i)
 				{
 					auto j = m_expected.find(arg[i]);
-					NNHardAssert(j != m_expected.end(), "Unexpected argument!");
+					NNHardAssert(j != m_expected.end(), "Unexpected argument '" + optName(arg[i]) + "'!");
 					NNHardAssert(j->second == Type::Bool, "Multiple options for a single - must be flags!");
 					m_data[arg[i]].type = Type::Bool;
 					m_data[arg[i]].b = true;
@@ -171,7 +171,7 @@ public:
 			}
 			
 			auto i = m_expected.find(opt);
-			NNHardAssert(i != m_expected.end(), "Unexpected argument!");
+			NNHardAssert(i != m_expected.end(), "Unexpected argument '" + optName(opt) + "'!");
 			m_data[opt].type = i->second;
 			
 			switch(i->second)
