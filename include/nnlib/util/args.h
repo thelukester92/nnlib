@@ -86,21 +86,23 @@ public:
 	ArgsParser &addFlag(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
+		m_data[opt].type = Type::Bool;
+		m_data[opt].b = false;
 		return *this;
 	}
 	
 	ArgsParser &addInt(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
-		m_expected[opt].type = Data::Int;
-		m_data[opt].type = Data::Null;
+		m_expected[opt] = Type::Int;
+		m_data[opt].type = Type::Null;
 		return *this;
 	}
 	
 	ArgsParser &addInt(char opt, std::string longOpt, int defaultValue)
 	{
 		addInt(opt, longOpt);
-		m_data[opt].type = Data::Int;
+		m_data[opt].type = Type::Int;
 		m_data[opt].i = defaultValue;
 		return *this;
 	}
@@ -108,15 +110,15 @@ public:
 	ArgsParser &addDouble(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
-		m_expected[opt].type = Data::Double;
-		m_data[opt].type = Data::Null;
+		m_expected[opt] = Type::Double;
+		m_data[opt].type = Type::Null;
 		return *this;
 	}
 	
 	ArgsParser &addDouble(char opt, std::string longOpt, double defaultValue)
 	{
 		addDouble(opt, longOpt);
-		m_data[opt].type = Data::Double;
+		m_data[opt].type = Type::Double;
 		m_data[opt].d = defaultValue;
 		return *this;
 	}
@@ -124,15 +126,15 @@ public:
 	ArgsParser &addString(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
-		m_expected[opt].type = Data::String;
-		m_data[opt].type = Data::Null;
+		m_expected[opt] = Type::String;
+		m_data[opt].type = Type::Null;
 		return *this;
 	}
 	
 	ArgsParser &addString(char opt, std::string longOpt, std::string defaultValue)
 	{
 		addString(opt, longOpt);
-		m_data[opt].type = Data::String;
+		m_data[opt].type = Type::String;
 		m_data[opt].s = defaultValue.c_str();
 		return *this;
 	}
@@ -161,8 +163,8 @@ public:
 				{
 					auto j = m_expected.find(arg[i]);
 					NNHardAssert(j != m_expected.end(), "Unexpected argument!");
-					NNHardAssert(j->second.type == Data::Bool, "Multiple options for a single - must be flags!");
-					m_data[arg[i]].type = Data::Bool;
+					NNHardAssert(j->second == Type::Bool, "Multiple options for a single - must be flags!");
+					m_data[arg[i]].type = Type::Bool;
 					m_data[arg[i]].b = true;
 				}
 				opt = arg.back();
@@ -170,20 +172,20 @@ public:
 			
 			auto i = m_expected.find(opt);
 			NNHardAssert(i != m_expected.end(), "Unexpected argument!");
-			m_data[opt].type = i->second.type;
+			m_data[opt].type = i->second;
 			
-			switch(i->second.type)
+			switch(i->second)
 			{
-			case Data::Bool:
+			case Type::Bool:
 				m_data[opt].b = true;
 				break;
-			case Data::Int:
+			case Type::Int:
 				m_data[opt].i = args.popInt();
 				break;
-			case Data::Double:
+			case Type::Double:
 				m_data[opt].d = args.popDouble();
 				break;
-			case Data::String:
+			case Type::String:
 				m_data[opt].s = args.popString().c_str();
 				break;
 			}
@@ -207,16 +209,16 @@ public:
 			out << std::setw(20) << p.first << "= ";
 			switch(p.second.type)
 			{
-			case Data::Bool:
+			case Type::Bool:
 				out << p.second.b;
 				break;
-			case Data::Int:
+			case Type::Int:
 				out << p.second.i;
 				break;
-			case Data::Double:
+			case Type::Double:
 				out << p.second.d;
 				break;
-			case Data::String:
+			case Type::String:
 				out << p.second.s;
 				break;
 			}
@@ -228,34 +230,51 @@ public:
 	bool hasOpt(char opt)
 	{
 		auto i = m_data.find(opt);
-		return i != m_data.end() && i->second.type != Data::Null;
+		return i != m_data.end() && i->second.type != Type::Null;
+	}
+	
+	std::string optName(char opt)
+	{
+		auto i = m_charToLong.find(opt);
+		if(i != m_charToLong.end())
+			return i->second;
+		else
+			return std::string(opt, 1);
+	}
+	
+	bool getFlag(char opt)
+	{
+		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
+		NNHardAssert(m_data.at(opt).type == Type::Bool, "Attempted to get an incompatible type!");
+		return m_data.at(opt).b;
 	}
 	
 	int getInt(char opt)
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-		NNHardAssert(m_data.at(opt).type == Data::Int, "Attempted to get an incompatible type!");
+		NNHardAssert(m_data.at(opt).type == Type::Int, "Attempted to get an incompatible type!");
 		return m_data.at(opt).i;
 	}
 	
 	double getDouble(char opt, double def = 0)
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-		NNHardAssert(m_data.at(opt).type == Data::Double, "Attempted to get an incompatible type!");
+		NNHardAssert(m_data.at(opt).type == Type::Double, "Attempted to get an incompatible type!");
 		return m_data.at(opt).d;
 	}
 	
 	std::string getString(char opt, std::string def = "")
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-		NNHardAssert(m_data.at(opt).type == Data::String, "Attempted to get an incompatible type!");
+		NNHardAssert(m_data.at(opt).type == Type::String, "Attempted to get an incompatible type!");
 		return m_data.at(opt).s;
 	}
 	
 private:
+	enum class Type { Bool, Int, Double, String, Null };
 	struct Data
 	{
-		enum { Bool, Int, Double, String, Null } type;
+		Type type;
 		union
 		{
 			bool b;
@@ -268,8 +287,7 @@ private:
 	void addOpt(char opt, std::string longOpt)
 	{
 		NNHardAssert(m_expected.find(opt) == m_expected.end(), "Cannot redefine a command line option!");
-		m_expected[opt].type = Data::Bool;
-		m_expected[opt].b = false;
+		m_expected[opt] = Type::Bool;
 		
 		if(longOpt != "")
 		{
@@ -279,16 +297,7 @@ private:
 		}
 	}
 	
-	std::string optName(char opt)
-	{
-		auto i = m_charToLong.find(opt);
-		if(i != m_charToLong.end())
-			return i->second;
-		else
-			return std::string(opt, 1);
-	}
-	
-	std::unordered_map<char, Data> m_expected;
+	std::unordered_map<char, Type> m_expected;
 	std::unordered_map<char, Data> m_data;
 	std::unordered_map<std::string, char> m_longToChar;
 	std::unordered_map<char, std::string> m_charToLong;
