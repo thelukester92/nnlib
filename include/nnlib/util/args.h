@@ -4,6 +4,7 @@
 #include "error.h"
 #include <unordered_map>
 #include <map>
+#include <vector>
 #include <iostream>
 #include <iomanip>
 
@@ -144,7 +145,8 @@ public:
 	{
 		addString(opt, longOpt);
 		m_data[opt].type = Type::String;
-		m_data[opt].s = defaultValue.c_str();
+		m_stringStorage.push_back(defaultValue);
+		m_data[opt].s = m_stringStorage.back().c_str();
 		return *this;
 	}
 	
@@ -197,7 +199,8 @@ public:
 				m_data[opt].d = args.popDouble();
 				break;
 			case Type::String:
-				m_data[opt].s = args.popString().c_str();
+				m_stringStorage.push_back(args.popString());
+				m_data[opt].s = m_stringStorage.back().c_str();
 				break;
 			}
 		}
@@ -416,6 +419,7 @@ private:
 	std::unordered_map<char, Data> m_data;
 	std::unordered_map<std::string, char> m_longToChar;
 	std::unordered_map<char, std::string> m_charToLong;
+	std::vector<std::string> m_stringStorage;
 };
 
 }
