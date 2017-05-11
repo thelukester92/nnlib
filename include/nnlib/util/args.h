@@ -107,7 +107,6 @@ public:
 	{
 		addOpt(opt, longOpt);
 		m_expected[opt] = Type::Int;
-		m_data[opt].type = Type::Null;
 		return *this;
 	}
 	
@@ -123,7 +122,6 @@ public:
 	{
 		addOpt(opt, longOpt);
 		m_expected[opt] = Type::Double;
-		m_data[opt].type = Type::Null;
 		return *this;
 	}
 	
@@ -139,7 +137,6 @@ public:
 	{
 		addOpt(opt, longOpt);
 		m_expected[opt] = Type::String;
-		m_data[opt].type = Type::Null;
 		return *this;
 	}
 	
@@ -226,13 +223,19 @@ public:
 		
 		for(auto &p : orderedOpts)
 		{
-			std::string name = "";
+			char opt;
+			
 			if(p.first.size() == 1)
-				name += "-" + p.first;
+				opt = p.first[0];
 			else
-				name += std::string("-") + m_longToChar.at(p.first) + ",--" + p.first;
+				opt = m_longToChar.at(p.first);
+			
+			std::string name = std::string("-") + opt;
+			if(p.first.size() > 1)
+			 	name += ",--" + p.first;
 			
 			out << std::setw(25) << name;
+			
 			switch(p.second.type)
 			{
 			case Type::Bool:
@@ -248,6 +251,28 @@ public:
 				out << "String";
 				break;
 			}
+			
+			if(m_data.find(opt) != m_data.end())
+			{
+				out << " [value = ";
+				switch(p.second.type)
+				{
+				case Type::Bool:
+					out << (p.second.b ? "true" : "false");
+					break;
+				case Type::Int:
+					out << p.second.i;
+					break;
+				case Type::Double:
+					out << p.second.d;
+					break;
+				case Type::String:
+					out << "\"" << p.second.s << "\"";
+					break;
+				}
+				out << "]";
+			}
+			
 			out << std::endl;
 		}
 		
@@ -291,7 +316,7 @@ public:
 	bool hasOpt(char opt)
 	{
 		auto i = m_data.find(opt);
-		return i != m_data.end() && i->second.type != Type::Null;
+		return i != m_data.end();
 	}
 	
 	std::string optName(char opt)
@@ -332,7 +357,7 @@ public:
 	}
 	
 private:
-	enum class Type { Bool, Int, Double, String, Null };
+	enum class Type { Bool, Int, Double, String };
 	struct Data
 	{
 		Type type;
