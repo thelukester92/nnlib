@@ -21,7 +21,7 @@ public:
 	
 	Args &unpop()
 	{
-		NNAssert(m_argi > 0, "Cannot unpop from a full argument stack!");
+		NNHardAssert(m_argi > 0, "Cannot unpop from a full argument stack!");
 		--m_argi;
 		return *this;
 	}
@@ -33,7 +33,7 @@ public:
 	
 	bool ifPop(const std::string &s)
 	{
-		NNAssert(hasNext(), "Attempted to pop from an empty argument stack!");
+		NNHardAssert(hasNext(), "Attempted to pop from an empty argument stack!");
 		if(s == m_argv[m_argi])
 		{
 			++m_argi;
@@ -44,7 +44,7 @@ public:
 	
 	bool nextIsNumber()
 	{
-		NNAssert(hasNext(), "Attempted to use empty argument stack!");
+		NNHardAssert(hasNext(), "Attempted to use empty argument stack!");
 		try
 		{
 			std::stod(m_argv[m_argi]);
@@ -58,19 +58,19 @@ public:
 	
 	std::string popString()
 	{
-		NNAssert(hasNext(), "Attempted to pop from an empty argument stack!");
+		NNHardAssert(hasNext(), "Attempted to pop from an empty argument stack!");
 		return m_argv[m_argi++];
 	}
 	
 	double popDouble()
 	{
-		NNAssert(nextIsNumber(), "Attempted to pop a string as a number!");
+		NNHardAssert(nextIsNumber(), "Attempted to pop a string as a number!");
 		return std::stod(popString());
 	}
 	
 	int popInt()
 	{
-		NNAssert(nextIsNumber(), "Attempted to pop a string as a number!");
+		NNHardAssert(nextIsNumber(), "Attempted to pop a string as a number!");
 		return std::stoi(popString());
 	}
 	
@@ -144,7 +144,7 @@ public:
 		
 		while(args.hasNext())
 		{
-			NNAssert(!args.nextIsNumber(), "Unexpected number!");
+			NNHardAssert(!args.nextIsNumber(), "Unexpected number!");
 			
 			std::string arg = args.popString();
 			char opt;
@@ -152,7 +152,7 @@ public:
 			if(arg.length() > 1 && arg[0] == '-' && arg[1] == '-')
 			{
 				auto i = m_longToChar.find(std::string(arg.c_str() + 2));
-				NNAssert(i != m_longToChar.end(), "Unexpected argument!");
+				NNHardAssert(i != m_longToChar.end(), "Unexpected argument!");
 				opt = i->second;
 			}
 			else if(arg.length() > 1 && arg[0] == '-')
@@ -160,8 +160,8 @@ public:
 				for(size_t i = 1; i < arg.length() - 1; ++i)
 				{
 					auto j = m_expected.find(arg[i]);
-					NNAssert(j != m_expected.end(), "Unexpected argument!");
-					NNAssert(j->second.type == Data::Bool, "Multiple options for a single - must be flags!");
+					NNHardAssert(j != m_expected.end(), "Unexpected argument!");
+					NNHardAssert(j->second.type == Data::Bool, "Multiple options for a single - must be flags!");
 					m_data[arg[i]].type = Data::Bool;
 					m_data[arg[i]].b = true;
 				}
@@ -169,7 +169,7 @@ public:
 			}
 			
 			auto i = m_expected.find(opt);
-			NNAssert(i != m_expected.end(), "Unexpected argument!");
+			NNHardAssert(i != m_expected.end(), "Unexpected argument!");
 			m_data[opt].type = i->second.type;
 			
 			switch(i->second.type)
@@ -233,22 +233,22 @@ public:
 	
 	int getInt(char opt)
 	{
-		NNAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-		NNAssert(m_data.at(opt).type == Data::Int, "Attempted to get an incompatible type!");
+		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
+		NNHardAssert(m_data.at(opt).type == Data::Int, "Attempted to get an incompatible type!");
 		return m_data.at(opt).i;
 	}
 	
 	double getDouble(char opt, double def = 0)
 	{
-		NNAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-		NNAssert(m_data.at(opt).type == Data::Double, "Attempted to get an incompatible type!");
+		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
+		NNHardAssert(m_data.at(opt).type == Data::Double, "Attempted to get an incompatible type!");
 		return m_data.at(opt).d;
 	}
 	
 	std::string getString(char opt, std::string def = "")
 	{
-		NNAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-		NNAssert(m_data.at(opt).type == Data::String, "Attempted to get an incompatible type!");
+		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
+		NNHardAssert(m_data.at(opt).type == Data::String, "Attempted to get an incompatible type!");
 		return m_data.at(opt).s;
 	}
 	
@@ -267,13 +267,13 @@ private:
 	
 	void addOpt(char opt, std::string longOpt)
 	{
-		NNAssert(m_expected.find(opt) == m_expected.end(), "Cannot redefine a command line option!");
+		NNHardAssert(m_expected.find(opt) == m_expected.end(), "Cannot redefine a command line option!");
 		m_expected[opt].type = Data::Bool;
 		m_expected[opt].b = false;
 		
 		if(longOpt != "")
 		{
-			NNAssert(m_longToChar.find(longOpt) == m_longToChar.end(), "Cannot redefine a long option!");
+			NNHardAssert(m_longToChar.find(longOpt) == m_longToChar.end(), "Cannot redefine a long option!");
 			m_longToChar[longOpt] = opt;
 			m_charToLong[opt] = longOpt;
 		}
