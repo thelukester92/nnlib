@@ -162,7 +162,7 @@ public:
 				for(size_t i = 1; i < arg.length() - 1; ++i)
 				{
 					auto j = m_expected.find(arg[i]);
-					NNHardAssert(j != m_expected.end(), "Unexpected argument '" + optName(arg[i]) + "'!");
+					NNHardAssert(j != m_expected.end(), "Unexpected argument '" + std::string(1, arg[i]) + "'!");
 					NNHardAssert(j->second == Type::Bool, "Multiple options for a single - must be flags!");
 					m_data[arg[i]].type = Type::Bool;
 					m_data[arg[i]].b = true;
@@ -171,7 +171,7 @@ public:
 			}
 			
 			auto i = m_expected.find(opt);
-			NNHardAssert(i != m_expected.end(), "Unexpected argument '" + optName(opt) + "'!");
+			NNHardAssert(i != m_expected.end(), "Unexpected argument '" + std::string(1, opt) + "'!");
 			m_data[opt].type = i->second;
 			
 			switch(i->second)
@@ -239,7 +239,7 @@ public:
 		if(i != m_charToLong.end())
 			return i->second;
 		else
-			return std::string(opt, 1);
+			return std::string(1, opt);
 	}
 	
 	bool getFlag(char opt)
