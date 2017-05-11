@@ -291,7 +291,7 @@ private:
 		
 		if(longOpt != "")
 		{
-			NNHardAssert(m_expected.find(opt) == m_expected.end(), "Attempted to redefine '" + optName(opt) + "'!");
+			NNHardAssert(m_charToLong.find(opt) == m_charToLong.end(), "Attempted to redefine '" + optName(opt) + "'!");
 			m_longToChar[longOpt] = opt;
 			m_charToLong[opt] = longOpt;
 		}
