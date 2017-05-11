@@ -286,12 +286,12 @@ private:
 	
 	void addOpt(char opt, std::string longOpt)
 	{
-		NNHardAssert(m_expected.find(opt) == m_expected.end(), "Cannot redefine a command line option!");
+		NNHardAssert(m_expected.find(opt) == m_expected.end(), "Attempted to redefine '" + optName(opt) + "'!");
 		m_expected[opt] = Type::Bool;
 		
 		if(longOpt != "")
 		{
-			NNHardAssert(m_longToChar.find(longOpt) == m_longToChar.end(), "Cannot redefine a long option!");
+			NNHardAssert(m_expected.find(opt) == m_expected.end(), "Attempted to redefine '" + optName(opt) + "'!");
 			m_longToChar[longOpt] = opt;
 			m_charToLong[opt] = longOpt;
 		}
