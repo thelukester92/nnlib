@@ -83,6 +83,18 @@ private:
 class ArgsParser
 {
 public:
+	explicit ArgsParser(bool help = true) : m_helpOpt(help ? 'h' : '\0')
+	{
+		if(m_helpOpt != '\0')
+			addFlag(m_helpOpt, "help");
+	}
+	
+	explicit ArgsParser(char helpOpt, std::string helpLong = "help") : m_helpOpt(helpOpt)
+	{
+		if(m_helpOpt != '\0')
+			addFlag(m_helpOpt, helpLong);
+	}
+	
 	ArgsParser &addFlag(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
@@ -139,6 +151,8 @@ public:
 		return *this;
 	}
 	
+	/// Parses command line arguments.
+	/// If -h or --help is present, this prints help and ends the program.
 	ArgsParser &parse(int argc, const char **argv)
 	{
 		Args args(argc, argv);
@@ -191,6 +205,52 @@ public:
 			}
 		}
 		
+		if(m_helpOpt != '\0' && getFlag(m_helpOpt))
+		{
+			printHelp();
+			exit(1);
+		}
+		
+		return *this;
+	}
+	
+	ArgsParser &printHelp(std::ostream &out = std::cout)
+	{
+		out << std::left;
+		
+		std::map<std::string, Data> orderedOpts;
+		for(auto &p : m_data)
+		{
+			orderedOpts.emplace(optName(p.first), p.second);
+		}
+		
+		for(auto &p : orderedOpts)
+		{
+			std::string name = "";
+			if(p.first.size() == 1)
+				name += "-" + p.first;
+			else
+				name += std::string("-") + m_longToChar.at(p.first) + ",--" + p.first;
+			
+			out << std::setw(25) << name;
+			switch(p.second.type)
+			{
+			case Type::Bool:
+				out << "Flag";
+				break;
+			case Type::Int:
+				out << "Int";
+				break;
+			case Type::Double:
+				out << "Double";
+				break;
+			case Type::String:
+				out << "String";
+				break;
+			}
+			out << std::endl;
+		}
+		
 		return *this;
 	}
 	
@@ -224,6 +284,7 @@ public:
 			}
 			out << std::endl;
 		}
+		
 		return *this;
 	}
 	
@@ -297,6 +358,7 @@ private:
 		}
 	}
 	
+	char m_helpOpt;
 	std::unordered_map<char, Type> m_expected;
 	std::unordered_map<char, Data> m_data;
 	std::unordered_map<std::string, char> m_longToChar;
