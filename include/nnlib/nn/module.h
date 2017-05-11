@@ -16,14 +16,45 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
 	
+	/// Forward propagate input, returning output.
+	/// Automatically resize to fit, if possible, without changing weights.
+	virtual Tensor<T> &safeForward(const Tensor<T> &input)
+	{
+		safeInputs(input.shape());
+		return forward(input);
+	}
+	
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
+	
+	/// Backward propagate input and output gradient, returning input gradient.
+	/// Automatically resize to fit, if possible, without changing weights.
+	virtual Tensor<T> &safeBackward(const Tensor<T> &input, const Tensor<T> &outGrad)
+	{
+		safeInputs(input.shape());
+		safeOutputs(outGrad.shape());
+		return backward(input, outGrad);
+	}
 	
 	/// Cached output.
 	virtual Tensor<T> &output() = 0;
 	
 	/// Cached input gradient.
 	virtual Tensor<T> &inGrad() = 0;
+	
+	/// Set the input and output shapes of this module.
+	virtual Module &resize(const Storage<size_t> &inps, const Storage<size_t> &outs)
+	{
+		inputs(inps);
+		return outputs(outs);
+	}
+	
+	/// Safely (never reset weights) set the input and output shapes of this module.
+	virtual Module &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs)
+	{
+		safeInputs(inps);
+		return safeOutputs(outs);
+	}
 	
 	/// Get the input shape of this module, including batch.
 	virtual const Storage<size_t> &inputs() const
@@ -39,6 +70,17 @@ public:
 		return batch(dims[0]);
 	}
 	
+	/// Safely (never reset weights) set the input shape of this module.
+	/// By default, this assumes the first dimension (0) is the batch.
+	virtual Module &safeInputs(const Storage<size_t> &dims)
+	{
+		if(inGrad().size(1) == 0)
+			inputs(dims);
+		else
+			batch(dims[0]);
+		return *this;
+	}
+	
 	/// Get the output shape of this module, including batch.
 	virtual const Storage<size_t> &outputs() const
 	{
@@ -51,6 +93,17 @@ public:
 	{
 		output().resize(dims);
 		return batch(dims[0]);
+	}
+	
+	/// Safely (never reset weights) set the output shape of this module.
+	/// By default, this assumes the first dimension (0) is the batch.
+	virtual Module &safeOutputs(const Storage<size_t> &dims)
+	{
+		if(output().size(1) == 0)
+			outputs(dims);
+		else
+			batch(dims[0]);
+		return *this;
 	}
 	
 	/// Get the batch size of this module.

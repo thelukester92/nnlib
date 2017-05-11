@@ -70,7 +70,7 @@ public:
 	}
 	
 	/// Set the input shape of this critic, including batch and sequence length.
-	virtual CriticSequencer &inputs(const Storage<size_t> &dims)
+	virtual CriticSequencer &inputs(const Storage<size_t> &dims) override
 	{
 		NNAssert(dims.size() == 3, "CriticSequencer must have 3D input!");
 		m_inGrad.resize(dims);
@@ -79,7 +79,7 @@ public:
 	}
 	
 	/// Set the batch size of this critic.
-	virtual CriticSequencer &batch(size_t bats)
+	virtual CriticSequencer &batch(size_t bats) override
 	{
 		m_inGrad.resizeDim(1, bats);
 		m_critic->inGrad().resizeDim(0, m_inGrad.size(0) * m_inGrad.size(1));
@@ -87,7 +87,7 @@ public:
 	}
 	
 	/// Get the batch size of this critic.
-	virtual size_t batch() const
+	virtual size_t batch() const override
 	{
 		return m_inGrad.size(1);
 	}

@@ -15,8 +15,24 @@ public:
 	/// Calculate the loss (how far input is from target).
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) = 0;
 	
+	/// Calculate the loss (how far input is from target).
+	/// Automatically resize to fit.
+	virtual T safeForward(const Tensor<T> &input, const Tensor<T> &target)
+	{
+		inputs(input.shape());
+		return forward(input, target);
+	}
+	
 	/// Calculate the gradient of the loss w.r.t. the input.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) = 0;
+	
+	//// Calculate the gradient of the loss w.r.t. the input.
+	/// Automatically resize to fit.
+	virtual Tensor<T> &safeBackward(const Tensor<T> &input, const Tensor<T> &target)
+	{
+		inputs(input.shape());
+		return backward(input, target);
+	}
 	
 	/// Input gradient buffer.
 	virtual Tensor<T> &inGrad() = 0;

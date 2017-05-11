@@ -440,15 +440,15 @@ void testRNN()
 	Tensor<> sequence = { 8, 6, 7, 5, 3, 0, 9, 1, 2, 4 };
 	size_t sequenceLength = sequence.size(0) - 1;
 	
-	Tensor<> expectedOut = {
+	Tensor<> expectedOut = Tensor<>({
 		0.49605, 0.58459, 0.67011, 0.67758, 0.62128,
 		0.38235, 0.69360, 0.48573, 0.48518
-	};
+	}).resize(9, 1);
 	
-	Tensor<> expectedInGrad = {
+	Tensor<> expectedInGrad = Tensor<>({
 		-1.43229, -0.97700, -0.56715, -0.50216, -0.42033,
 		-1.66733, -0.15554, -0.42984, -0.46831
-	};
+	}).resize(9, 1);
 	
 	LSTM<> *lstm;
 	Sequencer<> nn(
@@ -468,12 +468,12 @@ void testRNN()
 		0.1, 0,
 		0.3, 0
 	});
-	MSE<> critic(nn.outputs());
+	CriticSequencer<> critic(new MSE<>(nn.module().outputs()), sequenceLength);
 	
 	nn.forget();
 	nn.forward(sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1));
 	
-	NNHardAssert(MSE<>(expectedOut.shape()).forward(nn.output().reshape(expectedOut.size(0)), expectedOut) < 1e-9, "Sequencer(LSTM)::forward failed!");
+	NNHardAssert(MSE<>(expectedOut.shape()).forward(nn.output().reshape(expectedOut.shape()), expectedOut) < 1e-9, "Sequencer(LSTM)::forward failed!");
 	
 	nn.backward(
 		sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1),
@@ -483,7 +483,7 @@ void testRNN()
 		)
 	);
 	
-	NNHardAssert(MSE<>(expectedInGrad.shape()).forward(nn.inGrad().reshape(expectedInGrad.size(0)), expectedInGrad) < 1e-9, "Sequencer(LSTM)::backward failed!");
+	NNHardAssert(MSE<>(expectedInGrad.shape()).forward(nn.inGrad().reshape(expectedInGrad.shape()), expectedInGrad) < 1e-9, "Sequencer(LSTM)::backward failed!");
 }
 
 int main()

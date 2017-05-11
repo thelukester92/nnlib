@@ -126,6 +126,24 @@ public:
 		return *this;
 	}
 	
+	/// Safely (never reset weights) set the input shape of this module.
+	virtual Sequencer &safeInputs(const Storage<size_t> &dims) override
+	{
+		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		
+		if(dims[2] == 0)
+		{
+			inputs(dims);
+		}
+		else
+		{
+			sequenceLength(dims[0]);
+			batch(dims[1]);
+		}
+		
+		return *this;
+	}
+	
 	/// Set the output shape of this module, including batch.
 	virtual Sequencer &outputs(const Storage<size_t> &dims) override
 	{
@@ -141,6 +159,24 @@ public:
 		
 		m_module->state();
 		m_states.resizeDim(1, m_state.size(0));
+		
+		return *this;
+	}
+	
+	/// Safely (never reset weights) set the output shape of this module.
+	virtual Sequencer &safeOutputs(const Storage<size_t> &dims) override
+	{
+		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		
+		if(dims[2] == 0)
+		{
+			outputs(dims);
+		}
+		else
+		{
+			sequenceLength(dims[0]);
+			batch(dims[1]);
+		}
 		
 		return *this;
 	}
