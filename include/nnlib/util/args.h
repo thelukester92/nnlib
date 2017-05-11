@@ -196,16 +196,15 @@ public:
 	{
 		out << std::left;
 		
-		std::map<char, Data> data(m_data.begin(), m_data.end());
-		for(auto &p : data)
+		std::map<std::string, Data> orderedOpts;
+		for(auto &p : m_data)
 		{
-			out << std::setw(20);
-			auto i = m_charToLong.find(p.first);
-			if(i != m_charToLong.end())
-				out << i->second;
-			else
-				out << p.first;
-			out << "= ";
+			orderedOpts.emplace(optName(p.first), p.second);
+		}
+		
+		for(auto &p : orderedOpts)
+		{
+			out << std::setw(20) << p.first << "= ";
 			switch(p.second.type)
 			{
 			case Data::Bool:
