@@ -33,7 +33,9 @@ public:
 	/// \return A new input archive.
 	static Archive fromFile(std::string filename, bool binary = true)
 	{
-		int flags = std::ios::out | (binary ? std::ios::binary : 0);
+		auto flags = std::ios::out;
+		if(binary)
+			flags = flags | std::ios::binary;
 		return Archive(new std::ifstream(filename.c_str(), flags), nullptr, binary, true);
 	}
 	
@@ -44,7 +46,9 @@ public:
 	/// \return A new output archive.
 	static Archive toFile(std::string filename, bool binary = true)
 	{
-		int flags = std::ios::out | (binary ? std::ios::binary : 0);
+		auto flags = std::ios::out;
+		if(binary)
+			flags = flags | std::ios::binary;
 		return Archive(nullptr, new std::ofstream(filename.c_str(), flags), binary, true);
 	}
 	

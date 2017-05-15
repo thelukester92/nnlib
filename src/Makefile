@@ -1,4 +1,4 @@
-DEF?=""
+DEF?=
 
 BIN:=../bin
 OBJ:=../obj
