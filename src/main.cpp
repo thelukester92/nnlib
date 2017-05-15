@@ -422,8 +422,6 @@ void testNeuralNet()
 	
 	// MARK: Serialization test
 	
-	Archive::registerName<Linear<>>(Linear<>::type());
-	
 	// linear
 	{
 		Linear<> test(4, 3);

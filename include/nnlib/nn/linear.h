@@ -203,6 +203,9 @@ private:
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.
 };
 
+template <typename T>
+bool Archive::Binding<Linear<T>>::bind = Archive::Mapper<Module<T>>::add(Linear<T>::type(), [](){ return reinterpret_cast<void *>(new Linear<T>()); });
+
 }
 
 #endif

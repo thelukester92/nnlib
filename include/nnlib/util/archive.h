@@ -18,13 +18,28 @@ namespace nnlib
 class Archive
 {
 public:
-	/// Register a constructor for generic deserialization.
-	template <typename T>
-	static void registerName(std::string name)
+	/// \brief A static class used to hold constructors of classes derived from a shared base.
+	///
+	/// This is needed for polymorphic serialization.
+	template <typename Base>
+	struct Mapper
 	{
-		NNAssert(m_constructors.find(name) == m_constructors.end(), "Cannot register the same name twice!");
-		m_constructors.emplace(name, [](){ return reinterpret_cast<void *>(new T()); });
-	}
+		typedef std::function<void*()> constructor;
+		static std::unordered_map<std::string, constructor> map;
+		static bool add(std::string name, constructor c)
+		{
+			NNAssert(map.find(name) == map.end(), "Attempted to redefine mapped class!");
+			map.emplace(name, c);
+			return true;
+		}
+	};
+	
+	/// A dummy class used to add derived class bindings.
+	template <typename Derived>
+	struct Binding
+	{
+		static bool bind;
+	};
 	
 	/// \brief Create an archive that reads from a file.
 	///
@@ -185,8 +200,8 @@ public:
 	/// \brief Read in a generic object.
 	///
 	/// \return A dynamically allocated object if a matching type constructor was found; null otherwise.
-	template <typename T>
-	T *read()
+	template <typename Base>
+	Base *read()
 	{
 		NNAssert(m_in != nullptr, "Archive has no input stream!");
 		std::string type;
@@ -195,15 +210,12 @@ public:
 		*this >> type;
 		m_in->seekg(pos);
 		
-		T *ptr = nullptr;
-		for(const auto &i : m_constructors)
+		Base *ptr = nullptr;
+		auto i = Mapper<Base>::map.find(type);
+		if(i != Mapper<Base>::map.end())
 		{
-			if(type == i.first)
-			{
-				ptr = reinterpret_cast<T *>(i.second());
-				*this >> *ptr;
-				break;
-			}
+			ptr = reinterpret_cast<Base *>(i->second());
+			*this >> *ptr;
 		}
 		
 		NNAssert(!m_in->fail(), "Archive failed while reading a generic object!");
@@ -232,12 +244,16 @@ private:
 	std::ostream *m_out;	///< The output stream or null.
 	bool m_binary;			///< Whether the streams are in binary mode.
 	bool m_ownsStreams;		///< Whether this archive should delete the streams.
-	
-	/// A table of constructors for generic deserialization.
-	static std::unordered_map<std::string, std::function<void *()>> m_constructors;
 };
 
-std::unordered_map<std::string, std::function<void *()>> Archive::m_constructors;
+/// Static initialization
+template <typename T>
+std::unordered_map<std::string, typename Archive::Mapper<T>::constructor> Archive::Mapper<T>::map;
+
+/// Macro for more easily adding polymorphic types.
+/*#define NNRegister()
+template <>
+bool Archive::Binding<Linear<>>::bind = Archive::Mapper<Module<>>::add(Linear<>::type(), [](){ return reinterpret_cast<void *>(new Linear<>()); });*/
 
 }
 
