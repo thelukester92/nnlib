@@ -26,13 +26,13 @@ public:
 	}
 	
 	/// Single element forward.
-	virtual T forward(const T &x) override
+	virtual real_t forward(const real_t &x) override
 	{
 		return x;
 	}
 	
 	/// Single element backward.
-	virtual T backward(const T &x, const T &y) override
+	virtual real_t backward(const real_t &x, const real_t &y) override
 	{
 		return 1.0;
 	}

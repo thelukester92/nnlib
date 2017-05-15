@@ -6,17 +6,13 @@
 namespace nnlib
 {
 
-template <typename T>
 class Module;
-
-template <typename T>
 class Critic;
 
-template <typename T = double>
 class Optimizer
 {
 public:
-	Optimizer(Module<T> &model, Critic<T> &critic) :
+	Optimizer(Module &model, Critic &critic) :
 		m_model(model),
 		m_critic(critic)
 	{}
@@ -32,23 +28,23 @@ public:
 	}
 	
 	/// Get the model.
-	Module<T> &model()
+	Module &model()
 	{
 		return m_model;
 	}
 	
 	/// Get the critic.
-	Critic<T> &critic()
+	Critic &critic()
 	{
 		return m_critic;
 	}
 	
 	/// Perform a single step of training given an input and a target.
-	virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
+	virtual Optimizer &step(const Tensor &input, const Tensor &target) = 0;
 	
 	/// Perform a single step of training given an input and a target.
 	/// Safely (without ruining weights) resize if possible.
-	virtual Optimizer &safeStep(const Tensor<T> &input, const Tensor<T> &target)
+	virtual Optimizer &safeStep(const Tensor &input, const Tensor &target)
 	{
 		m_model.safeResize(input.shape(), target.shape());
 		m_critic.inputs(m_model.outputs());
@@ -56,8 +52,8 @@ public:
 	}
 	
 protected:
-	Module<T> &m_model;
-	Critic<T> &m_critic;
+	Module &m_model;
+	Critic &m_critic;
 };
 
 }

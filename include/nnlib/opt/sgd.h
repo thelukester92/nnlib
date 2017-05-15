@@ -6,14 +6,13 @@
 namespace nnlib
 {
 
-template <typename T = double>
-class SGD : public Optimizer<T>
+class SGD : public Optimizer
 {
-using Optimizer<T>::m_model;
-using Optimizer<T>::m_critic;
+using Optimizer::m_model;
+using Optimizer::m_critic;
 public:
-	SGD(Module<T> &model, Critic<T> &critic) :
-		Optimizer<T>(model, critic),
+	SGD(Module &model, Critic &critic) :
+		Optimizer(model, critic),
 		m_parameters(model.parameters()),
 		m_grads(model.grad()),
 		m_velocity(m_grads.size(0)),
@@ -23,24 +22,24 @@ public:
 		m_velocity.fill(0.0);
 	}
 	
-	SGD &learningRate(T learningRate)
+	SGD &learningRate(real_t learningRate)
 	{
 		m_learningRate = learningRate;
 		return *this;
 	}
 	
-	T learningRate() const
+	real_t learningRate() const
 	{
 		return m_learningRate;
 	}
 	
-	SGD &momentum(T momentum)
+	SGD &momentum(real_t momentum)
 	{
 		m_momentum = momentum;
 		return *this;
 	}
 	
-	T momentum() const
+	real_t momentum() const
 	{
 		return m_momentum;
 	}
@@ -48,7 +47,7 @@ public:
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
-	virtual SGD &step(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual SGD &step(const Tensor &input, const Tensor &target) override
 	{
 		// calculate gradient
 		m_grads.fill(0);
@@ -71,11 +70,11 @@ public:
 	}
 	
 private:
-	Tensor<T> &m_parameters;
-	Tensor<T> &m_grads;
-	Tensor<T> m_velocity;
-	T m_learningRate;
-	T m_momentum;
+	Tensor &m_parameters;
+	Tensor &m_grads;
+	Tensor m_velocity;
+	real_t m_learningRate;
+	real_t m_momentum;
 };
 
 }

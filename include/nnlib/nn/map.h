@@ -28,10 +28,10 @@ public:
 	}
 	
 	/// Single element forward.
-	virtual T forward(const T &x) = 0;
+	virtual real_t forward(const real_t &x) = 0;
 	
 	/// Single element backward.
-	virtual T backward(const T &x, const T &y) = 0;
+	virtual real_t backward(const real_t &x, const real_t &y) = 0;
 	
 	// MARK: Module methods
 	

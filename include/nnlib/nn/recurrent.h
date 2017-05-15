@@ -29,7 +29,7 @@ public:
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
 		m_inpMod(new Linear(inps, outs, bats)),
 		m_memMod(new Linear(outs, outs, bats)),
-		m_outMod(new Sequential(new Linear(outs, outs, bats), new TanH<>())),
+		m_outMod(new Sequential(new Linear(outs, outs, bats), new TanH())),
 		m_state(bats, outs),
 		m_statePrev(bats, outs),
 		m_stateGrad(bats, outs),
@@ -44,7 +44,7 @@ public:
 	Recurrent(size_t outs) :
 		m_inpMod(new Linear(0, outs, 1)),
 		m_memMod(new Linear(outs, outs, 1)),
-		m_outMod(new Sequential(new Linear(outs, outs, 1), new TanH<>())),
+		m_outMod(new Sequential(new Linear(outs, outs, 1), new TanH())),
 		m_state(1, outs),
 		m_statePrev(1, outs),
 		m_stateGrad(1, outs),

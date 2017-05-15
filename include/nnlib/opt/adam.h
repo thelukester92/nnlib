@@ -6,14 +6,13 @@
 namespace nnlib
 {
 
-template <typename T = double>
-class Adam : public Optimizer<T>
+class Adam : public Optimizer
 {
-using Optimizer<T>::m_model;
-using Optimizer<T>::m_critic;
+using Optimizer::m_model;
+using Optimizer::m_critic;
 public:
-	Adam(Module<T> &model, Critic<T> &critic) :
-		Optimizer<T>(model, critic),
+	Adam(Module &model, Critic &critic) :
+		Optimizer(model, critic),
 		m_parameters(model.parameters()),
 		m_grads(model.grad()),
 		m_learningRate(0.001),
@@ -34,35 +33,35 @@ public:
 		m_normalize2 = 1;
 	}
 	
-	Adam &learningRate(T learningRate)
+	Adam &learningRate(real_t learningRate)
 	{
 		m_learningRate = learningRate;
 		return *this;
 	}
 	
-	T learningRate() const
+	real_t learningRate() const
 	{
 		return m_learningRate;
 	}
 	
-	Adam &beta1(T beta1)
+	Adam &beta1(real_t beta1)
 	{
 		m_beta1 = beta1;
 		return *this;
 	}
 	
-	T beta1() const
+	real_t beta1() const
 	{
 		return m_beta1;
 	}
 	
-	Adam &beta2(T beta2)
+	Adam &beta2(real_t beta2)
 	{
 		m_beta2 = beta2;
 		return *this;
 	}
 	
-	T beta2() const
+	real_t beta2() const
 	{
 		return m_beta2;
 	}
@@ -70,13 +69,13 @@ public:
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
-	virtual Adam &step(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual Adam &step(const Tensor &input, const Tensor &target) override
 	{
 		m_normalize1 *= m_beta1;
 		m_normalize2 *= m_beta2;
 		++m_steps;
 		
-		T lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
+		real_t lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
 		
 		// calculate gradient
 		m_grads.fill(0);
@@ -98,15 +97,15 @@ public:
 	}
 	
 private:
-	Tensor<T> &m_parameters;
-	Tensor<T> &m_grads;
-	Tensor<T> m_mean;
-	Tensor<T> m_variance;
-	T m_learningRate;
-	T m_beta1;
-	T m_beta2;
-	T m_normalize1;
-	T m_normalize2;
+	Tensor &m_parameters;
+	Tensor &m_grads;
+	Tensor m_mean;
+	Tensor m_variance;
+	real_t m_learningRate;
+	real_t m_beta1;
+	real_t m_beta2;
+	real_t m_normalize1;
+	real_t m_normalize2;
 	size_t m_steps;
 };
 

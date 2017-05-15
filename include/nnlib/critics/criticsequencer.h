@@ -6,13 +6,12 @@
 namespace nnlib
 {
 
-template <typename T = double>
-class CriticSequencer : public Critic<T>
+class CriticSequencer : public Critic
 {
 public:
-	using Critic<T>::inputs;
+	using Critic::inputs;
 	
-	CriticSequencer(Critic<T> *critic, size_t sequenceLength = 1) :
+	CriticSequencer(Critic *critic, size_t sequenceLength = 1) :
 		m_critic(critic)
 	{
 		NNAssert(m_critic->inGrad().dims() == 2, "CriticSequencer expects matrix critic as input!");
@@ -43,7 +42,7 @@ public:
 	}
 	
 	/// Calculate the loss (how far input is from target).
-	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual real_t forward(const Tensor &input, const Tensor &target) override
 	{
 		NNAssert(input.dims() == 3 && target.dims() == 3, "CriticSequencer expects a sequence of batches!");
 		NNAssert(input.size() == m_critic->inGrad().size(), "Incompatible input!");
@@ -53,7 +52,7 @@ public:
 	}
 	
 	/// Calculate the gradient of the loss w.r.t. the input.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &target) override
 	{
 		NNAssert(input.dims() == 3 && target.dims() == 3, "CriticSequencer expects a sequence of batches!");
 		NNAssert(input.size() == m_critic->inGrad().size(), "Incompatible input!");
@@ -64,7 +63,7 @@ public:
 	}
 	
 	/// Input gradient buffer.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_critic->inGrad();
 	}
@@ -93,8 +92,8 @@ public:
 	}
 	
 private:
-	Critic<T> *m_critic;
-	Tensor<T> m_inGrad;
+	Critic *m_critic;
+	Tensor m_inGrad;
 };
 
 }

@@ -52,7 +52,7 @@ public:
 	{
 		if(m_weights.size() > 0)
 		{
-			T range = 1.0 / sqrt(m_weights.size(1));
+			real_t range = 1.0 / sqrt(m_weights.size(1));
 			m_weights.rand(-range, range);
 			m_bias.rand(-range, range);
 		}

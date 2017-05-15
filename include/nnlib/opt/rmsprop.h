@@ -6,14 +6,13 @@
 namespace nnlib
 {
 
-template <typename T = double>
-class RMSProp : public Optimizer<T>
+class RMSProp : public Optimizer
 {
-using Optimizer<T>::m_model;
-using Optimizer<T>::m_critic;
+using Optimizer::m_model;
+using Optimizer::m_critic;
 public:
-	RMSProp(Module<T> &model, Critic<T> &critic) :
-		Optimizer<T>(model, critic),
+	RMSProp(Module &model, Critic &critic) :
+		Optimizer(model, critic),
 		m_parameters(model.parameters()),
 		m_grads(model.grad()),
 		m_learningRate(0.001),
@@ -22,13 +21,13 @@ public:
 		m_variance.resize(m_grads.size()).fill(0.0);
 	}
 	
-	RMSProp &learningRate(T learningRate)
+	RMSProp &learningRate(real_t learningRate)
 	{
 		m_learningRate = learningRate;
 		return *this;
 	}
 	
-	T learningRate() const
+	real_t learningRate() const
 	{
 		return m_learningRate;
 	}
@@ -36,7 +35,7 @@ public:
 	// MARK: Critic methods
 	
 	/// Perform a single step of training given an input and a target.
-	virtual RMSProp &step(const Tensor<T> &input, const Tensor<T> &target) override
+	virtual RMSProp &step(const Tensor &input, const Tensor &target) override
 	{
 		// calculate gradient
 		m_grads.fill(0);
@@ -55,11 +54,11 @@ public:
 	}
 	
 private:
-	Tensor<T> &m_parameters;
-	Tensor<T> &m_grads;
-	Tensor<T> m_variance;
-	T m_learningRate;
-	T m_gamma;
+	Tensor &m_parameters;
+	Tensor &m_grads;
+	Tensor m_variance;
+	real_t m_learningRate;
+	real_t m_gamma;
 };
 
 }

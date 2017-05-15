@@ -62,16 +62,15 @@ private:
 };
 
 /// \todo Somehow merge with archive?
-template <typename T = double>
 class File
 {
 public:
-	static T unknown;
+	static real_t unknown;
 	
 	/// Load a weka .arff file.
-	static Tensor<T> loadArff(const std::string &filename, Relation *relPtr = nullptr)
+	static Tensor loadArff(const std::string &filename, Relation *relPtr = nullptr)
 	{
-		Storage<Tensor<T> *> rows;
+		Storage<Tensor *> rows;
 		Relation rel;
 		
 		std::ifstream fin(filename.c_str());
@@ -141,8 +140,8 @@ public:
 			if(*ptr == '\0')
 				continue;
 			
-			Tensor<T> *rowPtr = new Tensor<T>(rel.size());
-			Tensor<T> &row = *rowPtr;
+			Tensor *rowPtr = new Tensor(rel.size());
+			Tensor &row = *rowPtr;
 			rows.push_back(rowPtr);
 			
 			size_t i = 0;
@@ -182,7 +181,7 @@ public:
 		if(relPtr != nullptr)
 			*relPtr = rel;
 		
-		Tensor<T> flattened = Tensor<T>::flatten(rows).resize(rows.size(), rel.size());
+		Tensor flattened = Tensor::flatten(rows).resize(rows.size(), rel.size());
 		for(auto *i : rows)
 			delete i;
 		
@@ -211,7 +210,7 @@ public:
 	}
 	
 	/// Save a weka .arff file.
-	static void saveArff(const Tensor<T> &m, const std::string &filename, Relation *relPtr = nullptr)
+	static void saveArff(const Tensor &m, const std::string &filename, Relation *relPtr = nullptr)
 	{
 		NNHardAssert(m.dims() == 2, "Can only save a matrix to an arff file!");
 		
@@ -335,8 +334,7 @@ private:
 	}
 };
 
-template <typename T>
-T File<T>::unknown = std::numeric_limits<T>::lowest();
+real_t File::unknown = std::numeric_limits<real_t>::lowest();
 
 }
 

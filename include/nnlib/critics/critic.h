@@ -6,41 +6,40 @@
 namespace nnlib
 {
 
-template <typename T = double>
 class Critic
 {
 public:
 	virtual ~Critic() {}
 	
 	/// Calculate the loss (how far input is from target).
-	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) = 0;
+	virtual real_t forward(const Tensor &input, const Tensor &target) = 0;
 	
 	/// Calculate the loss (how far input is from target).
 	/// Automatically resize to fit.
-	virtual T safeForward(const Tensor<T> &input, const Tensor<T> &target)
+	virtual real_t safeForward(const Tensor &input, const Tensor &target)
 	{
 		inputs(input.shape());
 		return forward(input, target);
 	}
 	
 	/// Calculate the gradient of the loss w.r.t. the input.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) = 0;
+	virtual Tensor &backward(const Tensor &input, const Tensor &target) = 0;
 	
 	//// Calculate the gradient of the loss w.r.t. the input.
 	/// Automatically resize to fit.
-	virtual Tensor<T> &safeBackward(const Tensor<T> &input, const Tensor<T> &target)
+	virtual Tensor &safeBackward(const Tensor &input, const Tensor &target)
 	{
 		inputs(input.shape());
 		return backward(input, target);
 	}
 	
 	/// Input gradient buffer.
-	virtual Tensor<T> &inGrad() = 0;
+	virtual Tensor &inGrad() = 0;
 	
 	/// Get the input shape of this critic, including batch.
 	virtual const Storage<size_t> &inputs() const
 	{
-		return const_cast<Critic<T> *>(this)->inGrad().shape();
+		return const_cast<Critic *>(this)->inGrad().shape();
 	}
 	
 	/// Set the input shape of this critic, including batch.
@@ -56,7 +55,7 @@ public:
 	/// By default, this returns the first dimension of the input shape.
 	virtual size_t batch() const
 	{
-		return const_cast<Critic<T> *>(this)->inGrad().size(0);
+		return const_cast<Critic *>(this)->inGrad().size(0);
 	}
 	
 	/// Set the batch size of this critic.

@@ -12,7 +12,7 @@ void testTensor()
 {
 	// MARK: Basics
 	
-	Tensor<double> vector(5);
+	Tensor vector(5);
 	NNHardAssert(vector.size() == 5, "Tensor::Tensor yielded the wrong tensor size!");
 	NNHardAssert(vector.dims() == 1, "Tensor::Tensor yielded the wrong number of dimensions!");
 	NNHardAssert(vector.size(0) == 5, "Tensor::Tensor yielded the wrong 0th dimension size!");
@@ -23,54 +23,54 @@ void testTensor()
 		NNHardAssert(fabs(value - 3.14) < 1e-9, "Tensor::fill failed!");
 	}
 	
-	Tensor<double> tensor(6, 3, 2);
+	Tensor tensor(6, 3, 2);
 	NNHardAssert(tensor.size() == 6*3*2, "Tensor::Tensor yielded the wrong tensor size!");
 	NNHardAssert(tensor.dims() == 3, "Tensor::Tensor yielded the wrong number of dimensions!");
 	NNHardAssert(tensor.size(0) == 6, "Tensor::Tensor yielded the wrong 0th dimension size!");
 	NNHardAssert(tensor.size(1) == 3, "Tensor::Tensor yielded the wrong 1st dimension size!");
 	NNHardAssert(tensor.size(2) == 2, "Tensor::Tensor yielded the wrong 2nd dimension size!");
 	
-	Tensor<double> reshaped = tensor.reshape(9, 4);
+	Tensor reshaped = tensor.reshape(9, 4);
 	NNHardAssert(reshaped.dims() == 2, "Tensor::reshape yielded the wrong number of dimensions!");
 	NNHardAssert(reshaped.size(0) == 9, "Tensor::reshape yielded the wrong 0th dimension size!");
 	NNHardAssert(reshaped.size(1) == 4, "Tensor::reshape yielded the wrong 1st dimension size!");
 	
 	// MARK: Narrowing
 	
-	Tensor<size_t> base(3, 5);
-	size_t value = 0;
-	for(size_t &val : base)
+	Tensor base(3, 5);
+	real_t value = 0;
+	for(real_t &val : base)
 	{
 		val = value++;
 	}
 	
-	Tensor<size_t> narrowed1 = base.narrow(1, 1, 2);
-	Tensor<size_t> expected1 = { 1, 2, 6, 7, 11, 12 };
+	Tensor narrowed1 = base.narrow(1, 1, 2);
+	Tensor expected1 = { 1, 2, 6, 7, 11, 12 };
 	
-	Tensor<size_t> narrowed2 = narrowed1.narrow(0, 1, 2);
-	Tensor<size_t> expected2 = { 6, 7, 11, 12 };
+	Tensor narrowed2 = narrowed1.narrow(0, 1, 2);
+	Tensor expected2 = { 6, 7, 11, 12 };
 	
 	for(auto i = narrowed1.begin(), j = expected1.begin(), k = narrowed1.end(); i != k; ++i, ++j)
 	{
-		NNHardAssert(*i == *j, "Tensor::narrow failed!");
+		NNHardAssert(fabs(*i - *j) < 1e-12, "Tensor::narrow failed!");
 	}
 	
 	for(auto i = narrowed2.begin(), j = expected2.begin(), k = narrowed2.end(); i != k; ++i, ++j)
 	{
-		NNHardAssert(*i == *j, "Tensor::narrow failed!");
+		NNHardAssert(fabs(*i - *j) < 1e-12, "Tensor::narrow failed!");
 	}
 	
-	Tensor<size_t> subbed = base.sub({ { 1, 2 }, { 1, 2 } });
+	Tensor subbed = base.sub({ { 1, 2 }, { 1, 2 } });
 	for(auto i = subbed.begin(), j = expected2.begin(), k = subbed.end(); i != k; ++i, ++j)
 	{
-		NNHardAssert(*i == *j, "Tensor::sub failed!");
+		NNHardAssert(fabs(*i - *j) < 1e-12, "Tensor::sub failed!");
 	}
 	
 	// MARK: Flattening
 	
-	Tensor<double> a = Tensor<double>(5).rand(), b = Tensor<double>(7, 3).rand();
-	Tensor<double> aCopy = a.copy(), bCopy = b.copy();
-	Tensor<double> c = Tensor<double>::flatten({ &a, &b });
+	Tensor a = Tensor(5).rand(), b = Tensor(7, 3).rand();
+	Tensor aCopy = a.copy(), bCopy = b.copy();
+	Tensor c = Tensor::flatten({ &a, &b });
 	
 	for(auto i = a.begin(), j = aCopy.begin(), end = a.end(); i != end; ++i, ++j)
 	{
@@ -84,8 +84,8 @@ void testTensor()
 	
 	// MARK: Selection
 	
-	Tensor<double> orig = Tensor<double>(10, 5, 3).rand();
-	Tensor<double> slice = orig.select(1, 3);
+	Tensor orig = Tensor(10, 5, 3).rand();
+	Tensor slice = orig.select(1, 3);
 	
 	NNHardAssert(slice.dims() == 2, "Tensor::select failed to set the correct number of dimensions!");
 	NNHardAssert(slice.size(0) == 10, "Tensor::select failed to set the correct 0th dimension size!");
@@ -101,8 +101,8 @@ void testTensor()
 	
 	// MARK: Transposition
 	
-	Tensor<double> notTransposed = Tensor<double>(5, 3).rand();
-	Tensor<double> transposed(3, 5);
+	Tensor notTransposed = Tensor(5, 3).rand();
+	Tensor transposed(3, 5);
 	for(size_t i = 0; i < 3; ++i)
 	{
 		for(size_t j = 0; j < 5; ++j)
@@ -111,7 +111,7 @@ void testTensor()
 		}
 	}
 	
-	Tensor<double> alsoTransposed = notTransposed.transpose();
+	Tensor alsoTransposed = notTransposed.transpose();
 	NNHardAssert(transposed.shape() == alsoTransposed.shape(), "Tensor::transpose failed!");
 	for(size_t i = 0; i < 3; ++i)
 	{
@@ -124,16 +124,16 @@ void testTensor()
 	Archive out = Archive::toString();
 	out << alsoTransposed;
 	
-	Tensor<> deserialized;
+	Tensor deserialized;
 	Archive in = Archive::fromString(out.str());
 	in >> deserialized;
 	
 	NNHardAssert(alsoTransposed.shape() == deserialized.shape(), "Tensor::save and/or Tensor::load failed!");
-	NNHardAssert(MSE<>(alsoTransposed.shape(), false).forward(alsoTransposed, deserialized) < 1e-9, "Tensor::save and/or Tensor::load failed!");
+	NNHardAssert(MSE(alsoTransposed.shape(), false).forward(alsoTransposed, deserialized) < 1e-9, "Tensor::save and/or Tensor::load failed!");
 }
 
 template <bool TransA, bool TransB>
-void slowMatrixMultiply(const Tensor<double> &A, const Tensor<double> &B, Tensor<double> &C)
+void slowMatrixMultiply(const Tensor &A, const Tensor &B, Tensor &C)
 {
 	C.fill(0);
 	
@@ -151,10 +151,10 @@ void slowMatrixMultiply(const Tensor<double> &A, const Tensor<double> &B, Tensor
 
 void testAlgebra()
 {
-	Tensor<double> A(10, 5);
-	Tensor<double> B(5, 3);
-	Tensor<double> C(10, 3);
-	Tensor<double> C2(10, 3);
+	Tensor A(10, 5);
+	Tensor B(5, 3);
+	Tensor C(10, 3);
+	Tensor C2(10, 3);
 	
 	A.rand();
 	B.rand();
@@ -206,8 +206,8 @@ void testAlgebra()
 		}
 	}
 	
-	Tensor<double> vec1 = Tensor<double>(10).rand(), vec2 = Tensor<double>(5).rand();
-	Tensor<double> outerProduct(10, 5);
+	Tensor vec1 = Tensor(10).rand(), vec2 = Tensor(5).rand();
+	Tensor outerProduct(10, 5);
 	outerProduct.multiplyVTV(vec1, vec2);
 	for(size_t i = 0; i < vec1.size(); ++i)
 	{
@@ -217,8 +217,8 @@ void testAlgebra()
 		}
 	}
 	
-	Tensor<double> mv(outerProduct.size(0));
-	Tensor<double> actual(outerProduct.size(0), 1);
+	Tensor mv(outerProduct.size(0));
+	Tensor actual(outerProduct.size(0), 1);
 	slowMatrixMultiply<false, false>(outerProduct, vec2.reshape(outerProduct.size(1), 1), actual);
 	mv.multiplyMV(outerProduct, vec2);
 	for(size_t i = 0; i < mv.size(); ++i)
@@ -228,11 +228,11 @@ void testAlgebra()
 	
 	// Make sure tensor enforces contiguous matrices for multiplication
 	
-	Tensor<double> foo = Tensor<double>(10, 10, 10).rand();
-	Tensor<double> bar = foo.select(2, 1);
-	Tensor<double> bat = Tensor<double>(10, 10).rand();
-	Tensor<double> baz(10, 10);
-	Tensor<double> baaz(10, 10);
+	Tensor foo = Tensor(10, 10, 10).rand();
+	Tensor bar = foo.select(2, 1);
+	Tensor bat = Tensor(10, 10).rand();
+	Tensor baz(10, 10);
+	Tensor baaz(10, 10);
 	
 	bool problem = false;
 	try
@@ -246,16 +246,16 @@ void testAlgebra()
 	NNAssert(problem, "Non-contiguous matrix multiplcation failed to raise an error!");
 }
 
-bool roughlyEqual(Module<> &a, Module<> &b)
+bool roughlyEqual(Module &a, Module &b)
 {
-	Tensor<> &flatA = a.parameters();
-	Tensor<> &flatB = b.parameters();
+	Tensor &flatA = a.parameters();
+	Tensor &flatB = b.parameters();
 	
 	if(flatA.size() != flatB.size())
 		return false;
 	
 	Storage<size_t> shape = { flatA.size(), 1 };
-	return MSE<>(shape, false).forward(flatA.view(shape), flatB.view(shape)) < 1e-9;
+	return MSE(shape, false).forward(flatA.view(shape), flatB.view(shape)) < 1e-9;
 }
 
 void testNeuralNet()
@@ -263,21 +263,21 @@ void testNeuralNet()
 	// MARK: Linear Test
 	
 	Linear perceptron(3, 2);
-	Tensor<double> &weights = perceptron.weights();
+	Tensor &weights = perceptron.weights();
 	
-	Tensor<double> inp = { 1.0, 2.0, 3.14 };
+	Tensor inp = { 1.0, 2.0, 3.14 };
 	inp.resize(1, 3);
 	
-	Tensor<double> target = {
+	Tensor target = {
 		weights(0, 0) * inp(0, 0) + weights(1, 0) * inp(0, 1) + weights(2, 0) * inp(0, 2),
 		weights(0, 1) * inp(0, 0) + weights(1, 1) * inp(0, 1) + weights(2, 1) * inp(0, 2)
 	};
 	target.resize(1, 2);
 	
-	Tensor<double> grad = { 1.5, -88.0 };
+	Tensor grad = { 1.5, -88.0 };
 	grad.resize(1, 2);
 	
-	Tensor<double> inGrad = {
+	Tensor inGrad = {
 		weights(0, 0) * grad(0, 0) + weights(0, 1) * grad(0, 1),
 		weights(1, 0) * grad(0, 0) + weights(1, 1) * grad(0, 1),
 		weights(2, 0) * grad(0, 0) + weights(2, 1) * grad(0, 1)
@@ -298,7 +298,7 @@ void testNeuralNet()
 	
 	// MARK: TanH Test
 	
-	TanH<double> tanh;
+	TanH tanh;
 	tanh.inputs(perceptron.outputs());
 	
 	tanh.forward(perceptron.output());
@@ -331,7 +331,7 @@ void testNeuralNet()
 	};
 	inGrad.resize(1, 3);
 	
-	Sequential<double> nn(&perceptron, &tanh);
+	Sequential nn(&perceptron, &tanh);
 	nn.forward(inp);
 	nn.backward(inp, grad);
 	
@@ -353,24 +353,24 @@ void testNeuralNet()
 	
 	RandomEngine::seed(0);
 	
-	Sequential<> trainNet(
-		new Linear(5, 10), new TanH<>(),
-		new Linear(3), new TanH<>(),
-		new LogSoftMax<>()
+	Sequential trainNet(
+		new Linear(5, 10), new TanH(),
+		new Linear(3), new TanH(),
+		new LogSoftMax()
 	);
 	
-	Sequential<> targetNet(
-		new Linear(5, 10), new TanH<>(),
-		new Linear(3), new TanH<>(),
-		new LogSoftMax<>()
+	Sequential targetNet(
+		new Linear(5, 10), new TanH(),
+		new Linear(3), new TanH(),
+		new LogSoftMax()
 	);
 	
-	MSE<> critic(trainNet.outputs());
-	SGD<> optimizer(trainNet, critic);
+	MSE critic(trainNet.outputs());
+	SGD optimizer(trainNet, critic);
 	optimizer.learningRate(0.001);
 	
-	Tensor<double> testFeat = Tensor<double>(100, 5).rand();
-	Tensor<double> testLab(100, 3);
+	Tensor testFeat = Tensor(100, 5).rand();
+	Tensor testLab(100, 3);
 	for(size_t i = 0; i < 100; ++i)
 	{
 		testLab.narrow(0, i).copy(targetNet.forward(testFeat.narrow(0, i)));
@@ -382,7 +382,7 @@ void testNeuralNet()
 	
 	for(size_t i = 0; i < 1000; ++i)
 	{
-		Tensor<double> feat = Tensor<double>(10, 5).rand();
+		Tensor feat = Tensor(10, 5).rand();
 		optimizer.step(feat, targetNet.forward(feat));
 	}
 	
@@ -393,32 +393,32 @@ void testNeuralNet()
 	// MARK: Concat test
 	
 	Linear *comp1 = new Linear(10, 5);
-	Sequential<> *comp2 = new Sequential<>(new Linear(10, 10), new TanH<>(), new Linear(10, 25), new TanH<>());
-	TanH<> *comp3 = new TanH<>(10);
+	Sequential *comp2 = new Sequential(new Linear(10, 10), new TanH(), new Linear(10, 25), new TanH());
+	TanH *comp3 = new TanH(10);
 	
-	Tensor<double> inMat = Tensor<double>(10).rand().resize(1, 10);
-	Tensor<double> outMat(1, 5 + 25 + 10);
+	Tensor inMat = Tensor(10).rand().resize(1, 10);
+	Tensor outMat(1, 5 + 25 + 10);
 	outMat.sub({ {}, {  0, 5 } }).copy(comp1->forward(inMat));
 	outMat.sub({ {}, {  5, 25 } }).copy(comp2->forward(inMat));
 	outMat.sub({ {}, { 30, 10 } }).copy(comp3->forward(inMat));
 	
-	Concat<> concat(comp1, comp2, comp3);
+	Concat concat(comp1, comp2, comp3);
 	concat.forward(inMat);
 	
-	NNHardAssert(MSE<>(concat.outputs()).forward(outMat, concat.output()) < 1e-9, "Concat::forward failed!");
+	NNHardAssert(MSE(concat.outputs()).forward(outMat, concat.output()) < 1e-9, "Concat::forward failed!");
 	
-	Tensor<double> blam1 = Tensor<double>(comp1->output().shape(), true).rand();
-	Tensor<double> blam2 = Tensor<double>(comp2->output().shape(), true).rand();
-	Tensor<double> blam3 = Tensor<double>(comp3->output().shape(), true).rand();
-	Tensor<double> inGrad2(inMat.shape(), true);
+	Tensor blam1 = Tensor(comp1->output().shape(), true).rand();
+	Tensor blam2 = Tensor(comp2->output().shape(), true).rand();
+	Tensor blam3 = Tensor(comp3->output().shape(), true).rand();
+	Tensor inGrad2(inMat.shape(), true);
 	inGrad2.addMM(comp1->backward(inMat, blam1));
 	inGrad2.addMM(comp2->backward(inMat, blam2));
 	inGrad2.addMM(comp3->backward(inMat, blam3));
 	
-	Tensor<double> blam = Tensor<double>::flatten({ &blam1, &blam2, &blam3 }).resize(1, 40);
+	Tensor blam = Tensor::flatten({ &blam1, &blam2, &blam3 }).resize(1, 40);
 	concat.backward(inMat, blam);
 	
-	NNHardAssert(MSE<>(inMat.shape()).forward(inGrad2, concat.inGrad()) < 1e-9, "Concat::backward failed!");
+	NNHardAssert(MSE(inMat.shape()).forward(inGrad2, concat.inGrad()) < 1e-9, "Concat::backward failed!");
 	
 	// MARK: Serialization test
 	
@@ -431,7 +431,7 @@ void testNeuralNet()
 		out << test;
 		
 		Archive in = Archive::fromString(out.str());
-		Module<> *test2 = in.read<Module<>>();
+		Module *test2 = in.read<Module>();
 		
 		NNHardAssert(test2 != nullptr, "Archive::read failed to read a generic type!");
 		NNHardAssert(roughlyEqual(test, *test2), "Linear::save and/or Linear::load failed!");
@@ -441,7 +441,7 @@ void testNeuralNet()
 	Archive out = Archive::toString();
 	out << trainNet;
 	
-	Sequential<> deserialized;
+	Sequential deserialized;
 	Archive in = Archive::fromString(out.str());
 	in >> deserialized;
 	
@@ -452,15 +452,15 @@ void testNeuralNet()
 		NNHardAssert(trainNet.component(i).outputs() == deserialized.component(i).outputs(), "Sequential::save and/or Sequential::load failed! Component " + std::to_string(i) << " had differing output shapes!");
 	}
 	
-	Tensor<> flatActual = Tensor<>::flatten(trainNet.parameters());
-	Tensor<> flatDeserial = Tensor<>::flatten(deserialized.parameters());
+	Tensor flatActual = Tensor::flatten(trainNet.parameters());
+	Tensor flatDeserial = Tensor::flatten(deserialized.parameters());
 	
 	NNHardAssert(flatActual.size() == flatDeserial.size(), "Sequential::save and/or Sequential::load failed! Unexpected flattened parameter size!");
-	NNHardAssert(MSE<>(flatActual.shape(), false).forward(flatActual, flatDeserial) < 1e-9, "Sequential::save and/or Sequential::load failed! Values were not close enough!");
+	NNHardAssert(MSE(flatActual.shape(), false).forward(flatActual, flatDeserial) < 1e-9, "Sequential::save and/or Sequential::load failed! Values were not close enough!");
 	*/
 }
 
-Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)
+Tensor extrapolate(Sequencer &model, const Tensor &context, size_t length)
 {
 	size_t sequenceLength = model.sequenceLength();
 	size_t bats = model.batch();
@@ -474,7 +474,7 @@ Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)
 		model.forward(context.narrow(0, i));
 	}
 	
-	Tensor<> result(length, 1, 1);
+	Tensor result(length, 1, 1);
 	for(size_t i = 0; i < length; ++i)
 	{
 		result.narrow(0, i).copy(model.forward(model.output()));
@@ -486,35 +486,35 @@ Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)
 	return result;
 }
 
-void plot(const string &filename, Sequencer<> &model, const Tensor<> &train, const Tensor<> &test)
+void plot(const string &filename, Sequencer &model, const Tensor &train, const Tensor &test)
 {
-	Tensor<> preds = extrapolate(model, train.reshape(train.size(0), 1, 1), test.size(0));
-	Tensor<> full(train.size(0) + test.size(0), 3);
-	full.fill(File<>::unknown);
+	Tensor preds = extrapolate(model, train.reshape(train.size(0), 1, 1), test.size(0));
+	Tensor full(train.size(0) + test.size(0), 3);
+	full.fill(File::unknown);
 	full.sub({ { 0, train.size(0) }, { 0 } }).copy(train.reshape(train.size(0), 1));
 	full.sub({ { train.size(0), test.size(0) }, { 1 } }).copy(test.reshape(test.size(0), 1));
 	full.sub({ { train.size(0), test.size(0) }, { 2 } }).copy(preds);
-	File<>::saveArff(full, filename);
+	File::saveArff(full, filename);
 }
 
 void testRNN()
 {
-	Tensor<> sequence = { 8, 6, 7, 5, 3, 0, 9, 1, 2, 4 };
+	Tensor sequence = { 8, 6, 7, 5, 3, 0, 9, 1, 2, 4 };
 	size_t sequenceLength = sequence.size(0) - 1;
 	
-	Tensor<> expectedOut = Tensor<>({
+	Tensor expectedOut = Tensor({
 		0.49605, 0.58459, 0.67011, 0.67758, 0.62128,
 		0.38235, 0.69360, 0.48573, 0.48518
 	}).resize(9, 1);
 	
-	Tensor<> expectedInGrad = Tensor<>({
+	Tensor expectedInGrad = Tensor({
 		-1.43229, -0.97700, -0.56715, -0.50216, -0.42033,
 		-1.66733, -0.15554, -0.42984, -0.46831
 	}).resize(9, 1);
 	
-	LSTM<> *lstm;
-	Sequencer<> nn(
-		lstm = new LSTM<>(1, 1),
+	LSTM *lstm;
+	Sequencer nn(
+		lstm = new LSTM(1, 1),
 		sequenceLength
 	);
 	nn.parameters().copy({
@@ -530,12 +530,12 @@ void testRNN()
 		0.1, 0,
 		0.3, 0
 	});
-	CriticSequencer<> critic(new MSE<>(nn.module().outputs()), sequenceLength);
+	CriticSequencer critic(new MSE(nn.module().outputs()), sequenceLength);
 	
 	nn.forget();
 	nn.forward(sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1));
 	
-	NNHardAssert(MSE<>(expectedOut.shape()).forward(nn.output().reshape(expectedOut.shape()), expectedOut) < 1e-9, "Sequencer(LSTM)::forward failed!");
+	NNHardAssert(MSE(expectedOut.shape()).forward(nn.output().reshape(expectedOut.shape()), expectedOut) < 1e-9, "Sequencer(LSTM)::forward failed!");
 	
 	nn.backward(
 		sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1),
@@ -545,7 +545,7 @@ void testRNN()
 		)
 	);
 	
-	NNHardAssert(MSE<>(expectedInGrad.shape()).forward(nn.inGrad().reshape(expectedInGrad.shape()), expectedInGrad) < 1e-9, "Sequencer(LSTM)::backward failed!");
+	NNHardAssert(MSE(expectedInGrad.shape()).forward(nn.inGrad().reshape(expectedInGrad.shape()), expectedInGrad) < 1e-9, "Sequencer(LSTM)::backward failed!");
 }
 
 int main()

@@ -10,11 +10,10 @@ namespace nnlib
 /// Takes two tensors and returns random slices along the major dimensions, one slice at at time.
 /// This is useful for optimization.
 /// Batcher requires non-const inputs and will shuffle them unless the copy flag is true.
-template <typename T = double>
 class Batcher
 {
 public:
-	Batcher(Tensor<T> &feat, Tensor<T> &lab, size_t bats = 1, bool copy = false) :
+	Batcher(Tensor &feat, Tensor &lab, size_t bats = 1, bool copy = false) :
 		m_feat(copy ? feat.copy() : feat),
 		m_lab(copy ? lab.copy() : lab),
 		m_featBatch(m_feat),
@@ -81,21 +80,21 @@ public:
 		return true;
 	}
 	
-	Tensor<T> &features()
+	Tensor &features()
 	{
 		return m_featBatch;
 	}
 	
-	Tensor<T> &labels()
+	Tensor &labels()
 	{
 		return m_labBatch;
 	}
 	
 private:
-	Tensor<T> m_feat;
-	Tensor<T> m_lab;
-	Tensor<T> m_featBatch;
-	Tensor<T> m_labBatch;
+	Tensor m_feat;
+	Tensor m_lab;
+	Tensor m_featBatch;
+	Tensor m_labBatch;
 	size_t m_offset;
 	size_t m_batch;
 };
@@ -107,7 +106,7 @@ template <typename T = double>
 class SequenceBatcher
 {
 public:
-	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 0, size_t bats = 1) :
+	SequenceBatcher(const Tensor &feat, const Tensor &lab, size_t sequenceLength = 0, size_t bats = 1) :
 		m_feat(feat),
 		m_lab(lab),
 		m_featBatch(sequenceLength, bats, m_feat.size(1)),
@@ -169,21 +168,21 @@ public:
 		return *this;
 	}
 	
-	Tensor<T> &features()
+	Tensor &features()
 	{
 		return m_featBatch;
 	}
 	
-	Tensor<T> &labels()
+	Tensor &labels()
 	{
 		return m_labBatch;
 	}
 	
 private:
-	const Tensor<T> &m_feat;
-	const Tensor<T> &m_lab;
-	Tensor<T> m_featBatch;
-	Tensor<T> m_labBatch;
+	const Tensor &m_feat;
+	const Tensor &m_lab;
+	Tensor m_featBatch;
+	Tensor m_labBatch;
 	size_t m_batch;
 	size_t m_sequenceLength;
 };

@@ -29,7 +29,7 @@ public:
 		
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
-			T max = input.narrow(0, i).max(), sum = 0;
+			real_t max = input.narrow(0, i).max(), sum = 0;
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
 			{
 				sum += exp(input(i, j) - max);
@@ -52,7 +52,7 @@ public:
 		
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
-			T sum = outGrad.narrow(0, i).sum();
+			real_t sum = outGrad.narrow(0, i).sum();
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
 			{
 				m_inGrad(i, j) = outGrad(i, j) - exp(m_output(i, j)) * sum;
