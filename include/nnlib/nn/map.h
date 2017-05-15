@@ -7,12 +7,11 @@ namespace nnlib
 {
 
 /// Abstract base class for pointwise functions on inputs, also known as activation functions.
-template <typename T = double>
-class Map : public Module<T>
+class Map : public Module
 {
 public:
-	using Module<T>::inputs;
-	using Module<T>::outputs;
+	using Module::inputs;
+	using Module::outputs;
 	
 	Map(size_t outs = 0, size_t bats = 1) :
 		m_inGrad(bats, outs),
@@ -37,7 +36,7 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
 		NNAssert(input.shape() == m_output.shape(), "Incompatible input shape!");
 		auto i = input.begin(), j = input.end();
@@ -49,7 +48,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		NNAssert(input.shape() == m_output.shape(), "Incompatible input shape!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible output gradient shape!");
@@ -62,13 +61,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_output;
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inGrad;
 	}
@@ -77,8 +76,8 @@ public:
 	/// In a map, input shape is always equal to output shape.
 	virtual Map &inputs(const Storage<size_t> &dims) override
 	{
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
+		Module::inputs(dims);
+		Module::outputs(dims);
 		return *this;
 	}
 	
@@ -86,14 +85,14 @@ public:
 	/// In a map, input shape is always equal to output shape.
 	virtual Map &outputs(const Storage<size_t> &dims) override
 	{
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
+		Module::inputs(dims);
+		Module::outputs(dims);
 		return *this;
 	}
 	
 private:
-	Tensor<T> m_inGrad;
-	Tensor<T> m_output;
+	Tensor m_inGrad;
+	Tensor m_output;
 };
 
 }

@@ -27,11 +27,6 @@ public:
 		m_variance.resize(m_grads.size()).fill(0.0);
 	}
 	
-	Tensor<T> &foo()
-	{
-		return m_grads;
-	}
-	
 	void reset()
 	{
 		m_steps = 0;

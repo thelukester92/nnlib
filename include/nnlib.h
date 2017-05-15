@@ -1,10 +1,17 @@
-/// Critics
+// Set type to use for reals (doubles or floats)
+#ifdef REAL_TYPE
+	using real_t = REAL_TYPE;
+#else
+	using real_t = double;
+#endif
+
+// Critics
 #include "nnlib/critics/critic.h"
 #include "nnlib/critics/criticsequencer.h"
 #include "nnlib/critics/nll.h"
 #include "nnlib/critics/mse.h"
 
-/// Neural Networks
+// Neural Networks
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/container.h"
 #include "nnlib/nn/identity.h"
@@ -19,14 +26,14 @@
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/tanh.h"
 
-/// Optimization
+// Optimization
 #include "nnlib/opt/adam.h"
 #include "nnlib/opt/nadam.h"
 #include "nnlib/opt/optimizer.h"
 #include "nnlib/opt/rmsprop.h"
 #include "nnlib/opt/sgd.h"
 
-/// Utilities
+// Utilities
 #include "nnlib/util/algebra.h"
 #include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"

@@ -10,14 +10,13 @@ namespace nnlib
 /// one at a time, essentially abstracting away BPTT.
 /// Input should be a 3D tensor: sequence X batch size X inputs.
 /// Output should be a 3D tensor: sequence X batch size X outputs.
-template <typename T = double>
-class Sequencer : public Container<T>
+class Sequencer : public Container
 {
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	using Container<T>::batch;
-	using Container<T>::add;
+	using Container::inputs;
+	using Container::outputs;
+	using Container::batch;
+	using Container::add;
 	
 	/// \brief A name for this module type.
 	///
@@ -28,7 +27,7 @@ public:
 		return "sequencer";
 	}
 	
-	Sequencer(Module<T> *module, size_t sequenceLength = 1) :
+	Sequencer(Module *module, size_t sequenceLength = 1) :
 		m_module(module),
 		m_state(module->state()),
 		m_states(sequenceLength, m_state.size(0))
@@ -47,7 +46,7 @@ public:
 	}
 	
 	/// Get the module used by this sequencer.
-	Module<T> &module()
+	Module &module()
 	{
 		return *m_module;
 	}
@@ -76,7 +75,7 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
 		
@@ -90,7 +89,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be sequence x batch x outputs!");
@@ -105,13 +104,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_output;
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inGrad;
 	}
@@ -211,13 +210,13 @@ public:
 	}
 	
 private:
-	Module<T> *m_module;
+	Module *m_module;
 	
-	Tensor<T> m_output;
-	Tensor<T> m_inGrad;
+	Tensor m_output;
+	Tensor m_inGrad;
 	
-	Tensor<T> &m_state;
-	Tensor<T> m_states;
+	Tensor &m_state;
+	Tensor m_states;
 };
 
 }

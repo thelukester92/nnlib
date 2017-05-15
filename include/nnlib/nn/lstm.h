@@ -12,13 +12,12 @@ namespace nnlib
 {
 
 /// LSTM recurrent module.
-template <typename T = double>
-class LSTM : public Container<T>
+class LSTM : public Container
 {
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	using Container<T>::batch;
+	using Container::inputs;
+	using Container::outputs;
+	using Container::batch;
 	
 	/// \brief A name for this module type.
 	///
@@ -30,22 +29,22 @@ public:
 	}
 	
 	LSTM(size_t inps, size_t outs, size_t bats = 1) :
-		m_inpGateX(new Linear<T>(inps, outs, bats)),
-		m_inpGateY(new Linear<T>(outs, outs, bats)),
-		m_inpGateH(new Linear<T>(outs, outs, bats)),
-		m_inpGate(new Logistic<T>(outs, bats)),
-		m_fgtGateX(new Linear<T>(inps, outs, bats)),
-		m_fgtGateY(new Linear<T>(outs, outs, bats)),
-		m_fgtGateH(new Linear<T>(outs, outs, bats)),
-		m_fgtGate(new Logistic<T>(outs, bats)),
-		m_inpModX(new Linear<T>(inps, outs, bats)),
-		m_inpModY(new Linear<T>(outs, outs, bats)),
-		m_inpMod(new TanH<T>(outs, bats)),
-		m_outGateX(new Linear<T>(inps, outs, bats)),
-		m_outGateY(new Linear<T>(outs, outs, bats)),
-		m_outGateH(new Linear<T>(outs, outs, bats)),
-		m_outGate(new Logistic<T>(outs, bats)),
-		m_outMod(new TanH<T>(outs, bats)),
+		m_inpGateX(new Linear(inps, outs, bats)),
+		m_inpGateY(new Linear(outs, outs, bats)),
+		m_inpGateH(new Linear(outs, outs, bats)),
+		m_inpGate(new Logistic(outs, bats)),
+		m_fgtGateX(new Linear(inps, outs, bats)),
+		m_fgtGateY(new Linear(outs, outs, bats)),
+		m_fgtGateH(new Linear(outs, outs, bats)),
+		m_fgtGate(new Logistic(outs, bats)),
+		m_inpModX(new Linear(inps, outs, bats)),
+		m_inpModY(new Linear(outs, outs, bats)),
+		m_inpMod(new TanH(outs, bats)),
+		m_outGateX(new Linear(inps, outs, bats)),
+		m_outGateY(new Linear(outs, outs, bats)),
+		m_outGateH(new Linear(outs, outs, bats)),
+		m_outGate(new Logistic(outs, bats)),
+		m_outMod(new TanH(outs, bats)),
 		m_inGrad(bats, inps),
 		m_inpAdd(bats, outs),
 		m_fgtAdd(bats, outs),
@@ -59,42 +58,42 @@ public:
 		m_gradBuffer(bats, outs),
 		m_resetGrad(true)
 	{
-		Container<T>::add(m_inpGateX);
-		Container<T>::add(m_inpGateY);
-		Container<T>::add(m_inpGateH);
-		Container<T>::add(m_inpGate);
-		Container<T>::add(m_fgtGateX);
-		Container<T>::add(m_fgtGateY);
-		Container<T>::add(m_fgtGateH);
-		Container<T>::add(m_fgtGate);
-		Container<T>::add(m_inpModX);
-		Container<T>::add(m_inpModY);
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_outGateX);
-		Container<T>::add(m_outGateY);
-		Container<T>::add(m_outGateH);
-		Container<T>::add(m_outGate);
-		Container<T>::add(m_outMod);
+		Container::add(m_inpGateX);
+		Container::add(m_inpGateY);
+		Container::add(m_inpGateH);
+		Container::add(m_inpGate);
+		Container::add(m_fgtGateX);
+		Container::add(m_fgtGateY);
+		Container::add(m_fgtGateH);
+		Container::add(m_fgtGate);
+		Container::add(m_inpModX);
+		Container::add(m_inpModY);
+		Container::add(m_inpMod);
+		Container::add(m_outGateX);
+		Container::add(m_outGateY);
+		Container::add(m_outGateH);
+		Container::add(m_outGate);
+		Container::add(m_outMod);
 		forget();
 	}
 	
 	LSTM(size_t outs) :
-		m_inpGateX(new Linear<T>(0, outs, 1)),
-		m_inpGateY(new Linear<T>(outs, outs, 1)),
-		m_inpGateH(new Linear<T>(outs, outs, 1)),
-		m_inpGate(new Logistic<T>(outs, 1)),
-		m_fgtGateX(new Linear<T>(0, outs, 1)),
-		m_fgtGateY(new Linear<T>(outs, outs, 1)),
-		m_fgtGateH(new Linear<T>(outs, outs, 1)),
-		m_fgtGate(new Logistic<T>(outs, 1)),
-		m_inpModX(new Linear<T>(0, outs, 1)),
-		m_inpModY(new Linear<T>(outs, outs, 1)),
-		m_inpMod(new TanH<T>(outs, 1)),
-		m_outGateX(new Linear<T>(0, outs, 1)),
-		m_outGateY(new Linear<T>(outs, outs, 1)),
-		m_outGateH(new Linear<T>(outs, outs, 1)),
-		m_outGate(new Logistic<T>(outs, 1)),
-		m_outMod(new TanH<T>(outs, 1)),
+		m_inpGateX(new Linear(0, outs, 1)),
+		m_inpGateY(new Linear(outs, outs, 1)),
+		m_inpGateH(new Linear(outs, outs, 1)),
+		m_inpGate(new Logistic(outs, 1)),
+		m_fgtGateX(new Linear(0, outs, 1)),
+		m_fgtGateY(new Linear(outs, outs, 1)),
+		m_fgtGateH(new Linear(outs, outs, 1)),
+		m_fgtGate(new Logistic(outs, 1)),
+		m_inpModX(new Linear(0, outs, 1)),
+		m_inpModY(new Linear(outs, outs, 1)),
+		m_inpMod(new TanH(outs, 1)),
+		m_outGateX(new Linear(0, outs, 1)),
+		m_outGateY(new Linear(outs, outs, 1)),
+		m_outGateH(new Linear(outs, outs, 1)),
+		m_outGate(new Logistic(outs, 1)),
+		m_outMod(new TanH(outs, 1)),
 		m_inGrad(1, 0),
 		m_inpAdd(1, outs),
 		m_fgtAdd(1, outs),
@@ -108,22 +107,22 @@ public:
 		m_gradBuffer(1, outs),
 		m_resetGrad(true)
 	{
-		Container<T>::add(m_inpGateX);
-		Container<T>::add(m_inpGateY);
-		Container<T>::add(m_inpGateH);
-		Container<T>::add(m_inpGate);
-		Container<T>::add(m_fgtGateX);
-		Container<T>::add(m_fgtGateY);
-		Container<T>::add(m_fgtGateH);
-		Container<T>::add(m_fgtGate);
-		Container<T>::add(m_inpModX);
-		Container<T>::add(m_inpModY);
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_outGateX);
-		Container<T>::add(m_outGateY);
-		Container<T>::add(m_outGateH);
-		Container<T>::add(m_outGate);
-		Container<T>::add(m_outMod);
+		Container::add(m_inpGateX);
+		Container::add(m_inpGateY);
+		Container::add(m_inpGateH);
+		Container::add(m_inpGate);
+		Container::add(m_fgtGateX);
+		Container::add(m_fgtGateY);
+		Container::add(m_fgtGateH);
+		Container::add(m_fgtGate);
+		Container::add(m_inpModX);
+		Container::add(m_inpModY);
+		Container::add(m_inpMod);
+		Container::add(m_outGateX);
+		Container::add(m_outGateY);
+		Container::add(m_outGateH);
+		Container::add(m_outGate);
+		Container::add(m_outMod);
 		forget();
 	}
 	
@@ -138,7 +137,7 @@ public:
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
-	virtual LSTM &add(Module<T> *component) override
+	virtual LSTM &add(Module *component) override
 	{
 		throw std::runtime_error("Cannot add components to a LSTM module!");
 	}
@@ -146,7 +145,7 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
 		m_prevState.copy(m_state);
 		m_prevOutput.copy(m_outMod->output());
@@ -185,7 +184,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		if(m_resetGrad)
 		{
@@ -236,13 +235,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_outMod->output();
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inGrad;
 	}
@@ -296,7 +295,7 @@ public:
 	/// Set the batch size of this module.
 	virtual LSTM &batch(size_t bats) override
 	{
-		Container<T>::batch(bats);
+		Container::batch(bats);
 		
 		m_inGrad.resizeDim(0, bats);
 		m_inpAdd.resizeDim(0, bats);
@@ -314,9 +313,9 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
-	virtual Storage<Tensor<T> *> stateList() override
+	virtual Storage<Tensor *> stateList() override
 	{
-		Storage<Tensor<T> *> states = Container<T>::stateList();
+		Storage<Tensor *> states = Container::stateList();
 		states.push_back(&m_state);
 		states.push_back(&m_prevState);
 		states.push_back(&m_prevOutput);
@@ -325,35 +324,35 @@ public:
 	}
 	
 private:
-	Module<T> *m_inpGateX;
-	Module<T> *m_inpGateY;
-	Module<T> *m_inpGateH;
-	Module<T> *m_inpGate;
-	Module<T> *m_fgtGateX;
-	Module<T> *m_fgtGateY;
-	Module<T> *m_fgtGateH;
-	Module<T> *m_fgtGate;
-	Module<T> *m_inpModX;
-	Module<T> *m_inpModY;
-	Module<T> *m_inpMod;
-	Module<T> *m_outGateX;
-	Module<T> *m_outGateY;
-	Module<T> *m_outGateH;
-	Module<T> *m_outGate;
-	Module<T> *m_outMod;
+	Module *m_inpGateX;
+	Module *m_inpGateY;
+	Module *m_inpGateH;
+	Module *m_inpGate;
+	Module *m_fgtGateX;
+	Module *m_fgtGateY;
+	Module *m_fgtGateH;
+	Module *m_fgtGate;
+	Module *m_inpModX;
+	Module *m_inpModY;
+	Module *m_inpMod;
+	Module *m_outGateX;
+	Module *m_outGateY;
+	Module *m_outGateH;
+	Module *m_outGate;
+	Module *m_outMod;
 	
-	Tensor<T> m_inGrad;
-	Tensor<T> m_inpAdd;
-	Tensor<T> m_fgtAdd;
-	Tensor<T> m_outAdd;
-	Tensor<T> m_outGrad;
+	Tensor m_inGrad;
+	Tensor m_inpAdd;
+	Tensor m_fgtAdd;
+	Tensor m_outAdd;
+	Tensor m_outGrad;
 	
-	Tensor<T> m_state;
-	Tensor<T> m_prevState;
-	Tensor<T> m_prevOutput;
-	Tensor<T> m_stateGrad;
-	Tensor<T> m_curStateGrad;
-	Tensor<T> m_gradBuffer;
+	Tensor m_state;
+	Tensor m_prevState;
+	Tensor m_prevOutput;
+	Tensor m_stateGrad;
+	Tensor m_curStateGrad;
+	Tensor m_gradBuffer;
 	
 	bool m_resetGrad;
 };

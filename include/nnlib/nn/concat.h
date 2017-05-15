@@ -7,15 +7,14 @@ namespace nnlib
 {
 
 /// A container that concatenates the outputs of each component.
-template <typename T = double>
-class Concat : public Container<T>
+class Concat : public Container
 {
-using Container<T>::components;
-using Container<T>::m_components;
+using Container::components;
+using Container::m_components;
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	using Container<T>::batch;
+	using Container::inputs;
+	using Container::outputs;
+	using Container::batch;
 	
 	/// \brief A name for this module type.
 	///
@@ -29,14 +28,14 @@ public:
 	Concat() {}
 	
 	template <typename ... Ms>
-	Concat(Module<T> *component, Ms *...components)
+	Concat(Module *component, Ms *...components)
 	{
 		add(component, components...);
 	}
 	
 	/// Add multiple components.
 	template <typename ... Ms>
-	Concat &add(Module<T> *component, Ms *...more)
+	Concat &add(Module *component, Ms *...more)
 	{
 		add(component);
 		add(more...);
@@ -46,7 +45,7 @@ public:
 	// MARK: Container methods
 	
 	/// Add a component to this container, enforcing compatibility.
-	virtual Concat &add(Module<T> *component) override
+	virtual Concat &add(Module *component) override
 	{
 		NNAssert(components() == 0 || m_components[0]->inputs() == component->inputs(), "Incompatible concat component!");
 		m_components.push_back(component);
@@ -54,9 +53,9 @@ public:
 	}
 	
 	/// Remove and return a specific component from this container, enforcing compatibility.
-	virtual Module<T> *remove(size_t index) override
+	virtual Module *remove(size_t index) override
 	{
-		Module<T> *comp = m_components[index];
+		Module *comp = m_components[index];
 		m_components.erase(index);
 		resizeBuffers();
 		return comp;
@@ -65,9 +64,9 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
-		for(Module<T> *component : m_components)
+		for(Module *component : m_components)
 		{
 			component->forward(input);
 		}
@@ -75,12 +74,12 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		m_inGrad.fill(0);
 		
 		size_t offset = 0, size;
-		for(Module<T> *component : m_components)
+		for(Module *component : m_components)
 		{
 			size = component->outputs()[1];
 			m_inGrad.addMM(component->backward(input, outGrad.sub({ {}, { offset, size } })));
@@ -91,13 +90,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_output;
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inGrad;
 	}
@@ -105,7 +104,7 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual Concat &inputs(const Storage<size_t> &dims) override
 	{
-		for(Module<T> *component : m_components)
+		for(Module *component : m_components)
 		{
 			component->inputs(dims);
 		}
@@ -124,7 +123,7 @@ private:
 		NNAssert(components() > 0 && m_components[0]->outputs().size() == 2, "Expected matrix IO for concat!");
 		
 		size_t outs = 0, bats = m_components[0]->outputs()[0], inps = m_components[0]->inputs()[1];
-		for(Module<T> *component : m_components)
+		for(Module *component : m_components)
 		{
 			outs += component->outputs()[1];
 		}
@@ -133,7 +132,7 @@ private:
 		m_inGrad.resize(bats, inps);
 		
 		size_t offset = 0, size;
-		for(Module<T> *component : m_components)
+		for(Module *component : m_components)
 		{
 			size = component->outputs()[1];
 			component->output() = m_output.sub({ {}, { offset, size } });
@@ -143,8 +142,8 @@ private:
 		return *this;
 	}
 	
-	Tensor<T> m_output;
-	Tensor<T> m_inGrad;
+	Tensor m_output;
+	Tensor m_inGrad;
 };
 
 }

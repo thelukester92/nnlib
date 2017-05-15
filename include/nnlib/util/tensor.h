@@ -14,14 +14,30 @@
 namespace nnlib
 {
 
+class Tensor;
+
+/// Iterator for the tensor class.
+/// This is templated so that it can return const real_t or real_t.
 template <typename T>
-class TensorIterator;
+class TensorIterator : public std::iterator<std::forward_iterator_tag, T, T, const T *, T &>
+{
+public:
+	TensorIterator(const Tensor *tensor, bool end = false);
+	TensorIterator &advance(size_t dim = (size_t) -1);
+	TensorIterator &operator++();
+	TensorIterator operator++(int);
+	T &operator*();
+	bool operator==(const TensorIterator &other);
+	bool operator!=(const TensorIterator &other);
+private:
+	Tensor *m_tensor;
+	Storage<size_t> m_indices;
+};
 
 /// \brief The standard input and output type in nnlib.
 ///
 /// A tensor can be a vector (one dimension), a matrix (two dimensions), or a higher-order tensor.
 /// Tensors provide views into Storage objects, and multiple tensors can share the same Storage.
-template <typename T = double>
 class Tensor
 {
 public:
@@ -43,7 +59,7 @@ public:
 		for(Tensor *t : tensors)
 		{
 			size_t i = offset;
-			for(const T &value : *t)
+			for(const real_t &value : *t)
 			{
 				flattened(i) = value;
 				++i;
@@ -63,11 +79,11 @@ public:
 	/// This performs a deep copy of the data given in the parameter.
 	/// The constructed tensor is one-dimensional (a vector).
 	/// \param values A Storage containing the values to store in the new tensor.
-	Tensor(const Storage<T> &values) :
+	Tensor(const Storage<real_t> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
 		m_offset(0),
-		m_data(new Storage<T>(values)),
+		m_data(new Storage<real_t>(values)),
 		m_shared(m_data)
 	{}
 	
@@ -76,11 +92,11 @@ public:
 	/// This performs a deep copy of the data given in the parameter.
 	/// The constructed tensor is one-dimensional (a vector).
 	/// \param values An initializer_list containing the values to store in the new tensor.
-	Tensor(const std::initializer_list<T> &values) :
+	Tensor(const std::initializer_list<real_t> &values) :
 		m_dims({ values.size() }),
 		m_strides({ 1 }),
 		m_offset(0),
-		m_data(new Storage<T>(values)),
+		m_data(new Storage<real_t>(values)),
 		m_shared(m_data)
 	{}
 	
@@ -88,10 +104,10 @@ public:
 	///
 	/// This creates an n-dimensional tensor where n is the size of the input parameter.
 	/// \param dims A Storage containing the dimension sizes for the new tensor.
-	/// \note This contructor uses a dummy bool to differentiate itself from the const Storage<T> & constructor. This is important when T = size_t.
+	/// \note This contructor uses a dummy bool to differentiate itself from the const Storage<real_t> & constructor. This is important when T = size_t.
 	Tensor(const Storage<size_t> &dims, bool) :
 		m_offset(0),
-		m_data(new Storage<T>()),
+		m_data(new Storage<real_t>()),
 		m_shared(m_data)
 	{
 		resize(dims);
@@ -105,7 +121,7 @@ public:
 	template <typename ... Ts>
 	explicit Tensor(Ts... dims) :
 		m_offset(0),
-		m_data(new Storage<T>()),
+		m_data(new Storage<real_t>()),
 		m_shared(m_data)
 	{
 		resize(dims...);
@@ -140,7 +156,7 @@ public:
 	///
 	/// Resizes the tensor to be a vector (one-dimensional) and copies data from values.
 	/// \param values A Storage containing the values to store in the new tensor.
-	Tensor &operator=(const Storage<T> &values)
+	Tensor &operator=(const Storage<real_t> &values)
 	{
 		m_dims		= { values.size() };
 		m_strides	= { 1 };
@@ -153,7 +169,7 @@ public:
 	///
 	/// Resizes the tensor to be a vector (one-dimensional) and copies data from values.
 	/// \param values An initializer_list containing the values to store in the new tensor.
-	Tensor &operator=(const std::initializer_list<T> &values)
+	Tensor &operator=(const std::initializer_list<real_t> &values)
 	{
 		m_dims		= { values.size() };
 		m_strides	= { 1 };
@@ -298,7 +314,7 @@ public:
 		Tensor t(dims);
 		NNAssert(t.size() == size(), "Incompatible dimensions for reshaping!");
 		auto k = t.begin();
-		for(const T &value : *this)
+		for(const real_t &value : *this)
 		{
 			*k = value;
 			++k;
@@ -491,7 +507,7 @@ public:
 	{
 		NNAssert(size() == other.size(), "Incompatible tensor for copying!");
 		auto i = other.begin();
-		for(T &value : *this)
+		for(real_t &value : *this)
 		{
 			value = *i;
 			++i;
@@ -508,9 +524,9 @@ public:
 	{
 		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
 		auto i = other.begin();
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
-			T t = v;
+			real_t t = v;
 			v = *i;
 			*i = t;
 			++i;
@@ -528,9 +544,9 @@ public:
 	{
 		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
 		auto i = other.begin();
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
-			T t = v;
+			real_t t = v;
 			v = *i;
 			*i = t;
 			++i;
@@ -608,7 +624,7 @@ public:
 	// MARK: Element manipulation methods.
 	
 	/// Sets every element in this tensor to the given value.
-	Tensor &fill(const T &value)
+	Tensor &fill(const real_t &value)
 	{
 		std::fill(begin(), end(), value);
 		return *this;
@@ -631,11 +647,11 @@ public:
 	/// \param from The lowest value in the uniform distribution.
 	/// \param to The highest value in the uniform distribution.
 	/// \return This tensor, for chaining.
-	Tensor &rand(const T &from = -1, const T &to = 1)
+	Tensor &rand(const real_t &from = -1, const real_t &to = 1)
 	{
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
-			v = Random<T>::uniform(from, to);
+			v = Random<real_t>::uniform(from, to);
 		}
 		return *this;
 	}
@@ -645,11 +661,11 @@ public:
 	/// \param mean The mean of the normal distribution.
 	/// \param stddev The standard deviation of the normal distribution.
 	/// \return This tensor, for chaining.
-	Tensor &randn(const T &mean = 0, const T &stddev = 1)
+	Tensor &randn(const real_t &mean = 0, const real_t &stddev = 1)
 	{
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
-			v = Random<T>::normal(mean, stddev);
+			v = Random<real_t>::normal(mean, stddev);
 		}
 		return *this;
 	}
@@ -662,11 +678,11 @@ public:
 	/// \param stddev The standard deviation of the normal distribution.
 	/// \param cap The threshold value for the maximum allowed distance away from the mean.
 	/// \return This tensor, for chaining.
-	Tensor &randn(const T &mean, const T &stddev, const T &cap)
+	Tensor &randn(const real_t &mean, const real_t &stddev, const real_t &cap)
 	{
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
-			v = Random<T>::normal(mean, stddev, cap);
+			v = Random<real_t>::normal(mean, stddev, cap);
 		}
 		return *this;
 	}
@@ -675,9 +691,9 @@ public:
 	///
 	/// \param alpha The scalar.
 	/// \return This tensor, for chaining.
-	Tensor &scale(T alpha)
+	Tensor &scale(real_t alpha)
 	{
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
 			v *= alpha;
 		}
@@ -688,9 +704,9 @@ public:
 	///
 	/// \param alpha The scalar.
 	/// \return This tensor, for chaining.
-	Tensor &shift(T alpha)
+	Tensor &shift(real_t alpha)
 	{
-		for(T &v : *this)
+		for(real_t &v : *this)
 		{
 			v += alpha;
 		}
@@ -700,11 +716,11 @@ public:
 	// MARK: Algebra
 	
 	/// \todo document this method
-	Tensor &multiplyMM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMM(const Tensor &A, const Tensor &B, real_t alpha = 1, real_t beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMM(
+		Algebra<real_t>::multiplyMM(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -713,11 +729,11 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMTM(const Tensor &A, const Tensor &B, real_t alpha = 1, real_t beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMTM(
+		Algebra<real_t>::multiplyMTM(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -726,11 +742,11 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMMT(const Tensor &A, const Tensor &B, real_t alpha = 1, real_t beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMMT(
+		Algebra<real_t>::multiplyMMT(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -739,11 +755,11 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMTMT(const Tensor &A, const Tensor &B, real_t alpha = 1, real_t beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMTMT(
+		Algebra<real_t>::multiplyMTMT(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -752,11 +768,11 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
+	Tensor &multiplyMV(const Tensor &A, const Tensor &x, real_t alpha = 1, real_t beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Algebra<T>::multiplyMV(
+		Algebra<real_t>::multiplyMV(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.size(), x.stride(0),
 			ptr(), size(), stride(0),
@@ -765,11 +781,11 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
+	Tensor &multiplyMTV(const Tensor &A, const Tensor &x, real_t alpha = 1, real_t beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Algebra<T>::multiplyMTV(
+		Algebra<real_t>::multiplyMTV(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.size(), x.stride(0),
 			ptr(), size(), stride(0),
@@ -778,11 +794,11 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyVTV(const Tensor<T> &x, const Tensor<T> &y, T alpha = 1)
+	Tensor &multiplyVTV(const Tensor &x, const Tensor &y, real_t alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
 		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
-		Algebra<T>::multiplyVTV(
+		Algebra<real_t>::multiplyVTV(
 			x.ptr(), x.size(), x.stride(0),
 			y.ptr(), y.size(), y.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -791,10 +807,10 @@ public:
 		return *this;
 	}
 	
-	Tensor &addVV(const Tensor<T> &x, T alpha = 1)
+	Tensor &addVV(const Tensor &x, real_t alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
-		Algebra<T>::addVV(
+		Algebra<real_t>::addVV(
 			x.ptr(), x.size(), x.stride(0),
 			ptr(), size(), stride(0),
 			alpha
@@ -802,12 +818,12 @@ public:
 		return *this;
 	}
 	
-	Tensor &addMM(const Tensor<T> &A, T alpha = 1)
+	Tensor &addMM(const Tensor &A, real_t alpha = 1)
 	{
 		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
 		for(size_t i = 0, end = size(0); i < end; ++i)
 		{
-			Algebra<T>::addVV(
+			Algebra<real_t>::addVV(
 				A.ptr() + i * A.stride(0), A.size(1), A.stride(1),
 				ptr() + i * stride(0), size(1), stride(1),
 				alpha
@@ -817,13 +833,13 @@ public:
 	}
 	
 	/// Hadamard/elementwise/pointwise product.
-	Tensor &pointwiseProduct(const Tensor<T> &x)
+	Tensor &pointwiseProduct(const Tensor &x)
 	{
 		NNAssert(shape() == x.shape(), "Incompatible operands!");
 		auto i = x.begin();
-		for(T &el : *this)
+		for(real_t &v : *this)
 		{
-			el *= *i;
+			v *= *i;
 			++i;
 		}
 		return *this;
@@ -831,20 +847,20 @@ public:
 	
 	// MARK: Statistical methods
 	
-	T sum() const
+	real_t sum() const
 	{
-		T result = 0;
-		for(const T &v : *this)
+		real_t result = 0;
+		for(const real_t &v : *this)
 		{
 			result += v;
 		}
 		return result;
 	}
 	
-	T min() const
+	real_t min() const
 	{
-		T result = *begin();
-		for(const T &v : *this)
+		real_t result = *begin();
+		for(const real_t &v : *this)
 		{
 			if(v < result)
 			{
@@ -854,10 +870,10 @@ public:
 		return result;
 	}
 	
-	T max() const
+	real_t max() const
 	{
-		T result = *begin();
-		for(const T &v : *this)
+		real_t result = *begin();
+		for(const real_t &v : *this)
 		{
 			if(v > result)
 			{
@@ -867,85 +883,85 @@ public:
 		return result;
 	}
 	
-	Tensor &normalize(T from = 0.0, T to = 1.0)
+	Tensor &normalize(real_t from = 0.0, real_t to = 1.0)
 	{
 		NNAssert(to > from, "Invalid normalization range!");
-		T small = min(), large = max();
+		real_t small = min(), large = max();
 		return shift(-small).scale((to - from) / (large - small)).shift(from);
 	}
 	
 	// MARK: Element/data access methods.
 	
 	/// Element access given a multidimensional index.
-	T &operator()(const Storage<size_t> &indices)
+	real_t &operator()(const Storage<size_t> &indices)
 	{
 		return (*m_data)[indexOf(indices)];
 	}
 	
 	/// Element access given a multidimensional index.
-	const T &operator()(const Storage<size_t> &indices) const
+	const real_t &operator()(const Storage<size_t> &indices) const
 	{
 		return (*m_data)[indexOf(indices)];
 	}
 	
 	/// Element access given a multidimensional index.
 	template <typename ... Ts>
-	T &operator()(Ts... indices)
+	real_t &operator()(Ts... indices)
 	{
 		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
 	}
 	
 	/// Element access given a multidimensional index.
 	template <typename ... Ts>
-	const T &operator()(Ts... indices) const
+	const real_t &operator()(Ts... indices) const
 	{
 		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
 	}
 	
 	/// Direct raw pointer access.
-	T *ptr()
+	real_t *ptr()
 	{
 		return m_data->ptr() + m_offset;
 	}
 	
 	/// Direct raw pointer access.
-	const T *ptr() const
+	const real_t *ptr() const
 	{
 		return m_data->ptr() + m_offset;
 	}
 	
 	/// Direct storage access.
-	Storage<T> &storage()
+	Storage<real_t> &storage()
 	{
 		return *m_data;
 	}
 	
 	/// Direct storage access.
-	const Storage<T> &storage() const
+	const Storage<real_t> &storage() const
 	{
 		return *m_data;
 	}
 	
 	// MARK: Iterators
 	
-	TensorIterator<T> begin()
+	TensorIterator<real_t> begin()
 	{
-		return TensorIterator<T>(this);
+		return TensorIterator<real_t>(this);
 	}
 	
-	TensorIterator<T> end()
+	TensorIterator<real_t> end()
 	{
-		return TensorIterator<T>(this, true);
+		return TensorIterator<real_t>(this, true);
 	}
 	
-	TensorIterator<const T> begin() const
+	TensorIterator<const real_t> begin() const
 	{
-		return TensorIterator<const T>(this);
+		return TensorIterator<const real_t>(this);
 	}
 	
-	TensorIterator<const T> end() const
+	TensorIterator<const real_t> end() const
 	{
-		return TensorIterator<const T>(this, true);
+		return TensorIterator<const real_t>(this, true);
 	}
 	
 	// MARK: Serialization
@@ -957,7 +973,7 @@ public:
 	void save(Archive &out) const
 	{
 		out << m_dims;
-		for(const T &x : *this)
+		for(const real_t &x : *this)
 			out << x;
 	}
 	
@@ -968,7 +984,7 @@ public:
 	{
 		in >> m_dims;
 		resize(m_dims);
-		for(T &x : *this)
+		for(real_t &x : *this)
 			in >> x;
 	}
 	
@@ -976,8 +992,8 @@ private:
 	Storage<size_t> m_dims;					///< The length along each dimension.
 	Storage<size_t> m_strides;				///< Strides between dimensions.
 	size_t m_offset;						///< Offset of data for this view.
-	Storage<T> *m_data;						///< The actual data.
-	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
+	Storage<real_t> *m_data;						///< The actual data.
+	std::shared_ptr<Storage<real_t>> m_shared;	///< Wrapped around m_data for ARC.
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
 	size_t indexOf(const Storage<size_t> &indices) const
@@ -994,82 +1010,80 @@ private:
 };
 
 template <typename T>
-class TensorIterator : public std::iterator<std::forward_iterator_tag, T, T, const T *, T &>
+TensorIterator<T>::TensorIterator(const Tensor *tensor, bool end) :
+	m_tensor(const_cast<Tensor *>(tensor)),
+	m_indices(tensor->dims(), 0)
 {
-using TT = typename std::remove_const<T>::type;
-public:
-	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
-		m_tensor(const_cast<Tensor<TT> *>(tensor)),
-		m_indices(tensor->dims(), 0)
+	NNAssert(tensor->size() > 0, "Cannot iterate through an empty tensor!");
+	if(end)
 	{
-		NNAssert(tensor->size() > 0, "Cannot iterate through an empty tensor!");
-		if(end)
-		{
-			m_indices[0] = m_tensor->size(0);
-		}
+		m_indices[0] = m_tensor->size(0);
 	}
-	
-	TensorIterator &advance(size_t dim = (size_t) -1)
+}
+
+template <typename T>
+TensorIterator<T> &TensorIterator<T>::advance(size_t dim)
+{
+	dim = std::min(dim, m_tensor->dims());
+	--m_indices.back();
+	++m_indices[dim];
+	return ++*this;
+}
+
+template <typename T>
+TensorIterator<T> &TensorIterator<T>::operator++()
+{
+	size_t dim = m_indices.size() - 1;
+	++m_indices[dim];
+	while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
 	{
-		dim = std::min(dim, m_tensor->dims());
-		--m_indices.back();
+		m_indices[dim] = 0;
+		--dim;
 		++m_indices[dim];
-		return ++*this;
+	}
+	return *this;
+}
+
+template <typename T>
+TensorIterator<T> TensorIterator<T>::operator++(int)
+{
+	TensorIterator it = *this;
+	return ++it;
+}
+
+template <typename T>
+T &TensorIterator<T>::operator*()
+{
+	return (*m_tensor)(m_indices);
+}
+
+template <typename T>
+bool TensorIterator<T>::operator==(const TensorIterator &other)
+{
+	if(m_tensor != other.m_tensor)
+	{
+		return false;
 	}
 	
-	TensorIterator &operator++()
+	for(size_t i = 0, j = m_indices.size(); i < j; ++i)
 	{
-		size_t dim = m_indices.size() - 1;
-		++m_indices[dim];
-		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
-		{
-			m_indices[dim] = 0;
-			--dim;
-			++m_indices[dim];
-		}
-		return *this;
-	}
-	
-	TensorIterator operator++(int)
-	{
-		TensorIterator it = *this;
-		return ++it;
-	}
-	
-	T &operator*()
-	{
-		return (*m_tensor)(m_indices);
-	}
-	
-	bool operator==(const TensorIterator &other)
-	{
-		if(m_tensor != other.m_tensor)
+		if(m_indices[i] != other.m_indices[i])
 		{
 			return false;
 		}
-		
-		for(size_t i = 0, j = m_indices.size(); i < j; ++i)
-		{
-			if(m_indices[i] != other.m_indices[i])
-			{
-				return false;
-			}
-		}
-		
-		return true;
 	}
 	
-	bool operator !=(const TensorIterator &other)
-	{
-		return !(*this == other);
-	}
-private:
-	Tensor<TT> *m_tensor;
-	Storage<size_t> m_indices;
-};
+	return true;
+}
 
 template <typename T>
-std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
+bool TensorIterator<T>::operator!=(const TensorIterator &other)
+{
+	return !(*this == other);
+}
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const Tensor &t)
 {
 	out << std::left << std::setprecision(5) << std::fixed;
 	

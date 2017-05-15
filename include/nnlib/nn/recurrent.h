@@ -10,13 +10,12 @@ namespace nnlib
 {
 
 /// A simple recurrent module.
-template <typename T = double>
-class Recurrent : public Container<T>
+class Recurrent : public Container
 {
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	using Container<T>::batch;
+	using Container::inputs;
+	using Container::outputs;
+	using Container::batch;
 	
 	/// \brief A name for this module type.
 	///
@@ -28,36 +27,36 @@ public:
 	}
 	
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
-		m_inpMod(new Linear<T>(inps, outs, bats)),
-		m_memMod(new Linear<T>(outs, outs, bats)),
-		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, bats), new TanH<>())),
+		m_inpMod(new Linear(inps, outs, bats)),
+		m_memMod(new Linear(outs, outs, bats)),
+		m_outMod(new Sequential(new Linear(outs, outs, bats), new TanH<>())),
 		m_state(bats, outs),
 		m_statePrev(bats, outs),
 		m_stateGrad(bats, outs),
 		m_resetGrad(true)
 	{
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_memMod);
-		Container<T>::add(m_outMod);
+		Container::add(m_inpMod);
+		Container::add(m_memMod);
+		Container::add(m_outMod);
 		forget();
 	}
 	
 	Recurrent(size_t outs) :
-		m_inpMod(new Linear<T>(0, outs, 1)),
-		m_memMod(new Linear<T>(outs, outs, 1)),
-		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, 1), new TanH<>())),
+		m_inpMod(new Linear(0, outs, 1)),
+		m_memMod(new Linear(outs, outs, 1)),
+		m_outMod(new Sequential(new Linear(outs, outs, 1), new TanH<>())),
 		m_state(1, outs),
 		m_statePrev(1, outs),
 		m_stateGrad(1, outs),
 		m_resetGrad(true)
 	{
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_memMod);
-		Container<T>::add(m_outMod);
+		Container::add(m_inpMod);
+		Container::add(m_memMod);
+		Container::add(m_outMod);
 		forget();
 	}
 	
-	Recurrent(Module<T> *inpMod, Module<T> *memMod, Module<T> *outMod) :
+	Recurrent(Module *inpMod, Module *memMod, Module *outMod) :
 		m_inpMod(inpMod),
 		m_memMod(memMod),
 		m_outMod(outMod),
@@ -69,9 +68,9 @@ public:
 		NNAssert(m_inpMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
 		NNAssert(m_memMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
 		NNAssert(m_outMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_memMod);
-		Container<T>::add(m_outMod);
+		Container::add(m_inpMod);
+		Container::add(m_memMod);
+		Container::add(m_outMod);
 		forget();
 	}
 	
@@ -85,7 +84,7 @@ public:
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
-	virtual Recurrent &add(Module<T> *component) override
+	virtual Recurrent &add(Module *component) override
 	{
 		throw std::runtime_error("Cannot add components to a recurrent module!");
 	}
@@ -93,7 +92,7 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
 		m_resetGrad = true;
 		
@@ -106,7 +105,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		if(m_resetGrad)
 		{
@@ -121,13 +120,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_outMod->output();
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inpMod->inGrad();
 	}
@@ -153,7 +152,7 @@ public:
 	/// Set the batch size of this module.
 	virtual Recurrent &batch(size_t bats) override
 	{
-		Container<T>::batch(bats);
+		Container::batch(bats);
 		m_state.resizeDim(0, bats);
 		m_statePrev.resizeDim(0, bats);
 		m_stateGrad.resizeDim(0, bats);
@@ -162,21 +161,21 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
-	virtual Storage<Tensor<T> *> stateList() override
+	virtual Storage<Tensor *> stateList() override
 	{
-		Storage<Tensor<T> *> states = Container<T>::stateList();
+		Storage<Tensor *> states = Container::stateList();
 		states.push_back(&m_state);
 		states.push_back(&m_statePrev);
 		return states;
 	}
 private:
-	Module<T> *m_inpMod;
-	Module<T> *m_memMod;
-	Module<T> *m_outMod;
+	Module *m_inpMod;
+	Module *m_memMod;
+	Module *m_outMod;
 	
-	Tensor<T> m_state;
-	Tensor<T> m_statePrev;
-	Tensor<T> m_stateGrad;
+	Tensor m_state;
+	Tensor m_statePrev;
+	Tensor m_stateGrad;
 	
 	bool m_resetGrad;
 };

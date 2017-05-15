@@ -7,13 +7,12 @@ namespace nnlib
 {
 
 /// A standard feed-forward layer that returns a linear combination of inputs.
-template <typename T = double>
-class Linear : public Module<T>
+class Linear : public Module
 {
 public:
-	using Module<T>::inputs;
-	using Module<T>::outputs;
-	using Module<T>::batch;
+	using Module::inputs;
+	using Module::outputs;
+	using Module::batch;
 	
 	/// \brief A name for this module type.
 	///
@@ -61,13 +60,13 @@ public:
 	}
 	
 	/// Get the weights of this module.
-	Tensor<T> &weights()
+	Tensor &weights()
 	{
 		return m_weights;
 	}
 	
 	/// Get the bias of this module.
-	Tensor<T> &bias()
+	Tensor &bias()
 	{
 		return m_bias;
 	}
@@ -75,7 +74,7 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
 		
@@ -89,7 +88,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
 		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
@@ -107,13 +106,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_output;
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inGrad;
 	}
@@ -122,7 +121,7 @@ public:
 	virtual Linear &inputs(const Storage<size_t> &dims) override
 	{
 		NNAssert(dims.size() == 2, "Linear only works with matrix inputs!");
-		Module<T>::inputs(dims);
+		Module::inputs(dims);
 		m_weights.resize(m_inGrad.size(1), m_output.size(1));
 		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
 		return reset();
@@ -132,7 +131,7 @@ public:
 	virtual Linear &outputs(const Storage<size_t> &dims) override
 	{
 		NNAssert(dims.size() == 2, "Linear only works with matrix outputs!");
-		Module<T>::outputs(dims);
+		Module::outputs(dims);
 		m_weights.resize(m_inGrad.size(1), m_output.size(1));
 		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
 		m_bias.resize(m_output.size(1));
@@ -143,19 +142,19 @@ public:
 	/// Set the batch size of this module.
 	virtual Linear &batch(size_t bats) override
 	{
-		Module<T>::batch(bats);
+		Module::batch(bats);
 		m_addBuffer.resize(bats);
 		return *this;
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
-	virtual Storage<Tensor<T> *> parameterList() override
+	virtual Storage<Tensor *> parameterList() override
 	{
 		return { &m_weights, &m_bias };
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters' gradient.
-	virtual Storage<Tensor<T> *> gradList() override
+	virtual Storage<Tensor *> gradList() override
 	{
 		return { &m_weightsGrad, &m_biasGrad };
 	}
@@ -184,23 +183,23 @@ public:
 		in >> m_weights >> m_bias >> bats;
 		NNAssert(m_weights.dims() == 2 && m_bias.dims() == 1, "Unexpected tensor for Linear!");
 		
-		Module<T>::inputs({ bats, m_weights.size(0) });
-		Module<T>::outputs({ bats, m_weights.size(1) });
+		Module::inputs({ bats, m_weights.size(0) });
+		Module::outputs({ bats, m_weights.size(1) });
 		m_weightsGrad.resize(m_weights.shape());
 		m_biasGrad.resize(m_bias.shape());
 	}
 	
 private:
-	Tensor<T> m_weights;		///< Module weights.
-	Tensor<T> m_weightsGrad;	///< Gradient of the error w.r.t. the weights.
+	Tensor m_weights;		///< Module weights.
+	Tensor m_weightsGrad;	///< Gradient of the error w.r.t. the weights.
 	
-	Tensor<T> m_bias;			///< Network bias.
-	Tensor<T> m_biasGrad;		///< Gradient of the error w.r.t. the bias.
+	Tensor m_bias;			///< Network bias.
+	Tensor m_biasGrad;		///< Gradient of the error w.r.t. the bias.
 	
-	Tensor<T> m_inGrad;			///< Input gradient buffer.
-	Tensor<T> m_output;			///< Output buffer.
+	Tensor m_inGrad;			///< Input gradient buffer.
+	Tensor m_output;			///< Output buffer.
 	
-	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.
+	Tensor m_addBuffer;		///< A vector of 1s for outer-producting bias.
 };
 
 }

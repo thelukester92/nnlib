@@ -7,8 +7,7 @@ namespace nnlib
 {
 
 /// The abtract base class for neural network modules that are made up of sub-modules.
-template <typename T = double>
-class Container : public Module<T>
+class Container : public Module
 {
 public:
 	/// \brief A name for this module type.
@@ -22,14 +21,14 @@ public:
 	
 	virtual ~Container()
 	{
-		for(Module<T> *comp : m_components)
+		for(Module *comp : m_components)
 		{
 			delete comp;
 		}
 	}
 	
 	/// Get a specific component from this container.
-	Module<T> *component(size_t index)
+	Module *component(size_t index)
 	{
 		return m_components[index];
 	}
@@ -42,7 +41,7 @@ public:
 	
 	/// Add multiple components to this container.
 	template <typename ... Ms>
-	Container &add(Module<T> *component, Ms *...more)
+	Container &add(Module *component, Ms *...more)
 	{
 		add(component);
 		add(more...);
@@ -50,16 +49,16 @@ public:
 	}
 	
 	/// Add a component to this container.
-	virtual Container &add(Module<T> *component)
+	virtual Container &add(Module *component)
 	{
 		m_components.push_back(component);
 		return *this;
 	}
 	
 	/// Remove and return a specific component from this container.
-	virtual Module<T> *remove(size_t index)
+	virtual Module *remove(size_t index)
 	{
-		Module<T> *comp = m_components[index];
+		Module *comp = m_components[index];
 		m_components.erase(index);
 		return comp;
 	}
@@ -67,7 +66,7 @@ public:
 	/// Set the batch size of this module.
 	virtual Container &batch(size_t bats) override
 	{
-		for(Module<T> *component : m_components)
+		for(Module *component : m_components)
 		{
 			component->batch(bats);
 		}
@@ -75,12 +74,12 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters.
-	virtual Storage<Tensor<T> *> parameterList() override
+	virtual Storage<Tensor *> parameterList() override
 	{
-		Storage<Tensor<T> *> params;
-		for(Module<T> *comp : m_components)
+		Storage<Tensor *> params;
+		for(Module *comp : m_components)
 		{
-			for(Tensor<T> *param : comp->parameterList())
+			for(Tensor *param : comp->parameterList())
 			{
 				params.push_back(param);
 			}
@@ -89,12 +88,12 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters' gradient.
-	virtual Storage<Tensor<T> *> gradList() override
+	virtual Storage<Tensor *> gradList() override
 	{
-		Storage<Tensor<T> *> blams;
-		for(Module<T> *comp : m_components)
+		Storage<Tensor *> blams;
+		for(Module *comp : m_components)
 		{
-			for(Tensor<T> *blam : comp->gradList())
+			for(Tensor *blam : comp->gradList())
 			{
 				blams.push_back(blam);
 			}
@@ -103,12 +102,12 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's internal state.
-	virtual Storage<Tensor<T> *> stateList() override
+	virtual Storage<Tensor *> stateList() override
 	{
-		Storage<Tensor<T> *> states;
-		for(Module<T> *comp : m_components)
+		Storage<Tensor *> states;
+		for(Module *comp : m_components)
 		{
-			for(Tensor<T> *state : comp->stateList())
+			for(Tensor *state : comp->stateList())
 			{
 				states.push_back(state);
 			}
@@ -116,7 +115,7 @@ public:
 		return states;
 	}
 protected:
-	Storage<Module<T> *> m_components;
+	Storage<Module *> m_components;
 };
 
 }

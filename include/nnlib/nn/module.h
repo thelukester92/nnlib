@@ -7,7 +7,6 @@ namespace nnlib
 {
 
 /// The abtract base class for all neural network modules.
-template <typename T = double>
 class Module
 {
 public:
@@ -23,22 +22,22 @@ public:
 	virtual ~Module() {}
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
+	virtual Tensor &forward(const Tensor &input) = 0;
 	
 	/// Forward propagate input, returning output.
 	/// Automatically resize to fit, if possible, without changing weights.
-	virtual Tensor<T> &safeForward(const Tensor<T> &input)
+	virtual Tensor &safeForward(const Tensor &input)
 	{
 		safeInputs(input.shape());
 		return forward(input);
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) = 0;
 	
 	/// Backward propagate input and output gradient, returning input gradient.
 	/// Automatically resize to fit, if possible, without changing weights.
-	virtual Tensor<T> &safeBackward(const Tensor<T> &input, const Tensor<T> &outGrad)
+	virtual Tensor &safeBackward(const Tensor &input, const Tensor &outGrad)
 	{
 		safeInputs(input.shape());
 		safeOutputs(outGrad.shape());
@@ -46,10 +45,10 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() = 0;
+	virtual Tensor &output() = 0;
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() = 0;
+	virtual Tensor &inGrad() = 0;
 	
 	/// Set the input and output shapes of this module.
 	virtual Module &resize(const Storage<size_t> &inps, const Storage<size_t> &outs)
@@ -68,7 +67,7 @@ public:
 	/// Get the input shape of this module, including batch.
 	virtual const Storage<size_t> &inputs() const
 	{
-		return const_cast<Module<T> *>(this)->inGrad().shape();
+		return const_cast<Module *>(this)->inGrad().shape();
 	}
 	
 	/// Set the input shape of this module, including batch.
@@ -93,7 +92,7 @@ public:
 	/// Get the output shape of this module, including batch.
 	virtual const Storage<size_t> &outputs() const
 	{
-		return const_cast<Module<T> *>(this)->output().shape();
+		return const_cast<Module *>(this)->output().shape();
 	}
 	
 	/// Set the output shape of this module, including batch.
@@ -119,7 +118,7 @@ public:
 	/// By default, this returns the first dimension of the input shape.
 	virtual size_t batch() const
 	{
-		return const_cast<Module<T> *>(this)->inGrad().size(0);
+		return const_cast<Module *>(this)->inGrad().size(0);
 	}
 	
 	/// Set the batch size of this module.
@@ -132,43 +131,43 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
-	virtual Storage<Tensor<T> *> parameterList()
+	virtual Storage<Tensor *> parameterList()
 	{
 		return {};
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters' gradient.
-	virtual Storage<Tensor<T> *> gradList()
+	virtual Storage<Tensor *> gradList()
 	{
 		return {};
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
 	/// By default, this is only the calculated output.
-	virtual Storage<Tensor<T> *> stateList()
+	virtual Storage<Tensor *> stateList()
 	{
 		return { &output() };
 	}
 	
 	/// A flattened tensor of all of this module's parameters.
 	/// \todo Don't recalculate each time; can this be cached?
-	Tensor<T> &parameters()
+	Tensor &parameters()
 	{
-		return m_flatParameters = Tensor<T>::flatten(parameterList());
+		return m_flatParameters = Tensor::flatten(parameterList());
 	}
 	
 	/// A flattened tensor of all of this module's parameters' gradients.
 	/// \todo Don't recalculate each time; can this be cached?
-	Tensor<T> &grad()
+	Tensor &grad()
 	{
-		return m_flatGrad = Tensor<T>::flatten(gradList());
+		return m_flatGrad = Tensor::flatten(gradList());
 	}
 	
 	/// A flattened tensor of all of this module's internal states.
 	/// \todo Don't recalculate each time; can this be cached?
-	Tensor<T> &state()
+	Tensor &state()
 	{
-		return m_flatState = Tensor<T>::flatten(stateList());
+		return m_flatState = Tensor::flatten(stateList());
 	}
 	
 	// MARK: Serialization
@@ -193,9 +192,9 @@ public:
 	}
 	
 protected:
-	Tensor<T> m_flatParameters;
-	Tensor<T> m_flatGrad;
-	Tensor<T> m_flatState;
+	Tensor m_flatParameters;
+	Tensor m_flatGrad;
+	Tensor m_flatState;
 };
 
 }

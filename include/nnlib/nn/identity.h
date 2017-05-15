@@ -9,13 +9,12 @@ namespace nnlib
 
 /// Identity activation function.
 /// Useful in a concat module.
-template <typename T = double>
-class Identity : public Map<T>
+class Identity : public Map
 {
 public:
-	using Map<T>::Map;
-	using Map<T>::forward;
-	using Map<T>::backward;
+	using Map::Map;
+	using Map::forward;
+	using Map::backward;
 	
 	/// \brief A name for this module type.
 	///

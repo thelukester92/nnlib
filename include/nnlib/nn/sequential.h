@@ -7,15 +7,14 @@ namespace nnlib
 {
 
 /// A standard feed-forward neural network module.
-template <typename T = double>
-class Sequential : public Container<T>
+class Sequential : public Container
 {
-using Container<T>::components;
-using Container<T>::m_components;
+using Container::components;
+using Container::m_components;
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	using Container<T>::batch;
+	using Container::inputs;
+	using Container::outputs;
+	using Container::batch;
 	
 	/// \brief A name for this module type.
 	///
@@ -29,14 +28,14 @@ public:
 	Sequential() {}
 	
 	template <typename ... Ms>
-	Sequential(Module<T> *component, Ms *...components)
+	Sequential(Module *component, Ms *...components)
 	{
 		add(component, components...);
 	}
 	
 	/// Add multiple components.
 	template <typename ... Ms>
-	Sequential &add(Module<T> *component, Ms *...more)
+	Sequential &add(Module *component, Ms *...more)
 	{
 		add(component);
 		add(more...);
@@ -46,7 +45,7 @@ public:
 	// MARK: Container methods
 	
 	/// Add a component to this container, enforcing compatibility.
-	virtual Sequential &add(Module<T> *component) override
+	virtual Sequential &add(Module *component) override
 	{
 		m_components.push_back(component);
 		if(components() > 1)
@@ -57,9 +56,9 @@ public:
 	}
 	
 	/// Remove and return a specific component from this container, enforcing compatibility.
-	virtual Module<T> *remove(size_t index) override
+	virtual Module *remove(size_t index) override
 	{
-		Module<T> *comp = m_components[index];
+		Module *comp = m_components[index];
 		m_components.erase(index);
 		
 		if(index > 0)
@@ -74,10 +73,10 @@ public:
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
-		Tensor<T> *inp = const_cast<Tensor<T> *>(&input);
-		for(Module<T> *component : m_components)
+		Tensor *inp = const_cast<Tensor *>(&input);
+		for(Module *component : m_components)
 		{
 			inp = &component->forward(*inp);
 		}
@@ -85,9 +84,9 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
-		const Tensor<T> *grad = &outGrad;
+		const Tensor *grad = &outGrad;
 		for(size_t i = components() - 1; i > 0; --i)
 		{
 			grad = &m_components[i]->backward(m_components[i - 1]->output(), *grad);
@@ -96,13 +95,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_components.back()->output();
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_components.front()->inGrad();
 	}

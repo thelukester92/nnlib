@@ -8,13 +8,12 @@ namespace nnlib
 {
 
 /// Sigmoidal logistic activation function.
-template <typename T = double>
-class Logistic : public Map<T>
+class Logistic : public Map
 {
 public:
-	using Map<T>::Map;
-	using Map<T>::forward;
-	using Map<T>::backward;
+	using Map::Map;
+	using Map::forward;
+	using Map::backward;
 	
 	/// \brief A name for this module type.
 	///

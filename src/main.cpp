@@ -262,7 +262,7 @@ void testNeuralNet()
 {
 	// MARK: Linear Test
 	
-	Linear<double> perceptron(3, 2);
+	Linear perceptron(3, 2);
 	Tensor<double> &weights = perceptron.weights();
 	
 	Tensor<double> inp = { 1.0, 2.0, 3.14 };
@@ -354,14 +354,14 @@ void testNeuralNet()
 	RandomEngine::seed(0);
 	
 	Sequential<> trainNet(
-		new Linear<>(5, 10), new TanH<>(),
-		new Linear<>(3), new TanH<>(),
+		new Linear(5, 10), new TanH<>(),
+		new Linear(3), new TanH<>(),
 		new LogSoftMax<>()
 	);
 	
 	Sequential<> targetNet(
-		new Linear<>(5, 10), new TanH<>(),
-		new Linear<>(3), new TanH<>(),
+		new Linear(5, 10), new TanH<>(),
+		new Linear(3), new TanH<>(),
 		new LogSoftMax<>()
 	);
 	
@@ -392,8 +392,8 @@ void testNeuralNet()
 	
 	// MARK: Concat test
 	
-	Linear<> *comp1 = new Linear<>(10, 5);
-	Sequential<> *comp2 = new Sequential<>(new Linear<>(10, 10), new TanH<>(), new Linear<>(10, 25), new TanH<>());
+	Linear *comp1 = new Linear(10, 5);
+	Sequential<> *comp2 = new Sequential<>(new Linear(10, 10), new TanH<>(), new Linear(10, 25), new TanH<>());
 	TanH<> *comp3 = new TanH<>(10);
 	
 	Tensor<double> inMat = Tensor<double>(10).rand().resize(1, 10);
@@ -422,11 +422,11 @@ void testNeuralNet()
 	
 	// MARK: Serialization test
 	
-	Archive::registerName<Linear<>>(Linear<>::type());
+	Archive::registerName<Linear>(Linear::type());
 	
 	// linear
 	{
-		Linear<> test(4, 3);
+		Linear test(4, 3);
 		Archive out = Archive::toString();
 		out << test;
 		

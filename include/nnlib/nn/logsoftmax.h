@@ -7,12 +7,11 @@ namespace nnlib
 {
 
 /// Log soft max module for classification problems.
-template <typename T = double>
-class LogSoftMax : public Module<T>
+class LogSoftMax : public Module
 {
 public:
-	using Module<T>::inputs;
-	using Module<T>::outputs;
+	using Module::inputs;
+	using Module::outputs;
 	
 	/// \brief A name for this module type.
 	///
@@ -24,7 +23,7 @@ public:
 	}
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual Tensor &forward(const Tensor &input) override
 	{
 		NNAssert(input.dims() == 2, "LogSoftMax expects Matrix input!");
 		
@@ -46,7 +45,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor &backward(const Tensor &input, const Tensor &outGrad) override
 	{
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
 		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
@@ -64,13 +63,13 @@ public:
 	}
 	
 	/// Cached output.
-	virtual Tensor<T> &output() override
+	virtual Tensor &output() override
 	{
 		return m_output;
 	}
 	
 	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Tensor &inGrad() override
 	{
 		return m_inGrad;
 	}
@@ -79,8 +78,8 @@ public:
 	/// In LogSoftMax, input shape is always equal to output shape.
 	virtual LogSoftMax &inputs(const Storage<size_t> &dims) override
 	{
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
+		Module::inputs(dims);
+		Module::outputs(dims);
 		return *this;
 	}
 	
@@ -88,14 +87,14 @@ public:
 	/// In LogSoftMax, input shape is always equal to output shape.
 	virtual LogSoftMax &outputs(const Storage<size_t> &dims) override
 	{
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
+		Module::inputs(dims);
+		Module::outputs(dims);
 		return *this;
 	}
 	
 private:
-	Tensor<T> m_inGrad;	///< Input gradient buffer.
-	Tensor<T> m_output;	///< Output buffer.
+	Tensor m_inGrad;	///< Input gradient buffer.
+	Tensor m_output;	///< Output buffer.
 };
 
 }
