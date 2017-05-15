@@ -18,6 +18,15 @@ public:
 	using Container<T>::outputs;
 	using Container<T>::batch;
 	
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "recurrent";
+	}
+	
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
 		m_inpMod(new Linear<T>(inps, outs, bats)),
 		m_memMod(new Linear<T>(outs, outs, bats)),

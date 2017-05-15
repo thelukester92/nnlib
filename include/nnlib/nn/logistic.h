@@ -16,6 +16,15 @@ public:
 	using Map<T>::forward;
 	using Map<T>::backward;
 	
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "logistic";
+	}
+	
 	/// Single element forward.
 	virtual T forward(const T &x) override
 	{

@@ -11,6 +11,15 @@ template <typename T = double>
 class Module
 {
 public:
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "module";
+	}
+	
 	virtual ~Module() {}
 	
 	/// Forward propagate input, returning output.
@@ -142,21 +151,45 @@ public:
 	}
 	
 	/// A flattened tensor of all of this module's parameters.
+	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &parameters()
 	{
 		return m_flatParameters = Tensor<T>::flatten(parameterList());
 	}
 	
 	/// A flattened tensor of all of this module's parameters' gradients.
+	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &grad()
 	{
 		return m_flatGrad = Tensor<T>::flatten(gradList());
 	}
 	
 	/// A flattened tensor of all of this module's internal states.
+	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &state()
 	{
 		return m_flatState = Tensor<T>::flatten(stateList());
+	}
+	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// The archive takes care of whitespace for plaintext.
+	/// By default, modules are not serializable.
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const
+	{
+		throw std::runtime_error("This type is not serializable!");
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// By default, modules are not serializable.
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in)
+	{
+		throw std::runtime_error("This type is not serializable!");
 	}
 	
 protected:

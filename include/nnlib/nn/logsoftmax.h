@@ -14,6 +14,15 @@ public:
 	using Module<T>::inputs;
 	using Module<T>::outputs;
 	
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "logsoftmax";
+	}
+	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{

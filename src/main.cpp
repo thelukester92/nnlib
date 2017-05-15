@@ -246,6 +246,18 @@ void testAlgebra()
 	NNAssert(problem, "Non-contiguous matrix multiplcation failed to raise an error!");
 }
 
+bool roughlyEqual(Module<> &a, Module<> &b)
+{
+	Tensor<> &flatA = a.parameters();
+	Tensor<> &flatB = b.parameters();
+	
+	if(flatA.size() != flatB.size())
+		return false;
+	
+	Storage<size_t> shape = { flatA.size(), 1 };
+	return MSE<>(shape, false).forward(flatA.view(shape), flatB.view(shape)) < 1e-9;
+}
+
 void testNeuralNet()
 {
 	// MARK: Linear Test
@@ -407,6 +419,45 @@ void testNeuralNet()
 	concat.backward(inMat, blam);
 	
 	NNHardAssert(MSE<>(inMat.shape()).forward(inGrad2, concat.inGrad()) < 1e-9, "Concat::backward failed!");
+	
+	// MARK: Serialization test
+	
+	Archive::registerName<Linear<>>(Linear<>::type());
+	
+	// linear
+	{
+		Linear<> test(4, 3);
+		Archive out = Archive::toString();
+		out << test;
+		
+		Archive in = Archive::fromString(out.str());
+		Module<> *test2 = in.read<Module<>>();
+		
+		NNHardAssert(test2 != nullptr, "Archive::read failed to read a generic type!");
+		NNHardAssert(roughlyEqual(test, *test2), "Linear::save and/or Linear::load failed!");
+	}
+	
+	/*
+	Archive out = Archive::toString();
+	out << trainNet;
+	
+	Sequential<> deserialized;
+	Archive in = Archive::fromString(out.str());
+	in >> deserialized;
+	
+	NNHardAssert(trainNet.components() == deserialized.components(), "Sequential::save and/or Sequential::load failed! Number of components does not match!");
+	for(size_t i = 0; i < trainNet.components(); ++i)
+	{
+		NNHardAssert(trainNet.component(i).inputs() == deserialized.component(i).inputs(), "Sequential::save and/or Sequential::load failed! Component " + std::to_string(i) << " had differing input shapes!");
+		NNHardAssert(trainNet.component(i).outputs() == deserialized.component(i).outputs(), "Sequential::save and/or Sequential::load failed! Component " + std::to_string(i) << " had differing output shapes!");
+	}
+	
+	Tensor<> flatActual = Tensor<>::flatten(trainNet.parameters());
+	Tensor<> flatDeserial = Tensor<>::flatten(deserialized.parameters());
+	
+	NNHardAssert(flatActual.size() == flatDeserial.size(), "Sequential::save and/or Sequential::load failed! Unexpected flattened parameter size!");
+	NNHardAssert(MSE<>(flatActual.shape(), false).forward(flatActual, flatDeserial) < 1e-9, "Sequential::save and/or Sequential::load failed! Values were not close enough!");
+	*/
 }
 
 Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)

@@ -950,6 +950,10 @@ public:
 	
 	// MARK: Serialization
 	
+	/// \brief Write to an archive.
+	///
+	/// The archive takes care of whitespace for plaintext.
+	/// \param out The archive to which to write.
 	void save(Archive &out) const
 	{
 		out << m_dims;
@@ -957,6 +961,9 @@ public:
 			out << x;
 	}
 	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
 	void load(Archive &in)
 	{
 		in >> m_dims;
@@ -995,6 +1002,7 @@ public:
 		m_tensor(const_cast<Tensor<TT> *>(tensor)),
 		m_indices(tensor->dims(), 0)
 	{
+		NNAssert(tensor->size() > 0, "Cannot iterate through an empty tensor!");
 		if(end)
 		{
 			m_indices[0] = m_tensor->size(0);

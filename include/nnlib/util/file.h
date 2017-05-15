@@ -61,6 +61,7 @@ private:
 	Storage<std::unordered_map<std::string, size_t>> m_attrVals;
 };
 
+/// \todo Somehow merge with archive?
 template <typename T = double>
 class File
 {

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 #include <type_traits>
+#include <unordered_map>
+#include <functional>
 
 namespace nnlib
 {
@@ -16,6 +18,14 @@ namespace nnlib
 class Archive
 {
 public:
+	/// Register a constructor for generic deserialization.
+	template <typename T>
+	static void registerName(std::string name)
+	{
+		NNAssert(m_constructors.find(name) == m_constructors.end(), "Cannot register the same name twice!");
+		m_constructors.emplace(name, [](){ return reinterpret_cast<void *>(new T()); });
+	}
+	
 	/// \brief Create an archive that reads from a file.
 	///
 	/// \param filename The file to read from.
@@ -104,15 +114,29 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write a class object.
+	/// \brief Write a non-string object.
 	///
 	/// \param x The object to write.
 	/// \return This archive, for chaining.
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, Archive>::type &operator<<(const T &x)
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value, Archive>
+		::type &operator<<(const T &x)
 	{
 		NNAssert(m_out != nullptr, "Archive has no output stream!");
 		x.save(*this);
+		return *this;
+	}
+	
+	/// \brief Write a string object.
+	///
+	/// \param x The string to write.
+	/// \return This archive, for chaining.
+	Archive &operator<<(const std::string &x)
+	{
+		NNAssert(m_out != nullptr, "Archive has no output stream!");
+		*this << x.length();
+		for(size_t i = 0, len = x.length(); i < len; ++i)
+			*this << x[i];
 		return *this;
 	}
 	
@@ -129,17 +153,61 @@ public:
 		return *this;
 	}
 	
-	/// \brief Read in a class object.
+	/// \brief Read in a non-string object.
 	///
 	/// \param x The object to read into.
 	/// \return This archive, for chaining.
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value, Archive>::type &operator>>(T &x)
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value, Archive>
+		::type &operator>>(T &x)
 	{
 		NNAssert(m_in != nullptr, "Archive has no input stream!");
 		x.load(*this);
 		NNAssert(!m_in->fail(), "Archive failed to read primative type!");
 		return *this;
+	}
+	
+	/// \brief Read in a string object.
+	///
+	/// \param x The string to read into.
+	/// \return This archive, for chaining.
+	Archive &operator>>(std::string &x)
+	{
+		NNAssert(m_in != nullptr, "Archive has no output stream!");
+		size_t len;
+		*this >> len;
+		x.resize(len);
+		for(size_t i = 0; i < len; ++i)
+			*this >> x[i];
+		return *this;
+	}
+	
+	/// \brief Read in a generic object.
+	///
+	/// \return A dynamically allocated object if a matching type constructor was found; null otherwise.
+	template <typename T>
+	T *read()
+	{
+		NNAssert(m_in != nullptr, "Archive has no input stream!");
+		std::string type;
+		
+		auto pos = m_in->tellg();
+		*this >> type;
+		m_in->seekg(pos);
+		
+		T *ptr = nullptr;
+		for(const auto &i : m_constructors)
+		{
+			if(type == i.first)
+			{
+				ptr = reinterpret_cast<T *>(i.second());
+				*this >> *ptr;
+				break;
+			}
+		}
+		
+		NNAssert(!m_in->fail(), "Archive failed while reading a generic object!");
+		return ptr;
 	}
 	
 	/// \brief Get the serialized string, if using an ostringstream.
@@ -154,16 +222,22 @@ public:
 	}
 	
 private:
+	/// Versioning number for backwards compatibility.
 	static size_t serializationVersion()
 	{
 		return 0;
 	}
 	
-	std::istream *m_in;
-	std::ostream *m_out;
-	bool m_binary;
-	bool m_ownsStreams;
+	std::istream *m_in;		///< The input stream or null.
+	std::ostream *m_out;	///< The output stream or null.
+	bool m_binary;			///< Whether the streams are in binary mode.
+	bool m_ownsStreams;		///< Whether this archive should delete the streams.
+	
+	/// A table of constructors for generic deserialization.
+	static std::unordered_map<std::string, std::function<void *()>> m_constructors;
 };
+
+std::unordered_map<std::string, std::function<void *()>> Archive::m_constructors;
 
 }
 

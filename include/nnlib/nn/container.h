@@ -11,6 +11,15 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "container";
+	}
+	
 	virtual ~Container()
 	{
 		for(Module<T> *comp : m_components)

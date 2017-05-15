@@ -19,6 +19,15 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "sequencer";
+	}
+	
 	Sequencer(Module<T> *module, size_t sequenceLength = 1) :
 		m_module(module),
 		m_state(module->state()),

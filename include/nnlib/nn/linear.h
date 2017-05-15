@@ -15,6 +15,15 @@ public:
 	using Module<T>::outputs;
 	using Module<T>::batch;
 	
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "linear";
+	}
+	
 	/// Standard inps -> outs layer.
 	Linear(size_t inps, size_t outs, size_t bats = 1) :
 		m_weights(inps, outs),
@@ -29,7 +38,7 @@ public:
 	}
 	
 	/// any -> outs layer; adding to a sequential will set input size.
-	Linear(size_t outs) :
+	Linear(size_t outs = 0) :
 		m_weights(0, outs),
 		m_weightsGrad(0, outs),
 		m_bias(outs),
@@ -42,9 +51,12 @@ public:
 	/// Set weights to uniformly distributed random values.
 	Linear &reset()
 	{
-		T range = 1.0 / sqrt(m_weights.size(1));
-		m_weights.rand(-range, range);
-		m_bias.rand(-range, range);
+		if(m_weights.size() > 0)
+		{
+			T range = 1.0 / sqrt(m_weights.size(1));
+			m_weights.rand(-range, range);
+			m_bias.rand(-range, range);
+		}
 		return *this;
 	}
 	
@@ -113,8 +125,6 @@ public:
 		Module<T>::inputs(dims);
 		m_weights.resize(m_inGrad.size(1), m_output.size(1));
 		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
-		m_bias.resize(m_output.size(1));
-		m_biasGrad.resize(m_output.size(1));
 		return reset();
 	}
 	
@@ -124,6 +134,9 @@ public:
 		NNAssert(dims.size() == 2, "Linear only works with matrix outputs!");
 		Module<T>::outputs(dims);
 		m_weights.resize(m_inGrad.size(1), m_output.size(1));
+		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
+		m_bias.resize(m_output.size(1));
+		m_biasGrad.resize(m_output.size(1));
 		return reset();
 	}
 	
@@ -145,6 +158,36 @@ public:
 	virtual Storage<Tensor<T> *> gradList() override
 	{
 		return { &m_weightsGrad, &m_biasGrad };
+	}
+	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// The archive takes care of whitespace for plaintext.
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << type() << m_weights << m_bias << batch();
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(str == type(), "Unexpected type! Expected '" + type() + "', got '" + str + "'!");
+		
+		size_t bats;
+		in >> m_weights >> m_bias >> bats;
+		NNAssert(m_weights.dims() == 2 && m_bias.dims() == 1, "Unexpected tensor for Linear!");
+		
+		Module<T>::inputs({ bats, m_weights.size(0) });
+		Module<T>::outputs({ bats, m_weights.size(1) });
+		m_weightsGrad.resize(m_weights.shape());
+		m_biasGrad.resize(m_bias.shape());
 	}
 	
 private:

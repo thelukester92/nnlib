@@ -17,6 +17,15 @@ public:
 	using Container<T>::outputs;
 	using Container<T>::batch;
 	
+	/// \brief A name for this module type.
+	///
+	/// This may be used for debugging, serialization, etc.
+	/// The type should NOT include whitespace.
+	static std::string type()
+	{
+		return "concat";
+	}
+	
 	Concat() {}
 	
 	template <typename ... Ms>
