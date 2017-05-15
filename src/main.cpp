@@ -121,13 +121,11 @@ void testTensor()
 		}
 	}
 	
-	ostringstream fout;
-	Archive out(nullptr, &fout);
+	Archive out = Archive::toString();
 	out << alsoTransposed;
 	
 	Tensor<> deserialized;
-	istringstream fin(fout.str());
-	Archive in(&fin, nullptr);
+	Archive in = Archive::fromString(out.str());
 	in >> deserialized;
 	
 	NNHardAssert(alsoTransposed.shape() == deserialized.shape(), "Tensor::save and/or Tensor::load failed!");
