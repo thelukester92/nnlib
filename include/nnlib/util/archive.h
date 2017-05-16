@@ -128,9 +128,10 @@ public:
 	typename std::enable_if<std::is_fundamental<T>::value, Archive>::type &operator<<(const T &x)
 	{
 		NNAssert(m_out != nullptr, "Archive has no output stream!");
-		*m_out << x;
-		if(!m_binary)
-			*m_out << " ";
+		if(m_binary)
+			m_out->write(reinterpret_cast<char *>(&x), sizeof(T));
+		else
+			*m_out << x << " ";
 		return *this;
 	}
 	
@@ -168,8 +169,10 @@ public:
 	{
 		NNAssert(m_out != nullptr, "Archive has no output stream!");
 		*this << x.length();
-		for(size_t i = 0, len = x.length(); i < len; ++i)
-			*m_out << x[i];
+		if(m_binary)
+			m_out->write(x.c_str(), x.length() * sizeof(char));
+		else
+			*m_out << x << " ";
 		return *this;
 	}
 	
@@ -181,7 +184,10 @@ public:
 	typename std::enable_if<std::is_fundamental<T>::value, Archive>::type &operator>>(T &x)
 	{
 		NNAssert(m_in != nullptr, "Archive has no input stream!");
-		*m_in >> x;
+		if(m_binary)
+			m_in->read(reinterpret_cast<char *>(&x), sizeof(T));
+		else
+			*m_in >> x;
 		NNAssert(!m_in->fail(), "Archive failed to read primative type!");
 		return *this;
 	}
@@ -222,6 +228,8 @@ public:
 		size_t len;
 		*this >> len;
 		x.resize(len);
+		if(m_binary)
+			m_in->read(x.c_str(), x.length() * sizeof(char));
 		for(size_t i = 0; i < len; ++i)
 			*this >> x[i];
 		return *this;
