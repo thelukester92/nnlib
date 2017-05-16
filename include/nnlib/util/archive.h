@@ -129,7 +129,7 @@ public:
 	{
 		NNAssert(m_out != nullptr, "Archive has no output stream!");
 		if(m_binary)
-			m_out->write(reinterpret_cast<char *>(&x), sizeof(T));
+			m_out->write(const_cast<char *>(reinterpret_cast<const char *>(&x)), sizeof(T));
 		else
 			*m_out << x << " ";
 		return *this;
@@ -170,7 +170,7 @@ public:
 		NNAssert(m_out != nullptr, "Archive has no output stream!");
 		*this << x.length();
 		if(m_binary)
-			m_out->write(x.c_str(), x.length() * sizeof(char));
+			m_out->write(const_cast<char *>(x.c_str()), x.length() * sizeof(char));
 		else
 			*m_out << x << " ";
 		return *this;
@@ -229,7 +229,7 @@ public:
 		*this >> len;
 		x.resize(len);
 		if(m_binary)
-			m_in->read(x.c_str(), x.length() * sizeof(char));
+			m_in->read(const_cast<char *>(x.c_str()), x.length() * sizeof(char));
 		for(size_t i = 0; i < len; ++i)
 			*this >> x[i];
 		return *this;
