@@ -251,7 +251,7 @@ template <typename T>
 std::unordered_map<std::string, typename Archive::Mapper<T>::constructor> Archive::Mapper<T>::map;
 
 /// Macro for more easily adding polymorphic types.
-#define NNRegister(Super, Sub)												\
+#define NNRegister(Sub, Super)												\
 	template <>																\
 	std::string Binding<Sub>::name = Archive::Mapper<Super>::add(#Sub, []()	\
 	{																		\

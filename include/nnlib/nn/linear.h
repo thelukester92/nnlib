@@ -197,8 +197,8 @@ private:
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.
 };
 
-NNRegister(Module<double>, Linear<double>);
-NNRegister(Module<float>, Linear<float>);
+NNRegister(Linear<double>, Module<double>);
+NNRegister(Linear<float>, Module<float>);
 
 }
 
