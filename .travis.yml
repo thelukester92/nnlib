@@ -8,7 +8,7 @@ dist:
 before_install:
     - git clone https://github.com/xianyi/OpenBLAS
     - cd OpenBLAS
-    - make FC=gfortran
+    - make
     - sudo make install
 script:
     - make -C test
