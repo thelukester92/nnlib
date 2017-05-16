@@ -46,7 +46,7 @@ public:
 		}
 		
 		if(m_average)
-			sum /= input.shape().back();
+			sum /= input.size();
 		
 		return sum;
 	}
@@ -59,7 +59,7 @@ public:
 		
 		T norm = 2.0;
 		if(m_average)
-			norm /= input.shape().back();
+			norm /= input.size();
 		
 		auto inp = input.begin(), tar = target.begin();
 		for(T &g : m_inGrad)

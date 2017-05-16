@@ -1,10 +1,9 @@
 #include "nnlib/critics/mse.h"
-#include <iostream>
 using namespace nnlib;
 
 void TestMSE()
 {
-	Storage<size_t> shape = { 1, 5 };
+	Storage<size_t> shape = { 5, 1 };
 	Tensor<> inp = Tensor<>({  1,  2,  3,  4,  5 }).resize(shape);
 	Tensor<> tgt = Tensor<>({  2,  4,  6,  8,  0 }).resize(shape);
 	Tensor<> sqd = Tensor<>({  1,  4,  9, 16, 25 }).resize(shape);
@@ -12,15 +11,15 @@ void TestMSE()
 	MSE<> critic(shape, false);
 	
 	double mse = critic.forward(inp, tgt);
-	NNHardAssert(mse == sqd.sum(), "MSE<>::forward with no average failed!");
+	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "MSE<>::forward with no average failed!");
 	
 	critic.average(true);
 	mse = critic.forward(inp, tgt);
-	NNHardAssert(mse == sqd.mean(), "MSE<>::forward with average failed!");
+	NNHardAssert(fabs(mse - sqd.mean()) < 1e-12, "MSE<>::forward with average failed!");
 	
 	critic.inputs({ 10, 10 });
 	mse = critic.safeForward(inp, tgt);
-	NNHardAssert(mse == sqd.mean(), "MSE<>::safeForward failed!");
+	NNHardAssert(fabs(mse - sqd.mean()) < 1e-12, "MSE<>::safeForward failed!");
 	
 	critic.average(false);
 	critic.backward(inp, tgt);
