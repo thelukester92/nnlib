@@ -1,6 +1,14 @@
-language: cpp
+language:
+    - cpp
 compiler:
     - clang
     - gcc
-dist: trusty
-script: make -C test
+dist:
+    - trusty
+before_install:
+    - git clone https://github.com/xianyi/OpenBLAS
+    - cd OpenBLAS
+    - make FC=gfortran
+    - sudo make install
+script:
+    - make -C test
