@@ -70,10 +70,10 @@ public:
 			
 			// Normalize this column
 			columnOut.copy(columnIn).shift(-m_means(i)).scale(1.0 / sqrt(m_variances(i) + 1e-12));
-			
-			// Rescale and reshift
-			columnOut.scale(m_params(0)).shift(m_params(1));
 		}
+		
+		// Rescale and reshift the entire result
+		m_output.scale(m_params(0)).shift(m_params(1));
 		
 		return m_output;
 	}
@@ -84,16 +84,41 @@ public:
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad!");
 		
+		// Unscale the entire result
+		Tensor<T> innerGrad(m_inGrad.shape(), true);
+		innerGrad.copy(outGrad).scale(m_params(0));
+		
 		// Iterate over each column
 		for(size_t i = 0, n = m_means.size(0); i < n; ++i)
 		{
 			// Get views of this column (input, output, inGrad, and outGrad)
-			/*
-			Tensor<T> columnIn = input.select(1, i);
+			const Tensor<T> &columnIn = input.select(1, i);
+			const Tensor<T> &columnGradOut = outGrad.select(1, i);
 			Tensor<T> columnOut = m_output.select(1, i);
 			Tensor<T> columnGradIn = m_inGrad.select(1, i);
-			Tensor<T> columnGradOut = outGrad.select(1, i);
-			*/
+			
+			Tensor<T> shiftedStuff = columnIn.copy().shift(-m_means(i));
+			
+			// Get gradient of variance(i)
+			T varianceGrad = innerGrad.select(1, i).copy()
+				.pointwiseProduct(shiftedStuff)
+				.sum() * -0.5 * pow(m_variances(i) + 1e-12, -1.5);
+			
+			// Get gradient of mean(i)
+			T meanGrad = innerGrad.select(1, i)
+				.sum() * -1.0 / sqrt(m_variances(i) + 1e-12)
+				+ varianceGrad * -2 * shiftedStuff.mean();
+			
+			// Get gradient of input
+			columnGradIn.copy(innerGrad)
+				.scale(1.0 / sqrt(m_variances(i) + 1e-12))
+				.addVV(shiftedStuff.scale(varianceGrad * 2 / m_inGrad.size(0)))
+				.shift(meanGrad / m_inGrad.size(0));
+			
+			// Get gradient of parameters
+			/// \todo make this more efficient, I hacked it together at 5:05pm
+			m_grads(0) += columnGradOut.copy().pointwiseProduct(columnOut.copy().shift(-m_grads(1)).scale(1.0 / m_grads(0))).sum();
+			m_grads(1) += columnGradOut.sum();
 		}
 		
 		return m_inGrad;

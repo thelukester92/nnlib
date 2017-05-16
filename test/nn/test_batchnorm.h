@@ -17,4 +17,6 @@ void TestBatchNorm()
 		NNHardAssert(fabs(bn.output().select(1, i).mean()) < 1e-9, "Non-zero mean!");
 		NNHardAssert(fabs(bn.output().select(1, i).variance() - 1) < 1e-9, "Non-unit variance!");
 	}
+	
+	
 }
