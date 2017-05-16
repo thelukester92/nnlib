@@ -841,6 +841,11 @@ public:
 		return result;
 	}
 	
+	T mean() const
+	{
+		return sum() / size();
+	}
+	
 	T min() const
 	{
 		T result = *begin();

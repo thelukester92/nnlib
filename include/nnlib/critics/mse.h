@@ -20,6 +20,17 @@ public:
 		NNAssert(shape.size() == 2, "Expected matrix input to MSE!");
 	}
 	
+	bool average() const
+	{
+		return m_average;
+	}
+	
+	MSE &average(bool ave)
+	{
+		m_average = ave;
+		return *this;
+	}
+	
 	/// L = 1/n sum_i( (input(i) - target(i))^2 )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
