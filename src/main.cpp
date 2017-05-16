@@ -324,7 +324,7 @@ void testNeuralNet()
 	for(size_t i = 0; i < tanh.inGrad().size(1); ++i)
 	{
 		double dy = grad(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
-		NNHardAssert(fabs(tanh.inGrad()(0, i) - dy) < 1e-9, "TanH::backward failed! Difference too high: " + to_string(tanh.inGrad()(0, i)) + " != " + to_string(dy));
+		NNHardAssert(fabs(tanh.inGrad()(0, i) - dy) < 1e-9, "TanH::backward failed!");
 	}
 	
 	// MARK: Sequential Test
