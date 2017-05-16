@@ -96,7 +96,7 @@ public:
 	/// \param out The archive to which to write.
 	virtual void save(Archive &out) const override
 	{
-		out << Binding<LogSoftMax>::name;
+		out << Binding<LogSoftMax>::name << this->inputs();
 	}
 	
 	/// \brief Read from an archive.
@@ -110,6 +110,9 @@ public:
 			str == Binding<LogSoftMax>::name,
 			"Unexpected type! Expected '" + Binding<LogSoftMax>::name + "', got '" + str + "'!"
 		);
+		Storage<size_t> shape;
+		in >> shape;
+		this->inputs(shape);
 	}
 	
 private:

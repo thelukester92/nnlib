@@ -255,20 +255,6 @@ bool roughlyEqual(Module<> &a, Module<> &b)
 	two << b;
 	
 	return one.str() == two.str();
-	
-	/*
-	Tensor<> &flatA = a.parameters();
-	Tensor<> &flatB = b.parameters();
-	
-	if(flatA.size() != flatB.size())
-		return false;
-	
-	if(flatA.size() == 0)
-		return true;
-	
-	Storage<size_t> shape = { flatA.size(), 1 };
-	return MSE<>(shape, false).forward(flatA.view(shape), flatB.view(shape)) < 1e-9;
-	*/
 }
 
 void testNeuralNet()
@@ -344,7 +330,12 @@ void testNeuralNet()
 	};
 	inGrad.resize(1, 3);
 	
-	Sequential<double> nn(&perceptron, &tanh);
+	Sequential<> foo(&perceptron, &tanh);
+	Module<> *bar = Archive::fromString((Archive::toString() << foo).str()).read<Module<>>();
+	foo.clear();
+	NNHardAssert(bar != nullptr, "Archiving failed!");
+	Sequential<> &nn = *dynamic_cast<Sequential<> *>(bar);
+	
 	nn.forward(inp);
 	nn.backward(inp, grad);
 	
@@ -359,8 +350,7 @@ void testNeuralNet()
 	}
 	
 	// avoid double deallocation since nn's modules were not dynamically allocated
-	nn.remove(0);
-	nn.remove(0);
+	nn.clear();
 	
 	// MARK: Optimization Test
 	

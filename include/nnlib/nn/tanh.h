@@ -35,7 +35,7 @@ public:
 	/// \param out The archive to which to write.
 	virtual void save(Archive &out) const override
 	{
-		out << Binding<TanH>::name;
+		out << Binding<TanH>::name << this->inputs();
 	}
 	
 	/// \brief Read from an archive.
@@ -49,6 +49,9 @@ public:
 			str == Binding<TanH>::name,
 			"Unexpected type! Expected '" + Binding<TanH>::name + "', got '" + str + "'!"
 		);
+		Storage<size_t> shape;
+		in >> shape;
+		this->inputs(shape);
 	}
 };
 
