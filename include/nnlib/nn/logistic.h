@@ -16,15 +16,6 @@ public:
 	using Map<T>::forward;
 	using Map<T>::backward;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "logistic";
-	}
-	
 	/// Single element forward.
 	virtual T forward(const T &x) override
 	{
@@ -36,7 +27,33 @@ public:
 	{
 		return y * (1.0 - y);
 	}
+	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<Logistic>::name;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<Logistic>::name,
+			"Unexpected type! Expected '" + Binding<Logistic>::name + "', got '" + str + "'!"
+		);
+	}
 };
+
+NNSerializable(Logistic<double>, Module<double>);
+NNSerializable(Logistic<float>, Module<float>);
 
 }
 

@@ -142,6 +142,19 @@ public:
 		return *this;
 	}
 	
+	/// \brief Write a non-string object from a pointer.
+	///
+	/// \param x The object to write.
+	/// \return This archive, for chaining.
+	template <typename T>
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value, Archive>
+		::type &operator<<(const T *x)
+	{
+		NNAssert(m_out != nullptr, "Archive has no output stream!");
+		x->save(*this);
+		return *this;
+	}
+	
 	/// \brief Write a string object.
 	///
 	/// \param x The string to write.
@@ -151,7 +164,7 @@ public:
 		NNAssert(m_out != nullptr, "Archive has no output stream!");
 		*this << x.length();
 		for(size_t i = 0, len = x.length(); i < len; ++i)
-			*this << x[i];
+			*m_out << x[i];
 		return *this;
 	}
 	
@@ -168,7 +181,7 @@ public:
 		return *this;
 	}
 	
-	/// \brief Read in a non-string object.
+	/// \brief Read in a non-generic non-string object.
 	///
 	/// \param x The object to read into.
 	/// \return This archive, for chaining.
@@ -179,6 +192,18 @@ public:
 		NNAssert(m_in != nullptr, "Archive has no input stream!");
 		x.load(*this);
 		NNAssert(!m_in->fail(), "Archive failed to read primative type!");
+		return *this;
+	}
+	
+	/// \brief Read in a generic non-string object.
+	///
+	/// \param x The object to read into.
+	/// \return This archive, for chaining.
+	template <typename T>
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value, Archive>
+		::type &operator>>(T *&x)
+	{
+		x = read<T>();
 		return *this;
 	}
 	
@@ -250,8 +275,8 @@ private:
 template <typename T>
 std::unordered_map<std::string, typename Archive::Mapper<T>::constructor> Archive::Mapper<T>::map;
 
-/// Macro for more easily adding polymorphic types.
-#define NNRegister(Sub, Super)												\
+// Macro for more easily adding serializable and polymorphic types.
+#define NNSerializable(Sub, Super)											\
 	template <>																\
 	std::string Binding<Sub>::name = Archive::Mapper<Super>::add(#Sub, []()	\
 	{																		\

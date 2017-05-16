@@ -20,15 +20,6 @@ public:
 	using Container<T>::outputs;
 	using Container<T>::batch;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "lstm";
-	}
-	
 	LSTM(size_t inps, size_t outs, size_t bats = 1) :
 		m_inpGateX(new Linear<T>(inps, outs, bats)),
 		m_inpGateY(new Linear<T>(outs, outs, bats)),
@@ -78,7 +69,7 @@ public:
 		forget();
 	}
 	
-	LSTM(size_t outs) :
+	LSTM(size_t outs = 0) :
 		m_inpGateX(new Linear<T>(0, outs, 1)),
 		m_inpGateY(new Linear<T>(outs, outs, 1)),
 		m_inpGateH(new Linear<T>(outs, outs, 1)),
@@ -138,9 +129,21 @@ public:
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
-	virtual LSTM &add(Module<T> *component) override
+	virtual LSTM &add(Module<T> *) override
 	{
 		throw std::runtime_error("Cannot add components to a LSTM module!");
+	}
+	
+	/// Cannot remove a component from this container.
+	virtual Module<T> *remove(size_t) override
+	{
+		throw std::runtime_error("Cannot remove components from a LSTM module!");
+	}
+	
+	/// Cannot remove a component from this container.
+	virtual LSTM &clear() override
+	{
+		throw std::runtime_error("Cannot remove components from a LSTM module!");
 	}
 	
 	// MARK: Module methods
@@ -324,6 +327,65 @@ public:
 		return states;
 	}
 	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<LSTM>::name
+			<< m_inpGateX << m_inpGateY << m_inpGateH << m_inpGate
+			<< m_fgtGateX << m_fgtGateY << m_fgtGateH << m_fgtGate
+			<< m_inpModX << m_inpModY << m_inpMod
+			<< m_outGateX << m_outGateY << m_outGateH << m_outGate
+			<< m_outMod;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<LSTM>::name,
+			"Unexpected type! Expected '" + Binding<LSTM>::name + "', got '" + str + "'!"
+		);
+		
+		Container<T>::clear();
+		
+		in >> m_inpGateX >> m_inpGateY >> m_inpGateH >> m_inpGate
+			>> m_fgtGateX >> m_fgtGateY >> m_fgtGateH >> m_fgtGate
+			>> m_inpModX >> m_inpModY >> m_inpMod
+			>> m_outGateX >> m_outGateY >> m_outGateH >> m_outGate
+			>> m_outMod;
+		
+		add(
+			m_inpGateX, m_inpGateY, m_inpGateH, m_inpGate,
+			m_fgtGateX, m_fgtGateY, m_fgtGateH, m_fgtGate,
+			m_inpModX, m_inpModY, m_inpMod,
+			m_outGateX, m_outGateY, m_outGateH, m_outGate,
+			m_outMod
+		);
+		
+		size_t bats = m_inpGateX->inputs()[0], inps = m_inpGateX->inputs()[1], outs = m_inpGateX->outputs()[1];
+		
+		m_inGrad.resize(bats, inps);
+		m_inpAdd.resize(bats, outs);
+		m_fgtAdd.resize(bats, outs);
+		m_outAdd.resize(bats, outs);
+		m_outGrad.resize(bats, outs);
+		m_state.resize(bats, outs);
+		m_prevState.resize(bats, outs);
+		m_prevOutput.resize(bats, outs);
+		m_stateGrad.resize(bats, outs);
+		m_curStateGrad.resize(bats, outs);
+		m_gradBuffer.resize(bats, outs);
+		m_resetGrad = true;
+	}
+	
 private:
 	Module<T> *m_inpGateX;
 	Module<T> *m_inpGateY;
@@ -357,6 +419,9 @@ private:
 	
 	bool m_resetGrad;
 };
+
+NNSerializable(LSTM<double>, Module<double>);
+NNSerializable(LSTM<float>, Module<float>);
 
 }
 

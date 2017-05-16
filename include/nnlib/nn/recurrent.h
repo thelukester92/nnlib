@@ -18,15 +18,6 @@ public:
 	using Container<T>::outputs;
 	using Container<T>::batch;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "recurrent";
-	}
-	
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
 		m_inpMod(new Linear<T>(inps, outs, bats)),
 		m_memMod(new Linear<T>(outs, outs, bats)),
@@ -88,6 +79,18 @@ public:
 	virtual Recurrent &add(Module<T> *component) override
 	{
 		throw std::runtime_error("Cannot add components to a recurrent module!");
+	}
+	
+	/// Cannot remove a component from this container.
+	virtual Module<T> *remove(size_t) override
+	{
+		throw std::runtime_error("Cannot remove components from a recurrent module!");
+	}
+	
+	/// Cannot remove a component from this container.
+	virtual Recurrent &clear() override
+	{
+		throw std::runtime_error("Cannot remove components from a recurrent module!");
 	}
 	
 	// MARK: Module methods
@@ -169,6 +172,40 @@ public:
 		states.push_back(&m_statePrev);
 		return states;
 	}
+	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<Recurrent>::name
+			<< m_inpMod << m_memMod << m_outMod;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<Recurrent>::name,
+			"Unexpected type! Expected '" + Binding<Recurrent>::name + "', got '" + str + "'!"
+		);
+		
+		Container<T>::clear();
+		in >> m_inpMod >> m_memMod >> m_outMod;
+		add(m_inpMod, m_memMod, m_outMod);
+		
+		m_state.resize(m_outMod->outputs());
+		m_statePrev.resize(m_outMod->outputs());
+		m_stateGrad.resize(m_outMod->outputs());
+		m_resetGrad = true;
+	}
+	
 private:
 	Module<T> *m_inpMod;
 	Module<T> *m_memMod;
@@ -180,6 +217,9 @@ private:
 	
 	bool m_resetGrad;
 };
+
+NNSerializable(Recurrent<double>, Module<double>);
+NNSerializable(Recurrent<float>, Module<float>);
 
 }
 

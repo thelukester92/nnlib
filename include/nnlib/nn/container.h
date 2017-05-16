@@ -11,15 +11,6 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "container";
-	}
-	
 	virtual ~Container()
 	{
 		for(Module<T> *comp : m_components)
@@ -62,6 +53,13 @@ public:
 		Module<T> *comp = m_components[index];
 		m_components.erase(index);
 		return comp;
+	}
+	
+	/// Remove all components from this container.
+	virtual Container &clear()
+	{
+		m_components.clear();
+		return *this;
 	}
 	
 	/// Set the batch size of this module.
@@ -115,6 +113,7 @@ public:
 		}
 		return states;
 	}
+	
 protected:
 	Storage<Module<T> *> m_components;
 };

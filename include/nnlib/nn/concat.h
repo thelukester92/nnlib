@@ -17,15 +17,6 @@ public:
 	using Container<T>::outputs;
 	using Container<T>::batch;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "concat";
-	}
-	
 	Concat() {}
 	
 	template <typename ... Ms>
@@ -118,6 +109,38 @@ public:
 		throw std::runtime_error("Cannot directly change concat outputs! Add or remove components instead.");
 	}
 	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<Concat>::name << m_components.size();
+		for(Module<T> *component : m_components)
+			out << *component;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<Concat>::name,
+			"Unexpected type! Expected '" + Binding<Concat>::name + "', got '" + str + "'!"
+		);
+		
+		size_t n;
+		in >> n;
+		
+		m_components.resize(n);
+		for(size_t i = 0; i < n; ++i)
+			in >> m_components[i];
+	}
+	
 private:
 	Concat &resizeBuffers()
 	{
@@ -146,6 +169,9 @@ private:
 	Tensor<T> m_output;
 	Tensor<T> m_inGrad;
 };
+
+NNSerializable(Concat<double>, Module<double>);
+NNSerializable(Concat<float>, Module<float>);
 
 }
 

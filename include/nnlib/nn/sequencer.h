@@ -19,19 +19,10 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "sequencer";
-	}
-	
 	Sequencer(Module<T> *module, size_t sequenceLength = 1) :
 		m_module(module),
-		m_state(module->state()),
-		m_states(sequenceLength, m_state.size(0))
+		m_state(&module->state()),
+		m_states(sequenceLength, m_state->size(0))
 	{
 		Storage<size_t> inps = { sequenceLength };
 		for(size_t size : m_module->inputs())
@@ -43,8 +34,30 @@ public:
 			outs.push_back(size);
 		m_output.resize(outs);
 		
-		add(module);
+		Container<T>::add(module);
 	}
+	
+	// MARK: Container methods
+	
+	/// Cannot add a component to this container.
+	virtual Sequencer &add(Module<T> *) override
+	{
+		throw std::runtime_error("Cannot add components to a Sequencer module!");
+	}
+	
+	/// Cannot remove a component from this container.
+	virtual Module<T> *remove(size_t) override
+	{
+		throw std::runtime_error("Cannot remove components from a Sequencer module!");
+	}
+	
+	/// Cannot remove a component from this container.
+	virtual Sequencer &clear() override
+	{
+		throw std::runtime_error("Cannot remove components from a Sequencer module!");
+	}
+	
+	// MARK: Sequencer methods
 	
 	/// Get the module used by this sequencer.
 	Module<T> &module()
@@ -69,7 +82,7 @@ public:
 	
 	Sequencer &forget()
 	{
-		m_state.fill(0);
+		m_state->fill(0);
 		return *this;
 	}
 	
@@ -83,7 +96,7 @@ public:
 		for(size_t i = 0, end = input.size(0); i < end; ++i)
 		{
 			m_output.select(0, i).copy(m_module->forward(input.select(0, i)));
-			m_states.select(0, i).copy(m_state);
+			m_states.select(0, i).copy(*m_state);
 		}
 		
 		return m_output;
@@ -97,7 +110,7 @@ public:
 		
 		for(int i = input.size(0) - 1; i >= 0; --i)
 		{
-			m_state.copy(m_states.select(0, i));
+			m_state->copy(m_states.select(0, i));
 			m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), outGrad.select(0, i)));
 		}
 		
@@ -130,7 +143,7 @@ public:
 		m_output.resizeDim(1, dims[1]);
 		
 		m_module->state();
-		m_states.resizeDim(1, m_state.size(0));
+		m_states.resizeDim(1, m_state->size(0));
 		
 		return *this;
 	}
@@ -167,7 +180,7 @@ public:
 		m_inGrad.resizeDim(1, dims[1]);
 		
 		m_module->state();
-		m_states.resizeDim(1, m_state.size(0));
+		m_states.resizeDim(1, m_state->size(0));
 		
 		return *this;
 	}
@@ -199,7 +212,7 @@ public:
 		
 		/// \note this is stupid, the way I re-flatten state
 		m_module->state();
-		m_states.resizeDim(1, m_state.size(0));
+		m_states.resizeDim(1, m_state->size(0));
 		
 		return *this;
 	}
@@ -210,15 +223,61 @@ public:
 		return m_output.size(1);
 	}
 	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<Sequencer>::name << sequenceLength() << m_module;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<Sequencer>::name,
+			"Unexpected type! Expected '" + Binding<Sequencer>::name + "', got '" + str + "'!"
+		);
+		
+		size_t seqLen;
+		in >> seqLen;
+		
+		Container<T>::clear();
+		in >> m_module;
+		Container<T>::add(m_module);
+		
+		m_state = &m_module->state();
+		m_states.resize(seqLen, m_state->size(0));
+		
+		Storage<size_t> inps = { seqLen };
+		for(size_t size : m_module->inputs())
+			inps.push_back(size);
+		m_inGrad.resize(inps);
+		
+		Storage<size_t> outs = { seqLen };
+		for(size_t size : m_module->outputs())
+			outs.push_back(size);
+		m_output.resize(outs);
+	}
+	
 private:
 	Module<T> *m_module;
 	
 	Tensor<T> m_output;
 	Tensor<T> m_inGrad;
 	
-	Tensor<T> &m_state;
+	Tensor<T> *m_state;
 	Tensor<T> m_states;
 };
+
+NNSerializable(Sequencer<double>, Module<double>);
+NNSerializable(Sequencer<float>, Module<float>);
 
 }
 

@@ -16,15 +16,6 @@ public:
 	using Map<T>::forward;
 	using Map<T>::backward;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "tanh";
-	}
-	
 	/// Single element forward.
 	virtual T forward(const T &x) override
 	{
@@ -36,7 +27,33 @@ public:
 	{
 		return 1.0 - y * y;
 	}
+	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<TanH>::name;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<TanH>::name,
+			"Unexpected type! Expected '" + Binding<TanH>::name + "', got '" + str + "'!"
+		);
+	}
 };
+
+NNSerializable(TanH<double>, Module<double>);
+NNSerializable(TanH<float>, Module<float>);
 
 }
 

@@ -14,15 +14,6 @@ public:
 	using Module<T>::inputs;
 	using Module<T>::outputs;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "logsoftmax";
-	}
-	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
@@ -93,10 +84,36 @@ public:
 		return *this;
 	}
 	
+	// MARK: Serialization
+	
+	/// \brief Write to an archive.
+	///
+	/// \param out The archive to which to write.
+	virtual void save(Archive &out) const override
+	{
+		out << Binding<LogSoftMax>::name;
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param in The archive from which to read.
+	virtual void load(Archive &in) override
+	{
+		std::string str;
+		in >> str;
+		NNAssert(
+			str == Binding<LogSoftMax>::name,
+			"Unexpected type! Expected '" + Binding<LogSoftMax>::name + "', got '" + str + "'!"
+		);
+	}
+	
 private:
 	Tensor<T> m_inGrad;	///< Input gradient buffer.
 	Tensor<T> m_output;	///< Output buffer.
 };
+
+NNSerializable(LogSoftMax<double>, Module<double>);
+NNSerializable(LogSoftMax<float>, Module<float>);
 
 }
 

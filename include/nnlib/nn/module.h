@@ -11,15 +11,6 @@ template <typename T = double>
 class Module
 {
 public:
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "module";
-	}
-	
 	virtual ~Module() {}
 	
 	/// Forward propagate input, returning output.
