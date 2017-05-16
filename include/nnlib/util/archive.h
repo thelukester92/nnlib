@@ -102,6 +102,7 @@ public:
 		if(m_out != nullptr)
 		{
 			*this << serializationVersion();
+			m_out->precision(std::numeric_limits<long double>::digits10 + 1);
 		}
 	}
 	

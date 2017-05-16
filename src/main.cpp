@@ -332,7 +332,8 @@ void testNeuralNet()
 	
 	Sequential<> foo(&perceptron, &tanh);
 	Module<> *bar = Archive::fromString((Archive::toString() << foo).str()).read<Module<>>();
-	foo.clear();
+	foo.remove(0);
+	foo.remove(0);
 	NNHardAssert(bar != nullptr, "Archiving failed!");
 	Sequential<> &nn = *dynamic_cast<Sequential<> *>(bar);
 	
@@ -350,7 +351,8 @@ void testNeuralNet()
 	}
 	
 	// avoid double deallocation since nn's modules were not dynamically allocated
-	nn.clear();
+	nn.remove(0);
+	nn.remove(0);
 	
 	// MARK: Optimization Test
 	
@@ -506,11 +508,11 @@ void testRNN()
 	}).resize(9, 1);
 	
 	LSTM<> *lstm;
-	Sequencer<> nn(
+	Sequencer<> foo(
 		lstm = new LSTM<>(1, 1),
 		sequenceLength
 	);
-	nn.parameters().copy({
+	foo.parameters().copy({
 		0.2, 0,
 		-0.1, 0,
 		0.25, 0,
@@ -523,6 +525,12 @@ void testRNN()
 		0.1, 0,
 		0.3, 0
 	});
+	
+	Sequencer<> &nn = *dynamic_cast<Sequencer<> *>(
+		Archive::fromString((Archive::toString() << foo).str()).read<Module<>>()
+	);
+	lstm = dynamic_cast<LSTM<> *>(&nn.module());
+	
 	CriticSequencer<> critic(new MSE<>(nn.module().outputs()), sequenceLength);
 	
 	nn.forget();

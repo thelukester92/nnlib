@@ -58,6 +58,10 @@ public:
 	/// Remove all components from this container.
 	virtual Container &clear()
 	{
+		for(Module<T> *comp : m_components)
+		{
+			delete comp;
+		}
 		m_components.clear();
 		return *this;
 	}
