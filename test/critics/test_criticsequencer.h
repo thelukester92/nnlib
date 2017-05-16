@@ -28,4 +28,10 @@ void TestCriticSequencer()
 	
 	critic.batch(12);
 	NNHardAssert(critic.batch() == 12, "CriticSequencer<>::batch failed!");
+	
+	critic.sequenceLength(10);
+	NNHardAssert(critic.sequenceLength() == 10, "CriticSequencer<>::sequenceLength failed!");
+	
+	critic.safeForward(inp, tgt);
+	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "CriticSequencer<>::safeForward failed!");
 }
