@@ -48,7 +48,7 @@ public:
 	/// \return A new input archive.
 	static Archive fromFile(std::string filename, bool binary = true)
 	{
-		auto flags = std::ios::out;
+		auto flags = std::ios::in;
 		if(binary)
 			flags = flags | std::ios::binary;
 		return Archive(new std::ifstream(filename.c_str(), flags), nullptr, binary, true);
