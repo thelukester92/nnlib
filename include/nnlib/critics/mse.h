@@ -10,7 +10,7 @@ namespace nnlib
 /// Assumes the last dimension is inputs, leaving earlier
 /// dimensions for batch size and sequence length.
 template <typename T = double>
-class MSE : public Critic<double>
+class MSE : public Critic<T>
 {
 public:
 	MSE(const Storage<size_t> &shape, bool average = true) :

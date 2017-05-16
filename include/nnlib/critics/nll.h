@@ -8,7 +8,7 @@ namespace nnlib
 
 /// Negative log loss critic.
 template <typename T = double>
-class NLL : public Critic<double>
+class NLL : public Critic<T>
 {
 public:
 	NLL(const Storage<size_t> &shape) :
