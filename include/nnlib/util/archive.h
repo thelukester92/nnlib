@@ -229,9 +229,14 @@ public:
 		*this >> len;
 		x.resize(len);
 		if(m_binary)
+		{
 			m_in->read(const_cast<char *>(x.c_str()), x.length() * sizeof(char));
-		for(size_t i = 0; i < len; ++i)
-			*this >> x[i];
+		}
+		else
+		{
+			for(size_t i = 0; i < len; ++i)
+				*this >> x[i];
+		}
 		return *this;
 	}
 	

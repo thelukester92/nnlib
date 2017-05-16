@@ -508,11 +508,11 @@ void testRNN()
 	}).resize(9, 1);
 	
 	LSTM<> *lstm;
-	Sequencer<> foo(
+	Sequencer<> nn(
 		lstm = new LSTM<>(1, 1),
 		sequenceLength
 	);
-	foo.parameters().copy({
+	nn.parameters().copy({
 		0.2, 0,
 		-0.1, 0,
 		0.25, 0,
@@ -525,11 +525,6 @@ void testRNN()
 		0.1, 0,
 		0.3, 0
 	});
-	
-	Sequencer<> &nn = *dynamic_cast<Sequencer<> *>(
-		Archive::fromString((Archive::toString() << foo).str()).read<Module<>>()
-	);
-	lstm = dynamic_cast<LSTM<> *>(&nn.module());
 	
 	CriticSequencer<> critic(new MSE<>(nn.module().outputs()), sequenceLength);
 	
@@ -547,6 +542,15 @@ void testRNN()
 	);
 	
 	NNHardAssert(MSE<>(expectedInGrad.shape()).forward(nn.inGrad().reshape(expectedInGrad.shape()), expectedInGrad) < 1e-9, "Sequencer(LSTM)::backward failed!");
+	
+	// test serialization of LSTM networks
+	
+	nn.forget();
+	Sequencer<> &what = *dynamic_cast<Sequencer<> *>(Archive::fromString((Archive::toString() << nn).str()).read<Module<>>());
+	NNHardAssert(MSE<>({nn.output().size(), 1}, false).forward(
+		nn.forward(sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1)).resize(nn.output().size(), 1),
+		what.forward(sequence.narrow(0, 0, sequenceLength).resize(sequenceLength, 1, 1)).resize(nn.output().size(), 1)
+	) < 1e-9, "LSTM serialization failed!");
 }
 
 int main()
