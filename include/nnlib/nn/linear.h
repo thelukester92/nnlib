@@ -15,15 +15,6 @@ public:
 	using Module<T>::outputs;
 	using Module<T>::batch;
 	
-	/// \brief A name for this module type.
-	///
-	/// This may be used for debugging, serialization, etc.
-	/// The type should NOT include whitespace.
-	static std::string type()
-	{
-		return "linear";
-	}
-	
 	/// Standard inps -> outs layer.
 	Linear(size_t inps, size_t outs, size_t bats = 1) :
 		m_weights(inps, outs),
@@ -168,7 +159,7 @@ public:
 	/// \param out The archive to which to write.
 	virtual void save(Archive &out) const override
 	{
-		out << type() << m_weights << m_bias << batch();
+		out << Binding<Linear>::name << m_weights << m_bias << batch();
 	}
 	
 	/// \brief Read from an archive.
@@ -178,7 +169,10 @@ public:
 	{
 		std::string str;
 		in >> str;
-		NNAssert(str == type(), "Unexpected type! Expected '" + type() + "', got '" + str + "'!");
+		NNAssert(
+			str == Binding<Linear>::name,
+			"Unexpected type! Expected '" + Binding<Linear>::name + "', got '" + str + "'!"
+		);
 		
 		size_t bats;
 		in >> m_weights >> m_bias >> bats;
@@ -203,8 +197,8 @@ private:
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.
 };
 
-template <typename T>
-bool Archive::Binding<Linear<T>>::bind = Archive::Mapper<Module<T>>::add(Linear<T>::type(), [](){ return reinterpret_cast<void *>(new Linear<T>()); });
+NNRegister(Module<double>, Linear<double>);
+NNRegister(Module<float>, Linear<float>);
 
 }
 

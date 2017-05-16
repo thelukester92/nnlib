@@ -11,6 +11,13 @@
 namespace nnlib
 {
 
+/// A class used to add derived class bindings.
+template <typename Derived>
+struct Binding
+{
+	static std::string name;
+};
+
 /// A wrapper for reading from files or strings to objects.
 /// Can be used as an iostream with >> and <<.
 /// Assumes things are deserialized in the same order and with the same types.
@@ -26,19 +33,12 @@ public:
 	{
 		typedef std::function<void*()> constructor;
 		static std::unordered_map<std::string, constructor> map;
-		static bool add(std::string name, constructor c)
+		static std::string add(std::string name, constructor c)
 		{
 			NNAssert(map.find(name) == map.end(), "Attempted to redefine mapped class!");
 			map.emplace(name, c);
-			return true;
+			return name;
 		}
-	};
-	
-	/// A dummy class used to add derived class bindings.
-	template <typename Derived>
-	struct Binding
-	{
-		static bool bind;
 	};
 	
 	/// \brief Create an archive that reads from a file.
@@ -251,9 +251,12 @@ template <typename T>
 std::unordered_map<std::string, typename Archive::Mapper<T>::constructor> Archive::Mapper<T>::map;
 
 /// Macro for more easily adding polymorphic types.
-/*#define NNRegister()
-template <>
-bool Archive::Binding<Linear<>>::bind = Archive::Mapper<Module<>>::add(Linear<>::type(), [](){ return reinterpret_cast<void *>(new Linear<>()); });*/
+#define NNRegister(Super, Sub)												\
+	template <>																\
+	std::string Binding<Sub>::name = Archive::Mapper<Super>::add(#Sub, []()	\
+	{																		\
+		return reinterpret_cast<void *>(new Sub());							\
+	});
 
 }
 
