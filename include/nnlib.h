@@ -5,6 +5,7 @@
 #include "nnlib/critics/mse.h"
 
 /// Neural Networks
+#include "nnlib/nn/batchnorm.h"
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/container.h"
 #include "nnlib/nn/identity.h"

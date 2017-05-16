@@ -123,7 +123,7 @@ public:
 		m_data(other.m_data),
 		m_shared(other.m_shared)
 	{}
-	
+
 	/// \brief Move constructor for a tensor.
 	///
 	/// The new tensor shares the parameter's storage and copies the parameter's shape.
@@ -844,6 +844,18 @@ public:
 	T mean() const
 	{
 		return sum() / size();
+	}
+	
+	T variance() const
+	{
+		T avg = mean();
+		T sum = 0;
+		for(const T &v : *this)
+		{
+			T diff = v - avg;
+			sum += diff * diff;
+		}
+		return sum / size();
 	}
 	
 	T min() const

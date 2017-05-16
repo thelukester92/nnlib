@@ -25,11 +25,12 @@ OBJ_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/opt/%.o)
 DBG_FILES:=$(CPP_FILES:%.cpp=$(OBJ)/dbg/%.o)
 DBG_OUT:=$(OUT)_dbg
 
-test: dbg opt
-	$(BIN)/$(DBG_OUT)
+test: opt
 	$(BIN)/$(OUT)
-dbg: $(BIN)/$(DBG_OUT)
+test_dbg: dbg
+	$(BIN)/$(OUT_DBG)
 opt: $(BIN)/$(OUT)
+dbg: $(BIN)/$(DBG_OUT)
 clean:
 	rm -rf $(BIN)/*
 	rm -rf $(OBJ)/*
@@ -56,4 +57,4 @@ $(OBJ):
 
 -include $(DEP_FILES)
 
-.PHONY: test dbg opt clean
+.PHONY: test test_dbg opt dbg clean

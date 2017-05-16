@@ -1,6 +1,7 @@
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
 #include "critics/test_nll.h"
+#include "nn/test_batchnorm.h"
 
 #include <iostream>
 #include <string>
@@ -16,9 +17,13 @@ int main()
 	int ret = 0;
 	
 	initializer_list<pair<std::string, std::function<void()>>> tests = {
+		// critics
 		TEST(CriticSequencer),
 		TEST(MSE),
-		TEST(NLL)
+		TEST(NLL),
+		
+		// nn
+		TEST(BatchNorm)
 	};
 	
 	try
