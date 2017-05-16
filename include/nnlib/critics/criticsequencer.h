@@ -28,6 +28,12 @@ public:
 		delete m_critic;
 	}
 	
+	/// Get the inner critic.
+	Critic<T> &critic()
+	{
+		return *m_critic;
+	}
+	
 	/// Set the length of the sequence this critic uses.
 	CriticSequencer &sequenceLength(size_t sequenceLength)
 	{
