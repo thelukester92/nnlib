@@ -21,7 +21,7 @@ public:
 	Recurrent(size_t inps, size_t outs, size_t bats = 1) :
 		m_inpMod(new Linear<T>(inps, outs, bats)),
 		m_memMod(new Linear<T>(outs, outs, bats)),
-		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, bats), new TanH<>())),
+		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, bats), new TanH<T>())),
 		m_state(bats, outs),
 		m_statePrev(bats, outs),
 		m_stateGrad(bats, outs),
@@ -33,10 +33,10 @@ public:
 		forget();
 	}
 	
-	Recurrent(size_t outs) :
+	Recurrent(size_t outs = 0) :
 		m_inpMod(new Linear<T>(0, outs, 1)),
 		m_memMod(new Linear<T>(outs, outs, 1)),
-		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, 1), new TanH<>())),
+		m_outMod(new Sequential<T>(new Linear<T>(outs, outs, 1), new TanH<T>())),
 		m_state(1, outs),
 		m_statePrev(1, outs),
 		m_stateGrad(1, outs),
@@ -198,7 +198,9 @@ public:
 		
 		Container<T>::clear();
 		in >> m_inpMod >> m_memMod >> m_outMod;
-		add(m_inpMod, m_memMod, m_outMod);
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
 		
 		m_state.resize(m_outMod->outputs());
 		m_statePrev.resize(m_outMod->outputs());

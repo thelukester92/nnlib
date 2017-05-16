@@ -115,6 +115,12 @@ public:
 		return *this;
 	}
 	
+	Storage &clear()
+	{
+		m_size = 0;
+		return *this;
+	}
+	
 	T *ptr()
 	{
 		return m_ptr;

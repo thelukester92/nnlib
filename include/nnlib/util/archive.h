@@ -129,12 +129,12 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write a non-string object.
+	/// \brief Write a non-string object from a reference.
 	///
 	/// \param x The object to write.
 	/// \return This archive, for chaining.
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value, Archive>
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value && !std::is_pointer<T>::value, Archive>
 		::type &operator<<(const T &x)
 	{
 		NNAssert(m_out != nullptr, "Archive has no output stream!");

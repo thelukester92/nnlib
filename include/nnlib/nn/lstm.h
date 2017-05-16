@@ -362,13 +362,22 @@ public:
 			>> m_outGateX >> m_outGateY >> m_outGateH >> m_outGate
 			>> m_outMod;
 		
-		add(
-			m_inpGateX, m_inpGateY, m_inpGateH, m_inpGate,
-			m_fgtGateX, m_fgtGateY, m_fgtGateH, m_fgtGate,
-			m_inpModX, m_inpModY, m_inpMod,
-			m_outGateX, m_outGateY, m_outGateH, m_outGate,
-			m_outMod
-		);
+		Container<T>::add(m_inpGateX);
+		Container<T>::add(m_inpGateY);
+		Container<T>::add(m_inpGateH);
+		Container<T>::add(m_inpGate);
+		Container<T>::add(m_fgtGateX);
+		Container<T>::add(m_fgtGateY);
+		Container<T>::add(m_fgtGateH);
+		Container<T>::add(m_fgtGate);
+		Container<T>::add(m_inpModX);
+		Container<T>::add(m_inpModY);
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_outGateX);
+		Container<T>::add(m_outGateY);
+		Container<T>::add(m_outGateH);
+		Container<T>::add(m_outGate);
+		Container<T>::add(m_outMod);
 		
 		size_t bats = m_inpGateX->inputs()[0], inps = m_inpGateX->inputs()[1], outs = m_inpGateX->outputs()[1];
 		

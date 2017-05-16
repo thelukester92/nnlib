@@ -37,6 +37,12 @@ public:
 		Container<T>::add(module);
 	}
 	
+	Sequencer() :
+		m_module(nullptr),
+		m_state(nullptr),
+		m_states(1, 0)
+	{}
+	
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
