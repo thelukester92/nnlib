@@ -1002,7 +1002,6 @@ public:
 		m_tensor(const_cast<Tensor<TT> *>(tensor)),
 		m_indices(tensor->dims(), 0)
 	{
-		NNAssert(tensor->size() > 0, "Cannot iterate through an empty tensor!");
 		if(end)
 		{
 			m_indices[0] = m_tensor->size(0);
@@ -1048,7 +1047,12 @@ public:
 			return false;
 		}
 		
-		for(size_t i = 0, j = m_indices.size(); i < j; ++i)
+		if((m_indices[0] % m_tensor->size(0)) != (other.m_indices[0] % m_tensor->size(0)))
+		{
+			return false;
+		}
+		
+		for(size_t i = 1, j = m_indices.size(); i < j; ++i)
 		{
 			if(m_indices[i] != other.m_indices[i])
 			{

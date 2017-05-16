@@ -14,6 +14,11 @@ public:
 	using Module<T>::inputs;
 	using Module<T>::outputs;
 	
+	LogSoftMax(size_t outs = 0, size_t bats = 1) :
+		m_inGrad(bats, outs),
+		m_output(bats, outs)
+	{}
+	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{

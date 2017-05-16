@@ -248,14 +248,27 @@ void testAlgebra()
 
 bool roughlyEqual(Module<> &a, Module<> &b)
 {
+	Archive one = Archive::toString();
+	one << a;
+	
+	Archive two = Archive::toString();
+	two << b;
+	
+	return one.str() == two.str();
+	
+	/*
 	Tensor<> &flatA = a.parameters();
 	Tensor<> &flatB = b.parameters();
 	
 	if(flatA.size() != flatB.size())
 		return false;
 	
+	if(flatA.size() == 0)
+		return true;
+	
 	Storage<size_t> shape = { flatA.size(), 1 };
 	return MSE<>(shape, false).forward(flatA.view(shape), flatB.view(shape)) < 1e-9;
+	*/
 }
 
 void testNeuralNet()
@@ -311,7 +324,7 @@ void testNeuralNet()
 	for(size_t i = 0; i < tanh.inGrad().size(1); ++i)
 	{
 		double dy = grad(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
-		NNHardAssert(fabs(tanh.inGrad()(0, i) - dy) < 1e-9, "TanH::backward failed!");
+		NNHardAssert(fabs(tanh.inGrad()(0, i) - dy) < 1e-9, "TanH::backward failed! Difference too high: " + to_string(tanh.inGrad()(0, i)) + " != " + to_string(dy));
 	}
 	
 	// MARK: Sequential Test
@@ -422,40 +435,32 @@ void testNeuralNet()
 	
 	// MARK: Serialization test
 	
-	// linear
+	Storage<Module<> *> modulesToSerialize =
 	{
-		Linear<> test(4, 3);
+		new Concat<>(new Linear<>(10, 4), new TanH<>(10)),
+		new Identity<>(5),
+		new Linear<>(3, 12),
+		new Logistic<>(6, 18),
+		new LogSoftMax<>(33, 5),
+		new LSTM<>(8, 4),
+		new Recurrent<>(5, 5),
+		new Sequencer<>(new LSTM<>(12, 35)),
+		new Sequential<>(new Linear<>(3, 6), new TanH<>()),
+		new TanH<>()
+	};
+	
+	for(Module<> *module : modulesToSerialize)
+	{
 		Archive out = Archive::toString();
-		out << test;
+		out << module;
 		
 		Archive in = Archive::fromString(out.str());
-		Module<> *test2 = in.read<Module<>>();
+		Module<> *module2;
+		in >> module2;
 		
-		NNHardAssert(test2 != nullptr, "Archive::read failed to read a generic type!");
-		NNHardAssert(roughlyEqual(test, *test2), "Linear::save and/or Linear::load failed!");
+		NNHardAssert(module2 != nullptr, "Archive::read failed to read a generic type!");
+		NNHardAssert(roughlyEqual(*module, *module2), "Module::save and/or Module::load failed!");
 	}
-	
-	/*
-	Archive out = Archive::toString();
-	out << trainNet;
-	
-	Sequential<> deserialized;
-	Archive in = Archive::fromString(out.str());
-	in >> deserialized;
-	
-	NNHardAssert(trainNet.components() == deserialized.components(), "Sequential::save and/or Sequential::load failed! Number of components does not match!");
-	for(size_t i = 0; i < trainNet.components(); ++i)
-	{
-		NNHardAssert(trainNet.component(i).inputs() == deserialized.component(i).inputs(), "Sequential::save and/or Sequential::load failed! Component " + std::to_string(i) << " had differing input shapes!");
-		NNHardAssert(trainNet.component(i).outputs() == deserialized.component(i).outputs(), "Sequential::save and/or Sequential::load failed! Component " + std::to_string(i) << " had differing output shapes!");
-	}
-	
-	Tensor<> flatActual = Tensor<>::flatten(trainNet.parameters());
-	Tensor<> flatDeserial = Tensor<>::flatten(deserialized.parameters());
-	
-	NNHardAssert(flatActual.size() == flatDeserial.size(), "Sequential::save and/or Sequential::load failed! Unexpected flattened parameter size!");
-	NNHardAssert(MSE<>(flatActual.shape(), false).forward(flatActual, flatDeserial) < 1e-9, "Sequential::save and/or Sequential::load failed! Values were not close enough!");
-	*/
 }
 
 Tensor<> extrapolate(Sequencer<> &model, const Tensor<> &context, size_t length)
@@ -549,20 +554,48 @@ void testRNN()
 int main()
 {
 	cout << "===== Testing Tensor =====" << endl;
-	testTensor();
-	cout << "Tensor test passed!" << endl << endl;
+	try
+	{
+		testTensor();
+		cout << "Tensor test passed!" << endl << endl;
+	}
+	catch(const std::runtime_error &e)
+	{
+		cout << "Tensor test failed!" << endl << e.what() << endl;
+	}
 	
 	cout << "===== Testing Algebra =====" << endl;
-	testAlgebra();
-	cout << "Algebra test passed!" << endl << endl;
+	try
+	{
+		testAlgebra();
+		cout << "Algebra test passed!" << endl << endl;
+	}
+	catch(const std::runtime_error &e)
+	{
+		cout << "Algebra test failed!" << endl << e.what() << endl;
+	}
 	
 	cout << "===== Testing Neural Networks =====" << endl;
-	testNeuralNet();
-	cout << "Neural networks test passed!" << endl << endl;
+	try
+	{
+		testNeuralNet();
+		cout << "Neural networks test passed!" << endl << endl;
+	}
+	catch(const std::runtime_error &e)
+	{
+		cout << "Neural networks test failed!" << endl << e.what() << endl;
+	}
 	
 	cout << "===== Testing Recurrent Neural Networks =====" << endl;
-	testRNN();
-	cout << "Recurrent neural networks test passed!" << endl << endl;
+	try
+	{
+		testRNN();
+		cout << "Recurrent neural networks test passed!" << endl << endl;
+	}
+	catch(const std::runtime_error &e)
+	{
+		cout << "Recurrent neural networks test failed!" << endl << e.what() << endl;
+	}
 	
 	cout << "All unit tests passed!" << endl;
 	
