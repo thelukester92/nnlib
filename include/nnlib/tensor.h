@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "error.h"
+#include "storage.h"
 #include "util/random.h"
-#include "util/storage.h"
 #include "util/algebra.h"
 #include "util/archive.h"
 

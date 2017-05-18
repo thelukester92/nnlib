@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <functional>
+#include "../error.h"
 
 namespace nnlib
 {
