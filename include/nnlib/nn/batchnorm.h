@@ -61,51 +61,63 @@ public:
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
+		size_t n = input.size(0);
 		
-		// Iterate over each column
-		for(size_t i = 0, n = m_means.size(0); i < n; ++i)
+		// Get means and variances to use
+		Tensor<T> means, invStds;
+		if(m_training)
 		{
-			// Get views of this column (input and output)
-			const Tensor<T> &columnIn = input.select(1, i);
-			Tensor<T> columnNorm = m_normalized.select(1, i);
-			Tensor<T> columnOut = m_output.select(1, i);
+			T norm = 1.0 / n;
 			
-			// Get mean and variance to use
-			T mean, invstd;
+			// Get means
+			input.sum(m_means, 0);
+			m_means.scale(norm);
 			
-			if(m_training)
+			// Get unnormalized variances (temporarily stored in invStd)
+			for(size_t i = 0; i < n; ++i)
 			{
-				// Calculate the mean of this column
-				mean = columnIn.mean();
-				m_means(i) = mean;
-				
-				// Calulate the inverted standard deviation of this column
-				T sum = 0;
-				for(const T &v : columnIn)
-				{
-					T diff = v - mean;
-					sum += diff * diff;
-				}
-				invstd = 1.0 / sqrt(sum / m_inGrad.size(0) + 1e-12);
-				m_invStds(i) = invstd;
-				
-				// Update running mean
-				m_runningMeans(i) = m_momentum * mean + (1 - m_momentum) * m_runningMeans(i);
-				
-				// Update running variance (unbiased)
-				m_runningVars(i) = m_momentum * sum / (m_inGrad.size() - 1) + (1 - m_momentum) * m_runningVars(i);
-			}
-			else
-			{
-				mean = m_runningMeans(i);
-				invstd = 1.0 / sqrt(m_runningVars(i) + 1e-12);
+				Tensor<T> diff = input.select(0, i).copy().addVV(m_means, -1);
+				diff.pointwiseProduct(diff);
+				m_invStds.addVV(diff);
 			}
 			
-			// Normalize this column
-			columnNorm.copy(columnIn).shift(-mean).scale(invstd);
+			// Update running mean
+			m_runningMeans.scale(1 - m_momentum).addVV(m_means.copy().scale(m_momentum));
 			
-			// Shift and scale using parameters
-			columnOut.copy(columnNorm).scale(m_weights(i)).shift(m_biases(i));
+			// Update running variance (normalize as sample)
+			m_runningVars.scale(1 - m_momentum).addVV(m_invStds.copy().scale(m_momentum / (n - 1)));
+			
+			// Now normalize variance as population; will invert and sqrt after this if statement
+			m_invStds.scale(norm);
+			
+			// Use the batch statistics
+			means = m_means;
+			invStds = m_invStds;
+		}
+		else
+		{
+			// Use the running statistics
+			means = m_runningMeans;
+			invStds = m_runningVars.copy();
+		}
+		
+		// Turn variance into inverted standard deviation
+		for(T &invStd : invStds)
+		{
+			invStd = 1.0 / sqrt(invStd + 1e-12);
+		}
+		
+		// Use the statistics to normalize the data row-by-row
+		m_output.copy(input);
+		for(size_t i = 0; i < n; ++i)
+		{
+			Tensor<T> out = m_output.select(0, i);
+			
+			// Normalize
+			out.addVV(means, -1).pointwiseProduct(invStds);
+			
+			// Rescale and reshift using the parameters
+			out.pointwiseProduct(m_weights).addVV(m_biases);
 		}
 		
 		return m_output;
@@ -117,43 +129,29 @@ public:
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad!");
 		
-		/*
-		// Unscale the entire result
-		Tensor<T> innerGrad(m_inGrad.shape(), true);
-		innerGrad.copy(outGrad).scale(m_params(0));
-		
 		// Iterate over each column
 		for(size_t i = 0, n = m_means.size(0); i < n; ++i)
 		{
-			// Get views of this column (input, output, inGrad, and outGrad)
+			// Get views of this column (input and output)
 			const Tensor<T> &columnIn = input.select(1, i);
-			const Tensor<T> &columnGradOut = outGrad.select(1, i);
-			Tensor<T> columnOut = m_output.select(1, i);
-			Tensor<T> columnGradIn = m_inGrad.select(1, i);
 			Tensor<T> columnNorm = m_normalized.select(1, i);
-			Tensor<T> shiftedStuff = columnIn.copy().shift(-m_means(i));
+			Tensor<T> columnOut = m_output.select(1, i);
 			
-			// Get gradient of variance(i)
-			T varianceGrad = innerGrad.select(1, i).copy()
-				.pointwiseProduct(shiftedStuff)
-				.sum() * -0.5 * pow(m_invStds(i) + 1e-12, -1.5);
+			// Get mean and variance to use
+			T mean, invstd;
+			if(m_training)
+			{
+				mean = m_means(i);
+				invstd = m_invStds(i);
+			}
+			else
+			{
+				mean = m_runningMeans(i);
+				invstd = 1.0 / sqrt(m_runningVars(i) + 1e-12);
+			}
 			
-			// Get gradient of mean(i)
-			T meanGrad = innerGrad.select(1, i)
-				.sum() * -1.0 / sqrt(m_invStds(i) + 1e-12)
-				+ varianceGrad * -2 * shiftedStuff.mean();
 			
-			// Get gradient of input
-			columnGradIn.copy(innerGrad)
-				.scale(1.0 / sqrt(m_invStds(i) + 1e-12))
-				.addVV(shiftedStuff.scale(varianceGrad * 2 / m_inGrad.size(0)))
-				.shift(meanGrad / m_inGrad.size(0));
-			
-			// Get gradient of parameters
-			m_grads(0) += columnGradOut.copy().pointwiseProduct(columnNorm).sum();
-			m_grads(1) += columnGradOut.sum();
 		}
-		*/
 		
 		return m_inGrad;
 	}
@@ -232,6 +230,8 @@ public:
 		states.push_back(&m_means);
 		states.push_back(&m_invStds);
 		states.push_back(&m_normalized);
+		states.push_back(&m_runningMeans);
+		states.push_back(&m_runningVars);
 		return states;
 	}
 	
@@ -243,7 +243,7 @@ public:
 	/// \param out The archive to which to write.
 	virtual void save(Archive &out) const override
 	{
-		out << Binding<BatchNorm>::name << m_means << m_invStds << m_training << m_momentum;
+		out << Binding<BatchNorm>::name << m_runningMeans << m_runningVars << m_weights << m_biases << m_training << m_momentum;
 	}
 	
 	/// \brief Read from an archive.
@@ -258,29 +258,30 @@ public:
 			"Unexpected type! Expected '" + Binding<BatchNorm>::name + "', got '" + str + "'!"
 		);
 		
-		in >> m_means >> m_invStds;
+		in >> m_runningMeans >> m_runningVars >> m_weights >> m_biases >> m_training >> m_momentum;
 		NNAssert(
-			m_means.size() == m_invStds.size() && m_means.dims() == 1 && m_invStds.dims() == 1,
+			m_runningMeans.shape() == m_runningVars.shape()
+			&& m_runningMeans.shape() == m_weights.shape()
+			&& m_runningMeans.shape() == m_biases.shape()
+			&& m_runningMeans.dims() == 1,
 			"Incompatible means and variances!"
 		);
-		inputs({ m_inGrad.size(0), m_means.size() });
-		
-		in >> m_training >> m_momentum;
+		inputs({ m_inGrad.size(0), m_runningMeans.size(0) });
 	}
 private:
-	Tensor<T> m_output;				///< Cached output.
-	Tensor<T> m_inGrad;				///< Gradient of error w.r.t. inputs.
-	Tensor<T> m_means;				///< Mean of each input dimension within the batch.
-	Tensor<T> m_invStds;			///< Inverted standard deviation of each input dimension within the batch.
-	Tensor<T> m_runningMeans;		///< A running mean for each input, for after training.
+	Tensor<T> m_output;			///< Cached output.
+	Tensor<T> m_inGrad;			///< Gradient of error w.r.t. inputs.
+	Tensor<T> m_means;			///< Mean of each input dimension within the batch.
+	Tensor<T> m_invStds;		///< Inverted standard deviation of each input dimension within the batch.
+	Tensor<T> m_runningMeans;	///< A running mean for each input, for after training.
 	Tensor<T> m_runningVars;	///< A running variance for each input, for after training.
-	Tensor<T> m_normalized;			///< Halfway transformed input, cached for backward.
-	Tensor<T> m_weights;			///< How much to scale the normalized input.
-	Tensor<T> m_biases;				///< How much to shift the normalized input.
-	Tensor<T> m_weightsGrad;		///< Gradient of error w.r.t. weights.
-	Tensor<T> m_biasesGrad;			///< Gradient of error w.r.t. biases.
-	bool m_training;				///< Whether we are in training mode.
-	T m_momentum;					///< How much to update running mean and variance.
+	Tensor<T> m_normalized;		///< Halfway transformed input, cached for backward.
+	Tensor<T> m_weights;		///< How much to scale the normalized input.
+	Tensor<T> m_biases;			///< How much to shift the normalized input.
+	Tensor<T> m_weightsGrad;	///< Gradient of error w.r.t. weights.
+	Tensor<T> m_biasesGrad;		///< Gradient of error w.r.t. biases.
+	bool m_training;			///< Whether we are in training mode.
+	T m_momentum;				///< How much to update running mean and variance.
 };
 
 NNSerializable(BatchNorm<double>, Module<double>);

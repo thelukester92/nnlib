@@ -691,7 +691,7 @@ public:
 	///
 	/// \param alpha The scalar.
 	/// \return This tensor, for chaining.
-	Tensor &shift(T alpha)
+	Tensor &add(T alpha)
 	{
 		for(T &v : *this)
 		{
@@ -703,7 +703,7 @@ public:
 	// MARK: Algebra
 	
 	/// \todo document this method
-	Tensor &multiplyMM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
@@ -716,7 +716,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTM(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMTM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
@@ -729,7 +729,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
@@ -742,7 +742,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTMT(const Tensor<T> &A, const Tensor<T> &B, T alpha = 1, T beta = 0)
+	Tensor &multiplyMTMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
@@ -755,7 +755,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
+	Tensor &multiplyMV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
@@ -768,7 +768,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTV(const Tensor<T> &A, const Tensor<T> &x, T alpha = 1, T beta = 0)
+	Tensor &multiplyMTV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
@@ -781,7 +781,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyVTV(const Tensor<T> &x, const Tensor<T> &y, T alpha = 1)
+	Tensor &multiplyVTV(const Tensor &x, const Tensor &y, T alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
 		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
@@ -794,7 +794,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &addVV(const Tensor<T> &x, T alpha = 1)
+	Tensor &addVV(const Tensor &x, T alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
 		Algebra<T>::addVV(
@@ -805,7 +805,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &addMM(const Tensor<T> &A, T alpha = 1)
+	Tensor &addMM(const Tensor &A, T alpha = 1)
 	{
 		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
 		for(size_t i = 0, end = size(0); i < end; ++i)
@@ -820,7 +820,7 @@ public:
 	}
 	
 	/// Hadamard/elementwise/pointwise product.
-	Tensor &pointwiseProduct(const Tensor<T> &x)
+	Tensor &pointwiseProduct(const Tensor &x)
 	{
 		NNAssert(shape() == x.shape(), "Incompatible operands!");
 		auto i = x.begin();
@@ -832,8 +832,36 @@ public:
 		return *this;
 	}
 	
+	/// \brief Compute elementwise/pointwise sum (general purpose).
+	///
+	/// This is a general purpose function for any size of tensor.
+	/// For vectors, addVV is called; for matrices, addMM is called.
+	Tensor &add(const Tensor &x, T alpha = 1)
+	{
+		NNAssert(shape() == x.shape(), "Incompatible operands to add!");
+		if(m_dims.size() == 1)
+		{
+			return addVV(x, alpha);
+		}
+		else if(m_dims.size() == 2)
+		{
+			return addMM(x, alpha);
+		}
+		else
+		{
+			auto i = x.begin();
+			for(T &el : *this)
+			{
+				el += *i;
+				++i;
+			}
+			return *this;
+		}
+	}
+	
 	// MARK: Statistical methods
 	
+	/// Calculate the sum of all elements in this tensor.
 	T sum() const
 	{
 		T result = 0;
@@ -842,6 +870,47 @@ public:
 			result += v;
 		}
 		return result;
+	}
+	
+	/// \brief Calculate the sum along the given dimension.
+	///
+	/// This reduces the number of dimensions by one, and may not be called on a 1D tensor (use sum() instead).
+	/// For example, in this matrix:
+	/// 	1 2 3
+	/// 	4 5 6
+	/// sum(0) will produce the vector `<5 7 9>`, and
+	/// sum(1) will produce the vector `<6 15>`
+	/// \param t The tensor to store the sum in. It must already be the appropriate shape.
+	/// \param dim Which dimension to sum.
+	/// \return The input tensor t, for chaining.
+	Tensor &sum(Tensor &t, size_t dim) const
+	{
+		NNAssert(dim < m_dims.size(), "Invalid dimension for summation!");
+		NNAssert(m_dims.size() > 1, "Cannot sum over a 1D tensor this way! Call sum() instead!");
+		
+		t.copy(select(dim, 0));
+		for(size_t i = 1, n = m_dims[dim]; i < n; ++i)
+		{
+			t.add(select(dim, i));
+		}
+		
+		return t;
+	}
+	
+	/// \brief Calculate the sum along the given dimension.
+	///
+	/// This reduces the number of dimensions by one, and may not be called on a 1D tensor (use sum() instead).
+	/// For example, in this matrix:
+	/// 	1 2 3
+	/// 	4 5 6
+	/// sum(0) will produce the vector `<5 7 9>`, and
+	/// sum(1) will produce the vector `<6 15>`
+	/// \param dim Which dimension to sum.
+	/// \return The tensor containing the sum.
+	Tensor sum(size_t dim) const
+	{
+		Tensor t(select(dim, 0).shape());
+		return sum(t, dim);
 	}
 	
 	T mean() const
@@ -891,7 +960,7 @@ public:
 	{
 		NNAssert(to > from, "Invalid normalization range!");
 		T small = min(), large = max();
-		return shift(-small).scale((to - from) / (large - small)).shift(from);
+		return add(-small).scale((to - from) / (large - small)).add(from);
 	}
 	
 	// MARK: Element/data access methods.
