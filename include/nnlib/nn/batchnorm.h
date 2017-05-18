@@ -129,6 +129,27 @@ public:
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad!");
 		size_t n = input.size(0);
 		
+		// Get means and variances to use
+		Tensor<T> means, invStds;
+		if(m_training)
+		{
+			// Use the batch statistics
+			means = m_means;
+			invStds = m_invStds;
+		}
+		else
+		{
+			// Use the running statistics
+			means = m_runningMeans;
+			invStds = m_runningVars.copy();
+			
+			// Turn variance into inverted standard deviation
+			for(T &invStd : invStds)
+			{
+				invStd = 1.0 / sqrt(invStd + 1e-12);
+			}
+		}
+		
 		// gradient of biases
 		m_biasesGrad.addVV(outGrad.sum(0));
 		
@@ -138,6 +159,9 @@ public:
 		{
 			m_weightsGrad.addVV(m_normalized.select(0, i));
 		}
+		
+		// gradient of inputs
+		
 		
 		return m_inGrad;
 	}
