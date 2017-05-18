@@ -1,7 +1,7 @@
 #ifndef NN_MODULE_H
 #define NN_MODULE_H
 
-#include "../util/tensor.h"
+#include "../tensor.h"
 
 namespace nnlib
 {

@@ -9,7 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <limits>
-#include "tensor.h"
+#include "../tensor.h"
 #include "error.h"
 
 namespace nnlib

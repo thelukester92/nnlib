@@ -2,7 +2,7 @@
 #define BATCHER_H
 
 #include "random.h"
-#include "tensor.h"
+#include "../tensor.h"
 
 namespace nnlib
 {

@@ -1,7 +1,7 @@
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
-#include "../util/tensor.h"
+#include "../tensor.h"
 
 namespace nnlib
 {
