@@ -12,6 +12,7 @@ class BatchNorm : public Module<T>
 public:
 	using Module<T>::inputs;
 	using Module<T>::outputs;
+	using Module<T>::batch;
 	
 	BatchNorm(size_t inps = 0, size_t bats = 1) :
 		m_output(bats, inps),
@@ -246,6 +247,14 @@ public:
 	virtual BatchNorm &outputs(const Storage<size_t> &dims) override
 	{
 		return inputs(dims);
+	}
+	
+	/// Set the batch size of this module.
+	virtual BatchNorm &batch(size_t bats)
+	{
+		Module<T>::batch(bats);
+		m_normalized.resizeDim(0, bats);
+		return *this;
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
