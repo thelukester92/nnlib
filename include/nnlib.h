@@ -1,3 +1,6 @@
+/// Top-level Classes
+#include "nnlib/tensor.h"
+
 /// Critics
 #include "nnlib/critics/critic.h"
 #include "nnlib/critics/criticsequencer.h"
@@ -37,5 +40,5 @@
 #include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
 #include "nnlib/util/storage.h"
-#include "nnlib/util/tensor.h"
+#include "nnlib/util/tensor_utils.h"
 #include "nnlib/util/timer.h"
