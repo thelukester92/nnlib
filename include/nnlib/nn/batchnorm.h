@@ -250,7 +250,7 @@ public:
 	}
 	
 	/// Set the batch size of this module.
-	virtual BatchNorm &batch(size_t bats)
+	virtual BatchNorm &batch(size_t bats) override
 	{
 		Module<T>::batch(bats);
 		m_normalized.resizeDim(0, bats);
