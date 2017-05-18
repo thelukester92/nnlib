@@ -859,6 +859,12 @@ public:
 		}
 	}
 	
+	/// Perform a pointwise product with the current tensor, squaring it.
+	Tensor &square()
+	{
+		return pointwiseProduct(*this);
+	}
+	
 	// MARK: Statistical methods
 	
 	/// Calculate the sum of all elements in this tensor.

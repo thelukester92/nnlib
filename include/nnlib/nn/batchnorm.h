@@ -108,16 +108,17 @@ public:
 		}
 		
 		// Use the statistics to normalize the data row-by-row
-		m_output.copy(input);
+		m_normalized.copy(input);
 		for(size_t i = 0; i < n; ++i)
 		{
+			Tensor<T> nrm = m_normalized.select(0, i);
 			Tensor<T> out = m_output.select(0, i);
 			
 			// Normalize
-			out.addVV(means, -1).pointwiseProduct(invStds);
+			nrm.addVV(means, -1).pointwiseProduct(invStds);
 			
 			// Rescale and reshift using the parameters
-			out.pointwiseProduct(m_weights).addVV(m_biases);
+			out.copy(nrm).pointwiseProduct(m_weights).addVV(m_biases);
 		}
 		
 		return m_output;
@@ -128,29 +129,16 @@ public:
 	{
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad!");
+		size_t n = input.size(0);
 		
-		// Iterate over each column
-		for(size_t i = 0, n = m_means.size(0); i < n; ++i)
+		// gradient of biases
+		m_biasesGrad.addVV(outGrad.sum(0));
+		
+		// gradient of weights
+		m_normalized.pointwiseProduct(outGrad);
+		for(size_t i = 0; i < n; ++i)
 		{
-			// Get views of this column (input and output)
-			const Tensor<T> &columnIn = input.select(1, i);
-			Tensor<T> columnNorm = m_normalized.select(1, i);
-			Tensor<T> columnOut = m_output.select(1, i);
-			
-			// Get mean and variance to use
-			T mean, invstd;
-			if(m_training)
-			{
-				mean = m_means(i);
-				invstd = m_invStds(i);
-			}
-			else
-			{
-				mean = m_runningMeans(i);
-				invstd = 1.0 / sqrt(m_runningVars(i) + 1e-12);
-			}
-			
-			
+			m_weightsGrad.addVV(m_normalized.select(0, i));
 		}
 		
 		return m_inGrad;
