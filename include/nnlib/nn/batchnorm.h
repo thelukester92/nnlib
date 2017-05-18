@@ -154,14 +154,41 @@ public:
 		m_biasesGrad.addVV(outGrad.sum(0));
 		
 		// gradient of weights
-		m_normalized.pointwiseProduct(outGrad);
+		Tensor<T> product = m_normalized.copy().pointwiseProduct(outGrad);
 		for(size_t i = 0; i < n; ++i)
 		{
-			m_weightsGrad.addVV(m_normalized.select(0, i));
+			m_weightsGrad.addVV(product.select(0, i));
 		}
 		
 		// gradient of inputs
-		
+		if(m_training)
+		{
+			Tensor<T> gradMean = outGrad.sum(0).scale(1.0 / n);
+			m_inGrad.copy(outGrad);
+			
+			Tensor<T> stuff = m_normalized.pointwiseProduct(outGrad).sum(0);
+			
+			for(size_t i = 0; i < n; ++i)
+			{
+				m_inGrad.select(0, i)
+					.add(gradMean, -1)
+					.add(
+						input.select(0, i).copy()
+						.add(means, -1)
+						.pointwiseProduct(stuff)
+						.pointwiseProduct(invStds).scale(1.0 / n), -1)
+					.pointwiseProduct(invStds)
+					.pointwiseProduct(m_weights);
+			}
+		}
+		else
+		{
+			m_inGrad.copy(outGrad);
+			for(size_t i = 0; i < n; ++i)
+			{
+				m_inGrad.select(0, i).pointwiseProduct(invStds).pointwiseProduct(m_weights);
+			}
+		}
 		
 		return m_inGrad;
 	}

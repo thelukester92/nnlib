@@ -16,9 +16,9 @@ void TestBatchNorm()
 	}).resize(3, 3);
 	
 	Tensor<> inGrad = Tensor<>({
-		 0.0360,  0.0001,  0,
-		-0.0249, -2.1213,  0,
-		-0.0111,  2.1212,  0
+		 0.03596,  0.00000,  0,
+		-0.02489, -2.12132,  0,
+		-0.01106,  2.12132,  0
 	}).resize(3, 3);
 	
 	BatchNorm<> bn(3, 3);
@@ -35,6 +35,7 @@ void TestBatchNorm()
 		bn.grad().add(Tensor<>({ 14.9606, 2.82843, 0, 10, 5, 12 }), -1).square().sum() < 1e-9,
 		"BatchNorm::backward failed! Wrong parameter gradient!"
 	);
+	
 	NNHardAssert(
 		bn.inGrad().add(inGrad, -1).square().sum() < 1e-9,
 		"BatchNorm::backward failed! Wrong input gradient!"
