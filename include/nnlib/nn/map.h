@@ -64,6 +64,23 @@ public:
 		return m_inGrad;
 	}
 	
+	/// Set the input and output shapes of this module.
+	/// In a map, input shape is always equal to output shape.
+	virtual Map &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	{
+		NNAssert(inps == outs, "Map modules expect the same input and output size!");
+		return inputs(outs);
+	}
+	
+	/// Safely (never reset weights) set the input and output shapes of this module.
+	/// In a map, input shape is always equal to output shape.
+	virtual Map &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	{
+		NNAssert(inps == outs, "Map modules expect the same input and output size!");
+		this->safeInputs(inps);
+		return *this;
+	}
+	
 	/// Set the input shape of this module, including batch.
 	/// In a map, input shape is always equal to output shape.
 	virtual Map &inputs(const Storage<size_t> &dims) override

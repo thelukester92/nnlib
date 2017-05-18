@@ -17,30 +17,43 @@ public:
 		m_output(bats, inps),
 		m_inGrad(bats, inps),
 		m_means(inps),
-		m_variances(inps),
-		m_params({ 1, 0 }),
-		m_grads(2)
-	{}
-	
-	T scale() const
+		m_invStds(inps),
+		m_runningMeans(inps),
+		m_runningVars(inps),
+		m_normalized(bats, inps),
+		m_weights(inps),
+		m_biases(inps),
+		m_weightsGrad(inps),
+		m_biasesGrad(inps),
+		m_training(true),
+		m_momentum(0.1)
 	{
-		return m_params(0);
+		m_weights.fill(1);
 	}
 	
-	BatchNorm &scale(T alpha)
+	/// Returns whether this module is in training mode.
+	bool training() const
 	{
-		m_params(0) = alpha;
+		return m_training;
+	}
+	
+	/// Sets whether this module is in training mode.
+	BatchNorm &training(bool training)
+	{
+		m_training = training;
 		return *this;
 	}
 	
-	T shift() const
+	/// Returns this module's momentum for running averages.
+	T momentum() const
 	{
-		return m_params(1);
+		return m_momentum;
 	}
 	
-	BatchNorm &shift(T alpha)
+	/// Sets this module's momentum for running averages.
+	BatchNorm &momentum(T momentum)
 	{
-		m_params(1) = alpha;
+		m_momentum = momentum;
 		return *this;
 	}
 	
@@ -54,26 +67,46 @@ public:
 		{
 			// Get views of this column (input and output)
 			const Tensor<T> &columnIn = input.select(1, i);
+			Tensor<T> columnNorm = m_normalized.select(1, i);
 			Tensor<T> columnOut = m_output.select(1, i);
 			
-			// Calculate the mean of this column
-			m_means(i) = columnIn.mean();
+			// Get mean and variance to use
+			T mean, invstd;
 			
-			// Calulate the variance of this column
-			m_variances(i) = 0;
-			for(const T &v : columnIn)
+			if(m_training)
 			{
-				T diff = v - m_means(i);
-				m_variances(i) += diff * diff;
+				// Calculate the mean of this column
+				mean = columnIn.mean();
+				m_means(i) = mean;
+				
+				// Calulate the inverted standard deviation of this column
+				T sum = 0;
+				for(const T &v : columnIn)
+				{
+					T diff = v - mean;
+					sum += diff * diff;
+				}
+				invstd = 1.0 / sqrt(sum / m_inGrad.size(0) + 1e-12);
+				m_invStds(i) = invstd;
+				
+				// Update running mean
+				m_runningMeans(i) = m_momentum * mean + (1 - m_momentum) * m_runningMeans(i);
+				
+				// Update running variance (unbiased)
+				m_runningVars(i) = m_momentum * sum / (m_inGrad.size() - 1) + (1 - m_momentum) * m_runningVars(i);
 			}
-			m_variances(i) /= m_inGrad.size(0);
+			else
+			{
+				mean = m_runningMeans(i);
+				invstd = 1.0 / sqrt(m_runningVars(i) + 1e-12);
+			}
 			
 			// Normalize this column
-			columnOut.copy(columnIn).shift(-m_means(i)).scale(1.0 / sqrt(m_variances(i) + 1e-12));
+			columnNorm.copy(columnIn).shift(-mean).scale(invstd);
+			
+			// Shift and scale using parameters
+			columnOut.copy(columnNorm).scale(m_weights(i)).shift(m_biases(i));
 		}
-		
-		// Rescale and reshift the entire result
-		m_output.scale(m_params(0)).shift(m_params(1));
 		
 		return m_output;
 	}
@@ -84,6 +117,7 @@ public:
 		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
 		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad!");
 		
+		/*
 		// Unscale the entire result
 		Tensor<T> innerGrad(m_inGrad.shape(), true);
 		innerGrad.copy(outGrad).scale(m_params(0));
@@ -96,30 +130,30 @@ public:
 			const Tensor<T> &columnGradOut = outGrad.select(1, i);
 			Tensor<T> columnOut = m_output.select(1, i);
 			Tensor<T> columnGradIn = m_inGrad.select(1, i);
-			
+			Tensor<T> columnNorm = m_normalized.select(1, i);
 			Tensor<T> shiftedStuff = columnIn.copy().shift(-m_means(i));
 			
 			// Get gradient of variance(i)
 			T varianceGrad = innerGrad.select(1, i).copy()
 				.pointwiseProduct(shiftedStuff)
-				.sum() * -0.5 * pow(m_variances(i) + 1e-12, -1.5);
+				.sum() * -0.5 * pow(m_invStds(i) + 1e-12, -1.5);
 			
 			// Get gradient of mean(i)
 			T meanGrad = innerGrad.select(1, i)
-				.sum() * -1.0 / sqrt(m_variances(i) + 1e-12)
+				.sum() * -1.0 / sqrt(m_invStds(i) + 1e-12)
 				+ varianceGrad * -2 * shiftedStuff.mean();
 			
 			// Get gradient of input
 			columnGradIn.copy(innerGrad)
-				.scale(1.0 / sqrt(m_variances(i) + 1e-12))
+				.scale(1.0 / sqrt(m_invStds(i) + 1e-12))
 				.addVV(shiftedStuff.scale(varianceGrad * 2 / m_inGrad.size(0)))
 				.shift(meanGrad / m_inGrad.size(0));
 			
 			// Get gradient of parameters
-			/// \todo make this more efficient, I hacked it together at 5:05pm
-			m_grads(0) += columnGradOut.copy().pointwiseProduct(columnOut.copy().shift(-m_grads(1)).scale(1.0 / m_grads(0))).sum();
+			m_grads(0) += columnGradOut.copy().pointwiseProduct(columnNorm).sum();
 			m_grads(1) += columnGradOut.sum();
 		}
+		*/
 		
 		return m_inGrad;
 	}
@@ -136,6 +170,23 @@ public:
 		return m_inGrad;
 	}
 	
+	/// Set the input and output shapes of this module.
+	/// In batchnorm, input shape is always equal to output shape.
+	virtual BatchNorm &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	{
+		NNAssert(inps == outs, "BatchNorm expects the same input and output size!");
+		return inputs(outs);
+	}
+	
+	/// Safely (never reset weights) set the input and output shapes of this module.
+	/// In batchnorm, input shape is always equal to output shape.
+	virtual BatchNorm &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	{
+		NNAssert(inps == outs, "BatchNorm expects the same input and output size!");
+		this->safeInputs(inps);
+		return *this;
+	}
+	
 	/// Set the input shape of this module, including batch.
 	/// In batchnorm, input shape is always equal to output shape.
 	virtual BatchNorm &inputs(const Storage<size_t> &dims) override
@@ -144,7 +195,14 @@ public:
 		Module<T>::inputs(dims);
 		Module<T>::outputs(dims);
 		m_means.resize(dims[1]);
-		m_variances.resize(dims[1]);
+		m_invStds.resize(dims[1]);
+		m_runningMeans.resize(dims[1]);
+		m_runningVars.resize(dims[1]);
+		m_normalized.resize(dims);
+		m_weights.resize(dims[1]).fill(1);
+		m_biases.resize(dims[1]);
+		m_weightsGrad.resize(dims[1]);
+		m_biasesGrad.resize(dims[1]);
 		return *this;
 	}
 	
@@ -158,13 +216,13 @@ public:
 	/// A vector of tensors filled with (views of) this module's parameters.
 	virtual Storage<Tensor<T> *> parameterList() override
 	{
-		return { &m_params };
+		return { &m_weights, &m_biases };
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters' gradient.
 	virtual Storage<Tensor<T> *> gradList() override
 	{
-		return { &m_grads };
+		return { &m_weightsGrad, &m_biasesGrad };
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
@@ -172,7 +230,8 @@ public:
 	{
 		Storage<Tensor<T> *> states = Module<T>::stateList();
 		states.push_back(&m_means);
-		states.push_back(&m_variances);
+		states.push_back(&m_invStds);
+		states.push_back(&m_normalized);
 		return states;
 	}
 	
@@ -184,7 +243,7 @@ public:
 	/// \param out The archive to which to write.
 	virtual void save(Archive &out) const override
 	{
-		out << Binding<BatchNorm>::name << m_params(0) << m_params(1);
+		out << Binding<BatchNorm>::name << m_means << m_invStds << m_training << m_momentum;
 	}
 	
 	/// \brief Read from an archive.
@@ -198,15 +257,30 @@ public:
 			str == Binding<BatchNorm>::name,
 			"Unexpected type! Expected '" + Binding<BatchNorm>::name + "', got '" + str + "'!"
 		);
-		in >> m_params(0) >> m_params(1);
+		
+		in >> m_means >> m_invStds;
+		NNAssert(
+			m_means.size() == m_invStds.size() && m_means.dims() == 1 && m_invStds.dims() == 1,
+			"Incompatible means and variances!"
+		);
+		inputs({ m_inGrad.size(0), m_means.size() });
+		
+		in >> m_training >> m_momentum;
 	}
 private:
-	Tensor<T> m_output;
-	Tensor<T> m_inGrad;
-	Tensor<T> m_means;
-	Tensor<T> m_variances;
-	Tensor<T> m_params;	///< A two-element tensor continaing scale and shift.
-	Tensor<T> m_grads;	///< Gradient of error w.r.t. m_params.
+	Tensor<T> m_output;				///< Cached output.
+	Tensor<T> m_inGrad;				///< Gradient of error w.r.t. inputs.
+	Tensor<T> m_means;				///< Mean of each input dimension within the batch.
+	Tensor<T> m_invStds;			///< Inverted standard deviation of each input dimension within the batch.
+	Tensor<T> m_runningMeans;		///< A running mean for each input, for after training.
+	Tensor<T> m_runningVars;	///< A running variance for each input, for after training.
+	Tensor<T> m_normalized;			///< Halfway transformed input, cached for backward.
+	Tensor<T> m_weights;			///< How much to scale the normalized input.
+	Tensor<T> m_biases;				///< How much to shift the normalized input.
+	Tensor<T> m_weightsGrad;		///< Gradient of error w.r.t. weights.
+	Tensor<T> m_biasesGrad;			///< Gradient of error w.r.t. biases.
+	bool m_training;				///< Whether we are in training mode.
+	T m_momentum;					///< How much to update running mean and variance.
 };
 
 NNSerializable(BatchNorm<double>, Module<double>);

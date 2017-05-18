@@ -196,6 +196,9 @@ public:
 	
 	/// \brief Resize this tensor in place and, if necessary, resize its underlying storage.
 	///
+	/// This will not change the data, although it will result in a contiguous tensor.
+	/// Thus, if the tensor was a non-contiguous view, it will end up with a different view.
+	/// This method will delete data if resizing smaller or add 0s if resizing bigger.
 	/// \param dims The new shape for the tensor.
 	/// \return The tensor, for chaining.
 	Tensor &resize(const Storage<size_t> &dims)
