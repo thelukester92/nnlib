@@ -76,9 +76,7 @@ public:
 			// Get unnormalized variances (temporarily stored in invStd)
 			for(size_t i = 0; i < n; ++i)
 			{
-				Tensor<T> diff = input.select(0, i).copy().addVV(m_means, -1);
-				diff.pointwiseProduct(diff);
-				m_invStds.addVV(diff);
+				m_invStds.addVV(input.select(0, i).copy().addVV(m_means, -1).square());
 			}
 			
 			// Update running mean
