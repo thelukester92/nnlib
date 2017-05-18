@@ -32,12 +32,12 @@
 #include "nnlib/opt/sgd.h"
 
 /// Utilities
-#include "nnlib/util/algebra.h"
 #include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"
 #include "nnlib/util/error.h"
 #include "nnlib/util/file.h"
+#include "nnlib/util/math.h"
 #include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
 #include "nnlib/util/tensor_utils.h"

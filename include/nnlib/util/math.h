@@ -1,5 +1,5 @@
-#ifndef ALGEBRA_H
-#define ALGEBRA_H
+#ifndef MATH_H
+#define MATH_H
 
 #ifdef __APPLE__
 	#include <Accelerate/Accelerate.h>
