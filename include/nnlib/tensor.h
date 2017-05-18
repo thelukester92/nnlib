@@ -7,8 +7,8 @@
 
 #include "error.h"
 #include "storage.h"
+#include "math/math.h"
 #include "util/archive.h"
-#include "util/math.h"
 #include "util/random.h"
 
 namespace nnlib
