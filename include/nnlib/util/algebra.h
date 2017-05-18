@@ -7,7 +7,7 @@
 	#include <cblas.h>
 #endif
 
-#include "error.h"
+#include "../error.h"
 
 namespace nnlib
 {

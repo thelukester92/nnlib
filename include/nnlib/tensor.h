@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <memory>
 
-#include "util/error.h"
+#include "error.h"
 #include "util/random.h"
 #include "util/storage.h"
 #include "util/algebra.h"

@@ -2,7 +2,7 @@
 #define RANDOM_H
 
 #include <random>
-#include "error.h"
+#include "../error.h"
 
 namespace nnlib
 {
