@@ -384,6 +384,39 @@ public:
 		return const_cast<Tensor *>(this)->narrow(dim, index, size);
 	}
 	
+	/// \brief Creates a new tensor with a "superview" of this tensor's data.
+	///
+	/// This results in a tensor with the same number of dimensions as this tensor.
+	/// The given dimension is expanded from 1 to the given number by repeating the slice n times.
+	/// This is accomplished without copying by setting stride to 0 in the given dimension.
+	/// The given dimension must already have a size of 1 in the given dimension.
+	/// \param dim Which dimension to expand.
+	/// \param size How long to expand the given dimension.
+	/// \return A tensor containing the "superview."
+	Tensor expand(size_t dim, size_t size)
+	{
+		NNAssert(dim < m_dims.size(), "Expanding dimension out of bounds!");
+		NNAssert(m_dims[dim] == 1, "Can only expand a dimension of size 1!");
+		Tensor t = *this;
+		t.m_dims[dim] = size;
+		t.m_strides[dim] = 0;
+		return t;
+	}
+	
+	/// \brief Creates a new const tensor with a "superview" of this tensor's data.
+	///
+	/// This results in a tensor with the same number of dimensions as this tensor.
+	/// The given dimension is expanded from 1 to the given number by repeating the slice n times.
+	/// This is accomplished without copying by setting stride to 0 in the given dimension.
+	/// The given dimension must already have a size of 1 in the given dimension.
+	/// \param dim Which dimension to expand.
+	/// \param size How long to expand the given dimension.
+	/// \return A const tensor containing the "superview."
+	const Tensor expand(size_t dim, size_t size) const
+	{
+		return const_cast<Tensor *>(this)->expand(dim, size);
+	}
+	
 	/// \brief Makes the given tensor a subview of this tensor's data.
 	///
 	/// The parameter tensor ends up with the same number of dimensions as this tensor.
@@ -729,7 +762,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Math<T>::mAdd_mv(
+		Math<T>::vAdd_mv(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.stride(0),
 			ptr(), stride(0),
@@ -753,7 +786,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Math<T>::mAdd_mtv(
+		Math<T>::vAdd_mtv(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.stride(0),
 			ptr(), stride(0),
