@@ -707,7 +707,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMM(
+		Math<T>::mAdd_mm(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -720,7 +720,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMTM(
+		Math<T>::mAdd_mtm(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -733,20 +733,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMMT(
-			A.ptr(), A.size(0), A.size(1), A.stride(0),
-			B.ptr(), B.size(0), B.size(1), B.stride(0),
-			ptr(), size(0), size(1), stride(0),
-			alpha, beta
-		);
-		return *this;
-	}
-	
-	Tensor &multiplyMTMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
-	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Algebra<T>::multiplyMTMT(
+		Math<T>::mAdd_mmt(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			B.ptr(), B.size(0), B.size(1), B.stride(0),
 			ptr(), size(0), size(1), stride(0),
@@ -759,10 +746,10 @@ public:
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Algebra<T>::multiplyMV(
+		Math<T>::mAdd_mvt(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
-			x.ptr(), x.size(), x.stride(0),
-			ptr(), size(), stride(0),
+			x.ptr(), x.stride(0),
+			ptr(), stride(0),
 			alpha, beta
 		);
 		return *this;
@@ -772,10 +759,10 @@ public:
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Algebra<T>::multiplyMTV(
+		Math<T>::mAdd_mtvt(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
-			x.ptr(), x.size(), x.stride(0),
-			ptr(), size(), stride(0),
+			x.ptr(), x.stride(0),
+			ptr(), stride(0),
 			alpha, beta
 		);
 		return *this;
@@ -785,10 +772,10 @@ public:
 	{
 		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
 		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
-		Algebra<T>::multiplyVTV(
+		Math<T>::mAdd_vtv(
 			x.ptr(), x.size(), x.stride(0),
 			y.ptr(), y.size(), y.stride(0),
-			ptr(), size(0), size(1), stride(0),
+			ptr(), stride(0),
 			alpha
 		);
 		return *this;
@@ -797,9 +784,9 @@ public:
 	Tensor &addVV(const Tensor &x, T alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
-		Algebra<T>::addVV(
+		Math<T>::vAdd_v(
 			x.ptr(), x.size(), x.stride(0),
-			ptr(), size(), stride(0),
+			ptr(), stride(0),
 			alpha
 		);
 		return *this;
@@ -808,14 +795,11 @@ public:
 	Tensor &addMM(const Tensor &A, T alpha = 1)
 	{
 		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
-		for(size_t i = 0, end = size(0); i < end; ++i)
-		{
-			Algebra<T>::addVV(
-				A.ptr() + i * A.stride(0), A.size(1), A.stride(1),
-				ptr() + i * stride(0), size(1), stride(1),
-				alpha
-			);
-		}
+		Math<T>::mAdd_m(
+			A.ptr(), A.size(0), A.size(1), A.stride(0),
+			ptr(), stride(0),
+			alpha
+		);
 		return *this;
 	}
 	
@@ -1087,6 +1071,115 @@ private:
 		return sum;
 	}
 };
+
+template <typename T>
+class TensorIterator : public std::iterator<std::forward_iterator_tag, T, T, const T *, T &>
+{
+using TT = typename std::remove_const<T>::type;
+public:
+	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
+		m_tensor(const_cast<Tensor<TT> *>(tensor)),
+		m_indices(tensor->dims(), 0)
+	{
+		/// \todo Make the right side of the `||` faster; `size()`` isn't cached, so this will hurt performance.
+		if(end || m_tensor->size() == 0)
+		{
+			m_indices[0] = m_tensor->size(0);
+		}
+	}
+	
+	TensorIterator &advance(size_t dim = (size_t) -1)
+	{
+		dim = std::min(dim, m_tensor->dims());
+		--m_indices.back();
+		++m_indices[dim];
+		return ++*this;
+	}
+	
+	TensorIterator &operator++()
+	{
+		size_t dim = m_indices.size() - 1;
+		++m_indices[dim];
+		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
+		{
+			m_indices[dim] = 0;
+			--dim;
+			++m_indices[dim];
+		}
+		return *this;
+	}
+	
+	TensorIterator operator++(int)
+	{
+		TensorIterator it = *this;
+		return ++it;
+	}
+	
+	T &operator*()
+	{
+		return (*m_tensor)(m_indices);
+	}
+	
+	bool operator==(const TensorIterator &other)
+	{
+		if(m_tensor != other.m_tensor)
+		{
+			return false;
+		}
+		
+		for(size_t i = 0, j = m_indices.size(); i < j; ++i)
+		{
+			if(m_indices[i] != other.m_indices[i])
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	bool operator !=(const TensorIterator &other)
+	{
+		return !(*this == other);
+	}
+private:
+	Tensor<TT> *m_tensor;
+	Storage<size_t> m_indices;
+};
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
+{
+	out << std::left << std::setprecision(5) << std::fixed;
+	
+	if(t.dims() == 1)
+	{
+		for(size_t i = 0; i < t.size(0); ++i)
+		{
+			out << t(i) << "\n";
+		}
+	}
+	else if(t.dims() == 2)
+	{
+		for(size_t i = 0; i < t.size(0); ++i)
+		{
+			for(size_t j = 0; j < t.size(1); ++j)
+			{
+				out << std::setw(10) << t(i, j);
+			}
+			out << "\n";
+		}
+	}
+	
+	out << "[ Tensor of dimension " << t.size(0);
+	for(size_t i = 1; i < t.dims(); ++i)
+	{
+		out << " x " << t.size(i);
+	}
+	out << " ]";
+	
+	return out;
+}
 
 }
 

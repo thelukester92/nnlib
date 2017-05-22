@@ -183,17 +183,6 @@ void testAlgebra()
 	}
 	
 	A.resize(5, 10);
-	slowMatrixMultiply<true, true>(A, B, C);
-	C2.multiplyMTMT(A, B);
-	
-	for(size_t i = 0; i < C.size(0); ++i)
-	{
-		for(size_t j = 0; j < C.size(1); ++j)
-		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMTMT failed!");
-		}
-	}
-	
 	B.resize(5, 3);
 	slowMatrixMultiply<true, false>(A, B, C);
 	C2.multiplyMTM(A, B);
@@ -224,6 +213,20 @@ void testAlgebra()
 	for(size_t i = 0; i < mv.size(); ++i)
 	{
 		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Tensor::multiplyMV failed!");
+	}
+	
+	// Matrix addition?
+	
+	C.rand();
+	C2.fill(3.14);
+	
+	C2.addMM(C);
+	for(size_t i = 0; i < C.size(0); ++i)
+	{
+		for(size_t j = 0; j < C.size(1); ++j)
+		{
+			NNHardAssert(C2(i, j) == 3.14 + C(i, j), "Tensor::addMM failed!");
+		}
 	}
 	
 	// Make sure tensor enforces contiguous matrices for multiplication

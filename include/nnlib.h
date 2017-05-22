@@ -42,5 +42,4 @@
 #include "nnlib/util/file.h"
 #include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
-#include "nnlib/util/tensor_utils.h"
 #include "nnlib/util/timer.h"
