@@ -71,7 +71,7 @@ public:
 	{
 		for(size_t i = 0; i < r; ++i)
 			for(size_t j = 0; j < c; ++j)
-				A[i * lda + j] = alpha * x[i] * y[j] + beta * A[i * lda + j];
+				A[i * lda + j] = alpha * x[i * sx] * y[j * sy] + beta * A[i * lda + j];
 	}
 	
 	/// y = alpha * A * x^T + beta * y

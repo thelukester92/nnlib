@@ -22,6 +22,11 @@ void addMatrixMultiply(size_t M, size_t N, size_t K, const double *A, size_t lda
 	}
 }
 
+bool almostEqual(double a, double b)
+{
+	return fabs(a - b) < 1e-9;
+}
+
 void TestMathBase()
 {
 	std::vector<double> x(10), y(10);
@@ -70,36 +75,36 @@ void TestMathBase()
 	std::fill(y.begin(), y.end(), 0.12345);
 	MathBase<double>::vAdd_v(x.data(), x.size(), 1, y.data(), 1);
 	for(size_t i = 0; i < x.size(); ++i)
-		NNHardAssert(x[i] + 0.12345 == y[i], "MathBase<>::vAdd_v with stride = 1 failed!");
+		NNHardAssert(almostEqual(x[i] + 0.12345, y[i]), "MathBase<>::vAdd_v with stride = 1 failed!");
 	
 	MathBase<double>::vAdd_v(y.data(), y.size() / 2, 2, y.data(), 2);
 	for(size_t i = 0; i < x.size(); ++i)
 	{
 		if(i % 2 == 0)
 		{
-			NNHardAssert(x[i] + 0.12345 + x[i] + 0.12345 == y[i], "MathBase<>::vAdd_v with stride = 2 failed!");
+			NNHardAssert(almostEqual(x[i] + 0.12345 + x[i] + 0.12345, y[i]), "MathBase<>::vAdd_v with stride = 2 failed!");
 		}
 		else
 		{
-			NNHardAssert(x[i] + 0.12345 == y[i], "MathBase<>::vAdd_v with stride = 2 failed!");
+			NNHardAssert(almostEqual(x[i] + 0.12345, y[i]), "MathBase<>::vAdd_v with stride = 2 failed!");
 		}
 	}
 	
 	std::fill(y.begin(), y.end(), 0.12345);
 	MathBase<double>::vAdd_v(x.data(), x.size(), 1, y.data(), 1, 0.5);
 	for(size_t i = 0; i < x.size(); ++i)
-		NNHardAssert(0.5 * x[i] + 0.12345 == y[i], "MathBase<>::vAdd_v with alpha != 1 failed!");
+		NNHardAssert(almostEqual(0.5 * x[i] + 0.12345, y[i]), "MathBase<>::vAdd_v with alpha != 1 failed!");
 	
 	std::fill(y.begin(), y.end(), 0.12345);
 	MathBase<double>::vAdd_v(x.data(), x.size(), 1, y.data(), 1, 1, 0.75);
 	for(size_t i = 0; i < x.size(); ++i)
-		NNHardAssert(x[i] + 0.75 * 0.12345 == y[i], "MathBase<>::vAdd_v with beta != 1 failed!");
+		NNHardAssert(almostEqual(x[i] + 0.75 * 0.12345, y[i]), "MathBase<>::vAdd_v with beta != 1 failed!");
 	
 	std::fill(A.begin(), A.end(), 0);
 	MathBase<double>::mAdd_vv(x.data(), x.size(), 1, y.data(), y.size(), 1, A.data(), 10);
 	for(size_t i = 0; i < x.size(); ++i)
 		for(size_t j = 0; j < y.size(); ++j)
-			NNHardAssert(A[i * 10 + j] == x[i] * y[j], "MathBase<>::mAdd_vv with stride = 1 failed!");
+			NNHardAssert(almostEqual(A[i * 10 + j], x[i] * y[j]), "MathBase<>::mAdd_vv with stride = 1 failed!");
 	
 	MathBase<double>::mAdd_vv(x.data(), x.size() / 2, 2, y.data(), y.size() / 2, 2, A.data(), 10);
 	for(size_t i = 0; i < x.size(); ++i)
@@ -108,11 +113,11 @@ void TestMathBase()
 		{
 			if(i < x.size() / 2 && j < y.size() / 2)
 			{
-				NNHardAssert(A[i * 10 + j] == x[i] * y[j] + x[i] * y[j], "MathBase<>::mAdd_vv with stride = 2 failed!");
+				NNHardAssert(almostEqual(A[i * 10 + j], x[i] * y[j] + x[2*i] * y[2*j]), "MathBase<>::mAdd_vv with stride = 2 failed!");
 			}
 			else
 			{
-				NNHardAssert(A[i * 10 + j] == x[i] * y[j], "MathBase<>::mAdd_vv with stride = 2 failed!");
+				NNHardAssert(almostEqual(A[i * 10 + j], x[i] * y[j]), "MathBase<>::mAdd_vv with stride = 2 failed!");
 			}
 		}
 	}
@@ -126,7 +131,7 @@ void TestMathBase()
 		{
 			value += A[i * 10 + j] * x[j];
 		}
-		NNHardAssert(y[i] == value, "MathBase<>::vAdd_mv failed!");
+		NNHardAssert(almostEqual(y[i], value), "MathBase<>::vAdd_mv failed!");
 	}
 	
 	std::fill(y.begin(), y.end(), 0);
@@ -138,45 +143,45 @@ void TestMathBase()
 		{
 			value += A[j * 10 + i] * x[j];
 		}
-		NNHardAssert(y[i] == value, "MathBase<>::vAdd_mtv failed!");
+		NNHardAssert(almostEqual(y[i], value), "MathBase<>::vAdd_mtv failed!");
 	}
 	
 	std::fill(B.begin(), B.end(), 10);
 	MathBase<double>::mAdd_m(A.data(), 10, 10, 10, B.data(), 10);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(B[i * 10 + j] == A[i * 10 + j] + 10, "MathBase<>::mAdd_m failed!");
+			NNHardAssert(almostEqual(B[i * 10 + j], A[i * 10 + j] + 10), "MathBase<>::mAdd_m failed!");
 	
 	std::fill(B.begin(), B.end(), 10);
 	MathBase<double>::mAdd_mt(A.data(), 10, 10, 10, B.data(), 10);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(B[i * 10 + j] == A[j * 10 + i] + 10, "MathBase<>::mAdd_mt failed!");
+			NNHardAssert(almostEqual(B[i * 10 + j], A[j * 10 + i] + 10), "MathBase<>::mAdd_mt failed!");
 	
 	std::fill(C.begin(), C.end(), 0);
 	addMatrixMultiply<false, false>(10, 10, 10, A.data(), 10, B.data(), 10, C.data(), 10, 1, 0);
 	MathBase<double>::mAdd_mm(10, 10, 10, A.data(), 10, B.data(), 10, D.data(), 10, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(C[i * 10 + j] == D[i * 10 + j], "MathBase<>::mAdd_mm failed!");
+			NNHardAssert(almostEqual(C[i * 10 + j], D[i * 10 + j]), "MathBase<>::mAdd_mm failed!");
 	
 	addMatrixMultiply<true, false>(10, 10, 10, A.data(), 10, B.data(), 10, C.data(), 10, 1, 0);
 	MathBase<double>::mAdd_mtm(10, 10, 10, A.data(), 10, B.data(), 10, D.data(), 10, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(C[i * 10 + j] == D[i * 10 + j], "MathBase<>::mAdd_mm failed!");
+			NNHardAssert(almostEqual(C[i * 10 + j], D[i * 10 + j]), "MathBase<>::mAdd_mm failed!");
 	
 	addMatrixMultiply<false, true>(10, 10, 10, A.data(), 10, B.data(), 10, C.data(), 10, 1, 0);
 	MathBase<double>::mAdd_mmt(10, 10, 10, A.data(), 10, B.data(), 10, D.data(), 10, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(C[i * 10 + j] == D[i * 10 + j], "MathBase<>::mAdd_mm failed!");
+			NNHardAssert(almostEqual(C[i * 10 + j], D[i * 10 + j]), "MathBase<>::mAdd_mm failed!");
 	
 	addMatrixMultiply<true, true>(10, 10, 10, A.data(), 10, B.data(), 10, C.data(), 10, 1, 0);
 	MathBase<double>::mAdd_mm(10, 10, 10, B.data(), 10, A.data(), 10, D.data(), 10, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(C[i * 10 + j] == D[j * 10 + i], "MathBase<>::mAdd_mm with both matrices transposed failed!");
+			NNHardAssert(almostEqual(C[i * 10 + j], D[j * 10 + i]), "MathBase<>::mAdd_mm with both matrices transposed failed!");
 }
 
 #endif
