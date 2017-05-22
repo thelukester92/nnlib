@@ -4,7 +4,7 @@
 
 nnlib is an all-header library for building, training, and using neural networks.
 It is designed to be both easy-to-use and efficient, using BLAS to accelerate math calculations.
-nnlib depends on OpenBLAS (on Linux) or the Accelerate framework (on OS X).
+nnlib has no dependencies, but is compatible with OpenBLAS (Linux) or the Accelerate framework (OS X).
 For examples on how to use nnlib, see the [examples repository](https://github.com/thelukester92/nnlib-examples).
 
 This library is *experimental*.
@@ -23,9 +23,11 @@ After nnlib is installed, you can use it right away with `#include <nnlib.h>`.
 The default installation directory is `/usr/local/include`.
 For a different install directory, use `make install prefix=/path/to/dir`.
 
-When you compile, make sure you link BLAS.
-On Linux, you can do this with the `-lopenblas` flag.
-On OS X, you can do this with the `-framework Accelerate` flag.
+You can run without acceleration by compiling normally.
+To accelerate with BLAS, you need to link BLAS and define `ACCELERATE_BLAS` when compiling.
+On Linux, you can link BLAS with the `-lopenblas` flag.
+On OS X, you can link BLAS with the `-framework Accelerate` flag.
+Finally, on any platform, include the `-DACCELERATE_BLAS` flag to enable BLAS.
 
 Make sure you use C++11 with the `-std=c++11` flag.
 
