@@ -1,3 +1,6 @@
+#ifndef TEST_MSE
+#define TEST_MSE
+
 #include "nnlib/critics/mse.h"
 using namespace nnlib;
 
@@ -32,3 +35,5 @@ void TestMSE()
 	critic.batch(12);
 	NNHardAssert(critic.batch() == 12, "MSE<>::batch failed!");
 }
+
+#endif

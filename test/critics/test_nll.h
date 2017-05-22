@@ -1,3 +1,6 @@
+#ifndef TEST_NLL
+#define TEST_NLL
+
 #include "nnlib/critics/nll.h"
 using namespace nnlib;
 
@@ -28,3 +31,5 @@ void TestNLL()
 	critic.batch(12);
 	NNHardAssert(critic.batch() == 12, "NLL<>::batch failed!");
 }
+
+#endif

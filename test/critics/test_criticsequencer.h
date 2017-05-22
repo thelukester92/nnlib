@@ -1,3 +1,6 @@
+#ifndef TEST_CRITIC_SEQUENCER_H
+#define TEST_CRITIC_SEQUENCER_H
+
 #include "nnlib/critics/criticsequencer.h"
 #include "nnlib/critics/mse.h"
 using namespace nnlib;
@@ -35,3 +38,5 @@ void TestCriticSequencer()
 	critic.safeForward(inp, tgt);
 	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "CriticSequencer<>::safeForward failed!");
 }
+
+#endif

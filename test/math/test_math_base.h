@@ -1,3 +1,6 @@
+#ifndef TEST_MATH_BASE
+#define TEST_MATH_BASE
+
 #include "nnlib/math/math_base.h"
 #include <algorithm>
 #include <vector>
@@ -175,3 +178,5 @@ void TestMathBase()
 		for(size_t j = 0; j < 10; ++j)
 			NNHardAssert(C[i * 10 + j] == D[j * 10 + i], "MathBase<>::mAdd_mm with both matrices transposed failed!");
 }
+
+#endif
