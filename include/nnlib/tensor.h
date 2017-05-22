@@ -512,6 +512,7 @@ public:
 	/// \brief Creates a new tensor as a copy this tensor.
 	///
 	/// This is a deep copy, and the resulting tensor will have the same shape as this tensor.
+	/// The resulting tensor will also be contiguous, regardless of whether this tensor is contiguous.
 	/// \return A copy of this tensor.
 	Tensor copy() const
 	{
