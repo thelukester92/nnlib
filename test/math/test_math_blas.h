@@ -9,7 +9,8 @@ using namespace nnlib;
 
 void TestMathBLAS()
 {
-	TestMath<MathBLAS<double>>("MathBLAS");
+	TestMath<MathBLAS, double>("MathBLAS<double>");
+	TestMath<MathBLAS, float>("MathBLAS<float>");
 }
 
 #endif
