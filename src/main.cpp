@@ -314,6 +314,8 @@ void testNeuralNet()
 	{
 		double dy = grad(0, i) * (1.0 - ::tanh(perceptron.output()(0, i)) * ::tanh(perceptron.output()(0, i)));
 		NNHardAssert(fabs(tanh.inGrad()(0, i) - dy) < 1e-9, "TanH::backward failed!");
+		cout << perceptron.output() << endl;
+		cout << tanh.inGrad()(0, i) << " and " << dy << endl;
 	}
 	
 	// MARK: Sequential Test
