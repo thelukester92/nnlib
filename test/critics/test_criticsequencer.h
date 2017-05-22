@@ -20,11 +20,11 @@ void TestCriticSequencer()
 	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "CriticSequencer<>::safeForward failed!");
 	
 	critic.backward(inp, tgt);
-	NNHardAssert(fabs(critic.inGrad().reshape(5, 1).addMM(dif.reshape(5, 1), -1).sum()) < 1e-12, "CriticSequencer<>::backward failed!");
+	NNHardAssert(fabs(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).sum()) < 1e-12, "CriticSequencer<>::backward failed!");
 	
 	critic.inputs({ 10, 10, 10 });
 	critic.safeBackward(inp, tgt);
-	NNHardAssert(fabs(critic.inGrad().reshape(5, 1).addMM(dif.reshape(5, 1), -1).sum()) < 1e-12, "CriticSequencer<>::safeBackward failed!");
+	NNHardAssert(fabs(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).sum()) < 1e-12, "CriticSequencer<>::safeBackward failed!");
 	
 	critic.batch(12);
 	NNHardAssert(critic.batch() == 12, "CriticSequencer<>::batch failed!");

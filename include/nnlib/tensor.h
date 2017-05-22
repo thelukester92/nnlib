@@ -773,7 +773,7 @@ public:
 		return *this;
 	}
 	
-	/// \brief Assigns a vector/vector outer product.
+	/// \brief Assigns or adds a vector/vector outer product.
 	///
 	/// Adds the scaled outer product of x and y to this matrix.
 	/// Sizes must be compatible.

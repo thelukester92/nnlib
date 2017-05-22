@@ -23,7 +23,7 @@ void TestNLL()
 	
 	critic.average(false);
 	critic.backward(inp, tgt);
-	NNHardAssert(fabs(critic.inGrad().addMM(grd, -1).sum()) < 1e-12, "NLL<>::backward failed!");
+	NNHardAssert(fabs(critic.inGrad().addM(grd, -1).sum()) < 1e-12, "NLL<>::backward failed!");
 	
 	critic.batch(12);
 	NNHardAssert(critic.batch() == 12, "NLL<>::batch failed!");
