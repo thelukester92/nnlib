@@ -26,7 +26,7 @@ public:
 	
 	// MARK: Vector/Vector operations
 	
-	/// y += alpha * x
+	/// y = alpha * x + y
 	static void vAdd_v(
 		const T *x, size_t n, size_t sx,
 		T *y, size_t sy,
@@ -36,16 +36,42 @@ public:
 		cblas_saxpy(n, alpha, x, sx, y, sy);
 	}
 	
+	/// y = alpha * x + beta * y
+	static void vAdd_v(
+		const T *x, size_t n, size_t sx,
+		T *y, size_t sy,
+		T alpha, T beta
+	)
+	{
+		#ifdef __APPLE__
+			catlas_saxpby(n, alpha, x, sx, beta, y, sy);
+		#else
+			cblas_saxpby(n, alpha, x, sx, beta, y, sy);
+		#endif
+	}
+	
 	// MARK: Matrix/Vector operations
 	
-	/// A += alpha * x^T * y
-	static void mAdd_vtv(
+	/// A = alpha * x <*> y + A, <*> = outer product
+	static void mAdd_vv(
 		const T *x, size_t r, size_t sx,
 		const T *y, size_t c, size_t sy,
 		T *A, size_t lda,
 		T alpha = 1
 	)
 	{
+		cblas_sger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
+	}
+	
+	/// A = alpha * x <*> y + beta * A, <*> = outer product
+	static void mAdd_vv(
+		const T *x, size_t r, size_t sx,
+		const T *y, size_t c, size_t sy,
+		T *A, size_t lda,
+		T alpha, T beta
+	)
+	{
+		mScale(A, r, c, lda, beta);
 		cblas_sger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
 	}
 	
@@ -134,7 +160,7 @@ public:
 	
 	// MARK: Vector/Vector operations
 	
-	/// y += alpha * x
+	/// y = alpha * x + y
 	static void vAdd_v(
 		const T *x, size_t n, size_t sx,
 		T *y, size_t sy,
@@ -144,16 +170,42 @@ public:
 		cblas_daxpy(n, alpha, x, sx, y, sy);
 	}
 	
+	/// y = alpha * x + beta * y
+	static void vAdd_v(
+		const T *x, size_t n, size_t sx,
+		T *y, size_t sy,
+		T alpha, T beta
+	)
+	{
+		#ifdef __APPLE__
+			catlas_daxpby(n, alpha, x, sx, beta, y, sy);
+		#else
+			cblas_daxpby(n, alpha, x, sx, beta, y, sy);
+		#endif
+	}
+	
 	// MARK: Matrix/Vector operations
 	
-	/// A += alpha * x^T * y
-	static void mAdd_vtv(
+	/// A = alpha * x <*> y + A, <*> = outer product
+	static void mAdd_vv(
 		const T *x, size_t r, size_t sx,
 		const T *y, size_t c, size_t sy,
 		T *A, size_t lda,
 		T alpha = 1
 	)
 	{
+		cblas_dger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
+	}
+	
+	/// A = alpha * x <*> y + beta * A, <*> = outer product
+	static void mAdd_vv(
+		const T *x, size_t r, size_t sx,
+		const T *y, size_t c, size_t sy,
+		T *A, size_t lda,
+		T alpha, T beta
+	)
+	{
+		mScale(A, r, c, lda, beta);
 		cblas_dger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
 	}
 	

@@ -160,62 +160,62 @@ void testAlgebra()
 	B.rand();
 	
 	slowMatrixMultiply<false, false>(A, B, C);
-	C2.multiplyMM(A, B);
+	C2.assignMM(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMM failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::assignMM failed!");
 		}
 	}
 	
 	B.resize(3, 5);
 	slowMatrixMultiply<false, true>(A, B, C);
-	C2.multiplyMMT(A, B);
+	C2.assignMMT(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMMT failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::assignMMT failed!");
 		}
 	}
 	
 	A.resize(5, 10);
 	B.resize(5, 3);
 	slowMatrixMultiply<true, false>(A, B, C);
-	C2.multiplyMTM(A, B);
+	C2.assignMTM(A, B);
 	
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::multiplyMTM failed!");
+			NNHardAssert(fabs(C(i, j) - C2(i, j)) < 1e-9, "Tensor::assignMTM failed!");
 		}
 	}
 	
 	Tensor<double> vec1 = Tensor<double>(10).rand(), vec2 = Tensor<double>(5).rand();
 	Tensor<double> outerProduct(10, 5);
-	outerProduct.multiplyVTV(vec1, vec2);
+	outerProduct.assignVV(vec1, vec2);
 	for(size_t i = 0; i < vec1.size(); ++i)
 	{
 		for(size_t j = 0; j < vec2.size(); ++j)
 		{
-			NNHardAssert(fabs(outerProduct(i, j) - vec1(i) * vec2(j)) < 1e-9, "Tensor::multiplyVTV failed!");
+			NNHardAssert(fabs(outerProduct(i, j) - vec1(i) * vec2(j)) < 1e-9, "Tensor::assignVV failed!");
 		}
 	}
 	
 	Tensor<double> mv(outerProduct.size(0));
 	Tensor<double> actual(outerProduct.size(0), 1);
 	slowMatrixMultiply<false, false>(outerProduct, vec2.reshape(outerProduct.size(1), 1), actual);
-	mv.multiplyMV(outerProduct, vec2);
+	mv.assignMV(outerProduct, vec2);
 	for(size_t i = 0; i < mv.size(); ++i)
 	{
-		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Tensor::multiplyMV failed!");
+		NNHardAssert(fabs(mv(i) - actual(i, 0)) < 1e-9, "Tensor::assignMV failed!");
 	}
 	
-	// Matrix addition?
+	// Matrix addition
 	
 	C.rand();
 	C2.fill(3.14);
@@ -240,7 +240,7 @@ void testAlgebra()
 	bool problem = false;
 	try
 	{
-		baz.multiplyMM(bar, bat);
+		baz.assignMM(bar, bat);
 	}
 	catch(std::runtime_error &e)
 	{

@@ -71,10 +71,10 @@ public:
 		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
 		
 		// output (bats x outs) = input (bats x inps) x weights (inps x outs)
-		m_output.multiplyMM(input, m_weights);
+		m_output.assignMM(input, m_weights);
 		
 		// output (bats x outs) += addBuffer (bats x 1) x bias (1 x outs)
-		m_output.multiplyVTV(m_addBuffer, m_bias);
+		m_output.assignVV(m_addBuffer, m_bias, 1, 1);
 		
 		return m_output;
 	}
@@ -86,13 +86,13 @@ public:
 		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
 		
 		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer (bats x 1)
-		m_biasGrad.multiplyMTV(outGrad, m_addBuffer, 1, 1);
+		m_biasGrad.assignMTV(outGrad, m_addBuffer, 1, 1);
 		
 		// weightsGrad (inps x outs) += input^T (bats x inps) x outGrad (bats x outs)
-		m_weightsGrad.multiplyMTM(input, outGrad, 1, 1);
+		m_weightsGrad.assignMTM(input, outGrad, 1, 1);
 		
 		// inGrad (bats x inps) = outGrad (bats x outs) x weights^T (outs x inps)
-		m_inGrad.multiplyMMT(outGrad, m_weights);
+		m_inGrad.assignMMT(outGrad, m_weights);
 		
 		return m_inGrad;
 	}

@@ -48,30 +48,30 @@ public:
 	
 	// MARK: Vector/Vector operations
 	
-	/// y += alpha * x
+	/// y = alpha * x + beta * y
 	static void vAdd_v(
 		const T *x, size_t n, size_t sx,
 		T *y, size_t sy,
-		T alpha = 1
+		T alpha = 1, T beta = 1
 	)
 	{
 		for(size_t i = 0; i < n; ++i)
-			y[i * sy] += x[i * sx];
+			y[i * sy] = alpha * x[i * sx] + beta * y[i * sy];
 	}
 	
 	// MARK: Matrix/Vector operations
 	
-	/// A += alpha * x^T * y
-	static void mAdd_vtv(
+	/// A = alpha * x <*> y + beta * A, <*> = outer product
+	static void mAdd_vv(
 		const T *x, size_t r, size_t sx,
 		const T *y, size_t c, size_t sy,
 		T *A, size_t lda,
-		T alpha = 1
+		T alpha = 1, T beta = 1
 	)
 	{
 		for(size_t i = 0; i < r; ++i)
 			for(size_t j = 0; j < c; ++j)
-				A[i * lda + j] += alpha * x[i] * y[j];
+				A[i * lda + j] = alpha * x[i] * y[j] + beta * A[i * lda + j];
 	}
 	
 	/// y = alpha * A * x^T + beta * y

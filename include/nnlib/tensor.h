@@ -702,60 +702,18 @@ public:
 	
 	// MARK: Algebra
 	
-	/// \brief Matrix multiplcation with no transposition.
+	/// \brief Assigns or adds a matrix/vector with no transposition.
 	///
-	/// Adds the scaled product of A and B to this tensor, scaled.
+	/// Adds the scaled product of A and x to this vector, scaled.
 	/// Sizes must be compatible.
 	/// This method will use acceleration, if present.
-	/// Effectively, using C for this tensor, this method computes `C = alpha * A * B + beta * C`.
-	/// \param A A M x K tensor.
-	/// \param B A K x N tensor.
-	/// \param alpha How much to scale A * B.
-	/// \param beta How much to scale C.
+	/// Effectively, using y for this tensor, this method computes `y = alpha * A * x + beta * y`.
+	/// \param A An M x N tensor.
+	/// \param x An N tensor.
+	/// \param alpha How much to scale A * x.
+	/// \param beta How much to scale y.
 	/// \return This tensor, for chaining.
-	Tensor &multiplyMM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
-	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Math<T>::mAdd_mm(
-			A.size(0), B.size(1), A.size(1),
-			A.ptr(), A.stride(0),
-			B.ptr(), B.stride(0),
-			ptr(), stride(0),
-			alpha, beta
-		);
-		return *this;
-	}
-	
-	Tensor &multiplyMTM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
-	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Math<T>::mAdd_mtm(
-			A.size(1), B.size(1), A.size(0),
-			A.ptr(), A.stride(0),
-			B.ptr(), B.stride(0),
-			ptr(), stride(0),
-			alpha, beta
-		);
-		return *this;
-	}
-	
-	Tensor &multiplyMMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
-	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
-		Math<T>::mAdd_mmt(
-			A.size(0), B.size(0), A.size(1),
-			A.ptr(), A.stride(0),
-			B.ptr(), B.stride(0),
-			ptr(), stride(0),
-			alpha, beta
-		);
-		return *this;
-	}
-	
-	Tensor &multiplyMV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
+	Tensor &assignMV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
@@ -768,7 +726,18 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyMTV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
+	/// \brief Assigns or adds a matrix/vector with transposition.
+	///
+	/// Adds the scaled product of A and x to this vector, scaled.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using y for this tensor, this method computes `y = alpha * A^T * x + beta * y`.
+	/// \param A An N x M tensor.
+	/// \param x An N tensor.
+	/// \param alpha How much to scale A^T * x.
+	/// \param beta How much to scale y.
+	/// \return This tensor, for chaining.
+	Tensor &assignMTV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
@@ -781,15 +750,48 @@ public:
 		return *this;
 	}
 	
-	Tensor &multiplyVTV(const Tensor &x, const Tensor &y, T alpha = 1)
+	/// \brief Assigns a vector/vector outer product.
+	///
+	/// Adds the scaled outer product of x and y to this matrix.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using A for this tensor, this method computes `A = alpha * x^T * y + A`.
+	/// \param x An N tensor.
+	/// \param y An M tensor.
+	/// \param alpha How much to scale x^T * y.
+	/// \return This tensor, for chaining.
+	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
 		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
-		Math<T>::mAdd_vtv(
+		Math<T>::mAdd_vv(
 			x.ptr(), x.size(), x.stride(0),
 			y.ptr(), y.size(), y.stride(0),
 			ptr(), stride(0),
 			alpha
+		);
+		return *this;
+	}
+	
+	/// \brief Assigns a vector/vector outer product.
+	///
+	/// Adds the scaled outer product of x and y to this matrix.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using A for this tensor, this method computes `A = alpha * x^T * y + beta * A`.
+	/// \param x An N tensor.
+	/// \param y An M tensor.
+	/// \param alpha How much to scale x^T * y.
+	/// \return This tensor, for chaining.
+	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha, T beta)
+	{
+		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
+		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
+		Math<T>::mAdd_vv(
+			x.ptr(), x.size(), x.stride(0),
+			y.ptr(), y.size(), y.stride(0),
+			ptr(), stride(0),
+			alpha, beta
 		);
 		return *this;
 	}
@@ -812,6 +814,81 @@ public:
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			ptr(), stride(0),
 			alpha
+		);
+		return *this;
+	}
+	
+	/// \brief Assigns or adds a matrix multiplcation with no transposition.
+	///
+	/// Adds the scaled product of A and B to this matrix, scaled.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using C for this tensor, this method computes `C = alpha * A * B + beta * C`.
+	/// \param A An M x K tensor.
+	/// \param B A K x N tensor.
+	/// \param alpha How much to scale A * B.
+	/// \param beta How much to scale C.
+	/// \return This tensor, for chaining.
+	Tensor &assignMM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
+		Math<T>::mAdd_mm(
+			A.size(0), B.size(1), A.size(1),
+			A.ptr(), A.stride(0),
+			B.ptr(), B.stride(0),
+			ptr(), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	/// \brief Assigns or adds a matrix multiplcation with transposition on the first operand.
+	///
+	/// Adds the scaled product of A and B to this matrix, scaled.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using C for this tensor, this method computes `C = alpha * A^T * B + beta * C`.
+	/// \param A A K x M tensor.
+	/// \param B A K x N tensor.
+	/// \param alpha How much to scale A^T * B.
+	/// \param beta How much to scale C.
+	/// \return This tensor, for chaining.
+	Tensor &assignMTM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
+		Math<T>::mAdd_mtm(
+			A.size(1), B.size(1), A.size(0),
+			A.ptr(), A.stride(0),
+			B.ptr(), B.stride(0),
+			ptr(), stride(0),
+			alpha, beta
+		);
+		return *this;
+	}
+	
+	/// \brief Assigns or adds a matrix multiplcation with transposition on the second operand.
+	///
+	/// Adds the scaled product of A and B to this matrix, scaled.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using C for this tensor, this method computes `C = alpha * A * B^T + beta * C`.
+	/// \param A An M x K tensor.
+	/// \param B An N x K tensor.
+	/// \param alpha How much to scale A * B^T.
+	/// \param beta How much to scale C.
+	/// \return This tensor, for chaining.
+	Tensor &assignMMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
+	{
+		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
+		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
+		Math<T>::mAdd_mmt(
+			A.size(0), B.size(0), A.size(1),
+			A.ptr(), A.stride(0),
+			B.ptr(), B.stride(0),
+			ptr(), stride(0),
+			alpha, beta
 		);
 		return *this;
 	}
