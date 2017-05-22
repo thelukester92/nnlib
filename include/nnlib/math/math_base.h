@@ -75,7 +75,7 @@ public:
 	}
 	
 	/// y = alpha * A * x^T + beta * y
-	static void mAdd_mv(
+	static void vAdd_mv(
 		const T *A, size_t ra, size_t ca, size_t lda,
 		const T *x, size_t sx,
 		T *y, size_t sy,
@@ -92,7 +92,7 @@ public:
 	}
 	
 	/// y = alpha * A^T * x^T + beta * y
-	static void mAdd_mtv(
+	static void vAdd_mtv(
 		const T *A, size_t ra, size_t ca, size_t lda,
 		const T *x, size_t sx,
 		T *y, size_t sy,
@@ -110,16 +110,28 @@ public:
 	
 	// MARK: Matrix/Matrix operations
 	
-	/// B += alpha * A
+	/// B = alpha * A + beta * B
 	static void mAdd_m(
 		const T *A, size_t r, size_t c, size_t lda,
 		T *B, size_t ldb,
-		T alpha = 1
+		T alpha = 1, T beta = 1
 	)
 	{
 		for(size_t i = 0; i < r; ++i)
 			for(size_t j = 0; j < c; ++j)
-				B[i * ldb + j] += alpha * A[i * lda + j];
+				B[i * ldb + j] = alpha * A[i * lda + j] + beta * B[i * ldb + j];
+	}
+	
+	/// B = alpha * A^T + beta * B
+	static void mAdd_mt(
+		const T *A, size_t r, size_t c, size_t lda,
+		T *B, size_t ldb,
+		T alpha = 1, T beta = 1
+	)
+	{
+		for(size_t i = 0; i < r; ++i)
+			for(size_t j = 0; j < c; ++j)
+				B[i * ldb + j] = alpha * A[j * lda + i] + beta * B[i * ldb + j];
 	}
 	
 	/// C = alpha * A * B + beta * C

@@ -76,7 +76,7 @@ public:
 	}
 	
 	/// y = alpha * A * x^T + beta * y
-	static void mAdd_mv(
+	static void vAdd_mv(
 		const T *A, size_t ra, size_t ca, size_t lda,
 		const T *x, size_t sx,
 		T *y, size_t sy,
@@ -87,7 +87,7 @@ public:
 	}
 	
 	/// y = alpha * A^T * x^T + beta * y
-	static void mAdd_mtv(
+	static void vAdd_mtv(
 		const T *A, size_t ra, size_t ca, size_t lda,
 		const T *x, size_t sx,
 		T *y, size_t sy,
