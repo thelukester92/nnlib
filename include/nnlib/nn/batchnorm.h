@@ -77,14 +77,14 @@ public:
 			// Get unnormalized variances (temporarily stored in invStd)
 			for(size_t i = 0; i < n; ++i)
 			{
-				m_invStds.addVV(input.select(0, i).copy().addVV(m_means, -1).square());
+				m_invStds.addV(input.select(0, i).copy().addV(m_means, -1).square());
 			}
 			
 			// Update running mean
-			m_runningMeans.scale(1 - m_momentum).addVV(m_means.copy().scale(m_momentum));
+			m_runningMeans.scale(1 - m_momentum).addV(m_means.copy().scale(m_momentum));
 			
 			// Update running variance (normalize as sample)
-			m_runningVars.scale(1 - m_momentum).addVV(m_invStds.copy().scale(m_momentum / (n - 1)));
+			m_runningVars.scale(1 - m_momentum).addV(m_invStds.copy().scale(m_momentum / (n - 1)));
 			
 			// Now normalize variance as population; will invert and sqrt after this if statement
 			m_invStds.scale(norm);
@@ -114,10 +114,10 @@ public:
 			Tensor<T> out = m_output.select(0, i);
 			
 			// Normalize
-			nrm.addVV(means, -1).pointwiseProduct(invStds);
+			nrm.addV(means, -1).pointwiseProduct(invStds);
 			
 			// Rescale and reshift using the parameters
-			out.copy(nrm).pointwiseProduct(m_weights).addVV(m_biases);
+			out.copy(nrm).pointwiseProduct(m_weights).addV(m_biases);
 		}
 		
 		return m_output;
@@ -152,13 +152,13 @@ public:
 		}
 		
 		// gradient of biases
-		m_biasesGrad.addVV(outGrad.sum(0));
+		m_biasesGrad.addV(outGrad.sum(0));
 		
 		// gradient of weights
 		Tensor<T> product = m_normalized.copy().pointwiseProduct(outGrad);
 		for(size_t i = 0; i < n; ++i)
 		{
-			m_weightsGrad.addVV(product.select(0, i));
+			m_weightsGrad.addV(product.select(0, i));
 		}
 		
 		// gradient of inputs

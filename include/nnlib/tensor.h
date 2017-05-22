@@ -702,6 +702,18 @@ public:
 	
 	// MARK: Algebra
 	
+	/// Add another vector to this vector.
+	Tensor &addV(const Tensor &x, T alpha = 1)
+	{
+		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
+		Math<T>::vAdd_v(
+			x.ptr(), x.size(), x.stride(0),
+			ptr(), stride(0),
+			alpha
+		);
+		return *this;
+	}
+	
 	/// \brief Assigns or adds a matrix/vector with no transposition.
 	///
 	/// Adds the scaled product of A and x to this vector, scaled.
@@ -760,6 +772,7 @@ public:
 	/// \param y An M tensor.
 	/// \param alpha How much to scale x^T * y.
 	/// \return This tensor, for chaining.
+	/// \note This method does not include beta because the no-beta version is faster.
 	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha = 1)
 	{
 		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
@@ -783,6 +796,7 @@ public:
 	/// \param y An M tensor.
 	/// \param alpha How much to scale x^T * y.
 	/// \return This tensor, for chaining.
+	/// \note This method does explicitly includes beta because the no-beta version is faster.
 	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha, T beta)
 	{
 		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
@@ -796,17 +810,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &addVV(const Tensor &x, T alpha = 1)
-	{
-		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
-		Math<T>::vAdd_v(
-			x.ptr(), x.size(), x.stride(0),
-			ptr(), stride(0),
-			alpha
-		);
-		return *this;
-	}
-	
+	/// Add another matrix to this matrix.
 	Tensor &addM(const Tensor &A, T alpha = 1)
 	{
 		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
@@ -909,13 +913,13 @@ public:
 	/// \brief Compute elementwise/pointwise sum (general purpose).
 	///
 	/// This is a general purpose function for any size of tensor.
-	/// For vectors, addVV is called; for matrices, addM is called.
+	/// For vectors, addV is called; for matrices, addM is called.
 	Tensor &add(const Tensor &x, T alpha = 1)
 	{
 		NNAssert(shape() == x.shape(), "Incompatible operands to add!");
 		if(m_dims.size() == 1)
 		{
-			return addVV(x, alpha);
+			return addV(x, alpha);
 		}
 		else if(m_dims.size() == 2)
 		{
