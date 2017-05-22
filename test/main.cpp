@@ -1,6 +1,8 @@
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
 #include "critics/test_nll.h"
+#include "math/test_math_base.h"
+#include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
 
 #include <iostream>
@@ -21,6 +23,10 @@ int main()
 		TEST(CriticSequencer),
 		TEST(MSE),
 		TEST(NLL),
+		
+		// math
+		TEST(MathBase),
+		TEST(MathBLAS),
 		
 		// nn
 		TEST(BatchNorm)

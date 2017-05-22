@@ -2,7 +2,7 @@ BIN:=../bin
 OBJ:=../obj
 INC:=../include
 OUT:=nnlib_test
-CFLAGS:=-Wall -std=c++11 -I$(INC)
+CFLAGS:=-Wall -std=c++11 -I$(INC) -DHAS_BLAS
 LFLAGS:=
 CXX:=g++
 UNAME:=$(shell uname -s)
