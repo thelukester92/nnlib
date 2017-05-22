@@ -26,6 +26,17 @@ public:
 	
 	// MARK: Matrix/Vector operations
 	
+	/// A += alpha * x^T * y
+	static void mAdd_vtv(
+		const T *x, size_t r, size_t sx,
+		const T *y, size_t c, size_t sy,
+		T *A, size_t lda,
+		T alpha = 1
+	)
+	{
+		cblas_sger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
+	}
+	
 	/// y = alpha * A * x^T + beta * y
 	static void mAdd_mv(
 		const T *A, size_t ra, size_t ca, size_t lda,
@@ -110,6 +121,17 @@ public:
 	using T = double;
 	
 	// MARK: Matrix/Vector operations
+	
+	/// A += alpha * x^T * y
+	static void mAdd_vtv(
+		const T *x, size_t r, size_t sx,
+		const T *y, size_t c, size_t sy,
+		T *A, size_t lda,
+		T alpha = 1
+	)
+	{
+		cblas_dger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
+	}
 	
 	/// y = alpha * A * x^T + beta * y
 	static void mAdd_mv(
