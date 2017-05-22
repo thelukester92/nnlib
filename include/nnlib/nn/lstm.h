@@ -156,30 +156,30 @@ public:
 		
 		// input gate
 		m_inpGateX->forward(input);
-		m_inpGateX->output().addMM(m_inpGateY->forward(m_prevOutput));
-		m_inpGateX->output().addMM(m_inpGateH->forward(m_prevState));
+		m_inpGateX->output().addM(m_inpGateY->forward(m_prevOutput));
+		m_inpGateX->output().addM(m_inpGateH->forward(m_prevState));
 		m_inpGate->forward(m_inpGateX->output());
 		
 		// forget gate
 		m_fgtGateX->forward(input);
-		m_fgtGateX->output().addMM(m_fgtGateY->forward(m_prevOutput));
-		m_fgtGateX->output().addMM(m_fgtGateH->forward(m_prevState));
+		m_fgtGateX->output().addM(m_fgtGateY->forward(m_prevOutput));
+		m_fgtGateX->output().addM(m_fgtGateH->forward(m_prevState));
 		m_fgtGate->forward(m_fgtGateX->output());
 		
 		// input value
 		m_inpModX->forward(input);
-		m_inpModX->output().addMM(m_inpModY->forward(m_prevOutput));
+		m_inpModX->output().addM(m_inpModY->forward(m_prevOutput));
 		m_inpMod->forward(m_inpModX->output());
 		
 		// update memory cell (hidden state)
 		m_inpAdd.copy(m_inpGate->output()).pointwiseProduct(m_inpMod->output());
 		m_fgtAdd.copy(m_fgtGate->output()).pointwiseProduct(m_state);
-		m_state.copy(m_inpAdd).addMM(m_fgtAdd);
+		m_state.copy(m_inpAdd).addM(m_fgtAdd);
 		
 		// output gate
 		m_outGateX->forward(input);
-		m_outGateX->output().addMM(m_outGateY->forward(m_prevOutput));
-		m_outGateX->output().addMM(m_outGateH->forward(m_state));
+		m_outGateX->output().addM(m_outGateY->forward(m_prevOutput));
+		m_outGateX->output().addM(m_outGateH->forward(m_state));
 		m_outGate->forward(m_outGateX->output());
 		m_outAdd.copy(m_outGate->output()).pointwiseProduct(m_state);
 		
@@ -198,12 +198,12 @@ public:
 		}
 		
 		// update output gradient
-		m_outGrad.addMM(outGrad);
+		m_outGrad.addM(outGrad);
 		m_outMod->backward(m_outAdd, m_outGrad);
 		
 		// backprop to hidden state
 		m_curStateGrad.copy(m_outMod->inGrad()).pointwiseProduct(m_outGate->output());
-		m_curStateGrad.addMM(m_stateGrad);
+		m_curStateGrad.addM(m_stateGrad);
 		
 		// backprop through output gate
 		m_gradBuffer.copy(m_outMod->inGrad()).pointwiseProduct(m_state);
@@ -214,26 +214,26 @@ public:
 		// backprop through input value
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_inpGate->output());
 		m_inpMod->backward(m_inpModX->output(), m_gradBuffer);
-		m_inGrad.addMM(m_inpModX->backward(input, m_inpMod->inGrad()));
-		m_outGrad.addMM(m_inpModY->backward(m_prevOutput, m_inpMod->inGrad()));
+		m_inGrad.addM(m_inpModX->backward(input, m_inpMod->inGrad()));
+		m_outGrad.addM(m_inpModY->backward(m_prevOutput, m_inpMod->inGrad()));
 		
 		// backprop through forget gate
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_prevState);
 		m_fgtGate->backward(m_fgtGateX->output(), m_gradBuffer);
-		m_inGrad.addMM(m_fgtGateX->backward(input, m_fgtGate->inGrad()));
+		m_inGrad.addM(m_fgtGateX->backward(input, m_fgtGate->inGrad()));
 		m_stateGrad.copy(m_fgtGateH->backward(m_prevState, m_fgtGate->inGrad()));
-		m_outGrad.addMM(m_fgtGateY->backward(m_prevOutput, m_fgtGate->inGrad()));
+		m_outGrad.addM(m_fgtGateY->backward(m_prevOutput, m_fgtGate->inGrad()));
 		
 		// backprop through input gate
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_inpMod->output());
 		m_inpGate->backward(m_inpGateX->output(), m_gradBuffer);
-		m_inGrad.addMM(m_inpGateX->backward(input, m_inpGate->inGrad()));
-		m_stateGrad.addMM(m_inpGateH->backward(m_prevState, m_inpGate->inGrad()));
-		m_outGrad.addMM(m_inpGateY->backward(m_prevOutput, m_inpGate->inGrad()));
+		m_inGrad.addM(m_inpGateX->backward(input, m_inpGate->inGrad()));
+		m_stateGrad.addM(m_inpGateH->backward(m_prevState, m_inpGate->inGrad()));
+		m_outGrad.addM(m_inpGateY->backward(m_prevOutput, m_inpGate->inGrad()));
 		
 		// backprop to hidden state
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_fgtGate->output());
-		m_stateGrad.addMM(m_gradBuffer);
+		m_stateGrad.addM(m_gradBuffer);
 		
 		return m_inGrad;
 	}

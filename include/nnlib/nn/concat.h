@@ -74,7 +74,7 @@ public:
 		for(Module<T> *component : m_components)
 		{
 			size = component->outputs()[1];
-			m_inGrad.addMM(component->backward(input, outGrad.sub({ {}, { offset, size } })));
+			m_inGrad.addM(component->backward(input, outGrad.sub({ {}, { offset, size } })));
 			offset += size;
 		}
 		

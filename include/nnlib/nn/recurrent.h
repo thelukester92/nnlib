@@ -104,7 +104,7 @@ public:
 		m_inpMod->forward(input);
 		m_memMod->forward(m_statePrev);
 		
-		m_state.copy(m_inpMod->output()).addMM(m_memMod->output());
+		m_state.copy(m_inpMod->output()).addM(m_memMod->output());
 		return m_outMod->forward(m_state);
 	}
 	
@@ -118,7 +118,7 @@ public:
 		}
 		
 		m_outMod->backward(m_state, outGrad);
-		m_outMod->inGrad().addMM(m_stateGrad);
+		m_outMod->inGrad().addM(m_stateGrad);
 		m_stateGrad.copy(m_memMod->backward(m_statePrev, m_outMod->inGrad()));
 		return m_inpMod->backward(input, m_outMod->inGrad());
 	}

@@ -220,12 +220,12 @@ void testAlgebra()
 	C.rand();
 	C2.fill(3.14);
 	
-	C2.addMM(C);
+	C2.addM(C);
 	for(size_t i = 0; i < C.size(0); ++i)
 	{
 		for(size_t j = 0; j < C.size(1); ++j)
 		{
-			NNHardAssert(C2(i, j) == 3.14 + C(i, j), "Tensor::addMM failed!");
+			NNHardAssert(C2(i, j) == 3.14 + C(i, j), "Tensor::addM failed!");
 		}
 	}
 	
@@ -419,9 +419,9 @@ void testNeuralNet()
 	Tensor<double> blam2 = Tensor<double>(comp2->output().shape(), true).rand();
 	Tensor<double> blam3 = Tensor<double>(comp3->output().shape(), true).rand();
 	Tensor<double> inGrad2(inMat.shape(), true);
-	inGrad2.addMM(comp1->backward(inMat, blam1));
-	inGrad2.addMM(comp2->backward(inMat, blam2));
-	inGrad2.addMM(comp3->backward(inMat, blam3));
+	inGrad2.addM(comp1->backward(inMat, blam1));
+	inGrad2.addM(comp2->backward(inMat, blam2));
+	inGrad2.addM(comp3->backward(inMat, blam3));
 	
 	Tensor<double> blam = Tensor<double>::flatten({ &blam1, &blam2, &blam3 }).resize(1, 40);
 	concat.backward(inMat, blam);

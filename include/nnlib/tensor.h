@@ -795,7 +795,7 @@ public:
 		return *this;
 	}
 	
-	Tensor &addMM(const Tensor &A, T alpha = 1)
+	Tensor &addM(const Tensor &A, T alpha = 1)
 	{
 		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
 		Math<T>::mAdd_m(
@@ -822,7 +822,7 @@ public:
 	/// \brief Compute elementwise/pointwise sum (general purpose).
 	///
 	/// This is a general purpose function for any size of tensor.
-	/// For vectors, addVV is called; for matrices, addMM is called.
+	/// For vectors, addVV is called; for matrices, addM is called.
 	Tensor &add(const Tensor &x, T alpha = 1)
 	{
 		NNAssert(shape() == x.shape(), "Incompatible operands to add!");
@@ -832,7 +832,7 @@ public:
 		}
 		else if(m_dims.size() == 2)
 		{
-			return addMM(x, alpha);
+			return addM(x, alpha);
 		}
 		else
 		{
