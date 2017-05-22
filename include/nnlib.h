@@ -1,4 +1,5 @@
 /// Top-level Classes
+#include "nnlib/error.h"
 #include "nnlib/storage.h"
 #include "nnlib/tensor.h"
 
@@ -39,7 +40,6 @@
 #include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"
-#include "nnlib/util/error.h"
 #include "nnlib/util/file.h"
 #include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
