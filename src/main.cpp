@@ -505,7 +505,7 @@ void testRNN()
 	Tensor<> expectedInGrad = Tensor<>({
 		-1.43229, -0.97700, -0.56715, -0.50216, -0.42033,
 		-1.66733, -0.15554, -0.42984, -0.46831
-	}).resize(9, 1);
+	}).resize(9, 1).scale(1.0 / 9.0);
 	
 	LSTM<> *lstm;
 	Sequencer<> nn(
