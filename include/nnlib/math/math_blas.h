@@ -24,6 +24,18 @@ class MathBLAS<float> : public MathBase<float>
 public:
 	using T = float;
 	
+	// MARK: Vector/Vector operations
+	
+	/// y += alpha * x
+	static void vAdd_v(
+		const T *x, size_t n, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1
+	)
+	{
+		cblas_saxpy(n, alpha, x, sx, y, sy);
+	}
+	
 	// MARK: Matrix/Vector operations
 	
 	/// A += alpha * x^T * y
@@ -119,6 +131,18 @@ class MathBLAS<double> : public MathBase<double>
 {
 public:
 	using T = double;
+	
+	// MARK: Vector/Vector operations
+	
+	/// y += alpha * x
+	static void vAdd_v(
+		const T *x, size_t n, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1
+	)
+	{
+		cblas_daxpy(n, alpha, x, sx, y, sy);
+	}
 	
 	// MARK: Matrix/Vector operations
 	
