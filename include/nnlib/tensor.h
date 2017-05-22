@@ -702,7 +702,17 @@ public:
 	
 	// MARK: Algebra
 	
-	/// \todo document this method
+	/// \brief Matrix multiplcation with no transposition.
+	///
+	/// Adds the scaled product of A and B to this tensor, scaled.
+	/// Sizes must be compatible.
+	/// This method will use acceleration, if present.
+	/// Effectively, using C for this tensor, this method computes `C = alpha * A * B + beta * C`.
+	/// \param A A M x K tensor.
+	/// \param B A K x N tensor.
+	/// \param alpha How much to scale A * B.
+	/// \param beta How much to scale C.
+	/// \return This tensor, for chaining.
 	Tensor &multiplyMM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
