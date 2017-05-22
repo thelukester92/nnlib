@@ -9,6 +9,7 @@
 #include "nnlib/critics/mse.h"
 
 /// Math
+/// \note Specific implementations are included from math.h
 #include "nnlib/math/math.h"
 
 /// Neural Networks

@@ -708,9 +708,10 @@ public:
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Math<T>::mAdd_mm(
-			A.ptr(), A.size(0), A.size(1), A.stride(0),
-			B.ptr(), B.size(0), B.size(1), B.stride(0),
-			ptr(), size(0), size(1), stride(0),
+			A.size(0), B.size(1), A.size(1),
+			A.ptr(), A.stride(0),
+			B.ptr(), B.stride(0),
+			ptr(), stride(0),
 			alpha, beta
 		);
 		return *this;
@@ -721,9 +722,10 @@ public:
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Math<T>::mAdd_mtm(
-			A.ptr(), A.size(0), A.size(1), A.stride(0),
-			B.ptr(), B.size(0), B.size(1), B.stride(0),
-			ptr(), size(0), size(1), stride(0),
+			A.size(1), B.size(1), A.size(0),
+			A.ptr(), A.stride(0),
+			B.ptr(), B.stride(0),
+			ptr(), stride(0),
 			alpha, beta
 		);
 		return *this;
@@ -734,9 +736,10 @@ public:
 		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
 		Math<T>::mAdd_mmt(
-			A.ptr(), A.size(0), A.size(1), A.stride(0),
-			B.ptr(), B.size(0), B.size(1), B.stride(0),
-			ptr(), size(0), size(1), stride(0),
+			A.size(0), B.size(0), A.size(1),
+			A.ptr(), A.stride(0),
+			B.ptr(), B.stride(0),
+			ptr(), stride(0),
 			alpha, beta
 		);
 		return *this;
