@@ -749,7 +749,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Math<T>::mAdd_mvt(
+		Math<T>::mAdd_mv(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.stride(0),
 			ptr(), stride(0),
@@ -762,7 +762,7 @@ public:
 	{
 		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
 		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
-		Math<T>::mAdd_mtvt(
+		Math<T>::mAdd_mtv(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.stride(0),
 			ptr(), stride(0),

@@ -24,12 +24,39 @@ class MathBLAS<float> : public MathBase<float>
 public:
 	using T = float;
 	
+	// MARK: Matrix/Vector operations
+	
+	/// y = alpha * A * x^T + beta * y
+	static void mAdd_mv(
+		const T *A, size_t ra, size_t ca, size_t lda,
+		const T *x, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1, T beta = 1
+	)
+	{
+		cblas_sgemv(CblasRowMajor, CblasNoTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
+	}
+	
+	/// y = alpha * A^T * x^T + beta * y
+	static void mAdd_mtv(
+		const T *A, size_t ra, size_t ca, size_t lda,
+		const T *x, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1, T beta = 1
+	)
+	{
+		cblas_sgemv(CblasRowMajor, CblasTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
+	}
+	
+	// MARK: Matrix/Matrix operations
+	
+	/// C = alpha * A * B + beta * C
 	static void mAdd_mm(
 		size_t M, size_t N, size_t K,
 		const T *A, size_t lda,
 		const T *B, size_t ldb,
 		T *C, size_t ldc,
-		T alpha = 1, T beta = 0
+		T alpha = 1, T beta = 1
 	)
 	{
 		cblas_sgemm(
@@ -40,12 +67,13 @@ public:
 		);
 	}
 	
+	/// C = alpha * A^T * B + beta * C
 	static void mAdd_mtm(
 		size_t M, size_t N, size_t K,
 		const T *A, size_t lda,
 		const T *B, size_t ldb,
 		T *C, size_t ldc,
-		T alpha = 1, T beta = 0
+		T alpha = 1, T beta = 1
 	)
 	{
 		cblas_sgemm(
@@ -56,12 +84,13 @@ public:
 		);
 	}
 	
+	/// C = alpha * A * B^T + beta * C
 	static void mAdd_mmt(
 		size_t M, size_t N, size_t K,
 		const T *A, size_t lda,
 		const T *B, size_t ldb,
 		T *C, size_t ldc,
-		T alpha = 1, T beta = 0
+		T alpha = 1, T beta = 1
 	)
 	{
 		cblas_sgemm(
@@ -80,12 +109,39 @@ class MathBLAS<double> : public MathBase<double>
 public:
 	using T = double;
 	
+	// MARK: Matrix/Vector operations
+	
+	/// y = alpha * A * x^T + beta * y
+	static void mAdd_mv(
+		const T *A, size_t ra, size_t ca, size_t lda,
+		const T *x, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1, T beta = 1
+	)
+	{
+		cblas_dgemv(CblasRowMajor, CblasNoTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
+	}
+	
+	/// y = alpha * A^T * x^T + beta * y
+	static void mAdd_mtv(
+		const T *A, size_t ra, size_t ca, size_t lda,
+		const T *x, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1, T beta = 1
+	)
+	{
+		cblas_dgemv(CblasRowMajor, CblasTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
+	}
+	
+	// MARK: Matrix/Matrix operations
+	
+	/// C = alpha * A * B + beta * C
 	static void mAdd_mm(
 		size_t M, size_t N, size_t K,
 		const T *A, size_t lda,
 		const T *B, size_t ldb,
 		T *C, size_t ldc,
-		T alpha = 1, T beta = 0
+		T alpha = 1, T beta = 1
 	)
 	{
 		cblas_dgemm(
@@ -96,12 +152,13 @@ public:
 		);
 	}
 	
+	/// C = alpha * A^T * B + beta * C
 	static void mAdd_mtm(
 		size_t M, size_t N, size_t K,
 		const T *A, size_t lda,
 		const T *B, size_t ldb,
 		T *C, size_t ldc,
-		T alpha = 1, T beta = 0
+		T alpha = 1, T beta = 1
 	)
 	{
 		cblas_dgemm(
@@ -112,12 +169,13 @@ public:
 		);
 	}
 	
+	/// C = alpha * A * B^T + beta * C
 	static void mAdd_mmt(
 		size_t M, size_t N, size_t K,
 		const T *A, size_t lda,
 		const T *B, size_t ldb,
 		T *C, size_t ldc,
-		T alpha = 1, T beta = 0
+		T alpha = 1, T beta = 1
 	)
 	{
 		cblas_dgemm(
