@@ -1,6 +1,6 @@
 # nnlib - Neural Network Library
 
-[![Build Status](http://img.shields.io/travis/thelukester92/nnlib.svg)](https://travis-ci.org/thelukester92/nnlib)
+[![Build Status](https://travis-ci.org/thelukester92/nnlib.svg?branch=master)](https://travis-ci.org/thelukester92/nnlib)
 
 nnlib is an all-header library for building, training, and using neural networks.
 It is designed to be both easy-to-use and efficient, using BLAS to accelerate math calculations.
