@@ -23,4 +23,28 @@ void TestTanH()
 	
 	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "TanH::forward failed!");
 	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "TanH::backward failed!");
+	
+	map.inputs({ 3, 4 });
+	NNHardAssert(map.inputs() == map.outputs(), "TanH::inputs failed to resize outputs!");
+	
+	map.outputs({ 12, 3 });
+	NNHardAssert(map.inputs() == map.outputs(), "TanH::outputs failed to resize inputs!");
+	
+	bool ok = true;
+	try
+	{
+		map.resize({ 3, 4 }, { 4, 3 });
+		ok = false;
+	}
+	catch(const std::runtime_error &e) {}
+	NNHardAssert(ok, "TanH::resize allowed unequal inputs and outputs!");
+	
+	TanH<> *deserialized = nullptr;
+	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
+	NNHardAssert(
+		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
+		"TanH::save and/or Identity::load failed!"
+	);
+	
+	delete deserialized;
 }
