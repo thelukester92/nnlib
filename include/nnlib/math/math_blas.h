@@ -24,6 +24,42 @@ class MathBLAS<float> : public MathBase<float>
 public:
 	using T = float;
 	
+	// MARK: Vector/scalar operations
+	
+	#ifdef __APPLE__
+		/// x[i] = alpha, 0 <= i < n
+		/// \note Only available when using Accelerate on OS X.
+		static void vFill(T *x, size_t n, size_t s, T alpha)
+		{
+			catlas_sset(n, alpha, x, s);
+		}
+	#endif
+	
+	/// x[i] *= alpha, 0 <= i < n
+	static void vScale(T *x, size_t n, size_t s, T alpha)
+	{
+		cblas_sscal(n, alpha, x, s);
+	}
+	
+	// MARK: Matrix/scalar operations
+	
+	#ifdef __APPLE__
+		/// A[i][j] = alpha, 0 <= i < ra, 0 <= j < ca
+		/// \note Only available when using Accelerate on OS X.
+		static void mFill(T *A, size_t r, size_t c, size_t ld, T alpha)
+		{
+			for(size_t i = 0; i < r; ++i, A += ld)
+				catlas_sset(c, alpha, A, 1);
+		}
+	#endif
+	
+	/// A[i][j] *= alpha, 0 <= i < ra, 0 <= j < ca
+	static void mScale(T *A, size_t r, size_t c, size_t ld, T alpha)
+	{
+		for(size_t i = 0; i < r; ++i, A += ld)
+			cblas_sscal(c, alpha, A, 1);
+	}
+	
 	// MARK: Vector/Vector operations
 	
 	/// y = alpha * x + y
@@ -158,6 +194,42 @@ class MathBLAS<double> : public MathBase<double>
 public:
 	using T = double;
 	
+	// MARK: Vector/scalar operations
+	
+	#ifdef __APPLE__
+		/// x[i] = alpha, 0 <= i < n
+		/// \note Only available when using Accelerate on OS X.
+		static void vFill(T *x, size_t n, size_t s, T alpha)
+		{
+			catlas_dset(n, alpha, x, s);
+		}
+	#endif
+	
+	/// x[i] *= alpha, 0 <= i < n
+	static void vScale(T *x, size_t n, size_t s, T alpha)
+	{
+		cblas_dscal(n, alpha, x, s);
+	}
+	
+	// MARK: Matrix/scalar operations
+	
+	#ifdef __APPLE__
+		/// A[i][j] = alpha, 0 <= i < ra, 0 <= j < ca
+		/// \note Only available when using Accelerate on OS X.
+		static void mFill(T *A, size_t r, size_t c, size_t ld, T alpha)
+		{
+			for(size_t i = 0; i < r; ++i, A += ld)
+				catlas_dset(c, alpha, A, 1);
+		}
+	#endif
+	
+	/// A[i][j] *= alpha, 0 <= i < ra, 0 <= j < ca
+	static void mScale(T *A, size_t r, size_t c, size_t ld, T alpha)
+	{
+		for(size_t i = 0; i < r; ++i, A += ld)
+			cblas_dscal(c, alpha, A, 1);
+	}
+	
 	// MARK: Vector/Vector operations
 	
 	/// y = alpha * x + y
@@ -207,6 +279,28 @@ public:
 	{
 		mScale(A, r, c, lda, beta);
 		cblas_dger(CblasRowMajor, r, c, alpha, x, sx, y, sy, A, lda);
+	}
+	
+	/// y = alpha * A * x^T + beta * y
+	static void vAdd_mv(
+		const T *A, size_t ra, size_t ca, size_t lda,
+		const T *x, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1, T beta = 1
+	)
+	{
+		cblas_dgemv(CblasRowMajor, CblasNoTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
+	}
+	
+	/// y = alpha * A^T * x^T + beta * y
+	static void vAdd_mtv(
+		const T *A, size_t ra, size_t ca, size_t lda,
+		const T *x, size_t sx,
+		T *y, size_t sy,
+		T alpha = 1, T beta = 1
+	)
+	{
+		cblas_dgemv(CblasRowMajor, CblasTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
 	}
 	
 	/// y = alpha * A * x^T + beta * y
