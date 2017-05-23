@@ -17,10 +17,10 @@ void TestLogistic()
 	
 	// Begin test
 	
-	Logistic<> tanh(3, 1);
-	tanh.forward(inp);
-	tanh.backward(inp, grd);
+	Logistic<> map(3, 1);
+	map.forward(inp);
+	map.backward(inp, grd);
 	
-	NNHardAssert(tanh.output().addM(out, -1).sum() < 1e-9, "Logistic::forward failed!");
-	NNHardAssert(tanh.inGrad().addM(ing, -1).sum() < 1e-9, "Logistic::backward failed!");
+	NNHardAssert(map.output().addM(out, -1).sum() < 1e-9, "Logistic::forward failed!");
+	NNHardAssert(map.inGrad().addM(ing, -1).sum() < 1e-9, "Logistic::backward failed!");
 }

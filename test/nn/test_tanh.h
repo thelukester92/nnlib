@@ -17,10 +17,10 @@ void TestTanH()
 	
 	// Begin test
 	
-	TanH<> tanh(3, 1);
-	tanh.forward(inp);
-	tanh.backward(inp, grd);
+	TanH<> map(3, 1);
+	map.forward(inp);
+	map.backward(inp, grd);
 	
-	NNHardAssert(tanh.output().addM(out, -1).sum() < 1e-9, "TanH::forward failed!");
-	NNHardAssert(tanh.inGrad().addM(ing, -1).sum() < 1e-9, "TanH::backward failed!");
+	NNHardAssert(map.output().addM(out, -1).sum() < 1e-9, "TanH::forward failed!");
+	NNHardAssert(map.inGrad().addM(ing, -1).sum() < 1e-9, "TanH::backward failed!");
 }
