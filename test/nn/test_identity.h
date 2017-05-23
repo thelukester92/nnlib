@@ -21,6 +21,6 @@ void TestIdentity()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).sum() < 1e-9, "Identity::forward failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).sum() < 1e-9, "Identity::backward failed!");
+	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Identity::forward failed!");
+	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::backward failed!");
 }

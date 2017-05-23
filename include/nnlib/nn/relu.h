@@ -16,9 +16,9 @@ public:
 	using Map<T>::forward;
 	using Map<T>::backward;
 	
-	ReLU(T leak = 0.0, size_t outs = 0, size_t bats = 1) :
+	ReLU(size_t outs = 0, size_t bats = 1) :
 		Map<T>(outs, bats),
-		m_leak(leak)
+		m_leak(0.0)
 	{}
 	
 	/// Get the "leak" for this ReLU. 0 if non-leaky.

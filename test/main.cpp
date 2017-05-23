@@ -6,6 +6,7 @@
 #include "nn/test_batchnorm.h"
 #include "nn/test_identity.h"
 #include "nn/test_logistic.h"
+#include "nn/test_relu.h"
 #include "nn/test_tanh.h"
 
 #include <iostream>
@@ -35,6 +36,7 @@ int main()
 		TEST(BatchNorm),
 		TEST(Identity),
 		TEST(Logistic),
+		TEST(ReLU),
 		TEST(TanH)
 	};
 	

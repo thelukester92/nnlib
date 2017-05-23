@@ -26,11 +26,11 @@ void TestMSE()
 	
 	critic.average(false);
 	critic.backward(inp, tgt);
-	NNHardAssert(fabs(critic.inGrad().addM(dif, -1).sum()) < 1e-12, "MSE<>::backward failed!");
+	NNHardAssert(critic.inGrad().addM(dif, -1).square().sum() < 1e-12, "MSE<>::backward failed!");
 	
 	critic.inputs({ 10, 10 });
 	critic.safeBackward(inp, tgt);
-	NNHardAssert(fabs(critic.inGrad().addM(dif, -1).sum()) < 1e-12, "MSE<>::safeBackward failed!");
+	NNHardAssert(critic.inGrad().addM(dif, -1).square().sum() < 1e-12, "MSE<>::safeBackward failed!");
 	
 	critic.batch(12);
 	NNHardAssert(critic.batch() == 12, "MSE<>::batch failed!");
