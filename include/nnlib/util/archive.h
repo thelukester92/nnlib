@@ -23,7 +23,7 @@ struct Binding
 /// A wrapper for reading from files or strings to objects.
 /// Can be used as an iostream with >> and <<.
 /// Assumes things are deserialized in the same order and with the same types.
-/// \todo Figure out how to enforce safe serialization.
+/// \todo Enforce safe(r) serialization.
 class Archive
 {
 public:
@@ -279,7 +279,7 @@ public:
 	}
 	
 private:
-	/// Versioning number for backwards compatibility.
+	/// Versioning number for backwards (in)compatibility.
 	static size_t serializationVersion()
 	{
 		return 0;
