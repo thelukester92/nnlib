@@ -204,7 +204,7 @@ public:
 	{
 		NNAssert(m_in != nullptr, "Archive has no input stream!");
 		x.load(*this);
-		NNAssert(!m_in->fail(), "Archive failed to read primative type!");
+		NNAssert(!m_in->fail(), "Archive failed to read object!");
 		return *this;
 	}
 	
@@ -226,7 +226,7 @@ public:
 	/// \return This archive, for chaining.
 	Archive &operator>>(std::string &x)
 	{
-		NNAssert(m_in != nullptr, "Archive has no output stream!");
+		NNAssert(m_in != nullptr, "Archive has no input stream!");
 		size_t len;
 		*this >> len;
 		x.resize(len);
@@ -239,14 +239,19 @@ public:
 			for(size_t i = 0; i < len; ++i)
 				*this >> x[i];
 		}
+		NNAssert(!m_in->fail(), "Archive failed to read string!");
 		return *this;
 	}
 	
-	/// \brief Read in a generic object.
+	/// \brief Read in a generic object with an abstract base.
 	///
-	/// \return A dynamically allocated object if a matching type constructor was found; null otherwise.
+	/// This method will attempt to read in a subclass of the given Base.
+	/// If a subclass matching the header of the input stream is found, it is constructed and read into.
+	/// If no matching subclass has been registered, this method returns nullptr.
+	/// The caller is responsible for deleting the returned data.
+	/// \return The constructed object or nullptr.
 	template <typename Base>
-	Base *read()
+	typename std::enable_if<std::is_abstract<Base>::value, Base>::type *read()
 	{
 		NNAssert(m_in != nullptr, "Archive has no input stream!");
 		std::string type;
@@ -262,6 +267,36 @@ public:
 			ptr = reinterpret_cast<Base *>(i->second());
 			*this >> *ptr;
 		}
+		
+		NNAssert(!m_in->fail(), "Archive failed while reading a generic object!");
+		return ptr;
+	}
+	
+	/// \brief Read in a generic object with a non-abstract base.
+	///
+	/// This method will attempt to read in a subclass of the given Base.
+	/// If a subclass matching the header of the input stream is found, it is constructed and read into.
+	/// If no matching subclass has been registered, this method builds a default-constructed Base and reads into that instead.
+	/// The caller is responsible for deleting the returned data.
+	/// \return The constructed object.
+	template <typename Base>
+	typename std::enable_if<!std::is_abstract<Base>::value, Base>::type *read()
+	{
+		NNAssert(m_in != nullptr, "Archive has no input stream!");
+		std::string type;
+		
+		auto pos = m_in->tellg();
+		*this >> type;
+		m_in->seekg(pos);
+		
+		Base *ptr = nullptr;
+		auto i = Mapper<Base>::map.find(type);
+		if(i != Mapper<Base>::map.end())
+			ptr = reinterpret_cast<Base *>(i->second());
+		else
+			ptr = new Base();
+		
+		*this >> *ptr;
 		
 		NNAssert(!m_in->fail(), "Archive failed while reading a generic object!");
 		return ptr;
