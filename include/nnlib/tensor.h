@@ -521,7 +521,7 @@ public:
 	
 	/// \brief Copies the data and shape from another tensor to this tensor.
 	///
-	/// This is a deep copy, and the tensor will have the same shape as the parameter tensor.
+	/// This is a deep copy, but the tensor will not necessarily have the same shape, just the same size, as the other tensor.
 	/// \param other The tensor to copy.
 	/// \return This tensor, for chaining.
 	Tensor &copy(const Tensor &other)
