@@ -4,6 +4,7 @@
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
+#include "nn/test_tanh.h"
 
 #include <iostream>
 #include <string>
@@ -29,7 +30,8 @@ int main()
 		TEST(MathBLAS),
 		
 		// nn
-		TEST(BatchNorm)
+		TEST(BatchNorm),
+		TEST(TanH)
 	};
 	
 	try
