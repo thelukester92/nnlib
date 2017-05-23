@@ -2,7 +2,7 @@ BIN:=../bin
 OBJ:=../obj
 INC:=../include
 OUT:=nnlib_test
-CFLAGS:=-Wall -std=c++11 -I$(INC) -DHAS_BLAS
+CFLAGS:=-Wall -std=c++11 -I$(INC) -DACCELERATE_BLAS -DHAS_BLAS
 LFLAGS:=
 CXX:=g++
 

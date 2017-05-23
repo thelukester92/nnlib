@@ -4,6 +4,7 @@
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
+#include "nn/test_logistic.h"
 #include "nn/test_tanh.h"
 
 #include <iostream>
@@ -31,6 +32,7 @@ int main()
 		
 		// nn
 		TEST(BatchNorm),
+		TEST(Logistic),
 		TEST(TanH)
 	};
 	
