@@ -5,8 +5,13 @@ OUT:=nnlib_test
 CFLAGS:=-Wall -std=c++11 -I$(INC) -DHAS_BLAS
 LFLAGS:=
 CXX:=g++
-UNAME:=$(shell uname -s)
 
+GNU_VERSION:=$(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
+ifneq ($(GNU_VERSION),)
+	CFLAGS+=-flax-vector-conversions
+endif
+
+UNAME:=$(shell uname -s)
 ifeq ($(UNAME),Darwin)
 	LFLAGS+=-framework Accelerate
 else

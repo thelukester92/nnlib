@@ -5,18 +5,18 @@ OUT:=nnlib_test
 CFLAGS:=-Wall -std=c++11 -I$(INC) -DACCELERATE_BLAS
 LFLAGS:=
 CXX:=g++
-UNAME:=$(shell uname -s)
-GNU_VERSION:=$(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
 
 prefix?=/usr/local
 INSTALL_INC:=$(prefix)/include
 INSTALL_INC_FILES:=$(shell find $(INC) -type f)
 INSTALL_INC_FILES:=$(INSTALL_INC_FILES:$(INC)/%.h=$(INSTALL_INC)/%.h)
 
+GNU_VERSION:=$(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
 ifneq ($(GNU_VERSION),)
 	CFLAGS+=-flax-vector-conversions
 endif
 
+UNAME:=$(shell uname -s)
 ifeq ($(UNAME),Darwin)
 	LFLAGS+=-framework Accelerate
 else
