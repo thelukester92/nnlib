@@ -57,8 +57,8 @@ endif
 test: $(BIN)/$(OUT)
 	$(BIN)/$(OUT)
 clean:
-	rm -f $(BIN)/$(OUT)
-	rm -f $(OBJ_FILES)
+	rm -rf $(BIN)/*
+	rm -rf $(OBJ)/*
 install: $(INSTALL_FILES)
 uninstall:
 	rm -f $(INSTALL_FILES)
