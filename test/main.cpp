@@ -9,6 +9,7 @@
 #include "nn/test_identity.h"
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
+#include "nn/test_logsoftmax.h"
 #include "nn/test_relu.h"
 #include "nn/test_tanh.h"
 
@@ -41,6 +42,7 @@ int main()
 		TEST(Identity),
 		TEST(Linear),
 		TEST(Logistic),
+		TEST(LogSoftMax),
 		TEST(ReLU),
 		TEST(TanH)
 	};

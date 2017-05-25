@@ -28,14 +28,10 @@ public:
 		{
 			T max = input.narrow(0, i).max(), sum = 0;
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
-			{
 				sum += exp(input(i, j) - max);
-			}
 			sum = max + log(sum);
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
-			{
 				m_output(i, j) = input(i, j) - sum;
-			}
 		}
 		
 		return m_output;
@@ -44,17 +40,12 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
-		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
+		NNAssert(input.dims() == 2, "LogSoftMax expects Matrix input!");
+		NNAssert(outGrad.dims() == 2, "LogSoftMax expects Matrix output gradient!");
 		
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
-		{
-			T sum = outGrad.narrow(0, i).sum();
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
-			{
-				m_inGrad(i, j) = outGrad(i, j) - exp(m_output(i, j)) * sum;
-			}
-		}
+				m_inGrad(i, j) = outGrad(i, j) * (1 - exp(m_output(i, j)));
 		
 		return m_inGrad;
 	}
@@ -69,6 +60,23 @@ public:
 	virtual Tensor<T> &inGrad() override
 	{
 		return m_inGrad;
+	}
+	
+	/// Set the input and output shapes of this module.
+	/// In LogSoftMax, input shape is always equal to output shape.
+	virtual LogSoftMax &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	{
+		NNAssert(inps == outs, "LogSoftMax expects the same input and output size!");
+		return inputs(outs);
+	}
+	
+	/// Safely (never reset weights) set the input and output shapes of this module.
+	/// In LogSoftMax, input shape is always equal to output shape.
+	virtual LogSoftMax &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	{
+		NNAssert(inps == outs, "LogSoftMax expects the same input and output size!");
+		this->safeInputs(inps);
+		return *this;
 	}
 	
 	/// Set the input shape of this module, including batch.
