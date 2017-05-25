@@ -56,7 +56,7 @@ install: $(INSTALL_FILES)
 uninstall:
 	rm -f $(INSTALL_FILES)
 
-$(BIN)/$(OUT): $(BIN)
+$(BIN)/$(OUT): $(BIN) test/main.cpp
 	$(CXX) test/main.cpp $(CFLAGS) $(LFLAGS) -o $@
 
 $(PREFIX)/%.h: $(INC)/%.h
