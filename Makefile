@@ -20,12 +20,18 @@ LFLAGS :=
 PREFIX := /usr/local/include
 
 override BIN := bin
+override OBJ := obj
 override INC := include
+override TST := test
 override OUT := nnlib_test
 CFLAGS += -I$(INC)
 
 override INSTALL_FILES := $(shell find $(INC) -type f)
 override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.h=$(PREFIX)/%.h)
+
+override CPP_FILES := $(wildcard $(TST)/*.cpp) $(wildcard $(TST)/**/*.cpp)
+override DEP_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.d)
+override OBJ_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.o)
 
 override UNAME := $(shell uname -s)
 override GNU   := $(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
@@ -52,12 +58,17 @@ test: $(BIN)/$(OUT)
 	$(BIN)/$(OUT)
 clean:
 	rm -f $(BIN)/$(OUT)
+	rm -f $(OBJ_FILES)
 install: $(INSTALL_FILES)
 uninstall:
 	rm -f $(INSTALL_FILES)
 
-$(BIN)/$(OUT): $(BIN) test/main.cpp
-	$(CXX) test/main.cpp $(CFLAGS) $(LFLAGS) -o $@
+$(BIN)/$(OUT): $(BIN) $(OBJ_FILES)
+	$(CXX) $(OBJ_FILES) $(CFLAGS) $(LFLAGS) -o $@
+
+$(OBJ)/%.o: $(TST)/%.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
 
 $(PREFIX)/%.h: $(INC)/%.h
 	mkdir -p $(dir $@)
@@ -67,3 +78,5 @@ $(BIN):
 	mkdir -p $@
 
 .PHONY: test clean install uninstall
+
+-include $(DEP_FILES)
