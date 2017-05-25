@@ -25,6 +25,7 @@ public:
 		m_output(bats, outs),
 		m_addBuffer(bats)
 	{
+		m_addBuffer.fill(1);
 		reset();
 	}
 	
@@ -135,7 +136,7 @@ public:
 	virtual Linear &batch(size_t bats) override
 	{
 		Module<T>::batch(bats);
-		m_addBuffer.resize(bats);
+		m_addBuffer.resize(bats).fill(1);
 		return *this;
 	}
 	
