@@ -14,4 +14,4 @@ before_install:
     - git clone https://github.com/xianyi/OpenBLAS ../OpenBLAS || (cd ../OpenBLAS && git pull)
     - (cd ../OpenBLAS && make && make install)
 script:
-    - make LFLAGS=-I/opt/OpenBLAS/include test
+    - make LFLAGS="-I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
