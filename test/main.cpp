@@ -5,6 +5,7 @@
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
+#include "nn/test_concat.h"
 #include "nn/test_identity.h"
 #include "nn/test_logistic.h"
 #include "nn/test_relu.h"
@@ -35,6 +36,7 @@ int main()
 		
 		// nn
 		TEST(BatchNorm),
+		TEST(Concat),
 		TEST(Identity),
 		TEST(Logistic),
 		TEST(ReLU),
