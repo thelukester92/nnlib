@@ -60,7 +60,7 @@ void TestLinear()
 	Linear<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
 	NNHardAssert(
-		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).sum() < 1e-9,
+		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
 		"Linear::save and/or Linear::load failed!"
 	);
 	delete deserialized;

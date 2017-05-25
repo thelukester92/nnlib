@@ -87,7 +87,7 @@ void TestConcat()
 	Concat<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
 	NNHardAssert(
-		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).sum() < 1e-9,
+		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
 		"Concat::save and/or Concat::load failed!"
 	);
 	delete deserialized;
