@@ -6,6 +6,13 @@
 #include <exception>
 #include <stdexcept>
 
+/// Check for compiler support.
+/// This is here because 1) it causes errors, and 2) this file is included everywhere.
+/// \todo Determine if this check is better fitted elsewhere.
+#if __cplusplus < 201103L
+	#error C++11 is required!
+#endif
+
 /// \todo stack trace
 
 namespace nnlib
