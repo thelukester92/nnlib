@@ -15,5 +15,3 @@ before_install:
     - cd OpenBLAS
     - make
     - sudo make install
-script:
-    - make -C test

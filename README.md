@@ -17,11 +17,12 @@ Use at your own risk, and expect future commits to break your code.
 Run the following commands to clone the repo and install the headers.
 
 	git clone https://github.com/thelukester92/nnlib.git
-	cd nnlib/src
+	cd nnlib
 	make install
 
 The default installation directory is `/usr/local/include`.
-For a different install directory, use `make install prefix=/path/to/dir`.
+For a different install directory, use `make install PREFIX=/path/to/dir`.
+To run unit tests, use `make test`.
 
 To use nnlib in your code, `#include <nnlib.h>` and you're all set!
 You must compile with C++11 (`-std=c++11` in most compilers).
