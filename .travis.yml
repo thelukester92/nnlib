@@ -16,4 +16,4 @@ before_install:
     - make
     - sudo make install
 script:
-    - make test
+    - make clean && make test
