@@ -10,7 +10,7 @@
 /// This is here because 1) it causes errors, and 2) this file is included everywhere.
 /// \todo Determine if this check is better fitted elsewhere.
 #if __cplusplus < 201103L
-	#error C++11 is required!
+	#error C++11 is required! Use -std=c++11 if available.
 #endif
 
 /// \todo stack trace
