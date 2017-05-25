@@ -1,3 +1,6 @@
+#ifndef TEST_TANH_H
+#define TEST_TANH_H
+
 #include "nnlib/nn/tanh.h"
 using namespace nnlib;
 
@@ -48,3 +51,5 @@ void TestTanH()
 	
 	delete deserialized;
 }
+
+#endif

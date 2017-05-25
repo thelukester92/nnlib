@@ -1,3 +1,6 @@
+#ifndef TEST_LOGISTIC_H
+#define TEST_LOGISTIC_H
+
 #include "nnlib/nn/logistic.h"
 using namespace nnlib;
 
@@ -48,3 +51,5 @@ void TestLogistic()
 	
 	delete deserialized;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef TEST_BATCHNORM_H
+#define TEST_BATCHNORM_H
+
 #include "nnlib/nn/batchnorm.h"
 using namespace nnlib;
 
@@ -41,3 +44,5 @@ void TestBatchNorm()
 		"BatchNorm::backward failed! Wrong input gradient!"
 	);
 }
+
+#endif

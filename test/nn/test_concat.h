@@ -1,3 +1,6 @@
+#ifndef TEST_CONCAT_H
+#define TEST_CONCAT_H
+
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/identity.h"
@@ -272,3 +275,5 @@ void TestConcat()
 	
 	*/
 }
+
+#endif

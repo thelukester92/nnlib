@@ -1,3 +1,6 @@
+#ifndef TEST_RELU_H
+#define TEST_RELU_H
+
 #include "nnlib/nn/relu.h"
 using namespace nnlib;
 
@@ -60,3 +63,5 @@ void TestReLU()
 	
 	delete deserialized;
 }
+
+#endif
