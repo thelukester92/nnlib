@@ -7,7 +7,7 @@ dist:
     - trusty
 cache:
     directories:
-    - OpenBLAS
+    - ../OpenBLAS
 before_install:
     - sudo apt-get update -qq -y
     - sudo apt-get install -y gfortran
