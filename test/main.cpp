@@ -7,6 +7,7 @@
 #include "nn/test_batchnorm.h"
 #include "nn/test_concat.h"
 #include "nn/test_identity.h"
+#include "nn/test_linear.h"
 #include "nn/test_logistic.h"
 #include "nn/test_relu.h"
 #include "nn/test_tanh.h"
@@ -38,6 +39,7 @@ int main()
 		TEST(BatchNorm),
 		TEST(Concat),
 		TEST(Identity),
+		TEST(Linear),
 		TEST(Logistic),
 		TEST(ReLU),
 		TEST(TanH)
