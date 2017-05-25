@@ -51,10 +51,10 @@ endif
 test: $(BIN)/$(OUT)
 	$(BIN)/$(OUT)
 clean:
-	rm $(BIN)/$(OUT)
+	rm -f $(BIN)/$(OUT)
 install: $(INSTALL_FILES)
 uninstall:
-	rm $(INSTALL_FILES)
+	rm -f $(INSTALL_FILES)
 
 $(BIN)/$(OUT): $(BIN)
 	$(CXX) test/main.cpp $(CFLAGS) $(LFLAGS) -o $@
