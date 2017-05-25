@@ -7,11 +7,14 @@ dist:
     - trusty
 cache:
     directories:
-    - ../OpenBLAS
+    - cache
 before_install:
     - sudo apt-get update -qq -y
     - sudo apt-get install -y gfortran
-    - git clone https://github.com/xianyi/OpenBLAS ../OpenBLAS || (cd ../OpenBLAS && git pull)
-    - (cd ../OpenBLAS && make && make install)
+    - mkdir -p cache
+    - git clone https://github.com/xianyi/OpenBLAS cache/openblas || true
+    - cd cache/openblas
+    - git pull
+    - make && make PREFIX=/opt/OpenBLAS install
 script:
     - make LFLAGS="-I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
