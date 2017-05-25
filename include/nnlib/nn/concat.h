@@ -10,9 +10,9 @@ namespace nnlib
 template <typename T = double>
 class Concat : public Container<T>
 {
-using Container<T>::components;
 using Container<T>::m_components;
 public:
+	using Container<T>::components;
 	using Container<T>::inputs;
 	using Container<T>::outputs;
 	using Container<T>::batch;
@@ -109,6 +109,15 @@ public:
 		throw std::runtime_error("Cannot directly change concat outputs! Add or remove components instead.");
 	}
 	
+	/// Set the batch size of this module.
+	virtual Concat &batch(size_t bats) override
+	{
+		Container<T>::batch(bats);
+		m_output.resizeDim(0, bats);
+		m_inGrad.resizeDim(0, bats);
+		return *this;
+	}
+	
 	// MARK: Serialization
 	
 	/// \brief Write to an archive.
@@ -144,7 +153,10 @@ public:
 private:
 	Concat &resizeBuffers()
 	{
-		NNAssert(components() > 0 && m_components[0]->outputs().size() == 2, "Expected matrix IO for concat!");
+		NNAssert(
+			components() > 0 && m_components[0]->outputs().size() == 2,
+			"Expected matrix input and output for concat!"
+		);
 		
 		size_t outs = 0, bats = m_components[0]->outputs()[0], inps = m_components[0]->inputs()[1];
 		for(Module<T> *component : m_components)

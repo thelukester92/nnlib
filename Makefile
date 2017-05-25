@@ -15,7 +15,7 @@
 #   PREFIX - where to install headers; defaults to /usr/local/include
 
 CXX    := g++
-CFLAGS := -Wall -std=c++11 -DACCELERATE_BLAS
+CFLAGS := -Wall -DACCELERATE_BLAS
 LFLAGS :=
 PREFIX := /usr/local/include
 
@@ -24,7 +24,7 @@ override OBJ := obj
 override INC := include
 override TST := test
 override OUT := nnlib_test
-CFLAGS += -I$(INC)
+override CFLAGS += -std=c++11 -I$(INC)
 
 override INSTALL_FILES := $(shell find $(INC) -type f)
 override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.h=$(PREFIX)/%.h)

@@ -10,9 +10,9 @@ namespace nnlib
 template <typename T = double>
 class Sequential : public Container<T>
 {
-using Container<T>::components;
 using Container<T>::m_components;
 public:
+	using Container<T>::components;
 	using Container<T>::inputs;
 	using Container<T>::outputs;
 	using Container<T>::batch;
