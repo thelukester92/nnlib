@@ -16,10 +16,11 @@ before_install:
     - git clone https://github.com/xianyi/OpenBLAS cache/openblas || true
     - cd cache/openblas
     - git pull
-    - make && make PREFIX=/opt/OpenBLAS install
+    - mkdir -p build
+    - make && make PREFIX=build install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make CFLAGS="-Wall -DACCELERATE_BLAS -I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
+    - make CFLAGS="-Wall -DACCELERATE_BLAS -I/cache/openblas/build/include -L/cache/openblas/build/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - bash <(curl -s https://codecov.io/bash)
