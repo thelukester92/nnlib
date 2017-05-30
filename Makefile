@@ -24,7 +24,7 @@ override OBJ := obj
 override INC := include
 override TST := test
 override OUT := nnlib_test
-override CFLAGS += -std=c++11 -I$(INC)
+override CFLAGS += -std=c++11 -I$(INC) --coverage
 
 override INSTALL_FILES := $(shell find $(INC) -type f)
 override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.h=$(PREFIX)/%.h)
