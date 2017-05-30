@@ -20,7 +20,7 @@ before_install:
     - make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include -L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -rpath$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
+    - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include -L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -rpath $TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - bash <(curl -s https://codecov.io/bash)
