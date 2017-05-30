@@ -47,9 +47,7 @@ public:
 		{
 			T sum = outGrad.narrow(0, i).sum();
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
-			{
 				m_inGrad(i, j) = outGrad(i, j) - exp(m_output(i, j)) * sum;
-			}
 		}
 		
 		return m_inGrad;
