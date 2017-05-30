@@ -14,7 +14,7 @@
 #   LFLAGS - linker flags for test
 #   PREFIX - where to install headers; defaults to /usr/local/include
 
-CXX    := g++
+CXX    ?= g++
 CFLAGS := -Wall -DACCELERATE_BLAS
 LFLAGS :=
 PREFIX := /usr/local/include
