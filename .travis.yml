@@ -16,6 +16,7 @@ before_install:
     - cd cache/openblas
     - git pull
     - make && make PREFIX=/opt/OpenBLAS install
+    - cd $TRAVIS_BUILD_DIR
 script:
     - make LFLAGS="-I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
 after_success:
