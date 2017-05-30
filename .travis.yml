@@ -19,7 +19,7 @@ before_install:
     - make && make PREFIX=/opt/OpenBLAS install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make LFLAGS="-I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
+    - make CFLAGS="-Wall -DACCELERATE_BLAS -I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - bash <(curl -s https://codecov.io/bash)
