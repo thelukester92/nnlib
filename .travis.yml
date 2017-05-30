@@ -17,10 +17,10 @@ before_install:
     - cd cache/openblas
     - git pull
     - mkdir -p build
-    - make && make PREFIX=/usr/local install
+    - make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make test
+    - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - bash <(curl -s https://codecov.io/bash)
