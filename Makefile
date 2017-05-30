@@ -41,14 +41,14 @@ override BLAS  := $(findstring -DACCELERATE_BLAS,$(CFLAGS))
 ifneq ($(BLAS),)
 ifeq ($(UNAME),Darwin)
 	# OSX uses the Accelerate framework
-	LFLAGS += -framework Accelerate
+	override LFLAGS += -framework Accelerate
 ifneq ($(GNU),)
 	# gcc on OS X requires this flag for the Accelerate framework to work
-	CFLAGS += -flax-vector-conversions
+	override CFLAGS += -flax-vector-conversions
 endif
 else
 	# Other systems use OpenBLAS
-	LFLAGS += -L/usr/local/lib -lopenblas -lpthread
+	override LFLAGS += -L/usr/local/lib -lopenblas -lpthread
 endif
 endif
 
