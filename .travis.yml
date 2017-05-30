@@ -17,7 +17,7 @@ before_install:
     - cd cache/openblas
     - git pull
     - mkdir -p build
-    - make && make PREFIX=build install
+    - make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas/build install
 script:
     - cd $TRAVIS_BUILD_DIR
     - make CFLAGS="-Wall -DACCELERATE_BLAS -I/cache/openblas/build/include -L/cache/openblas/build/lib" test
