@@ -9,6 +9,7 @@ cache:
     directories:
     - cache
 before_install:
+    - cd $TRAVIS_BUILD_DIR
     - sudo apt-get update -qq -y
     - sudo apt-get install -y gfortran
     - mkdir -p cache
@@ -16,9 +17,10 @@ before_install:
     - cd cache/openblas
     - git pull
     - make && make PREFIX=/opt/OpenBLAS install
-    - cd $TRAVIS_BUILD_DIR
 script:
+    - cd $TRAVIS_BUILD_DIR
     - make LFLAGS="-I/opt/OpenBLAS/include -L/opt/OpenBLAS/lib" test
 after_success:
+    - cd $TRAVIS_BUILD_DIR
     - bash <(curl -s https://codecov.io/bash)
     - rm *.gcov
