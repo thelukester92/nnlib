@@ -32,7 +32,7 @@ bool almostEqual(T a, T b)
 template <>
 bool almostEqual<float>(float a, float b)
 {
-	return fabs(a - b) < 1e-3;
+	return fabs(a - b) < 1e-2;
 }
 
 template <template <typename> class M, typename T>
