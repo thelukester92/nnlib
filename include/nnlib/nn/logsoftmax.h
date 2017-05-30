@@ -44,8 +44,13 @@ public:
 		NNAssert(outGrad.dims() == 2, "LogSoftMax expects Matrix output gradient!");
 		
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
+		{
+			T sum = outGrad.narrow(0, i).sum();
 			for(size_t j = 0, jend = input.size(1); j < jend; ++j)
-				m_inGrad(i, j) = outGrad(i, j) * (1 - exp(m_output(i, j)));
+			{
+				m_inGrad(i, j) = outGrad(i, j) - exp(m_output(i, j)) * sum;
+			}
+		}
 		
 		return m_inGrad;
 	}
