@@ -120,6 +120,14 @@ public:
 		return states;
 	}
 	
+	/// Reset the internal state of this module.
+	virtual Container &forget() override
+	{
+		for(Module<T> *comp : m_components)
+			comp->forget();
+		return *this;
+	}
+	
 protected:
 	Storage<Module<T> *> m_components;
 };

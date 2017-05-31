@@ -120,14 +120,6 @@ public:
 		forget();
 	}
 	
-	LSTM &forget()
-	{
-		m_outMod->output().fill(0);
-		m_state.fill(0);
-		m_resetGrad = true;
-		return *this;
-	}
-	
 	LSTM &gradClip(T clip)
 	{
 		m_clip = clip;
@@ -342,6 +334,15 @@ public:
 		states.push_back(&m_prevOutput);
 		states.push_back(&m_outAdd);
 		return states;
+	}
+	
+	/// Reset the internal state of this module.
+	virtual LSTM &forget() override
+	{
+		m_outMod->output().fill(0);
+		m_state.fill(0);
+		m_resetGrad = true;
+		return *this;
 	}
 	
 	// MARK: Serialization
