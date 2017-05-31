@@ -35,7 +35,7 @@ public:
 	{
 		typedef std::function<void*()> constructor;
 		
-		static std::unordered_map<std::string, constructor> map()
+		static std::unordered_map<std::string, constructor> &map()
 		{
 			static std::unordered_map<std::string, constructor> m;
 			return m;
