@@ -964,7 +964,7 @@ public:
 			auto i = x.begin();
 			for(T &el : *this)
 			{
-				el += *i;
+				el += *i * alpha;
 				++i;
 			}
 			return *this;
