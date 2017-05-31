@@ -54,7 +54,7 @@ endif
 
 # Targets follow
 
-test: $(BIN)/$(OUT)
+test: clean-gcda $(BIN)/$(OUT)
 	$(BIN)/$(OUT)
 clean:
 	rm -rf $(BIN)/*
@@ -62,6 +62,8 @@ clean:
 install: $(INSTALL_FILES)
 uninstall:
 	rm -f $(INSTALL_FILES)
+clean-gcda: $(OBJ)
+	find $(OBJ) -name "*.gcda" -print0 | xargs -0 rm
 
 $(BIN)/$(OUT): $(BIN) $(OBJ_FILES)
 	$(CXX) $(OBJ_FILES) $(CFLAGS) $(LFLAGS) -o $@
@@ -77,6 +79,9 @@ $(PREFIX)/%.h: $(INC)/%.h
 $(BIN):
 	mkdir -p $@
 
-.PHONY: test clean install uninstall
+$(OBJ):
+	mkdir -p $@
+
+.PHONY: test clean install uninstall clean-gcda
 
 -include $(DEP_FILES)

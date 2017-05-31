@@ -10,6 +10,7 @@
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
 #include "nn/test_logsoftmax.h"
+#include "nn/test_lstm.h"
 #include "nn/test_relu.h"
 #include "nn/test_tanh.h"
 
@@ -43,6 +44,7 @@ int main()
 		TEST(Linear),
 		TEST(Logistic),
 		TEST(LogSoftMax),
+		TEST(LSTM),
 		TEST(ReLU),
 		TEST(TanH)
 	};
