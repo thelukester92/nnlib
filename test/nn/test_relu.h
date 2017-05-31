@@ -58,7 +58,7 @@ void TestReLU()
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
 	NNHardAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"ReLU::save and/or Identity::load failed!"
+		"ReLU::save and/or ReLU::load failed!"
 	);
 	
 	delete deserialized;

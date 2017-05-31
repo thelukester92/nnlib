@@ -46,7 +46,7 @@ void TestLogistic()
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
 	NNHardAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"Logistic::save and/or Identity::load failed!"
+		"Logistic::save and/or Logistic::load failed!"
 	);
 	
 	delete deserialized;

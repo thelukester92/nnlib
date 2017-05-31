@@ -43,6 +43,15 @@ void TestBatchNorm()
 		bn.inGrad().add(inGrad, -1).square().sum() < 1e-9,
 		"BatchNorm::backward failed! Wrong input gradient!"
 	);
+	
+	BatchNorm<> *deserialized = nullptr;
+	Archive::fromString((Archive::toString() << bn).str()) >> deserialized;
+	NNHardAssert(
+		deserialized != nullptr && bn.inputs() == deserialized->inputs() && bn.outputs() == deserialized->outputs(),
+		"BatchNorm::save and/or BatchNorm::load failed!"
+	);
+	
+	delete deserialized;
 }
 
 #endif

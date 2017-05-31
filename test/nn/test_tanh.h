@@ -46,7 +46,7 @@ void TestTanH()
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
 	NNHardAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"TanH::save and/or Identity::load failed!"
+		"TanH::save and/or TanH::load failed!"
 	);
 	
 	delete deserialized;

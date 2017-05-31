@@ -46,7 +46,7 @@ void TestLogSoftMax()
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
 	NNHardAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"LogSoftMax::save and/or Identity::load failed!"
+		"LogSoftMax::save and/or LogSoftMax::load failed!"
 	);
 	
 	delete deserialized;
