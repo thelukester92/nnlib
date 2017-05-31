@@ -1083,6 +1083,15 @@ public:
 		return add(-small).scale((to - from) / (large - small)).add(from);
 	}
 	
+	/// Clip the elements of this tensor such that all elements lie in [smallest, largest]
+	Tensor &clip(T smallest, T largest)
+	{
+		NNAssert(largest > smallest, "Invalid clipping range!");
+		for(T &v : *this)
+			v = std::min(std::max(v, smallest), largest);
+		return *this;
+	}
+	
 	// MARK: Element/data access methods.
 	
 	/// Element access given a multidimensional index.
