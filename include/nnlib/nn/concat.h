@@ -145,9 +145,12 @@ public:
 		size_t n;
 		in >> n;
 		
-		m_components.resize(n);
+		m_components.resize(n, nullptr);
 		for(size_t i = 0; i < n; ++i)
+		{
 			in >> m_components[i];
+			NNAssert(m_components[i] != nullptr, "Failed to load component!");
+		}
 	}
 	
 private:
