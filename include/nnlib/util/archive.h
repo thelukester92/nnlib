@@ -34,11 +34,17 @@ public:
 	struct Mapper
 	{
 		typedef std::function<void*()> constructor;
-		static std::unordered_map<std::string, constructor> map;
+		
+		static std::unordered_map<std::string, constructor> map()
+		{
+			static std::unordered_map<std::string, constructor> m;
+			return m;
+		}
+		
 		static std::string add(std::string name, constructor c)
 		{
-			NNAssert(map.find(name) == map.end(), "Attempted to redefine mapped class!");
-			map.emplace(name, c);
+			NNAssert(map().find(name) == map().end(), "Attempted to redefine mapped class!");
+			map().emplace(name, c);
 			return name;
 		}
 	};
@@ -261,8 +267,8 @@ public:
 		m_in->seekg(pos);
 		
 		Base *ptr = nullptr;
-		auto i = Mapper<Base>::map.find(type);
-		if(i != Mapper<Base>::map.end())
+		auto i = Mapper<Base>::map().find(type);
+		if(i != Mapper<Base>::map().end())
 		{
 			ptr = reinterpret_cast<Base *>(i->second());
 			*this >> *ptr;
@@ -290,8 +296,8 @@ public:
 		m_in->seekg(pos);
 		
 		Base *ptr = nullptr;
-		auto i = Mapper<Base>::map.find(type);
-		if(i != Mapper<Base>::map.end())
+		auto i = Mapper<Base>::map().find(type);
+		if(i != Mapper<Base>::map().end())
 			ptr = reinterpret_cast<Base *>(i->second());
 		else
 			ptr = new Base();
@@ -325,10 +331,6 @@ private:
 	bool m_binary;			///< Whether the streams are in binary mode.
 	bool m_ownsStreams;		///< Whether this archive should delete the streams.
 };
-
-/// Static initialization
-template <typename T>
-std::unordered_map<std::string, typename Archive::Mapper<T>::constructor> Archive::Mapper<T>::map;
 
 // Macro for more easily adding serializable and polymorphic types.
 #define NNSerializable(Sub, Super)											\
