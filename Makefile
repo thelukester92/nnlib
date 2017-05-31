@@ -63,7 +63,7 @@ install: $(INSTALL_FILES)
 uninstall:
 	rm -f $(INSTALL_FILES)
 clean-gcda: $(OBJ)
-	find $(OBJ) -name "*.gcda" -print0 | xargs -0 rm
+	find $(OBJ) -name "*.gcda" -print0 | xargs -0 rm -f
 
 $(BIN)/$(OUT): $(BIN) $(OBJ_FILES)
 	$(CXX) $(OBJ_FILES) $(CFLAGS) $(LFLAGS) -o $@
