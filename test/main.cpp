@@ -14,6 +14,7 @@
 #include "nn/test_recurrent.h"
 #include "nn/test_relu.h"
 #include "nn/test_sequencer.h"
+#include "nn/test_sequential.h"
 #include "nn/test_tanh.h"
 
 #include <iostream>
@@ -50,6 +51,7 @@ int main()
 		TEST(Recurrent),
 		TEST(ReLU),
 		TEST(Sequencer),
+		TEST(Sequential),
 		TEST(TanH)
 	};
 	
