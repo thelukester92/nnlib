@@ -739,7 +739,8 @@ public:
 	/// Add another vector to this vector.
 	Tensor &addV(const Tensor &x, T alpha = 1)
 	{
-		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
+		NNAssert(x.dims() == 1 && dims() == 1, "Expected vector input to addV!");
+		NNAssert(x.size() == size(), "Incompatible operands in addV!");
 		Math<T>::vAdd_v(
 			x.ptr(), x.size(), x.stride(0),
 			ptr(), stride(0),
@@ -847,7 +848,8 @@ public:
 	/// Add another matrix to this matrix.
 	Tensor &addM(const Tensor &A, T alpha = 1)
 	{
-		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
+		NNAssert(A.dims() == 2 && dims() == 2, "Expected matrix inputs!");
+		NNAssert(A.shape() == shape(), "Incompatible operands!");
 		Math<T>::mAdd_m(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			ptr(), stride(0),
