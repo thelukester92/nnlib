@@ -94,7 +94,7 @@ public:
 		return *this;
 	}
 	
-//private:
+private:
 	Tensor<T> &m_parameters;
 	Tensor<T> &m_grads;
 	Tensor<T> m_mean;
