@@ -1,3 +1,6 @@
+#ifndef TEST_IDENTITY_H
+#define TEST_IDENTITY_H
+
 #include "nnlib/nn/identity.h"
 using namespace nnlib;
 
@@ -48,3 +51,5 @@ void TestIdentity()
 	
 	delete deserialized;
 }
+
+#endif

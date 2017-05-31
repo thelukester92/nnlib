@@ -1,12 +1,20 @@
+#include "test_tensor.h"
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
 #include "critics/test_nll.h"
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
+#include "nn/test_concat.h"
 #include "nn/test_identity.h"
+#include "nn/test_linear.h"
 #include "nn/test_logistic.h"
+#include "nn/test_logsoftmax.h"
+#include "nn/test_lstm.h"
+#include "nn/test_recurrent.h"
 #include "nn/test_relu.h"
+#include "nn/test_sequencer.h"
+#include "nn/test_sequential.h"
 #include "nn/test_tanh.h"
 
 #include <iostream>
@@ -34,9 +42,16 @@ int main()
 		
 		// nn
 		TEST(BatchNorm),
+		TEST(Concat),
 		TEST(Identity),
+		TEST(Linear),
 		TEST(Logistic),
+		TEST(LogSoftMax),
+		TEST(LSTM),
+		TEST(Recurrent),
 		TEST(ReLU),
+		TEST(Sequencer),
+		TEST(Sequential),
 		TEST(TanH)
 	};
 	

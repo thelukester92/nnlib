@@ -1,3 +1,6 @@
+#ifndef TEST_LOGISTIC_H
+#define TEST_LOGISTIC_H
+
 #include "nnlib/nn/logistic.h"
 using namespace nnlib;
 
@@ -43,8 +46,10 @@ void TestLogistic()
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
 	NNHardAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"Logistic::save and/or Identity::load failed!"
+		"Logistic::save and/or Logistic::load failed!"
 	);
 	
 	delete deserialized;
 }
+
+#endif

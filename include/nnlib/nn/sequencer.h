@@ -86,12 +86,6 @@ public:
 		return m_states.size(0);
 	}
 	
-	Sequencer &forget()
-	{
-		m_state->fill(0);
-		return *this;
-	}
-	
 	// MARK: Module methods
 	
 	/// Forward propagate input, returning output.

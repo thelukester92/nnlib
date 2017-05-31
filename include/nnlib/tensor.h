@@ -739,7 +739,8 @@ public:
 	/// Add another vector to this vector.
 	Tensor &addV(const Tensor &x, T alpha = 1)
 	{
-		NNAssert(x.dims() == 1 && dims() == 1 && x.size() == size(), "Incompatible operands!");
+		NNAssert(x.dims() == 1 && dims() == 1, "Expected vector input to addV!");
+		NNAssert(x.size() == size(), "Incompatible operands in addV!");
 		Math<T>::vAdd_v(
 			x.ptr(), x.size(), x.stride(0),
 			ptr(), stride(0),
@@ -847,7 +848,8 @@ public:
 	/// Add another matrix to this matrix.
 	Tensor &addM(const Tensor &A, T alpha = 1)
 	{
-		NNAssert(A.dims() == 2 && dims() == 2 && A.shape() == shape(), "Incompatible operands!");
+		NNAssert(A.dims() == 2 && dims() == 2, "Expected matrix inputs!");
+		NNAssert(A.shape() == shape(), "Incompatible operands!");
 		Math<T>::mAdd_m(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			ptr(), stride(0),
@@ -964,7 +966,7 @@ public:
 			auto i = x.begin();
 			for(T &el : *this)
 			{
-				el += *i;
+				el += *i * alpha;
 				++i;
 			}
 			return *this;
@@ -1079,6 +1081,15 @@ public:
 		NNAssert(to > from, "Invalid normalization range!");
 		T small = min(), large = max();
 		return add(-small).scale((to - from) / (large - small)).add(from);
+	}
+	
+	/// Clip the elements of this tensor such that all elements lie in [smallest, largest]
+	Tensor &clip(T smallest, T largest)
+	{
+		NNAssert(largest > smallest, "Invalid clipping range!");
+		for(T &v : *this)
+			v = std::min(std::max(v, smallest), largest);
+		return *this;
 	}
 	
 	// MARK: Element/data access methods.

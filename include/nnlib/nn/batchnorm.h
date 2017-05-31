@@ -289,7 +289,7 @@ public:
 	/// \param out The archive to which to write.
 	virtual void save(Archive &out) const override
 	{
-		out << Binding<BatchNorm>::name << m_runningMeans << m_runningVars << m_weights << m_biases << m_training << m_momentum;
+		out << Binding<BatchNorm>::name << m_runningMeans << m_runningVars << m_weights << m_biases << m_training << m_momentum << m_inGrad.size(0);
 	}
 	
 	/// \brief Read from an archive.
@@ -304,7 +304,8 @@ public:
 			"Unexpected type! Expected '" + Binding<BatchNorm>::name + "', got '" + str + "'!"
 		);
 		
-		in >> m_runningMeans >> m_runningVars >> m_weights >> m_biases >> m_training >> m_momentum;
+		size_t bats;
+		in >> m_runningMeans >> m_runningVars >> m_weights >> m_biases >> m_training >> m_momentum >> bats;
 		NNAssert(
 			m_runningMeans.shape() == m_runningVars.shape()
 			&& m_runningMeans.shape() == m_weights.shape()
@@ -312,7 +313,7 @@ public:
 			&& m_runningMeans.dims() == 1,
 			"Incompatible means and variances!"
 		);
-		inputs({ m_inGrad.size(0), m_runningMeans.size(0) });
+		inputs({ bats, m_runningMeans.size(0) });
 	}
 private:
 	Tensor<T> m_output;			///< Cached output.

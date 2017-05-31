@@ -11,6 +11,8 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
+	using Module<T>::batch;
+	
 	virtual ~Container()
 	{
 		for(Module<T> *comp : m_components)
@@ -116,6 +118,14 @@ public:
 			}
 		}
 		return states;
+	}
+	
+	/// Reset the internal state of this module.
+	virtual Container &forget() override
+	{
+		for(Module<T> *comp : m_components)
+			comp->forget();
+		return *this;
 	}
 	
 protected:

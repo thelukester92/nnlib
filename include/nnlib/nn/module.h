@@ -141,6 +141,14 @@ public:
 		return { &output() };
 	}
 	
+	/// Reset the internal state of this module.
+	virtual Module &forget()
+	{
+		for(Tensor<T> *t : stateList())
+			t->fill(0);
+		return *this;
+	}
+	
 	/// A flattened tensor of all of this module's parameters.
 	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &parameters()

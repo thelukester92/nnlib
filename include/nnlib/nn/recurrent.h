@@ -66,13 +66,6 @@ public:
 		forget();
 	}
 	
-	Recurrent &forget()
-	{
-		m_state.fill(0);
-		m_resetGrad = true;
-		return *this;
-	}
-	
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
@@ -171,6 +164,14 @@ public:
 		states.push_back(&m_state);
 		states.push_back(&m_statePrev);
 		return states;
+	}
+	
+	/// Reset the internal state of this module.
+	virtual Recurrent &forget() override
+	{
+		m_state.fill(0);
+		m_resetGrad = true;
+		return *this;
 	}
 	
 	// MARK: Serialization
