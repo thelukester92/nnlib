@@ -107,6 +107,23 @@ void TestLSTM()
 	NNHardAssert(inGrads.add(ing, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong inGrad!");
 	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong grad!");
 	
+	module.gradClip(0.03);
+	module.forget();
+	
+	for(size_t i = 0; i < inp.size(0); ++i)
+	{
+		outputs.select(0, i).copy(module.forward(inp.select(0, i)));
+		states.select(0, i).copy(state);
+	}
+	
+	for(size_t i = inp.size(0); i > 0; --i)
+	{
+		state.copy(states.select(0, i - 1));
+		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
+	}
+	
+	NNHardAssert(inGrads.add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "LSTM::gradClip failed!");
+	
 	module.batch(32);
 	NNHardAssert(module.batch() == 32, "LSTM::batch failed!");
 	

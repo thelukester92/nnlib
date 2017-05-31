@@ -48,7 +48,8 @@ public:
 		m_stateGrad(bats, outs),
 		m_curStateGrad(bats, outs),
 		m_gradBuffer(bats, outs),
-		m_resetGrad(true)
+		m_resetGrad(true),
+		m_clip(0)
 	{
 		Container<T>::add(m_inpGateX);
 		Container<T>::add(m_inpGateY);
@@ -97,7 +98,8 @@ public:
 		m_stateGrad(1, outs),
 		m_curStateGrad(1, outs),
 		m_gradBuffer(1, outs),
-		m_resetGrad(true)
+		m_resetGrad(true),
+		m_clip(0)
 	{
 		Container<T>::add(m_inpGateX);
 		Container<T>::add(m_inpGateY);
@@ -124,6 +126,17 @@ public:
 		m_state.fill(0);
 		m_resetGrad = true;
 		return *this;
+	}
+	
+	LSTM &gradClip(T clip)
+	{
+		m_clip = clip;
+		return *this;
+	}
+	
+	T gradClip() const
+	{
+		return m_clip;
 	}
 	
 	// MARK: Container methods
@@ -235,6 +248,10 @@ public:
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_fgtGate->output());
 		m_stateGrad.addM(m_gradBuffer);
 		
+		// clip if necessary
+		if(m_clip != 0)
+			m_inGrad.clip(-m_clip, m_clip);
+		
 		return m_inGrad;
 	}
 	
@@ -339,7 +356,7 @@ public:
 			<< m_fgtGateX << m_fgtGateY << m_fgtGateH << m_fgtGate
 			<< m_inpModX << m_inpModY << m_inpMod
 			<< m_outGateX << m_outGateY << m_outGateH << m_outGate
-			<< m_outMod;
+			<< m_outMod << m_clip;
 	}
 	
 	/// \brief Read from an archive.
@@ -360,7 +377,7 @@ public:
 			>> m_fgtGateX >> m_fgtGateY >> m_fgtGateH >> m_fgtGate
 			>> m_inpModX >> m_inpModY >> m_inpMod
 			>> m_outGateX >> m_outGateY >> m_outGateH >> m_outGate
-			>> m_outMod;
+			>> m_outMod >> m_clip;
 		
 		Container<T>::add(m_inpGateX);
 		Container<T>::add(m_inpGateY);
@@ -427,6 +444,7 @@ private:
 	Tensor<T> m_gradBuffer;
 	
 	bool m_resetGrad;
+	T m_clip;
 };
 
 NNSerializable(LSTM<double>, Module<double>);
