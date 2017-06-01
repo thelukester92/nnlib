@@ -26,8 +26,8 @@ void TestReLU()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "ReLU::forward failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "ReLU::backward failed!");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "ReLU::forward failed!");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "ReLU::backward failed!");
 	
 	map.leak(0.1479);
 	out(0, 0) = inp(0, 0) * 0.1479;
@@ -36,14 +36,14 @@ void TestReLU()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "ReLU::forward (leaky) failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "ReLU::backward (leaky) failed!");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "ReLU::forward (leaky) failed!");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "ReLU::backward (leaky) failed!");
 	
 	map.inputs({ 3, 4 });
-	NNHardAssert(map.inputs() == map.outputs(), "ReLU::inputs failed to resize outputs!");
+	NNAssert(map.inputs() == map.outputs(), "ReLU::inputs failed to resize outputs!");
 	
 	map.outputs({ 12, 3 });
-	NNHardAssert(map.inputs() == map.outputs(), "ReLU::outputs failed to resize inputs!");
+	NNAssert(map.inputs() == map.outputs(), "ReLU::outputs failed to resize inputs!");
 	
 	bool ok = true;
 	try
@@ -52,11 +52,11 @@ void TestReLU()
 		ok = false;
 	}
 	catch(const std::runtime_error &e) {}
-	NNHardAssert(ok, "ReLU::resize allowed unequal inputs and outputs!");
+	NNAssert(ok, "ReLU::resize allowed unequal inputs and outputs!");
 	
 	ReLU<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
 		"ReLU::save and/or ReLU::load failed!"
 	);

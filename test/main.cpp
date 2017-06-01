@@ -1,3 +1,9 @@
+// force debugging asserts
+#ifdef OPTIMIZE
+	#warning Debugging asserts have been re-enabled for testing.
+	#undef OPTIMIZE
+#endif
+
 #include "test_tensor.h"
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
@@ -16,6 +22,7 @@
 #include "nn/test_sequencer.h"
 #include "nn/test_sequential.h"
 #include "nn/test_tanh.h"
+using namespace nnlib;
 
 #include <iostream>
 #include <string>
@@ -24,13 +31,13 @@
 #include <functional>
 using namespace std;
 
-#define TEST(Class) { std::string("Testing ") + #Class, Test##Class }
+#define TEST(Class) { string("Testing ") + #Class, Test##Class }
 
 int main()
 {
 	int ret = 0;
 	
-	initializer_list<pair<std::string, std::function<void()>>> tests = {
+	initializer_list<pair<string, function<void()>>> tests = {
 		// critics
 		TEST(CriticSequencer),
 		TEST(MSE),
@@ -59,16 +66,16 @@ int main()
 	{
 		for(auto test : tests)
 		{
-			std::cout << test.first << "..." << std::flush;
+			cout << test.first << "..." << flush;
 			test.second();
-			std::cout << " Passed!" << std::endl;
+			cout << " Passed!" << endl;
 		}
 		
-		std::cout << "All tests passed!" << std::endl;
+		cout << "All tests passed!" << endl;
 	}
-	catch(const std::runtime_error &e)
+	catch(const Error &e)
 	{
-		std::cerr << e.what();
+		cerr << endl << "An unexpected error occurred:\n\t" << e.what() << endl;
 		ret = 1;
 	}
 	return ret;

@@ -56,37 +56,37 @@ void TestConcat()
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	NNHardAssert(module.output().addM(out, -1).square().sum() < 1e-9, "Concat::forward failed!");
-	NNHardAssert(module.inGrad().addM(ing, -1).square().sum() < 1e-9, "Concat::backward failed; wrong inGrad!");
-	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Concat::backward failed; wrong grad!");
+	NNAssert(module.output().addM(out, -1).square().sum() < 1e-9, "Concat::forward failed!");
+	NNAssert(module.inGrad().addM(ing, -1).square().sum() < 1e-9, "Concat::backward failed; wrong inGrad!");
+	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Concat::backward failed; wrong grad!");
 	
-	NNHardAssert(module.component(0) == linear, "Concat::component failed to get the correct component!");
-	NNHardAssert(module.component(1) == identity, "Concat::component failed to get the correct component!");
+	NNAssert(module.component(0) == linear, "Concat::component failed to get the correct component!");
+	NNAssert(module.component(1) == identity, "Concat::component failed to get the correct component!");
 	
-	NNHardAssert(module.components() == 2, "Concat::components failed!");
+	NNAssert(module.components() == 2, "Concat::components failed!");
 	
-	NNHardAssert(module.remove(0) == linear, "Concat::remove failed to return the removed component!");
-	NNHardAssert(module.components() == 1, "Concat::remove failed!");
-	NNHardAssert(module.component(0) == identity, "Concat::remove failed!");
-	NNHardAssert(module.outputs() == identity->outputs(), "Concat::remove failed!");
+	NNAssert(module.remove(0) == linear, "Concat::remove failed to return the removed component!");
+	NNAssert(module.components() == 1, "Concat::remove failed!");
+	NNAssert(module.component(0) == identity, "Concat::remove failed!");
+	NNAssert(module.outputs() == identity->outputs(), "Concat::remove failed!");
 	
 	module.clear();
-	NNHardAssert(module.components() == 0, "Concat::clear failed!");
+	NNAssert(module.components() == 0, "Concat::clear failed!");
 	
 	module.add(linear);
-	NNHardAssert(module.outputs() == linear->outputs(), "Concat::add failed!");
+	NNAssert(module.outputs() == linear->outputs(), "Concat::add failed!");
 	
 	module.batch(32);
-	NNHardAssert(module.batch() == 32, "Concat::batch failed to batch container!");
-	NNHardAssert(linear->batch() == 32, "Concat::batch failed to batch children!");
+	NNAssert(module.batch() == 32, "Concat::batch failed to batch container!");
+	NNAssert(linear->batch() == 32, "Concat::batch failed to batch children!");
 	
-	NNHardAssert(module.parameterList() == linear->parameterList(), "Concat::parameterList failed!");
-	NNHardAssert(module.gradList() == linear->gradList(), "Concat::gradList failed!");
-	NNHardAssert(module.stateList() == linear->stateList(), "Concat::stateList failed!");
+	NNAssert(module.parameterList() == linear->parameterList(), "Concat::parameterList failed!");
+	NNAssert(module.gradList() == linear->gradList(), "Concat::gradList failed!");
+	NNAssert(module.stateList() == linear->stateList(), "Concat::stateList failed!");
 	
 	Concat<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
 		"Concat::save and/or Concat::load failed!"
 	);

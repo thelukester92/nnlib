@@ -103,9 +103,9 @@ void TestLSTM()
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 	
-	NNHardAssert(outputs.add(out, -1).square().sum() < 1e-6, "LSTM::forward failed!");
-	NNHardAssert(inGrads.add(ing, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong inGrad!");
-	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong grad!");
+	NNAssert(outputs.add(out, -1).square().sum() < 1e-6, "LSTM::forward failed!");
+	NNAssert(inGrads.add(ing, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong inGrad!");
+	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong grad!");
 	
 	module.gradClip(0.03);
 	module.forget();
@@ -122,14 +122,14 @@ void TestLSTM()
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 	
-	NNHardAssert(inGrads.add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "LSTM::gradClip failed!");
+	NNAssert(inGrads.add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "LSTM::gradClip failed!");
 	
 	module.batch(32);
-	NNHardAssert(module.batch() == 32, "LSTM::batch failed!");
+	NNAssert(module.batch() == 32, "LSTM::batch failed!");
 	
 	LSTM<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
 		"LSTM::save and/or LSTM::load failed!"
 	);

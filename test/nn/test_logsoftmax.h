@@ -24,14 +24,14 @@ void TestLogSoftMax()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "LogSoftMax::forward failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "LogSoftMax::backward failed!");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "LogSoftMax::forward failed!");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "LogSoftMax::backward failed!");
 	
 	map.inputs({ 3, 4 });
-	NNHardAssert(map.inputs() == map.outputs(), "LogSoftMax::inputs failed to resize outputs!");
+	NNAssert(map.inputs() == map.outputs(), "LogSoftMax::inputs failed to resize outputs!");
 	
 	map.outputs({ 12, 3 });
-	NNHardAssert(map.inputs() == map.outputs(), "LogSoftMax::outputs failed to resize inputs!");
+	NNAssert(map.inputs() == map.outputs(), "LogSoftMax::outputs failed to resize inputs!");
 	
 	bool ok = true;
 	try
@@ -40,11 +40,11 @@ void TestLogSoftMax()
 		ok = false;
 	}
 	catch(const std::runtime_error &e) {}
-	NNHardAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
+	NNAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
 	
 	LogSoftMax<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
 		"LogSoftMax::save and/or LogSoftMax::load failed!"
 	);

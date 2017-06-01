@@ -29,24 +29,24 @@ void TestBatchNorm()
 	bn.forward(inp);
 	for(size_t i = 0; i < 3; ++i)
 	{
-		NNHardAssert(fabs(bn.output().select(1, i).mean()) < 1e-9, "BatchNorm::forward failed! Non-zero mean!");
-		NNHardAssert(fabs(bn.output().select(1, i).variance() - 1) < 1e-9, "BatchNorm::forward failed! Non-unit variance!");
+		NNAssert(fabs(bn.output().select(1, i).mean()) < 1e-9, "BatchNorm::forward failed! Non-zero mean!");
+		NNAssert(fabs(bn.output().select(1, i).variance() - 1) < 1e-9, "BatchNorm::forward failed! Non-unit variance!");
 	}
 	
 	bn.backward(inp, grad);
-	NNHardAssert(
+	NNAssert(
 		bn.grad().add(Tensor<>({ 14.9606, 2.82843, 0, 10, 5, 12 }), -1).square().sum() < 1e-9,
 		"BatchNorm::backward failed! Wrong parameter gradient!"
 	);
 	
-	NNHardAssert(
+	NNAssert(
 		bn.inGrad().add(inGrad, -1).square().sum() < 1e-9,
 		"BatchNorm::backward failed! Wrong input gradient!"
 	);
 	
 	BatchNorm<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << bn).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && bn.inputs() == deserialized->inputs() && bn.outputs() == deserialized->outputs(),
 		"BatchNorm::save and/or BatchNorm::load failed!"
 	);

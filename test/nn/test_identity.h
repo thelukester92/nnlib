@@ -24,14 +24,14 @@ void TestIdentity()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Identity::forward failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::backward failed!");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Identity::forward failed");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::backward failed");
 	
 	map.inputs({ 3, 4 });
-	NNHardAssert(map.inputs() == map.outputs(), "Identity::inputs failed to resize outputs!");
+	NNAssert(map.inputs() == map.outputs(), "Identity::inputs failed to resize outputs!");
 	
 	map.outputs({ 12, 3 });
-	NNHardAssert(map.inputs() == map.outputs(), "Identity::outputs failed to resize inputs!");
+	NNAssert(map.inputs() == map.outputs(), "Identity::outputs failed to resize inputs!");
 	
 	bool ok = true;
 	try
@@ -40,11 +40,11 @@ void TestIdentity()
 		ok = false;
 	}
 	catch(const std::runtime_error &e) {}
-	NNHardAssert(ok, "Identity::resize allowed unequal inputs and outputs!");
+	NNAssert(ok, "Identity::resize allowed unequal inputs and outputs!");
 	
 	Identity<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
 		"Identity::save and/or Identity::load failed!"
 	);

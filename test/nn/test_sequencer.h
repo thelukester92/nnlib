@@ -91,22 +91,22 @@ void TestSequencer()
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	NNHardAssert(module.output().add(out, -1).square().sum() < 1e-9, "Sequencer::forward failed!");
-	NNHardAssert(module.inGrad().add(ing, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong inGrad!");
-	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong grad!");
+	NNAssert(module.output().add(out, -1).square().sum() < 1e-9, "Sequencer::forward failed!");
+	NNAssert(module.inGrad().add(ing, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong inGrad!");
+	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong grad!");
 	
 	lstm->gradClip(0.03);
 	module.forget();
 	module.forward(inp);
 	module.backward(inp, grd);
-	NNHardAssert(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "Sequencer::gradClip failed!");
+	NNAssert(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "Sequencer::gradClip failed!");
 	
 	module.batch(32);
-	NNHardAssert(module.batch() == 32, "Sequencer::batch failed!");
+	NNAssert(module.batch() == 32, "Sequencer::batch failed!");
 	
 	Sequencer<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNHardAssert(
+	NNAssert(
 		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
 		"Sequencer::save and/or Sequencer::load failed!"
 	);
