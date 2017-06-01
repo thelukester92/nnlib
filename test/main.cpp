@@ -4,6 +4,7 @@
 	#undef OPTIMIZE
 #endif
 
+#include "nnlib.h"
 #include "test_tensor.h"
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
