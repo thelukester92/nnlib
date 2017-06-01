@@ -17,7 +17,6 @@ public:
 		std::runtime_error(file + ":" + std::to_string(line) + " (" + func + "): " + stringify(reasons...))
 	{}
 	
-private:
 	template <typename T, typename ... Ts>
 	static std::string stringify(const T &value, const Ts &...values)
 	{
@@ -38,6 +37,11 @@ private:
 	static std::string stringify(const char *value)
 	{
 		return std::string(value);
+	}
+	
+	static std::string stringify()
+	{
+		return "";
 	}
 };
 
@@ -61,9 +65,36 @@ private:
 #endif
 
 /// A few convenient ways to use debug asserts.
-#define NNAssertEquals(x, y) NNAssert(x == y, "Unexpected value for ", #x, "! Expected ", y, ", got ", x, ".")
-#define NNAssertLessThan(x, y) NNAssert(x < y, "Unexpected value for ", #x, "! Expected < ", y, ", got ", x, ".")
-#define NNAssertGreaterThan(x, y) NNAssert(x < y, "Unexpected value for ", #x, "! Expected > ", y, ", got ", x, ".")
+
+#define NNAssertEquals(x, y, ...)									\
+	NNAssert(														\
+		x == y, Error::stringify(__VA_ARGS__),						\
+		" Expected ", #x, " == ", #y, ", but ", x, " != ", y, "."	\
+	)
+
+#define NNAssertLessThan(x, y, ...)									\
+	NNAssert(														\
+		x < y, Error::stringify(__VA_ARGS__),						\
+		" Expected ", #x, " < ", #y, ", but ", x, " >= ", y, "."	\
+	)
+
+#define NNAssertLessThanOrEquals(x, y, ...)							\
+	NNAssert(														\
+		x <= y, Error::stringify(__VA_ARGS__),						\
+		" Expected ", #x, " <= ", #y, ", but ", x, " > ", y, "."	\
+	)
+
+#define NNAssertGreaterThan(x, y, ...)								\
+	NNAssert(														\
+		x > y, Error::stringify(__VA_ARGS__),						\
+		" Expected ", #x, " > ", #y, ", but ", x, " <= ", y, "."	\
+	)
+
+#define NNAssertGreaterThanOrEquals(x, y, ...)						\
+	NNAssert(														\
+		x >= y, Error::stringify(__VA_ARGS__),						\
+		" Expected ", #x, " >= ", #y, ", but ", x, " < ", y, "."	\
+	)
 
 }
 

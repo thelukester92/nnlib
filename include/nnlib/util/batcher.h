@@ -21,14 +21,14 @@ public:
 		m_labBatch(m_lab),
 		m_batch(bats)
 	{
-		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels!");
-		NNAssert(bats <= feat.size(0), "Invalid batch size!");
+		NNAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	
 	Batcher &batch(size_t bats)
 	{
-		NNAssert(bats <= m_feat.size(0), "Invalid batch size!");
+		NNAssertLessThanOrEquals(bats, m_feat.size(0), "Invalid batch size!");
 		m_batch = bats;
 		reset();
 		return *this;
@@ -115,16 +115,17 @@ public:
 		m_batch(bats),
 		m_sequenceLength(sequenceLength)
 	{
-		NNAssert(feat.dims() == 2 && lab.dims() == 2, "SequenceBatcher only works with matrix inputs!");
-		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels (" + std::to_string(feat.size(0)) + " != " + std::to_string(lab.size(0)) + ")!");
-		NNAssert(sequenceLength <= feat.size(0), "Invalid sequence length (" + std::to_string(sequenceLength) + " > " + std::to_string(feat.size(0)) + ")!");
-		NNAssert(bats <= feat.size(0), "Invalid batch size (" + std::to_string(bats) + " > " + std::to_string(feat.size(0)) + ")!");
+		NNAssertEquals(feat.dims(), 2, "Invalid features!");
+		NNAssertEquals(lab.dims(), 2, "Invalid labels!");
+		NNAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNAssertLessThanOrEquals(sequenceLength, feat.size(0), "Invalid sequence length!");
+		NNAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	
 	SequenceBatcher &sequenceLength(size_t sequenceLength)
 	{
-		NNAssert(sequenceLength <= m_feat.size(0), "Invalid sequence length (" + std::to_string(sequenceLength) + " > " + std::to_string(m_feat.size(0)) + ")!");
+		NNAssertLessThanOrEquals(sequenceLength, m_feat.size(0), "Invalid sequence length!");
 		m_sequenceLength = sequenceLength;
 		reset();
 		return *this;
@@ -137,7 +138,7 @@ public:
 	
 	SequenceBatcher &batch(size_t bats)
 	{
-		NNAssert(bats <= m_feat.size(0), "Invalid batch size (" + std::to_string(bats) + " > " + std::to_string(m_feat.size(0)) + ")!");
+		NNAssertLessThanOrEquals(bats, m_feat.size(0), "Invalid batch size!");
 		m_batch = bats;
 		reset();
 		return *this;

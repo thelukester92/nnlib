@@ -75,7 +75,7 @@ int main()
 	}
 	catch(const Error &e)
 	{
-		cerr << endl << "An unexpected error occurred:\n\t" << e.what() << endl;
+		cerr << endl << "An error occurred:\n\t" << e.what() << endl;
 		ret = 1;
 	}
 	return ret;
