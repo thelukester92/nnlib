@@ -287,7 +287,8 @@ public:
 	template <typename ... Ts>
 	const Tensor view(Ts... dims) const
 	{
-		return view({ static_cast<size_t>(dims)... });
+		const Tensor &t = view({ static_cast<size_t>(dims)... });
+		return t;
 	}
 	
 	/// \brief Creates a new tensor with a copy of this tensor's data and a new shape.
@@ -930,7 +931,7 @@ public:
 	/// Hadamard/elementwise/pointwise product.
 	Tensor &pointwiseProduct(const Tensor &x)
 	{
-		NNAssert(shape() == x.shape(), "Incompatible operands!");
+		NNAssertEquals(shape(), x.shape(), "Incompatible operands!");
 		auto i = x.begin();
 		for(T &el : *this)
 		{
@@ -946,7 +947,7 @@ public:
 	/// For vectors, addV is called; for matrices, addM is called.
 	Tensor &add(const Tensor &x, T alpha = 1)
 	{
-		NNAssert(shape() == x.shape(), "Incompatible operands to add!");
+		NNAssertEquals(shape(), x.shape(), "Incompatible operands to add!");
 		if(m_dims.size() == 1)
 		{
 			return addV(x, alpha);
@@ -999,8 +1000,8 @@ public:
 	/// \return The input tensor t, for chaining.
 	Tensor &sum(Tensor &t, size_t dim) const
 	{
-		NNAssert(dim < m_dims.size(), "Invalid dimension for summation!");
-		NNAssert(m_dims.size() > 1, "Cannot sum over a 1D tensor this way! Call sum() instead!");
+		NNAssertLessThan(dim, m_dims.size(), "Invalid dimension for summation!");
+		NNAssertGreaterThan(m_dims.size(), 1, "Cannot sum over a 1D tensor this way! Call sum() instead!");
 		
 		t.copy(select(dim, 0));
 		for(size_t i = 1, n = m_dims[dim]; i < n; ++i)
@@ -1023,15 +1024,17 @@ public:
 	/// \return The tensor containing the sum.
 	Tensor sum(size_t dim) const
 	{
-		Tensor t(select(dim, 0).shape());
+		Tensor t(select(dim, 0).shape(), true);
 		return sum(t, dim);
 	}
 	
+	/// Calculate the mean of the elements of this tensor.
 	T mean() const
 	{
 		return sum() / size();
 	}
 	
+	/// Calculate the variance of the elements of this tensor.
 	T variance() const
 	{
 		T avg = mean();
@@ -1044,6 +1047,7 @@ public:
 		return sum / size();
 	}
 	
+	/// Find the minimum element of this tensor.
 	T min() const
 	{
 		T result = *begin();
@@ -1057,6 +1061,7 @@ public:
 		return result;
 	}
 	
+	/// Find the maximum element of this tensor.
 	T max() const
 	{
 		T result = *begin();
@@ -1070,9 +1075,10 @@ public:
 		return result;
 	}
 	
+	/// Normalize the elements of this tensor.
 	Tensor &normalize(T from = 0.0, T to = 1.0)
 	{
-		NNAssert(to > from, "Invalid normalization range!");
+		NNAssertGreaterThan(to, from, "Invalid normalization range!");
 		T small = min(), large = max();
 		return add(-small).scale((to - from) / (large - small)).add(from);
 	}

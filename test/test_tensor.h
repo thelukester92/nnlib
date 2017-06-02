@@ -271,17 +271,77 @@ void TestTensor()
 	for(auto x = viewOfMoved.begin(), y = view.begin(); x != viewOfMoved.end(); ++x, ++y)
 		NNAssertAlmostEquals(1.5 * *x, *y, 1e-12, "Tensor::assignMM failed!");
 	
-	// test const methods
-	/*
+	view = empty.copy().pointwiseProduct(vector);
+	for(auto x = view.begin(), y = empty.begin(), z = vector.begin(); x != view.end(); ++x, ++y, ++z)
+		NNAssertAlmostEquals(*x, *y * *z, 1e-12, "Tensor::pointwiseProduct failed!");
 	
-	view(Storage)
-	view(...)
-	select()
+	view = empty.copy().add(vector, 0.75);
+	for(auto x = view.begin(), y = empty.begin(), z = vector.begin(); x != view.end(); ++x, ++y, ++z)
+		NNAssertAlmostEquals(*x, *y + 0.75 * *z, 1e-12, "Tensor::add(Tensor, T) failed!");
+	
+	view = empty.copy().square();
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y * *y, 1e-12, "Tensor::square failed!");
+	
+	double sum = view.sum();
+	for(auto &v : view)
+		sum -= v;
+	NNAssertAlmostEquals(sum, 0, 1e-12, "Tensor::sum() failed!");
+	
+	vector.resize(2, 3).copy({ 1, 2, 3, 4, 5, 6 });
+	vector.sum(view.resize(3), 0);
+	empty.resize(3).copy({ 5, 7, 9 });
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::sum(Tensor, size_t) failed!");
+	
+	view.resize(2) = vector.sum(1);
+	empty.resize(2).copy({ 6, 15 });
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::sum(size_t) failed!");
+	
+	NNAssertAlmostEquals(vector.mean(), 3.5, 1e-12, "Tensor::mean failed!");
+	NNAssertAlmostEquals(vector.variance(), 2.917, 1e-3, "Tensor::variance failed!");
+	NNAssertEquals(vector.min(), 1, "Tensor::min failed!");
+	NNAssertEquals(vector.max(), 6, "Tensor::max failed!");
+	
+	vector.normalize(-1, 20);
+	NNAssertAlmostEquals(vector.min(), -1, 1e-12, "Tensor::normalize failed!");
+	NNAssertAlmostEquals(vector.max(), 20, 1e-12, "Tensor::normalize failed!");
+	
+	vector.clip(0, 10);
+	NNAssertAlmostEquals(vector.min(), 0, 1e-12, "Tensor::clip failed!");
+	NNAssertAlmostEquals(vector.max(), 10, 1e-12, "Tensor::clip failed!");
+	
+	// test const methods
+	
+	view.resize(10, 10);
+	
+	const Tensor<> &constant = view;
+	
+	{
+		const Tensor<> &constView = constant.view(Storage<size_t>({ 3, 3 }));
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 3, 3 }), "const Tensor::view(Storage) failed! Wrong shape!");
+		NNAssertEquals(&constView(0, 0), &constant(0, 0), "const Tensor::view(Storage) failed! Wrong data!");
+	}
+	
+	{
+		const Tensor<> &constView = constant.view(3, 3);
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 3, 3 }), "const Tensor::view(size_t, size_t) failed! Wrong shape!");
+		NNAssertEquals(&constView(0, 0), &constant(0, 0), "const Tensor::view(size_t, size_t) failed! Wrong data!");
+	}
+	
+	{
+		const Tensor<> &constView = constant.select(1, 1);
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 3 }), "const Tensor::select failed! Wrong shape!");
+		NNAssertEquals(&constView(2), &constant(2, 1), "const Tensor::select failed! Wrong data!");
+	}
+	
+	/*
 	narrow()
 	expand()
 	sub()
 	
-	// test Serialization
+	// test serialization
 	
 	Storage<double> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << regular).str()) >> deserialized;

@@ -83,7 +83,7 @@ void TestStorage()
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
 	NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
 	
-	// test Serialization
+	// test serialization
 	
 	Storage<double> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << regular).str()) >> deserialized;
