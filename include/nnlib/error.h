@@ -6,6 +6,7 @@
 #include <exception>
 #include <stdexcept>
 #include <type_traits>
+#include <cmath>
 
 namespace nnlib
 {
@@ -86,7 +87,7 @@ public:
 
 #define NNAssertAlmostEquals(x, y, eps, __VA_ARGS__)				\
 	NNAssert(														\
-		fabs((x) - (y)) < eps, Error::stringify(__VA_ARGS__),		\
+		std::fabs((x) - (y)) < eps, Error::stringify(__VA_ARGS__),	\
 		" Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."	\
 	)
 
