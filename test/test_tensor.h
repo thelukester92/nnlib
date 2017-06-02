@@ -336,21 +336,44 @@ void TestTensor()
 		NNAssertEquals(&constView(2), &constant(2, 1), "const Tensor::select failed! Wrong data!");
 	}
 	
-	/*
-	narrow()
-	expand()
-	sub()
+	{
+		const Tensor<> &constView = constant.narrow(1, 2, 2);
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 10, 2 }), "const Tensor::narrow failed! Wrong shape!");
+		NNAssertEquals(&constView(2, 1), &constant(2, 3), "const Tensor::narrow failed! Wrong data!");
+	}
+	
+	{
+		const Tensor<> &constView = constant.narrow(1, 2, 2);
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 10, 2 }), "const Tensor::narrow failed! Wrong shape!");
+		NNAssertEquals(&constView(2, 1), &constant(2, 3), "const Tensor::narrow failed! Wrong data!");
+	}
+	
+	view.resize(10, 1, 10);
+	
+	{
+		const Tensor<> &constant = view;
+		const Tensor<> &constView = constant.expand(1, 50);
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 10, 50, 10 }), "const Tensor::expand failed! Wrong shape!");
+		NNAssertEquals(&constView(7, 29, 3), &constant(7, 0, 3), "const Tensor::expand failed! Wrong data!");
+	}
+	
+	{
+		const Tensor<> &constant = view;
+		const Tensor<> &constView = constant.sub({ { 2, 4 }, { 0 }, { 7, 2 } });
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 4, 1, 2 }), "const Tensor::sub failed! Wrong shape!");
+		NNAssertEquals(&constView(2, 0, 1), &constant(4, 0, 8), "const Tensor::sub failed! Wrong data!");
+	}
 	
 	// test serialization
 	
-	Storage<double> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << regular).str()) >> deserialized;
-	NNAssertNotEquals(deserialized, nullptr, "Storage::save and/or Storage::load failed!");
-	for(auto x = deserialized->begin(), y = regular.begin(); x != deserialized->end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Storage::save and/or Storage::load failed!");
-	delete deserialized;
+	view.rand();
 	
-	*/
+	Tensor<> *deserialized = nullptr;
+	Archive::fromString((Archive::toString() << view).str()) >> deserialized;
+	NNAssertNotEquals(deserialized, nullptr, "Tensor::save and/or Tensor::load failed!");
+	for(auto x = deserialized->begin(), y = view.begin(); x != deserialized->end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");
+	delete deserialized;
 }
 
 #endif
