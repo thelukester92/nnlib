@@ -432,7 +432,7 @@ public:
 	Tensor &sub(Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
 		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
-		t.m_offset = m_offset;
+		t = *this;
 		
 		size_t dim = 0;
 		for(const std::initializer_list<size_t> &params : dims)
@@ -457,23 +457,6 @@ public:
 		}
 		
 		return t;
-	}
-	
-	/// \brief Makes the given tensor a subview of this tensor's data.
-	///
-	/// The parameter tensor ends up with the same number of dimensions as this tensor.
-	/// This method narrows each dimension according to the values given initializer_list.
-	/// Each element in the initializer_list refers to one dimension, in order, and may be
-	/// empty (`{}`) for keeping the full dimension,
-	/// a single element (i.e. `{3}`) for narrowing to a single slice,
-	/// or two elements (i.e. `{3, 2}`) for narrowing a range.
-	/// The resulting tensor is not a copy, but a view.
-	/// \param t The tensor to use for the subview.
-	/// \param dims An initializer_list describing how to narrow each dimension.
-	/// \return This tensor, for chaining.
-	const Tensor &sub(const Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims) const
-	{
-		return const_cast<Tensor *>(this)->sub(*const_cast<Tensor *>(&t), dims);
 	}
 	
 	/// \brief Creates a new tensor as a subview of this tensor's data.

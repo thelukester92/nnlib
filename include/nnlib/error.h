@@ -86,7 +86,7 @@ public:
 
 #define NNAssertAlmostEquals(x, y, eps, __VA_ARGS__)				\
 	NNAssert(														\
-		(x - y) * (x - y) < eps, Error::stringify(__VA_ARGS__),		\
+		fabs((x) - (y)) < eps, Error::stringify(__VA_ARGS__),		\
 		" Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."	\
 	)
 

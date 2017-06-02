@@ -41,6 +41,7 @@ int main()
 	initializer_list<pair<string, function<void()>>> tests = {
 		// top level
 		TEST(Storage),
+		TEST(Tensor),
 		
 		// critics
 		TEST(CriticSequencer),

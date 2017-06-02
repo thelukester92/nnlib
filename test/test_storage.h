@@ -29,11 +29,11 @@ void TestStorage()
 	NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14 }), "Storage::operator== failed!");
 	NNAssertEquals(copy, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14 }), "Storage::operator== failed!");
 	NNAssertEquals(initialized, Storage<double>({ 1.0, 2.0, 3.0, 4.0 }), "Storage::operator== failed!");
-	NNAssertEquals(regular, copy, "Storage::operator== failed!")
+	NNAssertEquals(regular, copy, "Storage::operator== failed!");
 	
-	NNAssertNotEquals(empty, regular, "Storage::operator!=(Storage) failed!")
-	NNAssertNotEquals(regular, initialized, "Storage::operator!=(Storage) failed!")
-	NNAssertNotEquals(initialized, Storage<double>({ 2.0 }), "Storage::operator!=(initializer_list) failed!")
+	NNAssertNotEquals(empty, regular, "Storage::operator!=(Storage) failed!");
+	NNAssertNotEquals(regular, initialized, "Storage::operator!=(Storage) failed!");
+	NNAssertNotEquals(initialized, Storage<double>({ 2.0 }), "Storage::operator!=(initializer_list) failed!");
 	
 	// test assignment
 	
