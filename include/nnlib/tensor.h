@@ -287,7 +287,7 @@ public:
 	template <typename ... Ts>
 	const Tensor view(Ts... dims) const
 	{
-		const Tensor &t = view({ static_cast<size_t>(dims)... });
+		Tensor t = const_cast<Tensor *>(this)->view({ static_cast<size_t>(dims)... });
 		return t;
 	}
 	

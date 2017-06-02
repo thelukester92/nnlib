@@ -332,7 +332,7 @@ void TestTensor()
 	
 	{
 		const Tensor<> &constView = constant.select(1, 1);
-		NNAssertEquals(constView.shape(), Storage<size_t>({ 3 }), "const Tensor::select failed! Wrong shape!");
+		NNAssertEquals(constView.shape(), Storage<size_t>({ 10 }), "const Tensor::select failed! Wrong shape!");
 		NNAssertEquals(&constView(2), &constant(2, 1), "const Tensor::select failed! Wrong data!");
 	}
 	
