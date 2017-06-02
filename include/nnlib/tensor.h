@@ -745,8 +745,12 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &assignMV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
 	{
-		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
+		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
+		NNAssertEquals(x.dims(), 1, "x must be a vector!");
+		NNAssertEquals(dims(), 1, "This must be a vector!");
+		NNAssertEquals(size(0), A.size(0), "Incompatible operands!");
+		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
+		
 		Math<T>::vAdd_mv(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.stride(0),
@@ -769,8 +773,12 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &assignMTV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0)
 	{
-		NNAssert(A.dims() == 2 && x.dims() == 1 && dims() == 1, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1, "Matrix-vector multiplcation requires a contiguous matrix!");
+		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
+		NNAssertEquals(x.dims(), 1, "x must be a vector!");
+		NNAssertEquals(dims(), 1, "This must be a vector!");
+		NNAssertEquals(size(0), A.size(1), "Incompatible operands!");
+		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
+		
 		Math<T>::vAdd_mtv(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			x.ptr(), x.stride(0),
