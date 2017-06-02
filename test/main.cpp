@@ -4,6 +4,7 @@
 	#undef OPTIMIZE
 #endif
 
+#include "test_storage.h"
 #include "test_tensor.h"
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
@@ -38,6 +39,9 @@ int main()
 	int ret = 0;
 	
 	initializer_list<pair<string, function<void()>>> tests = {
+		// top level
+		TEST(Storage),
+		
 		// critics
 		TEST(CriticSequencer),
 		TEST(MSE),

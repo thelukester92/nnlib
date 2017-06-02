@@ -5,6 +5,7 @@
 #include <sstream>
 #include <exception>
 #include <stdexcept>
+#include <type_traits>
 
 namespace nnlib
 {
@@ -24,9 +25,15 @@ public:
 	}
 	
 	template <typename T>
-	static std::string stringify(const T &value)
+	static typename std::enable_if<std::is_fundamental<T>::value, std::string>::type stringify(const T &value)
 	{
 		return std::to_string(value);
+	}
+	
+	template <typename T>
+	static typename std::enable_if<!std::is_fundamental<T>::value, std::string>::type stringify(const T &value)
+	{
+		return "object";
 	}
 	
 	static std::string stringify(const std::string &value)
@@ -37,6 +44,11 @@ public:
 	static std::string stringify(const char *value)
 	{
 		return std::string(value);
+	}
+	
+	static std::string stringify(std::nullptr_t null)
+	{
+		return "null";
 	}
 	
 	static std::string stringify()
@@ -76,6 +88,12 @@ public:
 	NNAssert(														\
 		(x - y) * (x - y) < eps, Error::stringify(__VA_ARGS__),		\
 		" Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."	\
+	)
+
+#define NNAssertNotEquals(x, y, ...)								\
+	NNAssert(														\
+		x != y, Error::stringify(__VA_ARGS__),						\
+		" Expected ", #x, " != ", #y, ", but ", x, " == ", y, "."	\
 	)
 
 #define NNAssertLessThan(x, y, ...)									\
