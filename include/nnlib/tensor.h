@@ -788,7 +788,7 @@ public:
 		return *this;
 	}
 	
-	/// \brief Assigns a vector/vector outer product.
+	/// \brief Assigns or adds a vector/vector outer product.
 	///
 	/// Adds the scaled outer product of x and y to this matrix.
 	/// Sizes must be compatible.
@@ -798,35 +798,15 @@ public:
 	/// \param y An M tensor.
 	/// \param alpha How much to scale x^T * y.
 	/// \return This tensor, for chaining.
-	/// \note This method does not include beta because the no-beta version is faster.
-	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha = 1)
+	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha = 1, T beta = 0)
 	{
-		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
-		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
-		Math<T>::mAdd_vv(
-			x.ptr(), x.size(), x.stride(0),
-			y.ptr(), y.size(), y.stride(0),
-			ptr(), stride(0),
-			alpha
-		);
-		return *this;
-	}
-	
-	/// \brief Assigns or adds a vector/vector outer product.
-	///
-	/// Adds the scaled outer product of x and y to this matrix.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using A for this tensor, this method computes `A = alpha * x^T * y + beta * A`.
-	/// \param x An N tensor.
-	/// \param y An M tensor.
-	/// \param alpha How much to scale x^T * y.
-	/// \return This tensor, for chaining.
-	/// \note This method does explicitly includes beta because the no-beta version is faster.
-	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha, T beta)
-	{
-		NNAssert(x.dims() == 1 && y.dims() == 1 && dims() == 2, "Incompatible operands!");
-		NNAssert(stride(1) == 1, "Vector outer product requires a contiguous matrix!");
+		NNAssertEquals(x.dims(), 1, "x must be a vector!");
+		NNAssertEquals(y.dims(), 1, "y must be a vector!");
+		NNAssertEquals(dims(), 2, "This must be a matrix!");
+		NNAssertEquals(size(0), x.size(0), "Incompatible operands!");
+		NNAssertEquals(size(1), y.size(0), "Incompatible operands!");
+		NNAssertEquals(stride(1), 1, "This must be contiguous!");
+		
 		Math<T>::mAdd_vv(
 			x.ptr(), x.size(), x.stride(0),
 			y.ptr(), y.size(), y.stride(0),

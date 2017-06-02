@@ -221,12 +221,23 @@ void TestTensor()
 	empty.resize(100);
 	
 	empty.assignMTV(view, vector);
-	for(int i = 0; i < view.size(1); ++i)
-		for(int j = 0; j < view.size(0); ++j)
+	for(size_t i = 0; i < view.size(1); ++i)
+		for(size_t j = 0; j < view.size(0); ++j)
 			viewOfMoved(i) += view(j, i) * vector(j);
 	
 	for(auto x = viewOfMoved.begin(), y = empty.begin(); x != viewOfMoved.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::assignMTV failed!");
+	
+	empty.resize(3, 3);
+	viewOfMoved.resize(3, 3);
+	
+	empty.assignVV(vector, vector);
+	for(size_t i = 0; i < vector.size(); ++i)
+		for(size_t j = 0; j < vector.size(); ++j)
+			viewOfMoved(i, j) = vector(i) * vector(j);
+	
+	for(auto x = viewOfMoved.begin(), y = empty.begin(); x != viewOfMoved.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::assignVV failed!");
 	
 	// test const methods
 	/*
