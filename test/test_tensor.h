@@ -244,6 +244,33 @@ void TestTensor()
 		for(size_t j = 0; j < view.size(1); ++j)
 			NNAssertAlmostEquals(view(i, j), empty(i, j) + viewOfMoved(i, j), 1e-12, "Tensor::addM failed!");
 	
+	empty.resize(10, 5).rand();
+	vector.resize(10, 5).rand();
+	view.resize(10, 10);
+	viewOfMoved.resize(10, 10);
+	
+	for(size_t i = 0; i < 10; ++i)
+	{
+		for(size_t j = 0; j < 10; ++j)
+		{
+			viewOfMoved(i, j) = 0;
+			for(size_t k = 0; k < 5; ++k)
+				viewOfMoved(i, j) += empty(i, k) * vector(j, k);
+		}
+	}
+	
+	view.assignMM(empty, vector.transpose().copy());
+	for(auto x = viewOfMoved.begin(), y = view.begin(); x != viewOfMoved.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::assignMM failed!");
+	
+	view.assignMTM(empty.transpose().copy(), vector.transpose().copy(), 0.5);
+	for(auto x = viewOfMoved.begin(), y = view.begin(); x != viewOfMoved.end(); ++x, ++y)
+		NNAssertAlmostEquals(0.5 * *x, *y, 1e-12, "Tensor::assignMM failed!");
+	
+	view.assignMMT(empty, vector, 1, 1);
+	for(auto x = viewOfMoved.begin(), y = view.begin(); x != viewOfMoved.end(); ++x, ++y)
+		NNAssertAlmostEquals(1.5 * *x, *y, 1e-12, "Tensor::assignMM failed!");
+	
 	// test const methods
 	/*
 	

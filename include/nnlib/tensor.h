@@ -844,8 +844,15 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &assignMM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
+		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
+		NNAssertEquals(B.dims(), 2, "B must be a matrix!");
+		NNAssertEquals(dims(), 2, "This must be a matrix!");
+		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
+		NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
+		NNAssertEquals(stride(1), 1, "This must be contiguous!");
+		NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
+		NNAssertEquals(B.size(1), size(0), "Incompatible operands!");
+		
 		Math<T>::mAdd_mm(
 			A.size(0), B.size(1), A.size(1),
 			A.ptr(), A.stride(0),
@@ -869,8 +876,15 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &assignMTM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
+		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
+		NNAssertEquals(B.dims(), 2, "B must be a matrix!");
+		NNAssertEquals(dims(), 2, "This must be a matrix!");
+		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
+		NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
+		NNAssertEquals(stride(1), 1, "This must be contiguous!");
+		NNAssertEquals(A.size(1), size(0), "Incompatible operands!");
+		NNAssertEquals(B.size(1), size(0), "Incompatible operands!");
+		
 		Math<T>::mAdd_mtm(
 			A.size(1), B.size(1), A.size(0),
 			A.ptr(), A.stride(0),
@@ -894,8 +908,15 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &assignMMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0)
 	{
-		NNAssert(A.dims() == 2 && B.dims() == 2 && dims() == 2, "Incompatible operands!");
-		NNAssert(A.stride(1) == 1 && B.stride(1) == 1 && stride(1) == 1, "Matrix multiplcation requires contiguous operands!");
+		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
+		NNAssertEquals(B.dims(), 2, "B must be a matrix!");
+		NNAssertEquals(dims(), 2, "This must be a matrix!");
+		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
+		NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
+		NNAssertEquals(stride(1), 1, "This must be contiguous!");
+		NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
+		NNAssertEquals(B.size(0), size(0), "Incompatible operands!");
+		
 		Math<T>::mAdd_mmt(
 			A.size(0), B.size(0), A.size(1),
 			A.ptr(), A.stride(0),
