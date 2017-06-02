@@ -819,8 +819,10 @@ public:
 	/// Add another matrix to this matrix.
 	Tensor &addM(const Tensor &A, T alpha = 1)
 	{
-		NNAssert(A.dims() == 2 && dims() == 2, "Expected matrix inputs!");
-		NNAssert(A.shape() == shape(), "Incompatible operands!");
+		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
+		NNAssertEquals(dims(), 2, "This must be a matrix!");
+		NNAssertEquals(A.shape(), shape(), "Incompatible operands!");
+		
 		Math<T>::mAdd_m(
 			A.ptr(), A.size(0), A.size(1), A.stride(0),
 			ptr(), stride(0),

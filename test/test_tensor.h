@@ -239,6 +239,11 @@ void TestTensor()
 	for(auto x = viewOfMoved.begin(), y = empty.begin(); x != viewOfMoved.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::assignVV failed!");
 	
+	view = empty.copy().addM(viewOfMoved);
+	for(size_t i = 0; i < view.size(0); ++i)
+		for(size_t j = 0; j < view.size(1); ++j)
+			NNAssertAlmostEquals(view(i, j), empty(i, j) + viewOfMoved(i, j), 1e-12, "Tensor::addM failed!");
+	
 	// test const methods
 	/*
 	
