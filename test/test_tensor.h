@@ -2,7 +2,6 @@
 #define TEST_TENSOR_H
 
 #include "nnlib/tensor.h"
-#include "math/test_math_base.h"
 using namespace nnlib;
 
 void TestTensor()
@@ -204,40 +203,15 @@ void TestTensor()
 	
 	// test tensor math
 	
-	view.resize(3, 100).rand();
-	vector.resize(100).rand();
-	viewOfMoved.resize(view.size(0));
-	empty.resize(view.size(0));
+	view = Tensor<>(3, 100).rand();
+	vector = Tensor<>(100).rand();
+	viewOfMoved = Tensor<>(view.size(0));
+	empty = Tensor<>(view.size(0));
 	
 	empty.assignMV(view, vector);
-	addMatrixMultiply<false, false>(vector.size(0), 1, view.size(1), view.ptr(), view.size(1), vector.ptr(), 1, viewOfMoved.ptr(), 1, 1.0, 0.0);
-	
-	std::cout << std::endl << empty << std::endl << viewOfMoved << std::endl;
-	
 	for(int i = 0; i < view.size(0); ++i)
-	{
-		viewOfMoved(i) = 0;
 		for(int j = 0; j < view.size(1); ++j)
 			viewOfMoved(i) += view(i, j) * vector(j);
-	}
-	std::cout << viewOfMoved << std::endl;
-	
-	std::cout << std::endl << std::endl;
-	
-	empty.assignMV(view, vector);
-	addMatrixMultiply<false, false>(vector.size(0), 1, view.size(1), view.ptr(), view.size(1), vector.ptr(), 1, viewOfMoved.ptr(), 1, 1.0, 0.0);
-	
-	std::cout << std::endl << empty << std::endl << viewOfMoved << std::endl;
-	
-	for(int i = 0; i < view.size(0); ++i)
-	{
-		viewOfMoved(i) = 0;
-		for(int j = 0; j < view.size(1); ++j)
-			viewOfMoved(i) += view(i, j) * vector(j);
-	}
-	std::cout << viewOfMoved << std::endl;
-	
-	std::cout << std::endl << std::endl;
 	
 	for(auto x = viewOfMoved.begin(), y = empty.begin(); x != viewOfMoved.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::assignMV failed!");
