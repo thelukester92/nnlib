@@ -6,7 +6,6 @@
 namespace nnlib
 {
 
-template <typename T = double>
 class Timer
 {
 using clock = std::chrono::high_resolution_clock;
@@ -20,9 +19,9 @@ public:
 		m_start = clock::now();
 	}
 	
-	T elapsed(bool startOver = false)
+	double elapsed(bool startOver = false)
 	{
-		T span = std::chrono::duration<T>(clock::now() - m_start).count();
+		double span = std::chrono::duration<T>(clock::now() - m_start).count();
 		if(startOver)
 			reset();
 		return span;

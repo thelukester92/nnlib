@@ -10,7 +10,6 @@
 namespace nnlib
 {
 
-template <typename T = double>
 class Progress
 {
 public:
@@ -47,7 +46,7 @@ public:
 	}
 	
 private:
-	static std::string ftime(T t)
+	static std::string ftime(double t)
 	{
 		std::ostringstream out;
 		out << std::setprecision(1) << std::fixed;
@@ -72,11 +71,10 @@ private:
 		return out.str();
 	}
 	
-	static Timer<T> timer;
+	static Timer timer;
 };
 
-template <typename T>
-Timer<T> Progress<T>::timer;
+Timer Progress::timer;
 
 }
 
