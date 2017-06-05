@@ -152,10 +152,12 @@ public:
 	
 	/// Parses command line arguments.
 	/// If -h or --help is present, this prints help and ends the program.
-	ArgsParser &parse(int argc, const char **argv)
+	ArgsParser &parse(int argc, const char **argv, bool popCommand = true)
 	{
 		Args args(argc, argv);
-		args.popString();
+		
+		if(popCommand)
+			args.popString();
 		
 		while(args.hasNext())
 		{
