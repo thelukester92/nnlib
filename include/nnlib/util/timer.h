@@ -21,7 +21,7 @@ public:
 	
 	double elapsed(bool startOver = false)
 	{
-		double span = std::chrono::duration<T>(clock::now() - m_start).count();
+		double span = std::chrono::duration<double>(clock::now() - m_start).count();
 		if(startOver)
 			reset();
 		return span;
