@@ -214,7 +214,7 @@ public:
 		return *this;
 	}
 	
-	ArgsParser &printHelp(std::ostream &out = std::cout) const
+	const ArgsParser &printHelp(std::ostream &out = std::cout) const
 	{
 		out << std::left;
 		
@@ -282,7 +282,7 @@ public:
 		return *this;
 	}
 	
-	ArgsParser &printOpts(std::ostream &out = std::cout) const
+	const ArgsParser &printOpts(std::ostream &out = std::cout) const
 	{
 		out << std::left;
 		
