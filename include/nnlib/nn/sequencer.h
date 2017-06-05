@@ -153,7 +153,7 @@ public:
 	{
 		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
 		
-		if(dims[2] == 0)
+		if(inGrad().size(2) == 0)
 		{
 			inputs(dims);
 		}
@@ -190,7 +190,7 @@ public:
 	{
 		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
 		
-		if(dims[2] == 0)
+		if(output().size(2) == 0)
 		{
 			outputs(dims);
 		}
