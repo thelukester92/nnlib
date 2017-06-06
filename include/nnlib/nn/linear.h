@@ -153,7 +153,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -184,7 +184,7 @@ public:
 		m_weightsGrad.resize(m_weights.shape());
 		m_biasGrad.resize(m_bias.shape());
 	}
-	
+	*/
 private:
 	Tensor<T> m_weights;		///< Module weights.
 	Tensor<T> m_weightsGrad;	///< Gradient of the error w.r.t. the weights.

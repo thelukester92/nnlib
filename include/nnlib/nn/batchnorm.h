@@ -282,7 +282,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -315,6 +315,8 @@ public:
 		);
 		inputs({ bats, m_runningMeans.size(0) });
 	}
+	*/
+	
 private:
 	Tensor<T> m_output;			///< Cached output.
 	Tensor<T> m_inGrad;			///< Gradient of error w.r.t. inputs.

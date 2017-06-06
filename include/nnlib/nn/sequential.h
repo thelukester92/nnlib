@@ -115,7 +115,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -145,7 +145,7 @@ public:
 		for(size_t i = 0; i < n; ++i)
 			in >> m_components[i];
 	}
-	
+	*/
 private:
 	Sequential &resizeDown(size_t start = 1)
 	{

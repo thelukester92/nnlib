@@ -29,7 +29,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -53,6 +53,7 @@ public:
 		in >> shape;
 		this->inputs(shape);
 	}
+	*/
 };
 
 NNSerializable(Logistic<double>, Module<double>);

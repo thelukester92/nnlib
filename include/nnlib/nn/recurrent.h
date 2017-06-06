@@ -175,7 +175,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -208,7 +208,7 @@ public:
 		m_stateGrad.resize(m_outMod->outputs());
 		m_resetGrad = true;
 	}
-	
+	*/
 private:
 	Module<T> *m_inpMod;
 	Module<T> *m_memMod;

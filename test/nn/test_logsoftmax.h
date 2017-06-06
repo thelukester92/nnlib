@@ -42,14 +42,14 @@ void TestLogSoftMax()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
 	
-	LogSoftMax<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNAssert(
-		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"LogSoftMax::save and/or LogSoftMax::load failed!"
-	);
-	
-	delete deserialized;
+	// LogSoftMax<> *deserialized = nullptr;
+	// Archive::fromString((Archive::toString() << map).str()) >> deserialized;
+	// NNAssert(
+	// 	deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
+	// 	"LogSoftMax::save and/or LogSoftMax::load failed!"
+	// );
+	// 
+	// delete deserialized;
 }
 
 #endif

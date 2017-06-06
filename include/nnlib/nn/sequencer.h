@@ -224,7 +224,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -265,7 +265,7 @@ public:
 			outs.push_back(size);
 		m_output.resize(outs);
 	}
-	
+	*/
 private:
 	Module<T> *m_module;
 	

@@ -171,7 +171,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -190,6 +190,7 @@ public:
 	{
 		throw std::runtime_error("This type is not serializable!");
 	}
+	*/
 	
 protected:
 	Tensor<T> m_flatParameters;

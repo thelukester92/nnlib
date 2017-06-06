@@ -346,7 +346,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -412,7 +412,7 @@ public:
 		m_gradBuffer.resize(bats, outs);
 		m_resetGrad = true;
 	}
-	
+	*/
 private:
 	Module<T> *m_inpGateX;
 	Module<T> *m_inpGateY;

@@ -44,6 +44,7 @@ void TestBatchNorm()
 		"BatchNorm::backward failed! Wrong input gradient!"
 	);
 	
+	/*
 	BatchNorm<> *deserialized = nullptr;
 	Archive::fromString((Archive::toString() << bn).str()) >> deserialized;
 	NNAssert(
@@ -52,6 +53,7 @@ void TestBatchNorm()
 	);
 	
 	delete deserialized;
+	*/
 }
 
 #endif

@@ -119,7 +119,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -152,7 +152,7 @@ public:
 			NNAssert(m_components[i] != nullptr, "Failed to load component!");
 		}
 	}
-	
+	*/
 private:
 	Concat &resizeBuffers()
 	{

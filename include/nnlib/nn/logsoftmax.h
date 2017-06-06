@@ -101,7 +101,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param out The archive to which to write.
@@ -125,7 +125,7 @@ public:
 		in >> shape;
 		this->inputs(shape);
 	}
-	
+	*/
 private:
 	Tensor<T> m_inGrad;	///< Input gradient buffer.
 	Tensor<T> m_output;	///< Output buffer.

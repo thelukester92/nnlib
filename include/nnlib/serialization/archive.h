@@ -4,46 +4,64 @@
 #include <unordered_map>
 #include <string>
 #include <functional>
-
+#include <type_traits>
 #include "../error.h"
-#include "traits.h"
 
 namespace nnlib
 {
+
+template <bool C, typename T = void>
+using EnableIf = typename std::enable_if<C, T>::type;
+
+template <typename T, typename = int>
+struct HasSerialize : std::false_type
+{};
+
+template <typename T>
+struct HasSerialize<T, decltype(&T::template serialize<T>, 0)> : std::true_type
+{};
+
+template <typename T, typename = int>
+struct HasLoadAndSave : std::false_type
+{};
+
+template <typename T>
+struct HasLoadAndSave<T, decltype(&T::template load<T>, &T::template save<T>, 0)> : std::true_type
+{};
+
+/// A class used to add derived class bindings.
+/// This is needed for polymorphic serialization.
+template <typename Derived>
+struct Binding
+{
+	static std::string name;
+};
+
+/// A class used to hold constructors of classes derived from a shared base.
+/// This is needed for polymorphic serialization.
+template <typename Base>
+struct Mapping
+{
+	typedef std::function<void*()> constructor;
+	
+	static std::unordered_map<std::string, constructor> &map()
+	{
+		static std::unordered_map<std::string, constructor> m;
+		return m;
+	}
+	
+	static std::string add(std::string name, constructor c)
+	{
+		NNAssert(map().find(name) == map().end(), "Attempted to redefine mapped class!");
+		map().emplace(name, c);
+		return name;
+	}
+};
 
 template <typename A>
 class Archive
 {
 public:
-	/// A class used to add derived class bindings.
-	/// This is needed for polymorphic serialization.
-	template <typename Derived>
-	struct Binding
-	{
-		static std::string name;
-	};
-	
-	/// A class used to hold constructors of classes derived from a shared base.
-	/// This is needed for polymorphic serialization.
-	template <typename Base>
-	struct Mapping
-	{
-		typedef std::function<void*()> constructor;
-		
-		static std::unordered_map<std::string, constructor> &map()
-		{
-			static std::unordered_map<std::string, constructor> m;
-			return m;
-		}
-		
-		static std::string add(std::string name, constructor c)
-		{
-			NNAssert(map().find(name) == map().end(), "Attempted to redefine mapped class!");
-			map().emplace(name, c);
-			return name;
-		}
-	};
-	
 	Archive(A *derived) : self(derived) {}
 	
 	template <typename ... Ts>
@@ -146,7 +164,7 @@ protected:
 // Macro for more easily adding serializable and polymorphic types.
 #define NNSerializable(Sub, Super)														\
 	template <>																			\
-	std::string Archive::Binding<Sub>::name = Archive::Mapping<Super>::add(#Sub, []()	\
+	std::string Binding<Sub>::name = Mapping<Super>::add(#Sub, []()	\
 	{																					\
 		return reinterpret_cast<void *>(new Sub());										\
 	});

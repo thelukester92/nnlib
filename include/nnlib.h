@@ -40,7 +40,6 @@
 /// serialization
 #include "nnlib/serialization/archive.h"
 #include "nnlib/serialization/string.h"
-#include "nnlib/serialization/traits.h"
 
 /// Utilities
 #include "nnlib/util/args.h"

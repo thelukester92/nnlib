@@ -8,7 +8,6 @@
 #include "error.h"
 #include "storage.h"
 #include "math/math.h"
-#include "util/archive.h"
 #include "util/random.h"
 
 namespace nnlib
@@ -1167,7 +1166,7 @@ public:
 	}
 	
 	// MARK: Serialization
-	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -1189,6 +1188,7 @@ public:
 		for(T &x : *this)
 			in >> x;
 	}
+	*/
 	
 private:
 	Storage<size_t> m_dims;					///< The length along each dimension.
