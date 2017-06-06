@@ -90,13 +90,13 @@ void TestStorage()
 	Storage<double> deserialized;
 	
 	OutputStringArchive osa;
-	osa(regular);
+	osa(copy);
 	
 	InputStringArchive isa(osa.str());
 	isa(deserialized);
 	
-	NNAssertEquals(deserialized.size(), regular.size(), "Storage serialization failed!");
-	for(auto x = deserialized.begin(), y = regular.begin(); x != deserialized.end(); ++x, ++y)
+	NNAssertEquals(deserialized.size(), copy.size(), "Storage serialization failed!");
+	for(auto x = deserialized.begin(), y = copy.begin(); x != deserialized.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Storage serialization failed!");
 }
 

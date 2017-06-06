@@ -21,12 +21,12 @@ template <typename T>
 struct HasSerialize<T, decltype(&T::template serialize<T>, 0)> : std::true_type
 {};
 
-template <typename T, typename = int>
+template <typename T, typename = int, typename = int>
 struct HasLoadAndSave : std::false_type
 {};
 
 template <typename T>
-struct HasLoadAndSave<T, decltype(&T::template load<T>, &T::template save<T>, 0)> : std::true_type
+struct HasLoadAndSave<T, decltype(&T::template load<T>, 0), decltype(&T::template save<T>, 0)> : std::true_type
 {};
 
 /// A class used to add derived class bindings.
