@@ -3,7 +3,7 @@
 
 #include "nnlib/error.h"
 #include "nnlib/storage.h"
-#include "nnlib/serialization/string.h"
+#include "serialization/test_archive.h"
 using namespace nnlib;
 
 void TestStorage()
@@ -85,19 +85,7 @@ void TestStorage()
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
 	NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
 	
-	// test serialization
-	
-	Storage<double> deserialized;
-	
-	OutputStringArchive osa;
-	osa(copy);
-	
-	InputStringArchive isa(osa.str());
-	isa(deserialized);
-	
-	NNAssertEquals(deserialized.size(), copy.size(), "Storage serialization failed!");
-	for(auto x = deserialized.begin(), y = copy.begin(); x != deserialized.end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Storage serialization failed!");
+	TestSerializationOfIterable(copy);
 }
 
 #endif

@@ -44,16 +44,7 @@ void TestBatchNorm()
 		"BatchNorm::backward failed! Wrong input gradient!"
 	);
 	
-	/*
-	BatchNorm<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << bn).str()) >> deserialized;
-	NNAssert(
-		deserialized != nullptr && bn.inputs() == deserialized->inputs() && bn.outputs() == deserialized->outputs(),
-		"BatchNorm::save and/or BatchNorm::load failed!"
-	);
-	
-	delete deserialized;
-	*/
+	TestSerializationOfModule(bn);
 }
 
 #endif

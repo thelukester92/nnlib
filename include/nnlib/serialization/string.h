@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <limits>
 #include "archive.h"
 
 namespace nnlib
@@ -31,11 +32,18 @@ class OutputStringArchive : public OutputArchive<OutputStringArchive>
 {
 public:
 	OutputStringArchive() : OutputArchive(this, *(new std::ostringstream()))
-	{}
+	{
+		precision(std::numeric_limits<double>::digits);
+	}
 	
 	~OutputStringArchive()
 	{
 		delete &(this->m_out);
+	}
+	
+	void precision(size_t precision)
+	{
+		m_out.precision(precision);
 	}
 	
 	template <typename T>

@@ -1165,30 +1165,29 @@ public:
 		return TensorIterator<const T>(this, true);
 	}
 	
-	// MARK: Serialization
-	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
 	/// \param out The archive to which to write.
-	void save(Archive &out) const
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << m_dims;
+		ar(m_dims);
 		for(const T &x : *this)
-			out << x;
+			ar(x);
 	}
 	
 	/// \brief Read from an archive.
 	///
 	/// \param in The archive from which to read.
-	void load(Archive &in)
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		in >> m_dims;
+		ar(m_dims);
 		resize(m_dims);
 		for(T &x : *this)
-			in >> x;
+			ar(x);
 	}
-	*/
 	
 private:
 	Storage<size_t> m_dims;					///< The length along each dimension.
