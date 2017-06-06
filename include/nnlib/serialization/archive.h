@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <type_traits>
+#include <memory>
 #include "../error.h"
 
 namespace nnlib
@@ -34,7 +35,7 @@ struct HasLoadAndSave<T, decltype(&T::template load<T>, 0), decltype(&T::templat
 template <typename Derived>
 struct Binding
 {
-	static std::string name;
+	using Base = Derived;
 };
 
 /// A class used to hold constructors of classes derived from a shared base.
@@ -42,7 +43,7 @@ struct Binding
 template <typename Base>
 struct Mapping
 {
-	typedef std::function<void*()> constructor;
+	typedef std::function<Base*()> constructor;
 	
 	static std::unordered_map<std::string, constructor> &map()
 	{
@@ -118,9 +119,48 @@ public:
 	}
 	
 	template <typename T>
+	void processGeneric(T *&arg)
+	{
+		using Base = typename Binding<T>::Base;
+		
+		if(arg == nullptr)
+		{
+			std::string type;
+			
+			auto pos = m_in.tellg();
+			self->process(type);
+			m_in.seekg(pos);
+			
+			auto i = Mapping<Base>::map().find(type);
+			if(i != Mapping<Base>::map().end())
+				arg = reinterpret_cast<Base *>(i->second());
+			else
+				arg = construct<Base>();
+		}
+		
+		if(arg != nullptr)
+			self->processGeneric(*arg);
+		
+		NNAssert(!m_in.fail(), "Archive failed while reading a generic object!");
+	}
+	
+	template <typename T>
 	EnableIf<!HasSerialize<T>::value && !HasLoadAndSave<T>::value> processGeneric(T &arg)
 	{
 		self->process(arg);
+	}
+	
+private:
+	template <typename T>
+	EnableIf<!std::is_abstract<typename Binding<T>::Base>::value, typename Binding<T>::Base *> construct()
+	{
+		return new typename Binding<T>::Base();
+	}
+	
+	template <typename T>
+	EnableIf<std::is_abstract<typename Binding<T>::Base>::value, typename Binding<T>::Base *> construct()
+	{
+		return nullptr;
 	}
 	
 protected:
@@ -162,11 +202,17 @@ protected:
 };
 
 // Macro for more easily adding serializable and polymorphic types.
-#define NNSerializable(Sub, Super)														\
-	template <>																			\
+#define NNSerializable(Sub, Super)									\
+	template <>														\
+	struct Binding<Sub>												\
+	{																\
+		using Base = Super;											\
+		static std::string name;									\
+	};																\
+																	\
 	std::string Binding<Sub>::name = Mapping<Super>::add(#Sub, []()	\
-	{																					\
-		return reinterpret_cast<void *>(new Sub());										\
+	{																\
+		return new Sub();											\
 	});
 
 }
