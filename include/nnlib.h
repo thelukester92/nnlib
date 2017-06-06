@@ -37,8 +37,12 @@
 #include "nnlib/opt/rmsprop.h"
 #include "nnlib/opt/sgd.h"
 
+/// serialization
+#include "nnlib/serialization/archive.h"
+#include "nnlib/serialization/string.h"
+#include "nnlib/serialization/traits.h"
+
 /// Utilities
-#include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"
 #include "nnlib/util/file.h"
