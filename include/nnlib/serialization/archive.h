@@ -32,29 +32,59 @@ struct HasLoadAndSave<T, decltype(&T::template load<T>, 0), decltype(&T::templat
 
 /// A class used to add derived class bindings.
 /// This is needed for polymorphic serialization.
-template <typename Derived>
-struct Binding
+template <typename T>
+struct BaseOf
 {
-	using Base = Derived;
+	using type = T;
 };
 
-/// A class used to hold constructors of classes derived from a shared base.
+/// A class used to hold constructors and serializers of classes derived from a shared base.
 /// This is needed for polymorphic serialization.
 template <typename Base>
-struct Mapping
+struct Bindings
 {
 	typedef std::function<Base*()> constructor;
+	typedef std::function<void(Base*)> serializer;
 	
-	static std::unordered_map<std::string, constructor> &map()
+	Bindings = delete;
+	
+	static std::unordered_map<std::string, constructor> &constructors()
 	{
 		static std::unordered_map<std::string, constructor> m;
 		return m;
 	}
 	
-	static std::string add(std::string name, constructor c)
+	static std::unordered_map<std::string, serializer> &serializers()
 	{
-		NNAssert(map().find(name) == map().end(), "Attempted to redefine mapped class!");
-		map().emplace(name, c);
+		static std::unordered_map<std::string, serializer> m;
+		return m;
+	}
+	
+	static std::unordered_map<std::string, serializer> &loaders()
+	{
+		static std::unordered_map<std::string, serializer> m;
+		return m;
+	}
+	
+	static std::unordered_map<std::string, serializer> &savers()
+	{
+		static std::unordered_map<std::string, serializer> m;
+		return m;
+	}
+	
+	static Bindings instance()
+	{
+		static Bindings b;
+		return b;
+	}
+	
+	template <typename Derived>
+	static std::string add(std::string name)
+	{
+		NNAssertEquals(constructors().find(name), constructors().end(), "Attempted to rebind a bound class!");
+		constructors().emplace(name, []() { return new Derived(); });
+		/// \todo make the serializers... 
+		/// \todo constructor is the hook, no need for std::string here
 		return name;
 	}
 };
@@ -121,7 +151,7 @@ public:
 	template <typename T>
 	void processGeneric(T *&arg)
 	{
-		using Base = typename Binding<T>::Base;
+		using Base = typename BaseOf<T>::type;
 		
 		if(arg == nullptr)
 		{
@@ -152,13 +182,13 @@ public:
 	
 private:
 	template <typename T>
-	EnableIf<!std::is_abstract<typename Binding<T>::Base>::value, typename Binding<T>::Base *> construct()
+	EnableIf<!std::is_abstract<typename BaseOf<T>::type>::value, typename BaseOf<T>::type *> construct()
 	{
-		return new typename Binding<T>::Base();
+		return new typename BaseOf<T>::type();
 	}
 	
 	template <typename T>
-	EnableIf<std::is_abstract<typename Binding<T>::Base>::value, typename Binding<T>::Base *> construct()
+	EnableIf<std::is_abstract<typename BaseOf<T>::type>::value, typename BaseOf<T>::type *> construct()
 	{
 		return nullptr;
 	}
@@ -204,10 +234,9 @@ protected:
 // Macro for more easily adding serializable and polymorphic types.
 #define NNSerializable(Sub, Super)									\
 	template <>														\
-	struct Binding<Sub>												\
+	struct BaseOf<Sub>												\
 	{																\
-		using Base = Super;											\
-		static std::string name;									\
+		using type = Super;											\
 	};																\
 																	\
 	std::string Binding<Sub>::name = Mapping<Super>::add(#Sub, []()	\
