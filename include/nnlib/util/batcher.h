@@ -107,7 +107,7 @@ template <typename T = double>
 class SequenceBatcher
 {
 public:
-	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 0, size_t bats = 1) :
+	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 1, size_t bats = 1) :
 		m_feat(feat),
 		m_lab(lab),
 		m_featBatch(sequenceLength, bats, m_feat.size(1)),
@@ -127,6 +127,8 @@ public:
 	{
 		NNAssertLessThanOrEquals(sequenceLength, m_feat.size(0), "Invalid sequence length!");
 		m_sequenceLength = sequenceLength;
+		m_featBatch.resizeDim(0, sequenceLength);
+		m_labBatch.resizeDim(0, sequenceLength);
 		reset();
 		return *this;
 	}
@@ -140,6 +142,8 @@ public:
 	{
 		NNAssertLessThanOrEquals(bats, m_feat.size(0), "Invalid batch size!");
 		m_batch = bats;
+		m_featBatch.resizeDim(1, bats);
+		m_labBatch.resizeDim(1, bats);
 		reset();
 		return *this;
 	}
