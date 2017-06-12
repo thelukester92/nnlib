@@ -54,14 +54,7 @@ void TestReLU()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "ReLU::resize allowed unequal inputs and outputs!");
 	
-	// ReLU<> *deserialized = nullptr;
-	// Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	// NNAssert(
-	// 	deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-	// 	"ReLU::save and/or ReLU::load failed!"
-	// );
-	// 
-	// delete deserialized;
+	TestSerializationOfModule(map);
 }
 
 #endif

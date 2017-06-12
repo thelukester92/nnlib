@@ -42,14 +42,7 @@ void TestIdentity()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "Identity::resize allowed unequal inputs and outputs!");
 	
-	// Identity<> *deserialized = nullptr;
-	// Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	// NNAssert(
-	// 	deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-	// 	"Identity::save and/or Identity::load failed!"
-	// );
-	// 
-	// delete deserialized;
+	TestSerializationOfModule(map);
 }
 
 #endif

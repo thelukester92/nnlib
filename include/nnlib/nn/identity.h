@@ -40,16 +40,19 @@ public:
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
+	/// \param ar The archive from which to read.
 	template <typename Archive>
-	void load(Archive &in)
+	void load(Archive &ar)
 	{
 		Storage<size_t> shape;
-		in >> shape;
+		ar(shape);
 		this->inputs(shape);
 	}
 };
 
 }
+
+NNRegisterType(Identity<float>, Module<float>);
+NNRegisterType(Identity<double>, Module<double>);
 
 #endif
