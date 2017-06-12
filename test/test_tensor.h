@@ -288,9 +288,9 @@ void TestTensor()
 		sum -= v;
 	NNAssertAlmostEquals(sum, 0, 1e-12, "Tensor::sum() failed!");
 	
-	vector.resize(2, 3).copy({ 1, 2, 3, 4, 5, 6 });
+	vector.resize(2, 3).copy({ 2, 1, 3, 4, 6, 5 });
 	vector.sum(view.resize(3), 0);
-	empty.resize(3).copy({ 5, 7, 9 });
+	empty.resize(3).copy({ 6, 7, 8 });
 	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::sum(Tensor, size_t) failed!");
 	
@@ -311,6 +311,8 @@ void TestTensor()
 	vector.clip(0, 10);
 	NNAssertAlmostEquals(vector.min(), 0, 1e-12, "Tensor::clip failed!");
 	NNAssertAlmostEquals(vector.max(), 10, 1e-12, "Tensor::clip failed!");
+	
+	NNAssertNotEquals(vector.begin(), view.begin(), "TensorIterator::operator== failed!");
 	
 	// test const methods
 	
