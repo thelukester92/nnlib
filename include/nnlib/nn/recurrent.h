@@ -221,9 +221,6 @@ private:
 	bool m_resetGrad;
 };
 
-NNSerializable(Recurrent<double>, Module<double>);
-NNSerializable(Recurrent<float>, Module<float>);
-
 }
 
 #endif

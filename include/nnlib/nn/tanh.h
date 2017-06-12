@@ -56,9 +56,6 @@ public:
 	*/
 };
 
-NNSerializable(TanH<double>, Module<double>);
-NNSerializable(TanH<float>, Module<float>);
-
 }
 
 #endif

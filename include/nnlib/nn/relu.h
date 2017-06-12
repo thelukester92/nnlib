@@ -77,9 +77,6 @@ private:
 	T m_leak;
 };
 
-NNSerializable(ReLU<double>, Module<double>);
-NNSerializable(ReLU<float>, Module<float>);
-
 }
 
 #endif

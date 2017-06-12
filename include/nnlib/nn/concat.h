@@ -125,6 +125,7 @@ public:
 	void serialize(Archive &ar)
 	{
 		ar(m_components);
+		resizeBuffers();
 	}
 	
 private:
@@ -159,9 +160,9 @@ private:
 	Tensor<T> m_inGrad;
 };
 
-NNSerializable(Concat<double>, Module<double>);
-NNSerializable(Concat<float>, Module<float>);
-
 }
+
+NNRegisterType(Concat<double>, Module<double>);
+NNRegisterType(Concat<float>, Module<float>);
 
 #endif

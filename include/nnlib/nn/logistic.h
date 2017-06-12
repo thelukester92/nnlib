@@ -56,9 +56,6 @@ public:
 	*/
 };
 
-NNSerializable(Logistic<double>, Module<double>);
-NNSerializable(Logistic<float>, Module<float>);
-
 }
 
 #endif

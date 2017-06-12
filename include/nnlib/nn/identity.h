@@ -57,9 +57,6 @@ public:
 	*/
 };
 
-NNSerializable(Identity<double>, Module<double>);
-NNSerializable(Identity<float>, Module<float>);
-
 }
 
 #endif

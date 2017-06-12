@@ -167,9 +167,6 @@ private:
 	}
 };
 
-NNSerializable(Sequential<double>, Module<double>);
-NNSerializable(Sequential<float>, Module<float>);
-
 }
 
 #endif

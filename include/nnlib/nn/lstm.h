@@ -448,9 +448,6 @@ private:
 	T m_clip;
 };
 
-NNSerializable(LSTM<double>, Module<double>);
-NNSerializable(LSTM<float>, Module<float>);
-
 }
 
 #endif

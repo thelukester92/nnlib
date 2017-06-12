@@ -276,9 +276,6 @@ private:
 	Tensor<T> m_states;
 };
 
-NNSerializable(Sequencer<double>, Module<double>);
-NNSerializable(Sequencer<float>, Module<float>);
-
 }
 
 #endif

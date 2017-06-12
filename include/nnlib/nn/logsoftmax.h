@@ -131,9 +131,6 @@ private:
 	Tensor<T> m_output;	///< Output buffer.
 };
 
-NNSerializable(LogSoftMax<double>, Module<double>);
-NNSerializable(LogSoftMax<float>, Module<float>);
-
 }
 
 #endif

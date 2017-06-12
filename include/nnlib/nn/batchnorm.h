@@ -324,9 +324,9 @@ private:
 	T m_momentum;				///< How much to update running mean and variance.
 };
 
-NNSerializable(BatchNorm<double>, Module<double>);
-NNSerializable(BatchNorm<float>, Module<float>);
-
 }
+
+NNRegisterType(BatchNorm<double>, Module<double>);
+NNRegisterType(BatchNorm<float>, Module<float>);
 
 #endif
