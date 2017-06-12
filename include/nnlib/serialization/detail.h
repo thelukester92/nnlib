@@ -95,7 +95,7 @@ public:
 		auto dKey = std::type_index(typeid(Derived));
 		
 		// insert or fetch the archive list
-		auto &aMap = serializers().insert({ aKey, {} }).first->second;
+		auto &aMap = serializers()[aKey];
 		
 		// insert the derived serializer
 		aMap.emplace(dKey, [](void *ar, Base *base)
