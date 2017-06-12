@@ -8,11 +8,24 @@ using namespace nnlib;
 
 void TestAdam()
 {
+	RandomEngine::seed();
+	
+	Tensor<> feat = Tensor<>(10, 2).rand();
+	Tensor<> lab = Tensor<>(10, 3).rand();
+	
 	Linear<> nn(2, 3);
 	MSE<> critic(nn.outputs());
 	
+	double errBefore = critic.safeForward(nn.safeForward(feat), lab);
+	
 	Adam<> opt(nn, critic);
-	/// \todo fill me in
+	opt.batch(1);
+	opt.step(feat.narrow(0, 0), lab.narrow(0, 0));
+	opt.safeStep(feat, lab);
+	
+	double errAfter = critic.safeForward(nn.safeForward(feat), lab);
+	
+	NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
 }
 
 #endif
