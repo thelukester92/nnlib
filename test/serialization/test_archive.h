@@ -10,6 +10,8 @@ template <typename T>
 void TestSerializationOfModule(T &module)
 {
 	std::stringstream ss1, ss2;
+	ss1.precision(16);
+	ss2.precision(16);
 	
 	{
 		BasicOutputArchive out(ss1);
@@ -56,6 +58,8 @@ template <typename T>
 void TestSerializationOfIterable(T &iterable)
 {
 	std::stringstream ss;
+	ss.precision(16);
+	
 	T deserialized;
 	
 	BasicOutputArchive out(ss);

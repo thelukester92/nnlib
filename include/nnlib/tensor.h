@@ -851,7 +851,7 @@ public:
 		NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
 		NNAssertEquals(stride(1), 1, "This must be contiguous!");
 		NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
-		NNAssertEquals(B.size(1), size(0), "Incompatible operands!");
+		NNAssertEquals(B.size(1), size(1), "Incompatible operands!");
 		
 		Math<T>::mAdd_mm(
 			A.size(0), B.size(1), A.size(1),
@@ -883,7 +883,7 @@ public:
 		NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
 		NNAssertEquals(stride(1), 1, "This must be contiguous!");
 		NNAssertEquals(A.size(1), size(0), "Incompatible operands!");
-		NNAssertEquals(B.size(1), size(0), "Incompatible operands!");
+		NNAssertEquals(B.size(1), size(1), "Incompatible operands!");
 		
 		Math<T>::mAdd_mtm(
 			A.size(1), B.size(1), A.size(0),
@@ -915,7 +915,7 @@ public:
 		NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
 		NNAssertEquals(stride(1), 1, "This must be contiguous!");
 		NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
-		NNAssertEquals(B.size(0), size(0), "Incompatible operands!");
+		NNAssertEquals(B.size(0), size(1), "Incompatible operands!");
 		
 		Math<T>::mAdd_mmt(
 			A.size(0), B.size(0), A.size(1),

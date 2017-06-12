@@ -366,14 +366,8 @@ void TestTensor()
 	
 	// test serialization
 	
-	view.rand();
-	
-	Tensor<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << view).str()) >> deserialized;
-	NNAssertNotEquals(deserialized, nullptr, "Tensor::save and/or Tensor::load failed!");
-	for(auto x = deserialized->begin(), y = view.begin(); x != deserialized->end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");
-	delete deserialized;
+	view.resize(3, 4, 5, 6).rand();
+	TestSerializationOfIterable(view);
 }
 
 #endif
