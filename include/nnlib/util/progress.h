@@ -13,6 +13,8 @@ namespace nnlib
 class Progress
 {
 public:
+	Progress() = delete;
+	
 	static void display(size_t current, size_t total, char end = '\0', size_t length = 50, std::ostream &out = std::cout)
 	{
 		size_t degreeCurrent	= current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));

@@ -32,7 +32,6 @@
 #include "serialization/test_basic.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
-#include "util/test_file.h"
 #include "util/test_progress.h"
 #include "util/test_random.h"
 #include "util/test_timer.h"
@@ -92,7 +91,6 @@ int main()
 		// util
 		TEST("util/", Args),
 		TEST("util/", Batcher),
-		TEST("util/", File),
 		TEST("util/", Progress),
 		TEST("util/", Random),
 		TEST("util/", Timer)

@@ -7,6 +7,8 @@ using namespace nnlib;
 void TestTimer()
 {
 	Timer t;
+	t.reset();
+	NNAssertLessThan(t.elapsed(), 1e-3, "Timer::elapsed returned a nonsensical value!");
 }
 
 #endif
