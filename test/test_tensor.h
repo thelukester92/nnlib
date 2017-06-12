@@ -209,8 +209,8 @@ void TestTensor()
 	empty = Tensor<>(view.size(0));
 	
 	empty.assignMV(view, vector);
-	for(int i = 0; i < view.size(0); ++i)
-		for(int j = 0; j < view.size(1); ++j)
+	for(size_t i = 0; i < view.size(0); ++i)
+		for(size_t j = 0; j < view.size(1); ++j)
 			viewOfMoved(i) += view(i, j) * vector(j);
 	
 	for(auto x = viewOfMoved.begin(), y = empty.begin(); x != viewOfMoved.end(); ++x, ++y)

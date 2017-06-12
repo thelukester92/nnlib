@@ -25,4 +25,4 @@ script:
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - lcov -c -d obj -o obj/lcov.info
-    - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash) -f obj/lcov.info
