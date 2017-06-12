@@ -134,6 +134,7 @@ public:
 	template <typename Archive>
 	void load(Archive &ar)
 	{
+		Container<T>::clear();
 		ar(m_components);
 		
 		for(size_t i = 1, end = m_components.size(); i != end; ++i)
