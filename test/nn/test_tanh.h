@@ -42,14 +42,7 @@ void TestTanH()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "TanH::resize allowed unequal inputs and outputs!");
 	
-	TanH<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNAssert(
-		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"TanH::save and/or TanH::load failed!"
-	);
-	
-	delete deserialized;
+	TestSerializationOfModule(map);
 }
 
 #endif

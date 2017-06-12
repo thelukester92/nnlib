@@ -174,31 +174,24 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
 	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Recurrent>::name
-			<< m_inpMod << m_memMod << m_outMod;
+		ar(m_inpMod, m_memMod, m_outMod);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Recurrent>::name,
-			"Unexpected type! Expected '" + Binding<Recurrent>::name + "', got '" + str + "'!"
-		);
-		
 		Container<T>::clear();
-		in >> m_inpMod >> m_memMod >> m_outMod;
+		ar(m_inpMod, m_memMod, m_outMod);
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
@@ -221,9 +214,9 @@ private:
 	bool m_resetGrad;
 };
 
-NNSerializable(Recurrent<double>, Module<double>);
-NNSerializable(Recurrent<float>, Module<float>);
-
 }
+
+NNRegisterType(Recurrent<float>, Module<float>);
+NNRegisterType(Recurrent<double>, Module<double>);
 
 #endif

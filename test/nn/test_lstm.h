@@ -127,13 +127,7 @@ void TestLSTM()
 	module.batch(32);
 	NNAssert(module.batch() == 32, "LSTM::batch failed!");
 	
-	LSTM<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNAssert(
-		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-		"LSTM::save and/or LSTM::load failed!"
-	);
-	delete deserialized;
+	TestSerializationOfModule(module);
 }
 
 #endif

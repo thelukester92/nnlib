@@ -2,7 +2,6 @@
 #define STORAGE_H
 
 #include <initializer_list>
-#include "util/archive.h"
 
 namespace nnlib
 {
@@ -222,21 +221,21 @@ public:
 		return m_ptr + m_size;
 	}
 	
-	// MARK: Serialization
-	
-	void save(Archive &out) const
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << m_size;
+		ar(m_size);
 		for(const T &x : *this)
-			out << x;
+			ar(x);
 	}
 	
-	void load(Archive &in)
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		in >> m_size;
+		ar(m_size);
 		resize(m_size);
 		for(T &x : *this)
-			in >> x;
+			ar(x);
 	}
 	
 private:

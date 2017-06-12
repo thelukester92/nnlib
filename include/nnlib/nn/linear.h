@@ -152,37 +152,34 @@ public:
 		return { &m_weightsGrad, &m_biasGrad };
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Linear>::name << m_weights << m_bias << batch();
+		ar(m_weights, m_bias, batch());
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Linear>::name,
-			"Unexpected type! Expected '" + Binding<Linear>::name + "', got '" + str + "'!"
-		);
-		
 		size_t bats;
-		in >> m_weights >> m_bias >> bats;
-		NNAssert(m_weights.dims() == 2 && m_bias.dims() == 1, "Unexpected tensor for Linear!");
+		ar(m_weights, m_bias, bats);
 		
-		Module<T>::inputs({ bats, m_weights.size(0) });
-		Module<T>::outputs({ bats, m_weights.size(1) });
+		NNAssertEquals(m_weights.dims(), 2, "Weights must be a matrix!");
+		NNAssertEquals(m_bias.dims(), 1, "Bias must be a vector!");
+		NNAssertEquals(m_bias.size(0), m_weights.size(1), "Weights and bias are incompatible!");
+		
 		m_weightsGrad.resize(m_weights.shape());
 		m_biasGrad.resize(m_bias.shape());
+		m_inGrad.resize({ bats, m_weights.size(0) });
+		m_output.resize({ bats, m_weights.size(1) });
+		m_addBuffer.resize(bats).fill(1);
 	}
 	
 private:
@@ -198,9 +195,9 @@ private:
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.
 };
 
-NNSerializable(Linear<double>, Module<double>);
-NNSerializable(Linear<float>, Module<float>);
-
 }
+
+NNRegisterType(Linear<float>, Module<float>);
+NNRegisterType(Linear<double>, Module<double>);
 
 #endif

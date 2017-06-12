@@ -170,27 +170,6 @@ public:
 		return m_flatState = Tensor<T>::flatten(stateList());
 	}
 	
-	// MARK: Serialization
-	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// By default, modules are not serializable.
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const
-	{
-		throw std::runtime_error("This type is not serializable!");
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// By default, modules are not serializable.
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in)
-	{
-		throw std::runtime_error("This type is not serializable!");
-	}
-	
 protected:
 	Tensor<T> m_flatParameters;
 	Tensor<T> m_flatGrad;

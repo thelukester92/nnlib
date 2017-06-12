@@ -85,7 +85,7 @@ public:
 		" Expected ", #x, " == ", #y, ", but ", x, " != ", y, "."	\
 	)
 
-#define NNAssertAlmostEquals(x, y, eps, __VA_ARGS__)				\
+#define NNAssertAlmostEquals(x, y, eps, ...)						\
 	NNAssert(														\
 		std::fabs((x) - (y)) < eps, Error::stringify(__VA_ARGS__),	\
 		" Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."	\

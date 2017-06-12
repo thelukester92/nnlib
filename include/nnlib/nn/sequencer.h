@@ -153,7 +153,7 @@ public:
 	{
 		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
 		
-		if(dims[2] == 0)
+		if(inGrad().size(2) == 0)
 		{
 			inputs(dims);
 		}
@@ -190,7 +190,7 @@ public:
 	{
 		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
 		
-		if(dims[2] == 0)
+		if(output().size(2) == 0)
 		{
 			outputs(dims);
 		}
@@ -223,33 +223,26 @@ public:
 		return m_output.size(1);
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Sequencer>::name << sequenceLength() << m_module;
+		ar(sequenceLength(), m_module);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Sequencer>::name,
-			"Unexpected type! Expected '" + Binding<Sequencer>::name + "', got '" + str + "'!"
-		);
-		
-		size_t seqLen;
-		in >> seqLen;
-		
 		Container<T>::clear();
-		in >> m_module;
+		size_t seqLen;
+		
+		ar(seqLen, m_module);
+		
 		Container<T>::add(m_module);
 		
 		m_state = &m_module->state();
@@ -276,9 +269,9 @@ private:
 	Tensor<T> m_states;
 };
 
-NNSerializable(Sequencer<double>, Module<double>);
-NNSerializable(Sequencer<float>, Module<float>);
-
 }
+
+NNRegisterType(Sequencer<float>, Module<float>);
+NNRegisterType(Sequencer<double>, Module<double>);
 
 #endif

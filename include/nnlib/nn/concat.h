@@ -118,39 +118,29 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// The archive takes care of whitespace for plaintext.
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Concat>::name << m_components.size();
-		for(Module<T> *component : m_components)
-			out << *component;
+		ar(m_components);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Concat>::name,
-			"Unexpected type! Expected '" + Binding<Concat>::name + "', got '" + str + "'!"
-		);
+		Container<T>::clear();
+		ar(m_components);
 		
-		size_t n;
-		in >> n;
+		for(size_t i = 1, end = m_components.size(); i != end; ++i)
+			NNAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible concat components!");
 		
-		m_components.resize(n, nullptr);
-		for(size_t i = 0; i < n; ++i)
-		{
-			in >> m_components[i];
-			NNAssert(m_components[i] != nullptr, "Failed to load component!");
-		}
+		resizeBuffers();
 	}
 	
 private:
@@ -185,9 +175,9 @@ private:
 	Tensor<T> m_inGrad;
 };
 
-NNSerializable(Concat<double>, Module<double>);
-NNSerializable(Concat<float>, Module<float>);
-
 }
+
+NNRegisterType(Concat<double>, Module<double>);
+NNRegisterType(Concat<float>, Module<float>);
 
 #endif

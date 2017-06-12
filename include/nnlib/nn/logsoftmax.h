@@ -100,40 +100,33 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<LogSoftMax>::name << this->inputs();
+		ar(this->inputs());
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<LogSoftMax>::name,
-			"Unexpected type! Expected '" + Binding<LogSoftMax>::name + "', got '" + str + "'!"
-		);
 		Storage<size_t> shape;
-		in >> shape;
+		ar(shape);
 		this->inputs(shape);
 	}
-	
 private:
 	Tensor<T> m_inGrad;	///< Input gradient buffer.
 	Tensor<T> m_output;	///< Output buffer.
 };
 
-NNSerializable(LogSoftMax<double>, Module<double>);
-NNSerializable(LogSoftMax<float>, Module<float>);
-
 }
+
+NNRegisterType(LogSoftMax<float>, Module<float>);
+NNRegisterType(LogSoftMax<double>, Module<double>);
 
 #endif

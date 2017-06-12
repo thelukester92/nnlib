@@ -281,40 +281,33 @@ public:
 		return states;
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<BatchNorm>::name << m_runningMeans << m_runningVars << m_weights << m_biases << m_training << m_momentum << m_inGrad.size(0);
+		ar(m_runningMeans, m_runningVars, m_weights, m_biases, m_training, m_momentum, m_inGrad.size(0));
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<BatchNorm>::name,
-			"Unexpected type! Expected '" + Binding<BatchNorm>::name + "', got '" + str + "'!"
-		);
-		
 		size_t bats;
-		in >> m_runningMeans >> m_runningVars >> m_weights >> m_biases >> m_training >> m_momentum >> bats;
-		NNAssert(
-			m_runningMeans.shape() == m_runningVars.shape()
-			&& m_runningMeans.shape() == m_weights.shape()
-			&& m_runningMeans.shape() == m_biases.shape()
-			&& m_runningMeans.dims() == 1,
-			"Incompatible means and variances!"
-		);
+		ar(m_runningMeans, m_runningVars, m_weights, m_biases, m_training, m_momentum, bats);
+		
+		NNAssertEquals(m_runningMeans.shape(), m_runningVars.shape(), "Incompatible means and variances!");
+		NNAssertEquals(m_runningMeans.shape(), m_weights.shape(), "Incompatible means and weights!");
+		NNAssertEquals(m_runningMeans.shape(), m_biases.shape(), "Incompatible means and biases!");
+		NNAssertEquals(m_runningMeans.dims(), 1, "Means must be a vector!");
+		
 		inputs({ bats, m_runningMeans.size(0) });
 	}
+	
 private:
 	Tensor<T> m_output;			///< Cached output.
 	Tensor<T> m_inGrad;			///< Gradient of error w.r.t. inputs.
@@ -331,9 +324,9 @@ private:
 	T m_momentum;				///< How much to update running mean and variance.
 };
 
-NNSerializable(BatchNorm<double>, Module<double>);
-NNSerializable(BatchNorm<float>, Module<float>);
-
 }
+
+NNRegisterType(BatchNorm<double>, Module<double>);
+NNRegisterType(BatchNorm<float>, Module<float>);
 
 #endif

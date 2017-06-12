@@ -27,7 +27,7 @@ public:
 		return *this;
 	}
 	
-	bool hasNext()
+	bool hasNext() const
 	{
 		return m_argi < m_argc;
 	}
@@ -43,7 +43,7 @@ public:
 		return false;
 	}
 	
-	bool nextIsNumber()
+	bool nextIsNumber() const
 	{
 		NNHardAssert(hasNext(), "Attempted to use empty argument stack!");
 		try
@@ -152,10 +152,12 @@ public:
 	
 	/// Parses command line arguments.
 	/// If -h or --help is present, this prints help and ends the program.
-	ArgsParser &parse(int argc, const char **argv)
+	ArgsParser &parse(int argc, const char **argv, bool popCommand = true)
 	{
 		Args args(argc, argv);
-		args.popString();
+		
+		if(popCommand)
+			args.popString();
 		
 		while(args.hasNext())
 		{
@@ -214,7 +216,7 @@ public:
 		return *this;
 	}
 	
-	ArgsParser &printHelp(std::ostream &out = std::cout)
+	const ArgsParser &printHelp(std::ostream &out = std::cout) const
 	{
 		out << std::left;
 		
@@ -282,7 +284,7 @@ public:
 		return *this;
 	}
 	
-	ArgsParser &printOpts(std::ostream &out = std::cout)
+	const ArgsParser &printOpts(std::ostream &out = std::cout) const
 	{
 		out << std::left;
 		
@@ -316,13 +318,13 @@ public:
 		return *this;
 	}
 	
-	bool hasOpt(char opt)
+	bool hasOpt(char opt) const
 	{
 		auto i = m_data.find(opt);
 		return i != m_data.end();
 	}
 	
-	std::string optName(char opt)
+	std::string optName(char opt) const
 	{
 		auto i = m_charToLong.find(opt);
 		if(i != m_charToLong.end())
@@ -331,56 +333,56 @@ public:
 			return std::string(1, opt);
 	}
 	
-	bool getFlag(char opt)
+	bool getFlag(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Bool, "Attempted to get an incompatible type!");
 		return m_data.at(opt).b;
 	}
 	
-	bool getFlag(std::string opt)
+	bool getFlag(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
 		return getFlag(i->second);
 	}
 	
-	int getInt(char opt)
+	int getInt(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Int, "Attempted to get an incompatible type!");
 		return m_data.at(opt).i;
 	}
 	
-	int getInt(std::string opt)
+	int getInt(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
 		return getInt(i->second);
 	}
 	
-	double getDouble(char opt, double def = 0)
+	double getDouble(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Double, "Attempted to get an incompatible type!");
 		return m_data.at(opt).d;
 	}
 	
-	double getDouble(std::string opt)
+	double getDouble(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
 		return getDouble(i->second);
 	}
 	
-	std::string getString(char opt, std::string def = "")
+	std::string getString(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::String, "Attempted to get an incompatible type!");
 		return m_data.at(opt).s;
 	}
 	
-	std::string getString(std::string opt)
+	std::string getString(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");

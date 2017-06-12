@@ -28,36 +28,30 @@ public:
 		return y * (1.0 - y);
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Logistic>::name << this->inputs();
+		ar(this->inputs());
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Logistic>::name,
-			"Unexpected type! Expected '" + Binding<Logistic>::name + "', got '" + str + "'!"
-		);
 		Storage<size_t> shape;
-		in >> shape;
+		ar(shape);
 		this->inputs(shape);
 	}
 };
 
-NNSerializable(Logistic<double>, Module<double>);
-NNSerializable(Logistic<float>, Module<float>);
-
 }
+
+NNRegisterType(Logistic<float>, Module<float>);
+NNRegisterType(Logistic<double>, Module<double>);
 
 #endif

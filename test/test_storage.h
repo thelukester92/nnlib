@@ -1,6 +1,7 @@
 #ifndef TEST_STORAGE_H
 #define TEST_STORAGE_H
 
+#include "nnlib/error.h"
 #include "nnlib/storage.h"
 using namespace nnlib;
 
@@ -77,20 +78,13 @@ void TestStorage()
 	// test const methods
 	
 	const Storage<double> &constant = copy;
-	NNAssertEquals(constant.end() - constant.begin(), constant.size(), "const Storage::begin and/or const Storage::end failed!");
+	NNAssertEquals((size_t)(constant.end() - constant.begin()), constant.size(), "const Storage::begin and/or const Storage::end failed!");
 	NNAssertEquals(constant.ptr(), copy.ptr(), "const Storage::ptr failed!");
 	NNAssertEquals(constant[2], copy[2], "const Storage::operator[] failed!");
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
 	NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
 	
-	// test serialization
-	
-	Storage<double> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << regular).str()) >> deserialized;
-	NNAssertNotEquals(deserialized, nullptr, "Storage::save and/or Storage::load failed!");
-	for(auto x = deserialized->begin(), y = regular.begin(); x != deserialized->end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Storage::save and/or Storage::load failed!");
-	delete deserialized;
+	TestSerializationOfIterable(copy);
 }
 
 #endif

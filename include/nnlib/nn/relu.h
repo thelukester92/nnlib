@@ -47,39 +47,32 @@ public:
 		return x > 0 ? 1 : m_leak;
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<ReLU>::name << this->inputs();
+		ar(this->inputs(), m_leak);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<ReLU>::name,
-			"Unexpected type! Expected '" + Binding<ReLU>::name + "', got '" + str + "'!"
-		);
 		Storage<size_t> shape;
-		in >> shape;
+		ar(shape, m_leak);
 		this->inputs(shape);
 	}
-	
 private:
 	T m_leak;
 };
 
-NNSerializable(ReLU<double>, Module<double>);
-NNSerializable(ReLU<float>, Module<float>);
-
 }
+
+NNRegisterType(ReLU<float>, Module<float>);
+NNRegisterType(ReLU<double>, Module<double>);
 
 #endif

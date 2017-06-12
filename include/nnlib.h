@@ -1,3 +1,7 @@
+/// Serialization (note: these must be included before including serializable types)
+#include "nnlib/serialization/archive.h"
+#include "nnlib/serialization/basic.h"
+
 /// Top-level Classes
 #include "nnlib/error.h"
 #include "nnlib/storage.h"
@@ -38,7 +42,6 @@
 #include "nnlib/opt/sgd.h"
 
 /// Utilities
-#include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"
 #include "nnlib/util/file.h"

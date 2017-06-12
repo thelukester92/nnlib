@@ -42,14 +42,7 @@ void TestLogistic()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "Logistic::resize allowed unequal inputs and outputs!");
 	
-	Logistic<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNAssert(
-		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"Logistic::save and/or Logistic::load failed!"
-	);
-	
-	delete deserialized;
+	TestSerializationOfModule(map);
 }
 
 #endif
