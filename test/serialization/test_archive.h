@@ -42,8 +42,8 @@ void TestSerializationOfModule(T &module)
 		NNAssertEquals(deserialized->inputs(), module.inputs(), "Generic serialization failed! Mismatching inputs.");
 		NNAssertEquals(deserialized->outputs(), module.outputs(), "Generic serialization failed! Mismatching outputs.");
 		
-		auto &p1 = module.parameters();
-		auto &p2 = deserialized->parameters();
+		Tensor<double> &p1 = module.parameters();
+		Tensor<double> &p2 = deserialized->parameters();
 		
 		for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
 			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Mismatching parameters.");

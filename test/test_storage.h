@@ -78,7 +78,7 @@ void TestStorage()
 	// test const methods
 	
 	const Storage<double> &constant = copy;
-	NNAssertEquals(constant.end() - constant.begin(), constant.size(), "const Storage::begin and/or const Storage::end failed!");
+	NNAssertEquals((size_t)(constant.end() - constant.begin()), constant.size(), "const Storage::begin and/or const Storage::end failed!");
 	NNAssertEquals(constant.ptr(), copy.ptr(), "const Storage::ptr failed!");
 	NNAssertEquals(constant[2], copy[2], "const Storage::operator[] failed!");
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");

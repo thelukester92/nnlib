@@ -13,6 +13,10 @@ namespace nnlib
 namespace detail
 {
 
+// ignore -Wunused-value for this section; it is unused on purpose for SFINAE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
+
 /// Check whether the given type has the serialize method. Default is false.
 template <typename T, typename = int>
 struct HasSerialize : std::false_type
@@ -32,6 +36,8 @@ struct HasLoadAndSave : std::false_type
 template <typename T>
 struct HasLoadAndSave<T, decltype(&T::template load<T>, 0), decltype(&T::template save<T>, 0)> : std::true_type
 {};
+
+#pragma GCC diagnostic pop
 
 /// \brief Hook in code before main.
 ///
