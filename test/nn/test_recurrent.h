@@ -80,13 +80,7 @@ void TestRecurrent()
 	module.batch(32);
 	NNAssert(module.batch() == 32, "Recurrent::batch failed!");
 	
-	// Recurrent<> *deserialized = nullptr;
-	// Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	// NNAssert(
-	// 	deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-	// 	"Recurrent::save and/or Recurrent::load failed!"
-	// );
-	// delete deserialized;
+	TestSerializationOfModule(module);
 }
 
 #endif

@@ -84,13 +84,7 @@ void TestSequential()
 	NNAssert(module.gradList() == linear->gradList(), "Sequential::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Sequential::stateList failed!");
 	
-	// Sequential<> *deserialized = nullptr;
-	// Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	// NNAssert(
-	// 	deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-	// 	"Sequential::save and/or Sequential::load failed!"
-	// );
-	// delete deserialized;
+	TestSerializationOfModule(module);
 }
 
 #endif
