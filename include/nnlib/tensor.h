@@ -437,7 +437,6 @@ public:
 		size_t dim = 0;
 		for(const std::initializer_list<size_t> &params : dims)
 		{
-			NNAssertGreaterThan(params.size(), 0, "Invalid parameters for subtensor!");
 			NNAssertLessThanOrEquals(params.size(), 2, "Invalid parameters for subtensor!");
 			if(params.size() == 1)
 			{
