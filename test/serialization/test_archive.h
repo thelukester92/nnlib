@@ -14,8 +14,7 @@ void TestSerializationOfModule(T &module)
 	{
 		BasicOutputArchive out(ss1);
 		out(module);
-		
-		ss2 << ss1.rdbuf();
+		ss2 << ss1.str();
 	}
 	
 	{

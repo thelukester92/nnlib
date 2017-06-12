@@ -30,14 +30,14 @@ public:
 private:
 	/// Primitives and strings.
 	template <typename T>
-	typename std::enable_if<(std::is_fundamental<T>::value || std::is_same<T, std::string>::value) && !std::is_pointer<T>::value>::type preprocess(T &arg)
+	typename std::enable_if<!std::is_polymorphic<T>::value && !std::is_pointer<T>::value>::type preprocess(T &arg)
 	{
 		self->process(arg);
 	}
 	
 	/// Polymorphic serializable objects (through pointer).
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type preprocess(T *&arg)
+	typename std::enable_if<std::is_polymorphic<T>::value>::type preprocess(T *&arg)
 	{
 		using Base = typename detail::BaseOf<T>::type;
 		
@@ -50,7 +50,7 @@ private:
 	
 	/// Polymorphic serializable objects (through reference).
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value && !std::is_pointer<T>::value>::type preprocess(T &arg)
+	typename std::enable_if<std::is_polymorphic<T>::value>::type preprocess(T &arg)
 	{
 		using Base = typename detail::BaseOf<T>::type;
 		
@@ -85,16 +85,16 @@ public:
 	}
 	
 private:
-	/// Primitives and strings.
+	/// Primitives, strings, and nonpolymorphic objects.
 	template <typename T>
-	typename std::enable_if<(std::is_fundamental<T>::value || std::is_same<T, std::string>::value) && !std::is_pointer<T>::value>::type preprocess(const T &arg)
+	typename std::enable_if<!std::is_polymorphic<T>::value && !std::is_pointer<T>::value>::type preprocess(const T &arg)
 	{
 		self->process(arg);
 	}
 	
 	/// Polymorphic serializable objects (through pointer).
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type preprocess(const T *arg)
+	typename std::enable_if<std::is_polymorphic<T>::value>::type preprocess(const T *arg)
 	{
 		using Base = typename detail::BaseOf<T>::type;
 		(*self)(detail::Binding<Base>::bindingName(typeid(*arg)));
@@ -103,7 +103,7 @@ private:
 	
 	/// Polymorphic serializable objects (through reference).
 	template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value && !std::is_pointer<T>::value>::type preprocess(const T &arg)
+	typename std::enable_if<std::is_polymorphic<T>::value>::type preprocess(const T &arg)
 	{
 		using Base = typename detail::BaseOf<T>::type;
 		(*self)(detail::Binding<Base>::bindingName(typeid(arg)));
