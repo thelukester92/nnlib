@@ -4,6 +4,8 @@
 	#undef OPTIMIZE
 #endif
 
+#include "serialization/test_archive.h"
+
 #include "test_storage.h"
 #include "test_tensor.h"
 #include "critics/test_criticsequencer.h"

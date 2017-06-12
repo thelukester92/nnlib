@@ -118,13 +118,27 @@ public:
 		return *this;
 	}
 	
-	/// \brief Read from and write to an archive.
+	/// \brief Write to an archive.
 	///
-	/// \param out The archive from which to read or to which to write.
+	/// The archive takes care of whitespace for plaintext.
+	/// \param ar The archive to which to write.
 	template <typename Archive>
-	void serialize(Archive &ar)
+	void save(Archive &ar) const
 	{
 		ar(m_components);
+	}
+	
+	/// \brief Read from an archive.
+	///
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
+	{
+		ar(m_components);
+		
+		for(size_t i = 1, end = m_components.size(); i != end; ++i)
+			NNAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible concat components!");
+		
 		resizeBuffers();
 	}
 	

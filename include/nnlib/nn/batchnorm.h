@@ -284,7 +284,7 @@ public:
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
-	/// \param out The archive to which to write.
+	/// \param ar The archive to which to write.
 	template <typename Archive>
 	void save(Archive &ar) const
 	{
@@ -293,7 +293,7 @@ public:
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
+	/// \param ar The archive from which to read.
 	template <typename Archive>
 	void load(Archive &ar)
 	{

@@ -84,13 +84,7 @@ void TestConcat()
 	NNAssert(module.gradList() == linear->gradList(), "Concat::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Concat::stateList failed!");
 	
-	// Concat<> *deserialized = nullptr;
-	// Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	// NNAssert(
-	// 	deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-	// 	"Concat::save and/or Concat::load failed!"
-	// );
-	// delete deserialized;
+	TestSerializationOfModule(module);
 }
 
 #endif
