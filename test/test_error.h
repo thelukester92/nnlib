@@ -8,7 +8,7 @@ using namespace nnlib;
 void TestError()
 {
 	Tensor<> tensor(3, 6, 9);
-	Error e("file", "func", 123, tensor(0, 1, 2), tensor, "failure");
+	Error e("file", "func", 123, tensor(0, 1, 2), tensor, std::string("failure"));
 	try
 	{
 		throw e;

@@ -1,6 +1,7 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+#include <iostream>
 #include "detail.h"
 
 namespace nnlib

@@ -81,7 +81,7 @@ public:
 
 #define NNAssertEquals(x, y, ...)									\
 	NNAssert(														\
-		x == y, Error::stringify(__VA_ARGS__),						\
+		(x) == (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " == ", #y, ", but ", x, " != ", y, "."	\
 	)
 
@@ -93,31 +93,31 @@ public:
 
 #define NNAssertNotEquals(x, y, ...)								\
 	NNAssert(														\
-		x != y, Error::stringify(__VA_ARGS__),						\
+		(x) != (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " != ", #y, ", but ", x, " == ", y, "."	\
 	)
 
 #define NNAssertLessThan(x, y, ...)									\
 	NNAssert(														\
-		x < y, Error::stringify(__VA_ARGS__),						\
+		(x) < (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " < ", #y, ", but ", x, " >= ", y, "."	\
 	)
 
 #define NNAssertLessThanOrEquals(x, y, ...)							\
 	NNAssert(														\
-		x <= y, Error::stringify(__VA_ARGS__),						\
+		(x) <= (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " <= ", #y, ", but ", x, " > ", y, "."	\
 	)
 
 #define NNAssertGreaterThan(x, y, ...)								\
 	NNAssert(														\
-		x > y, Error::stringify(__VA_ARGS__),						\
+		(x) > (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " > ", #y, ", but ", x, " <= ", y, "."	\
 	)
 
 #define NNAssertGreaterThanOrEquals(x, y, ...)						\
 	NNAssert(														\
-		x >= y, Error::stringify(__VA_ARGS__),						\
+		(x) >= (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " >= ", #y, ", but ", x, " < ", y, "."	\
 	)
 

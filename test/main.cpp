@@ -30,6 +30,7 @@
 #include "opt/test_rmsprop.h"
 #include "opt/test_sgd.h"
 #include "serialization/test_basic.h"
+#include "serialization/test_csv.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
 #include "util/test_progress.h"
@@ -87,6 +88,7 @@ int main()
 		
 		// serialization
 		TEST("serialization/", BasicArchive),
+		TEST("serialization/", CSVArchive),
 		
 		// util
 		TEST("util/", Args),

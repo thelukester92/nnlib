@@ -1,7 +1,6 @@
 #ifndef SERIALIZATION_BASIC_H
 #define SERIALIZATION_BASIC_H
 
-#include <iostream>
 #include "archive.h"
 
 namespace nnlib
