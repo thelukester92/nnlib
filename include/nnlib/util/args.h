@@ -152,7 +152,7 @@ public:
 	
 	/// Parses command line arguments.
 	/// If -h or --help is present, this prints help and ends the program.
-	ArgsParser &parse(int argc, const char **argv, bool popCommand = true)
+	ArgsParser &parse(int argc, const char **argv, bool popCommand = true, std::ostream &out = std::cout)
 	{
 		Args args(argc, argv);
 		
@@ -209,8 +209,8 @@ public:
 		
 		if(m_helpOpt != '\0' && getFlag(m_helpOpt))
 		{
-			printHelp();
-			exit(1);
+			printHelp(out);
+			exit(0);
 		}
 		
 		return *this;

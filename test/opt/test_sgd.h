@@ -26,6 +26,13 @@ void TestSGD()
 	double errAfter = critic.safeForward(nn.safeForward(feat), lab);
 	
 	NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
+	
+	errBefore = errAfter;
+	opt.momentum(0.25);
+	opt.step(feat, lab);
+	errAfter = critic.safeForward(nn.safeForward(feat), lab);
+	
+	NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
 }
 
 #endif
