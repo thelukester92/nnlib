@@ -72,9 +72,4 @@ void TestSerializationOfIterable(T &iterable)
 		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed!");
 }
 
-void TestArchive()
-{
-	// todo: fill me in
-}
-
 #endif
