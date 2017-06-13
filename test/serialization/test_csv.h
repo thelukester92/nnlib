@@ -18,17 +18,17 @@ void TestCSVUtil()
 		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 3.14
 	});
 	
-	CSVUtil::readCSV(tensor1, ss1);
-	CSVUtil::writeCSV(tensor1, ss2);
-	CSVUtil::readCSV(tensor2, ss2);
+	CSVUtil::read(tensor1, ss1);
+	CSVUtil::write(tensor1, ss2);
+	CSVUtil::read(tensor2, ss2);
 	
-	NNAssertEquals(tensor1.shape(), tensor3.shape(), "CSVUtil::readCSV failed! Wrong shape.");
+	NNAssertEquals(tensor1.shape(), tensor3.shape(), "CSVUtil::read failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor3.begin(), k = tensor1.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::readCSV failed! Wrong data.");
+		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::read failed! Wrong data.");
 	
-	NNAssertEquals(tensor1.shape(), tensor2.shape(), "CSVUtil::writeCSV failed! Wrong shape.");
+	NNAssertEquals(tensor1.shape(), tensor2.shape(), "CSVUtil::write failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::writeCSV failed! Wrong data.");
+		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::write failed! Wrong data.");
 }
 
 #endif

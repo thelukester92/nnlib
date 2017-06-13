@@ -1,7 +1,7 @@
 #ifndef SERIALIZATION_CSV_H
 #define SERIALIZATION_CSV_H
 
-#include "archive.h"
+#include "../error.h"
 #include <iostream>
 
 namespace nnlib
@@ -19,13 +19,17 @@ public:
 	CSVUtil() = delete;
 	
 	template <typename T = double>
-	static void readCSV(Tensor<T> &matrix, std::istream &in, char sep = ',', size_t attributes = 0)
+	static void read(Tensor<T> &matrix, std::istream &in, char sep = ',', size_t attributes = 0)
 	{
 		Storage<Tensor<T> *> rows;
 		Tensor<T> row;
 		
 		while(readRow(in, row, sep))
 		{
+			// skip blank lines
+			if(row.size(0) == 0)
+				continue;
+			
 			NNAssert(attributes == 0 || row.size(0) == attributes, "Unexpected row size!");
 			rows.push_back(new Tensor<T>(row.copy()));
 			
@@ -40,7 +44,7 @@ public:
 	}
 	
 	template <typename T = double>
-	static void writeCSV(const Tensor<T> &matrix, std::ostream &out, char sep = ',')
+	static void write(const Tensor<T> &matrix, std::ostream &out, char sep = ',')
 	{
 		NNAssertEquals(matrix.dims(), 2, "Only matrices may be written as CSV!");
 		
@@ -61,8 +65,15 @@ private:
 	static bool readRow(std::istream &in, Tensor<T> &row, char sep)
 	{
 		std::string line, value;
-		if(!std::getline(in, line) || line == "")
+		
+		if(!std::getline(in, line))
 			return false;
+		
+		if(line == "")
+		{
+			row.resize(0);
+			return true;
+		}
 		
 		std::istringstream ss(line);
 		Storage<T> &storage = row.storage().resize(0);

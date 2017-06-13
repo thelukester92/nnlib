@@ -29,6 +29,7 @@
 #include "opt/test_nadam.h"
 #include "opt/test_rmsprop.h"
 #include "opt/test_sgd.h"
+#include "serialization/test_arff.h"
 #include "serialization/test_basic.h"
 #include "serialization/test_csv.h"
 #include "util/test_args.h"
@@ -87,6 +88,7 @@ int main()
 		TEST("opt/", SGD),
 		
 		// serialization
+		TEST("serialization/", ARFFUtil),
 		TEST("serialization/", BasicArchive),
 		TEST("serialization/", CSVUtil),
 		
