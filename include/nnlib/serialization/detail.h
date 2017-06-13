@@ -37,17 +37,6 @@ template <typename T>
 struct HasLoadAndSave<T, decltype(&T::template load<T>, 0), decltype(&T::template save<T>, 0)> : std::true_type
 {};
 
-/// Check whether the given archive can serialize the given type. Default is false.
-template <typename Archive, typename T, typename = int>
-struct CanSerialize : std::false_type
-{};
-
-/// Check whether the given archive can serialize the given type. This override determines it does.
-/// \todo make this work, it is always true for some reason.
-template <typename Archive, typename T>
-struct CanSerialize<Archive, T, decltype(&Archive::template process<T>, 0)> : std::true_type
-{};
-
 #pragma GCC diagnostic pop
 
 /// \brief Hook in code before main.
@@ -100,7 +89,7 @@ public:
 	}
 	
 	template <typename Archive, typename Derived>
-	static typename std::enable_if<CanSerialize<Archive, Derived>::value>::type bindDerivedToArchive()
+	static void bindDerivedToArchive()
 	{
 		auto aKey = std::type_index(typeid(Archive));
 		auto dKey = std::type_index(typeid(Derived));

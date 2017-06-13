@@ -88,7 +88,7 @@ int main()
 		
 		// serialization
 		TEST("serialization/", BasicArchive),
-		TEST("serialization/", CSVArchive),
+		TEST("serialization/", CSVUtil),
 		
 		// util
 		TEST("util/", Args),

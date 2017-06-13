@@ -5,33 +5,30 @@
 #include <sstream>
 using namespace nnlib;
 
-void TestCSVArchive()
+void TestCSVUtil()
 {
-	Tensor<> tensor, tensor2;
-	std::stringstream ss;
+	Tensor<> tensor1, tensor2, tensor3;
+	std::stringstream ss1, ss2;
 	
-	{
-		ss << "8,6,7,5,3,0,9,1.0,3.14,6.28\n";
-		ss << "1,2,3,4,5,6,7,8.1,4.22,3.14\n";
-	}
+	ss1 << "8,6,7,5,3,0,9,1.0,3.14,6.28\n";
+	ss1 << "1,2,3,4,5,6,7,8.1,4.22,3.14\n";
 	
-	{
-		CSVInputArchive in(ss);
-		in(tensor);
-	}
+	tensor3.resize(2, 10).copy({
+		8, 6, 7, 5, 3, 0, 9, 1.0, 3.14, 6.28,
+		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 3.14
+	});
 	
-	std::stringstream ss2;
+	CSVUtil::readCSV(tensor1, ss1);
+	CSVUtil::writeCSV(tensor1, ss2);
+	CSVUtil::readCSV(tensor2, ss2);
 	
-	{
-		CSVOutputArchive out(ss2);
-		out(tensor);
-		
-		CSVInputArchive in(ss2);
-		in(tensor2);
-	}
+	NNAssertEquals(tensor1.shape(), tensor3.shape(), "CSVUtil::readCSV failed! Wrong shape.");
+	for(auto i = tensor1.begin(), j = tensor3.begin(), k = tensor1.end(); i != k; ++i, ++j)
+		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::readCSV failed! Wrong data.");
 	
-	for(auto i = tensor.begin(), j = tensor2.begin(), k = tensor.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVArchive failed!");
+	NNAssertEquals(tensor1.shape(), tensor2.shape(), "CSVUtil::writeCSV failed! Wrong shape.");
+	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
+		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::writeCSV failed! Wrong data.");
 }
 
 #endif
