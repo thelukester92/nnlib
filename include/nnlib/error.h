@@ -14,6 +14,10 @@ namespace nnlib
 class Error : public std::runtime_error
 {
 public:
+	Error(const std::string &reason) :
+		std::runtime_error(reason)
+	{}
+	
 	template <typename ... Ts>
 	Error(const std::string &file, const std::string &func, int line, const Ts &...reasons) :
 		std::runtime_error(file + ":" + std::to_string(line) + " (" + func + "): " + stringify(reasons...))

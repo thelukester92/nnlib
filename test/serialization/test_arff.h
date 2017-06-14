@@ -5,7 +5,7 @@
 #include <sstream>
 using namespace nnlib;
 
-void TestARFFUtil()
+void TestArffSerializer()
 {
 	Tensor<> tensor1, tensor2, tensor3;
 	std::stringstream ss1, ss2;
@@ -32,9 +32,11 @@ void TestARFFUtil()
 		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 3.14
 	});
 	
-	ARFFUtil::read(tensor1, ss1);
-	ARFFUtil::write(tensor1, ss2);
-	ARFFUtil::read(tensor2, ss2);
+	ArffSerializer::read(tensor1, ss1);
+	ArffSerializer::write(tensor1, ss2);
+	std::cout << "reserialized to " << std::endl;
+	std::cout << ss2.str() << std::endl;
+	ArffSerializer::read(tensor2, ss2);
 	
 	NNAssertEquals(tensor1.shape(), tensor3.shape(), "ARFFUtil::read failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor3.begin(), k = tensor1.end(); i != k; ++i, ++j)
