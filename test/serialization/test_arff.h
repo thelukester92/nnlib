@@ -32,10 +32,14 @@ void TestArffSerializer()
 		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 3.14
 	});
 	
-	ArffSerializer::read(tensor1, ss1);
-	ArffSerializer::write(tensor1, ss2);
+	auto relation = ArffSerializer::read(tensor1, ss1);
+	std::cout << "deserialized to " << std::endl;
+	std::cout << tensor1 << std::endl;
+	
+	ArffSerializer::write(tensor1, ss2, relation);
 	std::cout << "reserialized to " << std::endl;
 	std::cout << ss2.str() << std::endl;
+	
 	ArffSerializer::read(tensor2, ss2);
 	
 	NNAssertEquals(tensor1.shape(), tensor3.shape(), "ARFFUtil::read failed! Wrong shape.");

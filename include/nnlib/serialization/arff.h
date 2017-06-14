@@ -29,10 +29,30 @@ public:
 				addAttribute("attr" + std::to_string(i), "real");
 		}
 		
+		std::string name() const
+		{
+			return m_name;
+		}
+		
 		Relation &setName(std::string name)
 		{
 			m_name = name;
 			return *this;
+		}
+		
+		size_t attributes() const
+		{
+			return m_attrNames.size();
+		}
+		
+		std::string attrName(size_t i) const
+		{
+			return m_attrNames[i];
+		}
+		
+		std::string attrType(size_t i) const
+		{
+			return m_attrTypes[i];
 		}
 		
 		Relation &addAttribute(std::string name, std::string type)
@@ -40,11 +60,6 @@ public:
 			m_attrNames.push_back(name);
 			m_attrTypes.push_back(type);
 			return *this;
-		}
-		
-		size_t attributes()
-		{
-			return m_attrNames.size();
 		}
 		
 	private:
@@ -56,35 +71,30 @@ public:
 	ArffSerializer() = delete;
 	
 	template <typename T = double>
-	static void read(Tensor<T> &matrix, std::istream &in, Relation **rel = nullptr)
+	static Relation read(Tensor<T> &matrix, std::istream &in)
 	{
-		Relation *relation = readRelation(in);
-		readData(matrix, in, *relation);
-		
-		if(rel != nullptr)
-			*rel = relation;
-		else
-			delete rel;
+		Relation relation = readRelation(in);
+		readData(matrix, in, relation);
+		return relation;
 	}
 	
 	template <typename T = double>
-	static void write(const Tensor<T> &matrix, std::ostream &out, const Relation *rel = nullptr)
+	static void write(const Tensor<T> &matrix, std::ostream &out)
 	{
-		const Relation *relation = rel;
-		if(relation == nullptr)
-			relation = new Relation(matrix);
-		
-		writeRelation(out, *relation);
-		writeData(matrix, out, *relation);
-		
-		if(rel == nullptr)
-			delete relation;
+		write(matrix, out, Relation(matrix));
+	}
+	
+	template <typename T = double>
+	static void write(const Tensor<T> &matrix, std::ostream &out, const Relation &relation)
+	{
+		writeRelation(out, relation);
+		writeData(matrix, out, relation);
 	}
 	
 private:
-	static Relation *readRelation(std::istream &in)
+	static Relation readRelation(std::istream &in)
 	{
-		Relation *rel = new Relation();
+		Relation relation;
 		std::string token, type;
 		
 		readString(in, token);
@@ -92,7 +102,7 @@ private:
 		NNAssertEquals(token, "@relation", "Unexpected token '" + token + "' before @relation!");
 		
 		readString(in, token, true);
-		rel->setName(token);
+		relation.setName(token);
 		
 		while(true)
 		{
@@ -106,10 +116,10 @@ private:
 			readString(in, type);
 			toLower(type);
 			NNAssert(type == "numeric" || type == "integer" || type == "real", "Unexpected type '" + type + "'!");
-			rel->addAttribute(token, type);
+			relation.addAttribute(token, type);
 		}
 		
-		return rel;
+		return relation;
 	}
 	
 	template <typename T>
@@ -122,15 +132,12 @@ private:
 		
 		try
 		{
-			while(true)
+			while(!in.fail())
 			{
 				Tensor<T> *row = new Tensor<T>(rel.attributes());
 				for(T &val : *row)
 					readNumber(in, val);
-				if(!in.fail())
-					rows.push_back(row);
-				else
-					break;
+				rows.push_back(row);
 			}
 		}
 		catch(const std::invalid_argument &e)
@@ -145,13 +152,25 @@ private:
 	
 	static void writeRelation(std::ostream &out, const Relation &rel)
 	{
-		
+		out << "@relation " << quoted(rel.name()) << "\n";
+		for(size_t i = 0, n = rel.attributes(); i != n; ++i)
+			out << "@attribute " << quoted(rel.attrName(i)) << " " << rel.attrType(i) << "\n";
+		out << "@data\n";
 	}
 	
 	template <typename T>
 	static void writeData(const Tensor<T> &matrix, std::ostream &out, const Relation &rel)
 	{
-		
+		for(size_t i = 0, rows = matrix.size(0); i != rows; ++i)
+		{
+			for(size_t j = 0, cols = matrix.size(1); j != cols; ++j)
+			{
+				if(j > 0)
+					out << ",";
+				out << matrix(i, j);
+			}
+			out << std::endl;
+		}
 	}
 	
 	static void toLower(std::string &s)
@@ -165,14 +184,17 @@ private:
 	{
 		std::string token;
 		char c;
-		while(in >> c)
+		while(true)
 		{
+			c = in.peek();
 			if(c == ',' || c == '\n')
 				break;
 			token.push_back(c);
+			in.ignore();
 		}
-		if(!in.fail())
-			num = std::stod(token);
+		if(c == ',')
+			in.ignore();
+		num = std::stod(token);
 	}
 	
 	static void readString(std::istream &in, std::string &s, bool quoted = false)
@@ -210,6 +232,23 @@ private:
 			else
 				break;
 		}
+	}
+	
+	static std::string quoted(const std::string &s)
+	{
+		if(s.find_first_of("\t, ") != std::string::npos)
+		{
+			std::string result = "\"";
+			for(char c : s)
+			{
+				if(c == '"' || c == '\\')
+					result.push_back('\\');
+				result.push_back(c);
+			}
+			result.push_back('"');
+			return result;
+		}
+		return s;
 	}
 };
 

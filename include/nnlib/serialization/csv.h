@@ -9,14 +9,12 @@ namespace nnlib
 
 /// \brief Serialize to and from CSV streams.
 ///
-/// Because this serializer is limited in what it can do...
-///   1) It only reads/writes matrices
-///   2) It only reads/writes a single thing
-/// ...this is not an Archive, but a utility class.
-class CSVUtil
+/// This is a serializer, not an archive,
+/// because it only works in one type: matrices.
+class CsvSerializer
 {
 public:
-	CSVUtil() = delete;
+	CsvSerializer() = delete;
 	
 	template <typename T = double>
 	static void read(Tensor<T> &matrix, std::istream &in, char sep = ',', size_t attributes = 0)

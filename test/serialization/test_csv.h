@@ -5,7 +5,7 @@
 #include <sstream>
 using namespace nnlib;
 
-void TestCSVUtil()
+void TestCsvSerializer()
 {
 	Tensor<> tensor1, tensor2, tensor3;
 	std::stringstream ss1, ss2;
@@ -18,17 +18,17 @@ void TestCSVUtil()
 		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 3.14
 	});
 	
-	CSVUtil::read(tensor1, ss1);
-	CSVUtil::write(tensor1, ss2);
-	CSVUtil::read(tensor2, ss2);
+	CsvSerializer::read(tensor1, ss1);
+	CsvSerializer::write(tensor1, ss2);
+	CsvSerializer::read(tensor2, ss2);
 	
-	NNAssertEquals(tensor1.shape(), tensor3.shape(), "CSVUtil::read failed! Wrong shape.");
+	NNAssertEquals(tensor1.shape(), tensor3.shape(), "CsvSerializer::read failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor3.begin(), k = tensor1.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::read failed! Wrong data.");
+		NNAssertAlmostEquals(*i, *j, 1e-12, "CsvSerializer::read failed! Wrong data.");
 	
-	NNAssertEquals(tensor1.shape(), tensor2.shape(), "CSVUtil::write failed! Wrong shape.");
+	NNAssertEquals(tensor1.shape(), tensor2.shape(), "CsvSerializer::write failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "CSVUtil::write failed! Wrong data.");
+		NNAssertAlmostEquals(*i, *j, 1e-12, "CsvSerializer::write failed! Wrong data.");
 }
 
 #endif
