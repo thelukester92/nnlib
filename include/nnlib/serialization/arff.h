@@ -15,57 +15,29 @@ namespace nnlib
 class ArffSerializer
 {
 public:
+	class Attribute
+	{
+	public:
+		Attribute(std::string name = "attr") : m_name(name) {}
+		std::string name() const { return m_name; }
+		std::string type() const { return "real"; }
+	private:
+		std::string m_name;
+		Storage<std::string> m_values;
+	};
+	
 	class Relation
 	{
 	public:
-		Relation() : m_name("untitled")
-		{}
-		
-		template <typename T>
-		Relation(const Tensor<T> &matrix) : m_name("untitled")
-		{
-			NNAssertEquals(matrix.dims(), 2, "Relations are only compatible with matrices!");
-			for(size_t i = 0, n = matrix.size(1); i < n; ++i)
-				addAttribute("attr" + std::to_string(i), "real");
-		}
-		
-		std::string name() const
-		{
-			return m_name;
-		}
-		
-		Relation &setName(std::string name)
-		{
-			m_name = name;
-			return *this;
-		}
-		
-		size_t attributes() const
-		{
-			return m_attrNames.size();
-		}
-		
-		std::string attrName(size_t i) const
-		{
-			return m_attrNames[i];
-		}
-		
-		std::string attrType(size_t i) const
-		{
-			return m_attrTypes[i];
-		}
-		
-		Relation &addAttribute(std::string name, std::string type)
-		{
-			m_attrNames.push_back(name);
-			m_attrTypes.push_back(type);
-			return *this;
-		}
-		
+		Relation() : m_name("untitled")				{}
+		Relation(std::string name) : m_name(name)	{}
+		void addAttribute(std::string name)			{ m_attributes.push_back(name); }
+		std::string name() const					{ return m_name; }
+		size_t attributes() const					{ return m_attributes.size(); }
+		const Attribute &attribute(size_t i) const	{ return m_attributes[i]; }
 	private:
 		std::string m_name;
-		Storage<std::string> m_attrNames;
-		Storage<std::string> m_attrTypes;
+		Storage<Attribute> m_attributes;
 	};
 	
 	ArffSerializer() = delete;
@@ -94,15 +66,14 @@ public:
 private:
 	static Relation readRelation(std::istream &in)
 	{
-		Relation relation;
 		std::string token, type;
 		
 		readString(in, token);
 		toLower(token);
 		NNAssertEquals(token, "@relation", "Unexpected token '" + token + "' before @relation!");
-		
 		readString(in, token, true);
-		relation.setName(token);
+		
+		Relation relation(token);
 		
 		while(true)
 		{
@@ -116,45 +87,63 @@ private:
 			readString(in, type);
 			toLower(type);
 			NNAssert(type == "numeric" || type == "integer" || type == "real", "Unexpected type '" + type + "'!");
-			relation.addAttribute(token, type);
+			relation.addAttribute(token);
 		}
 		
 		return relation;
 	}
 	
 	template <typename T>
-	static void readData(Tensor<T> &matrix, std::istream &in, Relation &rel)
+	static void readData(Tensor<T> &matrix, std::istream &in, Relation &relation)
 	{
-		NNAssertGreaterThan(rel.attributes(), 0, "Cannot read data with no attributes!");
+		NNAssertGreaterThan(relation.attributes(), 0, "Cannot read data with no attributes!");
 		
 		Storage<Tensor<T> *> rows;
-		std::string token;
+		Tensor<T> row;
 		
-		try
+		while(readRow(in, row, ','))
 		{
-			while(!in.fail())
-			{
-				Tensor<T> *row = new Tensor<T>(rel.attributes());
-				for(T &val : *row)
-					readNumber(in, val);
-				rows.push_back(row);
-			}
-		}
-		catch(const std::invalid_argument &e)
-		{
-			throw Error(e.what());
+			// skip blank lines
+			if(row.size(0) == 0)
+				continue;
+			
+			NNAssert(row.size(0) == relation.attributes(), "Unexpected row size!");
+			rows.push_back(new Tensor<T>(row.copy()));
 		}
 		
-		matrix = Tensor<T>::flatten(rows).resize(rows.size(), rel.attributes());
+		matrix = Tensor<T>::flatten(rows).resize(rows.size(), row.size(0));
 		for(Tensor<T> *row : rows)
 			delete row;
+	}
+	
+	template <typename T>
+	static bool readRow(std::istream &in, Tensor<T> &row, char sep)
+	{
+		std::string line, value;
+		
+		if(!std::getline(in, line))
+			return false;
+		
+		if(line == "")
+		{
+			row.resize(0);
+			return true;
+		}
+		
+		std::istringstream ss(line);
+		Storage<T> &storage = row.storage().resize(0);
+		while(std::getline(ss, value, sep))
+			storage.push_back(std::stod(value));
+		row.resize(storage.size());
+		
+		return true;
 	}
 	
 	static void writeRelation(std::ostream &out, const Relation &rel)
 	{
 		out << "@relation " << quoted(rel.name()) << "\n";
 		for(size_t i = 0, n = rel.attributes(); i != n; ++i)
-			out << "@attribute " << quoted(rel.attrName(i)) << " " << rel.attrType(i) << "\n";
+			out << "@attribute " << quoted(rel.attribute(i).name()) << " " << rel.attribute(i).type() << "\n";
 		out << "@data\n";
 	}
 	

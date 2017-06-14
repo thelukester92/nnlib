@@ -88,7 +88,7 @@ int main()
 		TEST("opt/", SGD),
 		
 		// serialization
-		// TEST("serialization/", ArffSerializer),
+		TEST("serialization/", ArffSerializer),
 		TEST("serialization/", BasicArchive),
 		TEST("serialization/", CsvSerializer),
 		

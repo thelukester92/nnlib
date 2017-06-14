@@ -9,8 +9,8 @@ namespace nnlib
 
 /// \brief Serialize to and from CSV streams.
 ///
-/// This is a serializer, not an archive,
-/// because it only works in one type: matrices.
+/// This is a serializer, not an archive, because
+/// it works on only one kind of data: matrices.
 class CsvSerializer
 {
 public:
