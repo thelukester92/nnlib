@@ -34,7 +34,15 @@ public:
 	class Relation
 	{
 	public:
-		Relation(std::string name = "") : m_name(name) {}
+		template <typename T>
+		Relation(const Tensor<T> &matrix) : m_name("untitled")
+		{
+			NNAssertEquals(matrix.dims(), 2, "Relations are only compatible with matrices!");
+			for(size_t i = 0; i < matrix.size(1); ++i)
+				addAttribute(Attribute("attr" + std::to_string(i)));
+		}
+		
+		Relation(std::string name = "untitled") : m_name(name) {}
 		void name(std::string name)					{ m_name = name; }
 		std::string name() const					{ return m_name; }
 		void addAttribute(Attribute attr)			{ m_attributes.push_back(attr); }

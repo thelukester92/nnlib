@@ -8,7 +8,7 @@ using namespace nnlib;
 void TestArffSerializer()
 {
 	Tensor<> tensor1, tensor2, tensor3;
-	std::stringstream ss1, ss2;
+	std::stringstream ss1, ss2, ss3;
 	
 	ss1
 		<< "@relation 'this is a test'\n"
@@ -45,6 +45,14 @@ void TestArffSerializer()
 	NNAssertEquals(tensor1.shape(), tensor2.shape(), "ArffSerializer::write failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
 		NNAssertAlmostEquals(*i, *j, 1e-12, "ArffSerializer::write failed! Wrong data.");
+	
+	
+	ArffSerializer::write(tensor1, ss3);
+	ArffSerializer::read(tensor2, ss3);
+	
+	NNAssertEquals(tensor1.shape(), tensor2.shape(), "ArffSerializer::write without Relation failed! Wrong shape.");
+	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
+		NNAssertAlmostEquals(*i, *j, 1e-12, "ArffSerializer::write without Relation failed! Wrong data.");
 }
 
 #endif
