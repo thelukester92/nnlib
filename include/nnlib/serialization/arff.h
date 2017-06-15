@@ -3,7 +3,6 @@
 
 #include "../error.h"
 #include <iostream>
-#include <regex>
 
 namespace nnlib
 {
@@ -51,7 +50,14 @@ public:
 	static Relation read(Tensor<T> &matrix, std::istream &in)
 	{
 		Relation relation = readMetadata(in);
-		readData(matrix, in, relation);
+		try
+		{
+			readData(matrix, in, relation);
+		}
+		catch(const std::invalid_argument &e)
+		{
+			throw Error(e.what());
+		}
 		return relation;
 	}
 	

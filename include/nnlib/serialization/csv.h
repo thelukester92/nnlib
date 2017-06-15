@@ -36,7 +36,7 @@ public:
 				attributes = row.size(0);
 		}
 		
-		matrix = Tensor<T>::flatten(rows).resize(rows.size(), row.size(0));
+		matrix = Tensor<T>::flatten(rows).resize(rows.size(), attributes);
 		for(Tensor<T> *row : rows)
 			delete row;
 	}

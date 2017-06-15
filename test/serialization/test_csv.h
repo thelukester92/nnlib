@@ -10,8 +10,9 @@ void TestCsvSerializer()
 	Tensor<> tensor1, tensor2, tensor3;
 	std::stringstream ss1, ss2;
 	
-	ss1 << "8,6,7,5,3,0,9,1.0,3.14,6.28\n";
-	ss1 << "1,2,3,4,5,6,7,8.1,4.22,3.14\n";
+	ss1 << "\n\n"
+		<< "8,\t6,7,5,3,0, 9,1.0,3.14,6.28\n\n"
+		<< "1,2, 3,4,5,6,7,8.1,\t4.22,3.14\n\n";
 	
 	tensor3.resize(2, 10).copy({
 		8, 6, 7, 5, 3, 0, 9, 1.0, 3.14, 6.28,
