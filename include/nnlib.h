@@ -2,6 +2,7 @@
 #include "nnlib/serialization/archive.h"
 #include "nnlib/serialization/arff.h"
 #include "nnlib/serialization/basic.h"
+#include "nnlib/serialization/binary.h"
 #include "nnlib/serialization/csv.h"
 
 /// Top-level Classes

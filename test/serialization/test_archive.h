@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include "nnlib/serialization/basic.h"
+#include "nnlib/serialization/binary.h"
 #include "nnlib/nn/module.h"
 using namespace nnlib;
 
@@ -24,7 +25,7 @@ void TestSerializationOfModule(T &module)
 	}
 	
 	{
-		BasicOutputArchive out(ss1);
+		BinaryOutputArchive out(ss1);
 		out(module);
 		ss2 << ss1.str();
 	}
@@ -32,7 +33,7 @@ void TestSerializationOfModule(T &module)
 	{
 		T deserialized;
 		
-		BasicInputArchive in(ss1);
+		BinaryInputArchive in(ss1);
 		in(deserialized);
 		
 		NNAssertEquals(deserialized.inputs(), module.inputs(), "Serialization failed! Mismatching inputs.");
@@ -48,7 +49,7 @@ void TestSerializationOfModule(T &module)
 	{
 		Module<> *deserialized;
 		
-		BasicInputArchive in(ss2);
+		BinaryInputArchive in(ss2);
 		in(deserialized);
 		
 		NNAssertEquals(deserialized->inputs(), module.inputs(), "Generic serialization failed! Mismatching inputs.");
