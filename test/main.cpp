@@ -34,9 +34,7 @@
 #include "serialization/test_csv.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
-#include "util/test_progress.h"
 #include "util/test_random.h"
-#include "util/test_timer.h"
 using namespace nnlib;
 
 #include <iostream>
@@ -95,9 +93,7 @@ int main()
 		// util
 		TEST("util/", Args),
 		TEST("util/", Batcher),
-		TEST("util/", Progress),
-		TEST("util/", Random),
-		TEST("util/", Timer)
+		TEST("util/", Random)
 	};
 	
 	try
