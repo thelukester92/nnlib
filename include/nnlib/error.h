@@ -36,7 +36,7 @@ public:
 	}
 	
 	template <typename T>
-	static typename std::enable_if<!std::is_fundamental<T>::value, std::string>::type stringify(const T &value)
+	static typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value, std::string>::type stringify(const T &value)
 	{
 		return "object";
 	}
