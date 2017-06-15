@@ -22,27 +22,29 @@ void TestArffSerializer()
 		<< "@attribute sev real\n"
 		<< "@attribute eig real\n"
 		<< "@attribute nin real\n"
-		<< "@attribute ten real\n"
+		<< "@attribute ten {this,'is an',enum}\n"
 		<< "@data\n"
-		<< "8,6,7,5,3,0,9,1.0,3.14,6.28\n"
-		<< "1,2,3,4,5,6,7,8.1,4.22,3.14\n";
+		<< "8,6,7,5,3,0,9,1.0,3.14,this\n"
+		<< "1,2,3,4,5,6,7,8.1,4.22,\"is an\"\n"
+		<< "1,2,3,4,5,6,7,8.1,4.22, 'enum'\n";
 	
-	tensor3.resize(2, 10).copy({
-		8, 6, 7, 5, 3, 0, 9, 1.0, 3.14, 6.28,
-		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 3.14
+	tensor3.resize(3, 10).copy({
+		8, 6, 7, 5, 3, 0, 9, 1.0, 3.14, 0,
+		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 1,
+		1, 2, 3, 4, 5, 6, 7, 8.1, 4.22, 2
 	});
 	
 	auto relation = ArffSerializer::read(tensor1, ss1);
 	ArffSerializer::write(tensor1, ss2, relation);
 	ArffSerializer::read(tensor2, ss2);
 	
-	NNAssertEquals(tensor1.shape(), tensor3.shape(), "ARFFUtil::read failed! Wrong shape.");
+	NNAssertEquals(tensor1.shape(), tensor3.shape(), "ArffSerializer::read failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor3.begin(), k = tensor1.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "ARFFUtil::read failed! Wrong data.");
+		NNAssertAlmostEquals(*i, *j, 1e-12, "ArffSerializer::read failed! Wrong data.");
 	
-	NNAssertEquals(tensor1.shape(), tensor2.shape(), "ARFFUtil::write failed! Wrong shape.");
+	NNAssertEquals(tensor1.shape(), tensor2.shape(), "ArffSerializer::write failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "ARFFUtil::write failed! Wrong data.");
+		NNAssertAlmostEquals(*i, *j, 1e-12, "ArffSerializer::write failed! Wrong data.");
 }
 
 #endif

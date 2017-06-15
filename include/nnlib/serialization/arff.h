@@ -3,7 +3,7 @@
 
 #include "../error.h"
 #include <iostream>
-#include <sstream>
+#include <regex>
 
 namespace nnlib
 {
@@ -15,29 +15,34 @@ namespace nnlib
 class ArffSerializer
 {
 public:
+	/// Metadata about a column in a matrix.
 	class Attribute
 	{
 	public:
 		Attribute(std::string name = "attr") : m_name(name) {}
-		std::string name() const { return m_name; }
-		std::string type() const { return "real"; }
+		void name(std::string name)			{ m_name = name; }
+		std::string name() const			{ return m_name; }
+		void addValue(std::string value)	{ m_values.push_back(value); }
+		size_t values() const				{ return m_values.size(); }
+		std::string value(size_t i) const	{ return m_values[i]; }
 	private:
 		std::string m_name;
 		Storage<std::string> m_values;
 	};
-	
+
+	/// Metadata about a matrix.
 	class Relation
 	{
 	public:
-		Relation() : m_name("untitled")				{}
-		Relation(std::string name) : m_name(name)	{}
-		void addAttribute(std::string name)			{ m_attributes.push_back(name); }
+		Relation(std::string name = "") : m_name(name) {}
+		void name(std::string name)					{ m_name = name; }
 		std::string name() const					{ return m_name; }
+		void addAttribute(Attribute attr)			{ m_attributes.push_back(attr); }
 		size_t attributes() const					{ return m_attributes.size(); }
 		const Attribute &attribute(size_t i) const	{ return m_attributes[i]; }
 	private:
-		std::string m_name;
 		Storage<Attribute> m_attributes;
+		std::string m_name;
 	};
 	
 	ArffSerializer() = delete;
@@ -45,7 +50,7 @@ public:
 	template <typename T = double>
 	static Relation read(Tensor<T> &matrix, std::istream &in)
 	{
-		Relation relation = readRelation(in);
+		Relation relation = readMetadata(in);
 		readData(matrix, in, relation);
 		return relation;
 	}
@@ -59,185 +64,246 @@ public:
 	template <typename T = double>
 	static void write(const Tensor<T> &matrix, std::ostream &out, const Relation &relation)
 	{
-		writeRelation(out, relation);
+		writeMetadata(out, relation);
 		writeData(matrix, out, relation);
 	}
 	
 private:
-	static Relation readRelation(std::istream &in)
+	static Relation readMetadata(std::istream &in)
 	{
-		std::string token, type;
+		Relation relation;
+		std::string token;
 		
-		readString(in, token);
-		toLower(token);
-		NNAssertEquals(token, "@relation", "Unexpected token '" + token + "' before @relation!");
-		readString(in, token, true);
+		readToken(in, token);
+		NNHardAssert(equalsInsensitive(token, "@relation"), "Invalid arff file! Expected @relation.");
 		
-		Relation relation(token);
+		readToken(in, token, true);
+		relation.name(token);
 		
 		while(true)
 		{
-			readString(in, token);
-			toLower(token);
-			if(token == "@data")
-				break;
-			NNAssertEquals(token, "@attribute", "Unexpected token '" + token + "' before @data!");
+			Attribute attr;
 			
-			readString(in, token, true);
-			readString(in, type);
-			toLower(type);
-			NNAssert(type == "numeric" || type == "integer" || type == "real", "Unexpected type '" + type + "'!");
-			relation.addAttribute(token);
+			readToken(in, token);
+			if(equalsInsensitive(token, "@data"))
+				break;
+			NNHardAssert(equalsInsensitive(token, "@attribute"), "Invalid arff file! Expected @attribute.");
+			
+			readToken(in, token, true);
+			attr.name(token);
+			
+			readToken(in, token);
+			if(token[0] == '{')
+			{
+				for(size_t i = 0; i < token.size(); ++i)
+					in.unget();
+				while(!in.fail())
+				{
+					readToken(in, token, true, ",}");
+					attr.addValue(token);
+					in.unget();
+					if(in.peek() == '}')
+					{
+						in.ignore();
+						break;
+					}
+					in.ignore();
+				}
+			}
+			else
+				NNHardAssert(
+					equalsInsensitive(token, "real") || equalsInsensitive(token, "numeric") || equalsInsensitive(token, "integer"),
+					"Invalid arff file! Expected real|numeric|integer|{enum} attribute type."
+				);
+			
+			relation.addAttribute(attr);
 		}
 		
 		return relation;
 	}
 	
 	template <typename T>
-	static void readData(Tensor<T> &matrix, std::istream &in, Relation &relation)
+	static void readData(Tensor<T> &matrix, std::istream &in, const Relation &relation)
 	{
-		NNAssertGreaterThan(relation.attributes(), 0, "Cannot read data with no attributes!");
-		
 		Storage<Tensor<T> *> rows;
-		Tensor<T> row;
+		Tensor<T> row(relation.attributes());
 		
-		while(readRow(in, row, ','))
+		std::string token;
+		size_t attributes = relation.attributes();
+		while(true)
 		{
-			// skip blank lines
-			if(row.size(0) == 0)
-				continue;
+			if(in.peek() == EOF)
+				break;
 			
-			NNAssert(row.size(0) == relation.attributes(), "Unexpected row size!");
+			for(size_t i = 0; i < attributes; ++i)
+			{
+				if(relation.attribute(i).values() == 0)
+				{
+					readToken(in, token, false, "\n,");
+					row(i) = std::stod(token);
+				}
+				else
+				{
+					bool match = false;
+					readToken(in, token, true, "\n,");
+					for(size_t j = 0, n = relation.attribute(i).values(); j < n; ++j)
+					{
+						if(token == relation.attribute(i).value(j))
+						{
+							row(i) = j;
+							match = true;
+							break;
+						}
+					}
+					NNHardAssert(match, "Invalid enum value '" + token + "'!");
+				}
+			}
+			
 			rows.push_back(new Tensor<T>(row.copy()));
 		}
 		
-		matrix = Tensor<T>::flatten(rows).resize(rows.size(), row.size(0));
+		matrix = Tensor<T>::flatten(rows).resize(rows.size(), relation.attributes());
 		for(Tensor<T> *row : rows)
 			delete row;
 	}
 	
-	template <typename T>
-	static bool readRow(std::istream &in, Tensor<T> &row, char sep)
+	static void writeMetadata(std::ostream &out, const Relation &relation)
 	{
-		std::string line, value;
+		// write
 		
-		if(!std::getline(in, line))
-			return false;
+		out << "@relation ";
+		writeToken(out, relation.name());
+		out << std::endl;
 		
-		if(line == "")
+		for(size_t i = 0; i < relation.attributes(); ++i)
 		{
-			row.resize(0);
-			return true;
+			out << "@attribute ";
+			writeToken(out, relation.attribute(i).name());
+			out << " ";
+			if(relation.attribute(i).values() == 0)
+				out << "real" << std::endl;
+			else
+			{
+				out << "{";
+				for(size_t j = 0; j < relation.attribute(i).values(); ++j)
+				{
+					if(j > 0)
+						out << ",";
+					writeToken(out, relation.attribute(i).value(j));
+				}
+				out << "}" << std::endl;
+			}
 		}
-		
-		std::istringstream ss(line);
-		Storage<T> &storage = row.storage().resize(0);
-		while(std::getline(ss, value, sep))
-			storage.push_back(std::stod(value));
-		row.resize(storage.size());
-		
-		return true;
-	}
-	
-	static void writeRelation(std::ostream &out, const Relation &rel)
-	{
-		out << "@relation " << quoted(rel.name()) << "\n";
-		for(size_t i = 0, n = rel.attributes(); i != n; ++i)
-			out << "@attribute " << quoted(rel.attribute(i).name()) << " " << rel.attribute(i).type() << "\n";
-		out << "@data\n";
 	}
 	
 	template <typename T>
-	static void writeData(const Tensor<T> &matrix, std::ostream &out, const Relation &rel)
+	static void writeData(const Tensor<T> &matrix, std::ostream &out, const Relation &relation)
 	{
-		for(size_t i = 0, rows = matrix.size(0); i != rows; ++i)
+		NNAssertEquals(matrix.dims(), 2, "Only matrices are compatible with arff files!");
+		NNAssertEquals(matrix.size(1), relation.attributes(), "Incompatible relation!");
+		
+		out << "@data\n";
+		size_t attributes = relation.attributes();
+		for(size_t i = 0, n = matrix.size(0); i < n; ++i)
 		{
-			for(size_t j = 0, cols = matrix.size(1); j != cols; ++j)
+			for(size_t j = 0; j < attributes; ++j)
 			{
 				if(j > 0)
 					out << ",";
-				out << matrix(i, j);
+				if(relation.attribute(j).values() == 0)
+					out << matrix(i, j);
+				else
+				{
+					bool match = false;
+					for(size_t k = 0, m = relation.attribute(j).values(); k < m; ++k)
+					{
+						if(k == matrix(i, j))
+						{
+							match = true;
+							writeToken(out, relation.attribute(j).value(k));
+							break;
+						}
+					}
+					NNHardAssert(match, "Invalid enum index!");
+				}
 			}
 			out << std::endl;
 		}
 	}
 	
-	static void toLower(std::string &s)
+	static bool equalsInsensitive(const std::string &a, const std::string &b)
 	{
-		for(char &c : s)
-			c = tolower(c);
+		if(a.size() != b.size())
+			return false;
+		for(size_t i = 0, n = a.size(); i < n; ++i)
+			if(tolower(a[i]) != tolower(b[i]))
+				return false;
+		return true;
 	}
 	
-	template <typename T>
-	static void readNumber(std::istream &in, T &num)
+	static void readToken(std::istream &in, std::string &token, bool quoted = false, std::string delims = " \t\n")
 	{
-		std::string token;
-		char c;
-		while(true)
+		static const std::string WHITESPACE = " \t\n";
+		
+		token = "";
+		while(in.peek() != EOF && token == "")
 		{
+			while(in.peek() != EOF && WHITESPACE.find(in.peek()) != std::string::npos)
+				in.ignore();
+			
+			char c, quote = '\0';
+			bool escaped = false;
+			
 			c = in.peek();
-			if(c == ',' || c == '\n')
-				break;
-			token.push_back(c);
-			in.ignore();
-		}
-		if(c == ',')
-			in.ignore();
-		num = std::stod(token);
-	}
-	
-	static void readString(std::istream &in, std::string &s, bool quoted = false)
-	{
-		while(true)
-		{
-			char c;
-			in >> c;
-			
-			if(quoted && (c == '"' || c == '\''))
+			if(c == '%')
 			{
-				s = "";
-				char quote = c;
-				bool escaped = false;
-				while(in.get(c))
-				{
-					if(escaped)
-						escaped = false;
-					else if(c == '\\')
-						escaped = true;
-					else if(c == quote)
-						break;
-					if(!escaped)
-						s.push_back(c);
-				}
+				std::getline(in, token);
+				token = "";
+				continue;
 			}
-			else
+			else if(quoted && (c == '"' || c == '\''))
 			{
-				in.unget();
-				in >> s;
+				quote = c;
+				in.ignore();
 			}
 			
-			if(s.size() > 0 && s[0] == '%')
-				std::getline(in, s);
-			else
-				break;
+			while(in.get(c))
+			{
+				if(escaped)
+					escaped = false;
+				else if(c == '\\')
+					escaped = true;
+				else if((quote != '\0' && c == quote) || (quote == '\0' && delims.find(c) != std::string::npos))
+					break;
+				if(!escaped)
+					token.push_back(c);
+			}
+			
+			if(quote != '\0' && c == quote)
+			{
+				while(in.peek() != EOF && WHITESPACE.find(in.peek()) != std::string::npos)
+					in.ignore();
+				if(in.peek() != EOF && delims.find(in.peek()) != std::string::npos)
+					in.ignore();
+			}
 		}
 	}
 	
-	static std::string quoted(const std::string &s)
+	static void writeToken(std::ostream &out, const std::string &token)
 	{
-		if(s.find_first_of("\t, ") != std::string::npos)
+		if(token.find_first_of(" \t\n") != std::string::npos)
 		{
-			std::string result = "\"";
-			for(char c : s)
+			out << '"';
+			for(const char &c : token)
 			{
 				if(c == '"' || c == '\\')
-					result.push_back('\\');
-				result.push_back(c);
+					out << '\\';
+				out << c;
 			}
-			result.push_back('"');
-			return result;
+			out << '"';
 		}
-		return s;
+		else
+			out << token;
 	}
 };
 
