@@ -131,6 +131,11 @@ void TestMath(std::string name)
 		}
 	}
 	
+	M<T>::mAdd_vv(x.data(), x.size(), 1, y.data(), y.size(), 1, A.data(), 10, 1, 0);
+	for(size_t i = 0; i < x.size(); ++i)
+		for(size_t j = 0; j < y.size(); ++j)
+			NNHardAssert(almostEqual<T>(A[i * 10 + j], x[i] * y[j]), name + "::mAdd_vv with beta != 1 failed!");
+	
 	std::fill(y.begin(), y.end(), 0);
 	M<T>::vAdd_mv(A.data(), 10, 10, 10, x.data(), 1, y.data(), 1);
 	for(size_t i = 0; i < 10; ++i)
