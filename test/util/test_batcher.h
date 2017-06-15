@@ -26,6 +26,9 @@ void TestBatcher()
 		batcher.next();
 		NNAssertEquals(batcher.features().shape(), Storage<size_t>({ 2, 3 }), "Batcher::features is the wrong shape!");
 		NNAssertEquals(batcher.labels().shape(), Storage<size_t>({ 2, 2 }), "Batcher::labels is the wrong shape!");
+		
+		NNAssert(batcher.next() == false, "Batcher::next(false) failed to indicate end-of-batches!");
+		NNAssert(batcher.next(true), "Batcher::next(true) failed to reset the batcher!");
 	}
 	
 	{
