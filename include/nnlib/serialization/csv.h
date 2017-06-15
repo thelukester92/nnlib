@@ -2,6 +2,7 @@
 #define SERIALIZATION_CSV_H
 
 #include "../error.h"
+#include "../tensor.h"
 #include <iostream>
 
 namespace nnlib
