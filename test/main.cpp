@@ -31,6 +31,7 @@
 #include "opt/test_sgd.h"
 #include "serialization/test_arff.h"
 #include "serialization/test_basic.h"
+#include "serialization/test_binary.h"
 #include "serialization/test_csv.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
@@ -88,6 +89,7 @@ int main()
 		// serialization
 		TEST("serialization/", ArffSerializer),
 		TEST("serialization/", BasicArchive),
+		TEST("serialization/", BinaryArchive),
 		TEST("serialization/", CsvSerializer),
 		
 		// util

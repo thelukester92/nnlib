@@ -3,9 +3,34 @@
 
 #include <sstream>
 #include "nnlib/serialization/basic.h"
-#include "nnlib/serialization/binary.h"
-#include "nnlib/nn/module.h"
+#include "nnlib/tensor.h"
+#include "nnlib/nn/linear.h"
 using namespace nnlib;
+
+template <typename InputArchive, typename OutputArchive>
+void TestArchive()
+{
+	std::stringstream ss;
+	ss.precision(16);
+	
+	Tensor<> a = Tensor<>(3, 2, 4).rand();
+	Tensor<> b;
+	
+	InputArchive in(ss);
+	OutputArchive out(ss);
+	
+	out(a);
+	in(b);
+	
+	NNAssertEquals(a.shape(), b.shape(), "Serialization failed! Wrong shape!");
+	for(auto i = a.begin(), j = b.begin(), k = a.end(); i != k; ++i, ++j)
+		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Wrong data!");
+	
+	std::string s;
+	out("string with spaces");
+	in(s);
+	NNAssertEquals(s, "string with spaces", "Serialization failed!");
+}
 
 template <typename T>
 void TestSerializationOfModule(T &module)
@@ -25,7 +50,7 @@ void TestSerializationOfModule(T &module)
 	}
 	
 	{
-		BinaryOutputArchive out(ss1);
+		BasicOutputArchive out(ss1);
 		out(module);
 		ss2 << ss1.str();
 	}
@@ -33,7 +58,7 @@ void TestSerializationOfModule(T &module)
 	{
 		T deserialized;
 		
-		BinaryInputArchive in(ss1);
+		BasicInputArchive in(ss1);
 		in(deserialized);
 		
 		NNAssertEquals(deserialized.inputs(), module.inputs(), "Serialization failed! Mismatching inputs.");
@@ -49,7 +74,7 @@ void TestSerializationOfModule(T &module)
 	{
 		Module<> *deserialized;
 		
-		BinaryInputArchive in(ss2);
+		BasicInputArchive in(ss2);
 		in(deserialized);
 		
 		NNAssertEquals(deserialized->inputs(), module.inputs(), "Generic serialization failed! Mismatching inputs.");

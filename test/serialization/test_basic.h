@@ -2,15 +2,13 @@
 #define TEST_SERIALIZATION_BASIC_H
 
 #include "nnlib/serialization/basic.h"
+#include "test_archive.h"
 #include <sstream>
 using namespace nnlib;
 
 void TestBasicArchive()
 {
-	std::stringstream ss;
-	BasicInputArchive in(ss);
-	BasicOutputArchive out(ss);
-	/// \todo fill me in
+	TestArchive<BasicInputArchive, BasicOutputArchive>();
 }
 
 #endif
