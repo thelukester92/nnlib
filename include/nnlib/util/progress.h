@@ -17,6 +17,8 @@ public:
 	
 	static void display(size_t current, size_t total, char end = '\0', size_t length = 50, std::ostream &out = std::cout)
 	{
+		static Timer timer;
+		
 		size_t degreeCurrent	= current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));
 		size_t degreeTotal		= (size_t) ceil(log(total) / log(10)) + 1;
 		size_t middle			= degreeCurrent + degreeTotal + 5;
@@ -72,11 +74,7 @@ private:
 		
 		return out.str();
 	}
-	
-	static Timer timer;
 };
-
-Timer Progress::timer;
 
 }
 
