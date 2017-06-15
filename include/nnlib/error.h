@@ -14,6 +14,10 @@ namespace nnlib
 class Error : public std::runtime_error
 {
 public:
+	Error(const std::string &reason) :
+		std::runtime_error(reason)
+	{}
+	
 	template <typename ... Ts>
 	Error(const std::string &file, const std::string &func, int line, const Ts &...reasons) :
 		std::runtime_error(file + ":" + std::to_string(line) + " (" + func + "): " + stringify(reasons...))
@@ -81,7 +85,7 @@ public:
 
 #define NNAssertEquals(x, y, ...)									\
 	NNAssert(														\
-		x == y, Error::stringify(__VA_ARGS__),						\
+		(x) == (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " == ", #y, ", but ", x, " != ", y, "."	\
 	)
 
@@ -93,31 +97,31 @@ public:
 
 #define NNAssertNotEquals(x, y, ...)								\
 	NNAssert(														\
-		x != y, Error::stringify(__VA_ARGS__),						\
+		(x) != (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " != ", #y, ", but ", x, " == ", y, "."	\
 	)
 
 #define NNAssertLessThan(x, y, ...)									\
 	NNAssert(														\
-		x < y, Error::stringify(__VA_ARGS__),						\
+		(x) < (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " < ", #y, ", but ", x, " >= ", y, "."	\
 	)
 
 #define NNAssertLessThanOrEquals(x, y, ...)							\
 	NNAssert(														\
-		x <= y, Error::stringify(__VA_ARGS__),						\
+		(x) <= (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " <= ", #y, ", but ", x, " > ", y, "."	\
 	)
 
 #define NNAssertGreaterThan(x, y, ...)								\
 	NNAssert(														\
-		x > y, Error::stringify(__VA_ARGS__),						\
+		(x) > (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " > ", #y, ", but ", x, " <= ", y, "."	\
 	)
 
 #define NNAssertGreaterThanOrEquals(x, y, ...)						\
 	NNAssert(														\
-		x >= y, Error::stringify(__VA_ARGS__),						\
+		(x) >= (y), Error::stringify(__VA_ARGS__),					\
 		" Expected ", #x, " >= ", #y, ", but ", x, " < ", y, "."	\
 	)
 

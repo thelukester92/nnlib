@@ -1,11 +1,17 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+#include <iostream>
 #include "detail.h"
 
 namespace nnlib
 {
 
+/// \brief Base class for input archives.
+///
+/// An archive, as opposed to a serializer, reads many kinds of data.
+/// In particular, any class with a serialize(Archive) or load(Archive)
+/// can be read into from an InputArchive.
 template <typename Derived>
 class InputArchive
 {
@@ -63,6 +69,11 @@ private:
 	Derived *self;
 };
 
+/// \brief Base class for output archives.
+///
+/// An archive, as opposed to a serializer, write many kinds of data.
+/// In particular, any class with a serialize(Archive) or save(Archive)
+/// can be written by an OutputArchive.
 template <typename Derived>
 class OutputArchive
 {
