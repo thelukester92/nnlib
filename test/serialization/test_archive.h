@@ -14,6 +14,16 @@ void TestSerializationOfModule(T &module)
 	ss2.precision(16);
 	
 	{
+		std::stringstream ss;
+		BasicOutputArchive out(ss);
+		BasicInputArchive in(ss);
+		std::string test;
+		out("string with spaces");
+		in(test);
+		NNAssertEquals(test, "string with spaces", "Serialization failed!");
+	}
+	
+	{
 		BasicOutputArchive out(ss1);
 		out(module);
 		ss2 << ss1.str();

@@ -17,7 +17,11 @@ public:
 	/// Serialize a string.
 	void process(std::string &arg)
 	{
-		m_in >> arg;
+		size_t n;
+		process(n);
+		arg.resize(n);
+		m_in.ignore(); // the space
+		m_in.read(const_cast<char *>(arg.data()), n);
 	}
 	
 	/// Serialize a primitive.
@@ -56,7 +60,8 @@ public:
 	/// Serialize a string.
 	void process(const std::string &arg)
 	{
-		m_out << arg << " ";
+		process(arg.size());
+		m_out << arg;
 	}
 	
 	/// Serialize a primitive.
