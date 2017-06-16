@@ -265,9 +265,15 @@ public:
 			else
 				opt = m_longToChar.at(p.first);
 			
-			std::string name = std::string("-") + opt;
-			if(p.first.size() > 1)
-			 	name += ",--" + p.first;
+			std::string name;
+			if(opt < 32)
+				name = "--" + p.first;
+			else
+			{
+				name = std::string("-") + opt;
+				if(p.first.size() > 1)
+			 		name += ",--" + p.first;
+			}
 			
 			out << std::setw(25) << name;
 			
