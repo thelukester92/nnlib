@@ -20,14 +20,32 @@ void TestArgs()
 	argv[6] = "file.txt";
 	
 	ArgsParser argsParser;
+	argsParser.addFlag('w');
 	argsParser.addFlag('q');
 	argsParser.addInt('i');
 	argsParser.addInt('s', "six", 6);
+	argsParser.addInt("unnamedInt");
+	argsParser.addInt("unnamedInt2", 2);
 	argsParser.addDouble('p', "pi");
 	argsParser.addDouble('x', "chi", 2.12);
+	argsParser.addDouble("unnamedDouble");
+	argsParser.addDouble("unnamedDouble2", 3.14);
 	argsParser.addString('f', "infile");
 	argsParser.addString('o', "outfile", "nothing.txt");
+	argsParser.addString("unnamedString");
+	argsParser.addString("unnamedString2", "string!");
 	argsParser.parse(argc, argv);
+	
+	NNAssert(!argsParser.hasOpt("unnamedInt"), "ArgsParser::hasOpt(string) failed for unset option!");
+	NNAssert(argsParser.hasOpt('s'), "ArgsParser::hasOpt(char) failed for set option!");
+	NNAssert(!argsParser.getFlag('w'), "ArgsParser::getFlag failed for unset flag!");
+	NNAssert(argsParser.getFlag('q'), "ArgsParser::getFlag failed for set flag!");
+	NNAssertEquals(argsParser.getInt('i'), 5, "ArgsParser::getInt(char) failed!");
+	NNAssertEquals(argsParser.getInt("unnamedInt2"), 2, "ArgsParser::getInt(string) failed!");
+	NNAssertEquals(argsParser.getDouble('x'), 2.12, "ArgsParser::getDouble(char) failed!");
+	NNAssertEquals(argsParser.getDouble("pi"), 3.14, "ArgsParser::getDouble(string) failed!");
+	NNAssertEquals(argsParser.getString('f'), "file.txt", "ArgsParser::getString(char) failed!");
+	NNAssertEquals(argsParser.getString("outfile"), "nothing.txt", "ArgsParser::getString(string) failed!");
 	
 	ArgsParser two;
 	two.addFlag('q');
