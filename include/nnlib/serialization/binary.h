@@ -2,6 +2,7 @@
 #define SERIALIZATION_BINARY_H
 
 #include "archive.h"
+#include <fstream>
 
 namespace nnlib
 {
@@ -9,10 +10,26 @@ namespace nnlib
 class BinaryInputArchive : public InputArchive<BinaryInputArchive>
 {
 public:
+	BinaryInputArchive(std::string filename) :
+		InputArchive<BinaryInputArchive>(this),
+		m_fin(new std::ifstream(filename, std::ios::in | std::ios::binary)),
+		m_in(*m_fin)
+	{}
+	
 	BinaryInputArchive(std::istream &in) :
 		InputArchive<BinaryInputArchive>(this),
+		m_fin(nullptr),
 		m_in(in)
 	{}
+	
+	~BinaryInputArchive()
+	{
+		if(m_fin)
+		{
+			m_fin->close();
+			delete m_fin;
+		}
+	}
 	
 	/// Serialize a string.
 	void process(std::string &arg)
@@ -45,16 +62,33 @@ public:
 	}
 	
 private:
+	std::ifstream *m_fin;
 	std::istream &m_in;
 };
 
 class BinaryOutputArchive : public OutputArchive<BinaryOutputArchive>
 {
 public:
+	BinaryOutputArchive(std::string filename) :
+		OutputArchive<BinaryOutputArchive>(this),
+		m_fout(new std::ofstream(filename, std::ios::out | std::ios::binary)),
+		m_out(*m_fout)
+	{}
+	
 	BinaryOutputArchive(std::ostream &out) :
 		OutputArchive<BinaryOutputArchive>(this),
+		m_fout(nullptr),
 		m_out(out)
 	{}
+	
+	~BinaryOutputArchive()
+	{
+		if(m_fout)
+		{
+			m_fout->close();
+			delete m_fout;
+		}
+	}
 	
 	/// Serialize a string.
 	void process(const std::string &arg)
@@ -85,6 +119,7 @@ public:
 	}
 	
 private:
+	std::ofstream *m_fout;
 	std::ostream &m_out;
 };
 
