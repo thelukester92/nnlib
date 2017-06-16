@@ -250,8 +250,8 @@ public:
 	{
 		out << std::left;
 		
-		std::map<std::string, Data> orderedOpts;
-		for(auto &p : m_data)
+		std::map<std::string, Type> orderedOpts;
+		for(auto &p : m_expected)
 		{
 			orderedOpts.emplace(optName(p.first), p.second);
 		}
@@ -277,7 +277,7 @@ public:
 			
 			out << std::setw(25) << name;
 			
-			switch(p.second.type)
+			switch(p.second)
 			{
 			case Type::Bool:
 				out << "Flag";
@@ -293,22 +293,23 @@ public:
 				break;
 			}
 			
-			if(m_data.find(opt) != m_data.end())
+			auto d = m_data.find(opt);
+			if(d != m_data.end())
 			{
 				out << " [value = ";
-				switch(p.second.type)
+				switch(d->second.type)
 				{
 				case Type::Bool:
-					out << (p.second.b ? "true" : "false");
+					out << (d->second.b ? "true" : "false");
 					break;
 				case Type::Int:
-					out << p.second.i;
+					out << d->second.i;
 					break;
 				case Type::Double:
-					out << p.second.d;
+					out << d->second.d;
 					break;
 				case Type::String:
-					out << "\"" << m_stringStorage[p.second.i] << "\"";
+					out << "\"" << m_stringStorage[d->second.i] << "\"";
 					break;
 				}
 				out << "]";
