@@ -15,7 +15,7 @@ public:
 		m_fin(new std::ifstream(filename, std::ios::in | std::ios::binary)),
 		m_in(*m_fin)
 	{
-		NNHardAssert(m_in.is_open(), "Failed to open " + filename);
+		NNHardAssert(m_fin->is_open(), "Failed to open " + filename);
 	}
 	
 	BinaryInputArchive(std::istream &in) :
@@ -76,7 +76,7 @@ public:
 		m_fout(new std::ofstream(filename, std::ios::out | std::ios::binary)),
 		m_out(*m_fout)
 	{
-		NNHardAssert(m_out.is_open(), "Failed to open " + filename);
+		NNHardAssert(m_fout->is_open(), "Failed to open " + filename);
 	}
 	
 	BinaryOutputArchive(std::ostream &out) :
