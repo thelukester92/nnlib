@@ -57,9 +57,9 @@ public:
 		m_stateGrad(m_outMod->outputs(), true),
 		m_resetGrad(true)
 	{
-		NNAssert(m_inpMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
-		NNAssert(m_memMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
-		NNAssert(m_outMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
+		NNAssertEquals(m_inpMod->outputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(m_memMod->outputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(m_outMod->outputs().size(), 2, "Expected matrix input!");
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
@@ -71,19 +71,19 @@ public:
 	/// Cannot add a component to this container.
 	virtual Recurrent &add(Module<T> *component) override
 	{
-		throw std::runtime_error("Cannot add components to a recurrent module!");
+		throw Error("Cannot add components to a recurrent module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Module<T> *remove(size_t) override
 	{
-		throw std::runtime_error("Cannot remove components from a recurrent module!");
+		throw Error("Cannot remove components from a recurrent module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Recurrent &clear() override
 	{
-		throw std::runtime_error("Cannot remove components from a recurrent module!");
+		throw Error("Cannot remove components from a recurrent module!");
 	}
 	
 	// MARK: Module methods

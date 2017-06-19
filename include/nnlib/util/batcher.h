@@ -21,8 +21,8 @@ public:
 		m_labBatch(m_lab),
 		m_batch(bats)
 	{
-		NNAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
-		NNAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
+		NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	
@@ -115,11 +115,11 @@ public:
 		m_batch(bats),
 		m_sequenceLength(sequenceLength)
 	{
-		NNAssertEquals(feat.dims(), 2, "Invalid features!");
-		NNAssertEquals(lab.dims(), 2, "Invalid labels!");
-		NNAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
-		NNAssertLessThanOrEquals(sequenceLength, feat.size(0), "Invalid sequence length!");
-		NNAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
+		NNHardAssertEquals(feat.dims(), 2, "Invalid features!");
+		NNHardAssertEquals(lab.dims(), 2, "Invalid labels!");
+		NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNHardAssertLessThanOrEquals(sequenceLength, feat.size(0), "Invalid sequence length!");
+		NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	

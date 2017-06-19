@@ -29,7 +29,7 @@ public:
 			if(row.size(0) == 0)
 				continue;
 			
-			NNAssert(attributes == 0 || row.size(0) == attributes, "Unexpected row size!");
+			NNHardAssert(attributes == 0 || row.size(0) == attributes, "Unexpected row size!");
 			rows.push_back(new Tensor<T>(row.copy()));
 			
 			// if not specified, use the number of columns in the first row as attributes
@@ -45,7 +45,7 @@ public:
 	template <typename T = double>
 	static void write(const Tensor<T> &matrix, std::ostream &out, char sep = ',')
 	{
-		NNAssertEquals(matrix.dims(), 2, "Only matrices may be written as CSV!");
+		NNHardAssertEquals(matrix.dims(), 2, "Only matrices may be written as CSV!");
 		
 		for(size_t i = 0, rows = matrix.size(0); i != rows; ++i)
 		{

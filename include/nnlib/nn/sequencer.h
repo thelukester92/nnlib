@@ -48,19 +48,19 @@ public:
 	/// Cannot add a component to this container.
 	virtual Sequencer &add(Module<T> *) override
 	{
-		throw std::runtime_error("Cannot add components to a Sequencer module!");
+		throw Error("Cannot add components to a Sequencer module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Module<T> *remove(size_t) override
 	{
-		throw std::runtime_error("Cannot remove components from a Sequencer module!");
+		throw Error("Cannot remove components from a Sequencer module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Sequencer &clear() override
 	{
-		throw std::runtime_error("Cannot remove components from a Sequencer module!");
+		throw Error("Cannot remove components from a Sequencer module!");
 	}
 	
 	// MARK: Sequencer methods
@@ -91,7 +91,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		
 		for(size_t i = 0, end = input.size(0); i < end; ++i)
 		{
@@ -105,8 +105,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
-		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be sequence x batch x outputs!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
 		
 		for(int i = input.size(0) - 1; i >= 0; --i)
 		{
@@ -132,7 +132,7 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual Sequencer &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
 		
 		Storage<size_t> newDims = dims;
 		newDims.erase(0);
@@ -151,7 +151,7 @@ public:
 	/// Safely (never reset weights) set the input shape of this module.
 	virtual Sequencer &safeInputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
 		
 		if(inGrad().size(2) == 0)
 		{
@@ -169,7 +169,7 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual Sequencer &outputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequenceLength x batch x outputs output tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D output!");
 		
 		Storage<size_t> newDims = dims;
 		newDims.erase(0);
@@ -188,7 +188,7 @@ public:
 	/// Safely (never reset weights) set the output shape of this module.
 	virtual Sequencer &safeOutputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D output!");
 		
 		if(output().size(2) == 0)
 		{

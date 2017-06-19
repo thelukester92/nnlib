@@ -138,19 +138,19 @@ public:
 	/// Cannot add a component to this container.
 	virtual LSTM &add(Module<T> *) override
 	{
-		throw std::runtime_error("Cannot add components to a LSTM module!");
+		throw Error("Cannot add components to a LSTM module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Module<T> *remove(size_t) override
 	{
-		throw std::runtime_error("Cannot remove components from a LSTM module!");
+		throw Error("Cannot remove components from a LSTM module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual LSTM &clear() override
 	{
-		throw std::runtime_error("Cannot remove components from a LSTM module!");
+		throw Error("Cannot remove components from a LSTM module!");
 	}
 	
 	// MARK: Module methods
@@ -158,6 +158,8 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		
 		m_prevState.copy(m_state);
 		m_prevOutput.copy(m_outMod->output());
 		
@@ -197,6 +199,9 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_outMod->outputs(), "Incompatible output!");
+		
 		if(m_resetGrad)
 		{
 			m_resetGrad = false;
@@ -264,7 +269,7 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual LSTM &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 2, "LSTM expects matrix inputs!");
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		
 		m_inpGateX->inputs(dims);
 		m_fgtGateX->inputs(dims);
@@ -278,7 +283,7 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual LSTM &outputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 2, "LSTM expects matrix outputs!");
+		NNAssertEquals(dims.size(), 2, "Expected matrix output!");
 		
 		m_inpGateY->outputs(dims);
 		m_inpGateH->outputs(dims);

@@ -299,7 +299,7 @@ public:
 	Tensor reshape(const Storage<size_t> &dims) const
 	{
 		Tensor t(dims);
-		NNAssert(t.size() == size(), "Incompatible dimensions for reshaping!");
+		NNAssertEquals(t.size(), size(), "Incompatible dimensions for reshaping!");
 		auto k = t.begin();
 		for(const T &value : *this)
 		{
@@ -330,8 +330,8 @@ public:
 	/// \return A tensor containing the subview.
 	Tensor select(size_t dim, size_t index)
 	{
-		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
-		NNAssert(index < m_dims[dim], "Out of dimension bounds!");
+		NNAssertLessThan(dim, m_dims.size(), "Narrowing dimension out of bounds!");
+		NNAssertLessThan(index, m_dims[dim], "Out of dimension bounds!");
 		Tensor t = *this;
 		t.m_offset += index * t.m_strides[dim];
 		t.m_dims.erase(dim);
@@ -362,8 +362,8 @@ public:
 	/// \return A tensor containing the subview.
 	Tensor narrow(size_t dim, size_t index, size_t size = 1)
 	{
-		NNAssert(dim < m_dims.size(), "Narrowing dimension out of bounds!");
-		NNAssert(index + size <= m_dims[dim], "Out of dimension bounds!");
+		NNAssertLessThan(dim, m_dims.size(), "Narrowing dimension out of bounds!");
+		NNAssertLessThanOrEquals(index + size, m_dims[dim], "Out of dimension bounds!");
 		Tensor t = *this;
 		t.m_offset = m_offset + index * m_strides[dim];
 		t.m_dims[dim] = size;
@@ -395,8 +395,8 @@ public:
 	/// \return A tensor containing the "superview."
 	Tensor expand(size_t dim, size_t size)
 	{
-		NNAssert(dim < m_dims.size(), "Expanding dimension out of bounds!");
-		NNAssert(m_dims[dim] == 1, "Can only expand a dimension of size 1!");
+		NNAssertLessThan(dim, m_dims.size(), "Expanding dimension out of bounds!");
+		NNAssertEquals(m_dims[dim], 1, "Can only expand a dimension of size 1!");
 		Tensor t = *this;
 		t.m_dims[dim] = size;
 		t.m_strides[dim] = 0;
@@ -431,7 +431,7 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &sub(Tensor &t, const std::initializer_list<const std::initializer_list<size_t>> &dims)
 	{
-		NNAssert(dims.size() == m_dims.size(), "Invalid subtensor dimensions!");
+		NNAssertEquals(dims.size(), m_dims.size(), "Invalid subtensor dimensions!");
 		t = *this;
 		
 		size_t dim = 0;
@@ -441,7 +441,7 @@ public:
 			if(params.size() == 1)
 			{
 				size_t index = *params.begin();
-				NNAssert(index < m_dims[dim], "Incompatible index!");
+				NNAssertLessThan(index, m_dims[dim], "Incompatible index!");
 				t.m_offset += index * m_strides[dim];
 				t.m_dims[dim] = 1;
 			}
@@ -449,7 +449,7 @@ public:
 			{
 				size_t index = *params.begin();
 				size_t size = *(params.begin() + 1);
-				NNAssert(index + size <= m_dims[dim], "Incompatible index and size!");
+				NNAssertLessThanOrEquals(index + size, m_dims[dim], "Incompatible index and size!");
 				t.m_offset += index * m_strides[dim];
 				t.m_dims[dim] = size;
 			}
@@ -509,7 +509,7 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &copy(const Tensor &other)
 	{
-		NNAssert(size() == other.size(), "Incompatible tensor for copying!");
+		NNAssertEquals(size(), other.size(), "Incompatible tensor for copying!");
 		auto i = other.begin();
 		for(T &value : *this)
 		{
@@ -526,7 +526,7 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &swap(Tensor &other)
 	{
-		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
+		NNAssertEquals(shape(), other.shape(), "Incompatible tensors for swapping!");
 		auto i = other.begin();
 		for(T &v : *this)
 		{
@@ -546,7 +546,7 @@ public:
 	/// \note It is alright to use an rvalue reference here, as the temporary tensor is using persistant storage.
 	Tensor &swap(Tensor &&other)
 	{
-		NNAssert(shape() == other.shape(), "Incompatible tensors for swapping!");
+		NNAssertEquals(shape(), other.shape(), "Incompatible tensors for swapping!");
 		auto i = other.begin();
 		for(T &v : *this)
 		{
@@ -567,7 +567,8 @@ public:
 	/// \return A tensor with a subview of this tensor but with the dimensions switched.
 	Tensor transpose(size_t dim1 = 1, size_t dim2 = 0)
 	{
-		NNAssert(dim1 < dims() && dim2 < dims(), "Invalid dimensions for transposition!");
+		NNAssertLessThan(dim1, dims(), "Invalid dimensions for transposition!");
+		NNAssertLessThan(dim2, dims(), "Invalid dimensions for transposition!");
 		Tensor t = *this;
 		
 		size_t temp = t.m_strides[dim1];
@@ -608,7 +609,7 @@ public:
 	/// Gets the size of a given dimension.
 	size_t size(size_t dim) const
 	{
-		NNAssert(dim < m_dims.size(), "Invalid dimension!");
+		NNAssertLessThan(dim, m_dims.size(), "Invalid dimension!");
 		return m_dims[dim];
 	}
 	
@@ -722,8 +723,9 @@ public:
 	/// Add another vector to this vector.
 	Tensor &addV(const Tensor &x, T alpha = 1)
 	{
-		NNAssert(x.dims() == 1 && dims() == 1, "Expected vector input to addV!");
-		NNAssert(x.size() == size(), "Incompatible operands in addV!");
+		NNAssertEquals(x.dims(), 1, "Expected vector input to addV!");
+		NNAssertEquals(dims(), 1, "Expected vector input to addV!");
+		NNAssertEquals(x.size(), size(), "Incompatible operands in addV!");
 		Math<T>::vAdd_v(
 			x.ptr(), x.size(), x.stride(0),
 			ptr(), stride(0),
@@ -1085,7 +1087,7 @@ public:
 	/// Clip the elements of this tensor such that all elements lie in [smallest, largest]
 	Tensor &clip(T smallest, T largest)
 	{
-		NNAssert(largest > smallest, "Invalid clipping range!");
+		NNAssertGreaterThan(largest, smallest, "Invalid clipping range!");
 		for(T &v : *this)
 			v = std::min(std::max(v, smallest), largest);
 		return *this;
@@ -1199,13 +1201,13 @@ private:
 	/// Get the appropriate contiguous index given the multidimensional index.
 	size_t indexOf(const Storage<size_t> &indices) const
 	{
-		NNAssert(indices.size() == m_dims.size(), "Incorrect number of dimensions!");
+		NNAssertEquals(indices.size(), m_dims.size(), "Incorrect number of dimensions!");
 		size_t sum = m_offset;
 		for(size_t i = 0, j = indices.size(); i < j; ++i)
 		{
 			sum += indices[i] * m_strides[i];
 		}
-		NNAssert(sum < m_data->size(), "Index out of bounds!");
+		NNAssertLessThan(sum, m_data->size(), "Index out of bounds!");
 		return sum;
 	}
 };

@@ -39,7 +39,9 @@ public:
 	/// Add a component to this container, enforcing compatibility.
 	virtual Concat &add(Module<T> *component) override
 	{
-		NNAssert(components() == 0 || m_components[0]->inputs() == component->inputs(), "Incompatible concat component!");
+		NNAssert(components() == 0 || m_components[0]->inputs() == component->inputs(), "Incompatible component!");
+		NNAssertEquals(component->inputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(component->outputs().size(), 2, "Expected matrix output!");
 		m_components.push_back(component);
 		return resizeBuffers();
 	}
@@ -49,7 +51,8 @@ public:
 	{
 		Module<T> *comp = m_components[index];
 		m_components.erase(index);
-		resizeBuffers();
+		if(components() > 0)
+			resizeBuffers();
 		return comp;
 	}
 	
@@ -96,6 +99,7 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual Concat &inputs(const Storage<size_t> &dims) override
 	{
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		for(Module<T> *component : m_components)
 		{
 			component->inputs(dims);
@@ -106,7 +110,7 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual Concat &outputs(const Storage<size_t> &dims) override
 	{
-		throw std::runtime_error("Cannot directly change concat outputs! Add or remove components instead.");
+		throw Error("Cannot directly change concat outputs! Add or remove components instead.");
 	}
 	
 	/// Set the batch size of this module.
@@ -125,6 +129,7 @@ public:
 	template <typename Archive>
 	void save(Archive &ar) const
 	{
+		NNAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
 		ar(m_components);
 	}
 	
@@ -137,8 +142,15 @@ public:
 		Container<T>::clear();
 		ar(m_components);
 		
+		NNAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
+		NNAssertEquals(m_components[0]->inputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(m_components[0]->outputs().size(), 2, "Expected matrix output!");
+		
 		for(size_t i = 1, end = m_components.size(); i != end; ++i)
-			NNAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible concat components!");
+		{
+			NNAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible component!");
+			NNAssertEquals(m_components[i]->outputs().size(), 2, "Expected matrix output!");
+		}
 		
 		resizeBuffers();
 	}
@@ -146,10 +158,7 @@ public:
 private:
 	Concat &resizeBuffers()
 	{
-		NNAssert(
-			components() > 0 && m_components[0]->outputs().size() == 2,
-			"Expected matrix input and output for concat!"
-		);
+		NNAssertGreaterThan(components(), 0, "Expected at least one component!");
 		
 		size_t outs = 0, bats = m_components[0]->outputs()[0], inps = m_components[0]->inputs()[1];
 		for(Module<T> *component : m_components)

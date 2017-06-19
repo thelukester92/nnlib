@@ -107,14 +107,14 @@ public:
 	static std::string bindingName(const std::type_info &info)
 	{
 		auto i = bindingNames().find(info);
-		NNAssertNotEquals(i, bindingNames().end(), "Could not find binding for the given type!");
+		NNHardAssertNotEquals(i, bindingNames().end(), "Could not find binding for the given type!");
 		return i->second;
 	}
 	
 	static Base *construct(std::string name)
 	{
 		auto i = constructors().find(name);
-		NNAssertNotEquals(i, constructors().end(), "Could not find binding for " + name + "!");
+		NNHardAssertNotEquals(i, constructors().end(), "Could not find binding for " + name + "!");
 		return i->second();
 	}
 	
@@ -125,10 +125,10 @@ public:
 		auto dKey = std::type_index(typeid(base));
 		
 		auto aItr = serializers().find(aKey);
-		NNAssertNotEquals(aItr, serializers().end(), "Could not find binding for the given archive type!");
+		NNHardAssertNotEquals(aItr, serializers().end(), "Could not find binding for the given archive type!");
 		
 		auto dItr = aItr->second.find(dKey);
-		NNAssertNotEquals(dItr, aItr->second.end(), "Could not find binding for the given base type!");
+		NNHardAssertNotEquals(dItr, aItr->second.end(), "Could not find binding for the given base type!");
 		
 		dItr->second(&ar, &base);
 	}

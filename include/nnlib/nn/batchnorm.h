@@ -61,7 +61,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		size_t n = input.size(0);
 		
 		// Get means and variances to use
@@ -126,8 +126,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input!");
-		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
 		size_t n = input.size(0);
 		
 		// Get means and variances to use
@@ -210,7 +210,7 @@ public:
 	/// In batchnorm, input shape is always equal to output shape.
 	virtual BatchNorm &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssert(inps == outs, "BatchNorm expects the same input and output size!");
+		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
 		return inputs(outs);
 	}
 	
@@ -218,7 +218,7 @@ public:
 	/// In batchnorm, input shape is always equal to output shape.
 	virtual BatchNorm &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssert(inps == outs, "BatchNorm expects the same input and output size!");
+		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
 		this->safeInputs(inps);
 		return *this;
 	}
@@ -227,7 +227,7 @@ public:
 	/// In batchnorm, input shape is always equal to output shape.
 	virtual BatchNorm &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 2, "BatchNorm expects matrix inputs!");
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		Module<T>::inputs(dims);
 		Module<T>::outputs(dims);
 		m_means.resize(dims[1]);
@@ -303,7 +303,7 @@ public:
 		NNAssertEquals(m_runningMeans.shape(), m_runningVars.shape(), "Incompatible means and variances!");
 		NNAssertEquals(m_runningMeans.shape(), m_weights.shape(), "Incompatible means and weights!");
 		NNAssertEquals(m_runningMeans.shape(), m_biases.shape(), "Incompatible means and biases!");
-		NNAssertEquals(m_runningMeans.dims(), 1, "Means must be a vector!");
+		NNAssertEquals(m_runningMeans.dims(), 1, "Expected means to be a vector!");
 		
 		inputs({ bats, m_runningMeans.size(0) });
 	}

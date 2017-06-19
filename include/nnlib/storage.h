@@ -106,7 +106,7 @@ public:
 	
 	Storage &erase(size_t index)
 	{
-		NNAssert(index < m_size, "Attempted to erase an index that is out of bounds!");
+		NNAssertLessThan(index, m_size, "Attempted to erase an index that is out of bounds!");
 		for(size_t i = index + 1; i < m_size; ++i)
 		{
 			m_ptr[i - 1] = m_ptr[i];
@@ -165,37 +165,37 @@ public:
 	
 	T &operator[](size_t i)
 	{
-		NNAssert(i < m_size, "Attempted to access an index that is out of bounds!");
+		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
 		return m_ptr[i];
 	}
 	
 	const T &operator[](size_t i) const
 	{
-		NNAssert(i < m_size, "Attempted to access an index that is out of bounds!");
+		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
 		return m_ptr[i];
 	}
 	
 	T &front()
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return *m_ptr;
 	}
 	
 	const T &front() const
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return *m_ptr;
 	}
 	
 	T &back()
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return m_ptr[m_size - 1];
 	}
 	
 	const T &back() const
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return m_ptr[m_size - 1];
 	}
 	

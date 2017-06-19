@@ -47,7 +47,7 @@ public:
 	/// By default, this resizes the input gradient and resets the batch to dims[0].
 	virtual Critic &inputs(const Storage<size_t> &dims)
 	{
-		NNAssert(dims.size() == 2, "Critic expects matrix inputs!");
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		inGrad().resize(dims);
 		return batch(dims[0]);
 	}

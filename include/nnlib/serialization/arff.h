@@ -37,7 +37,7 @@ public:
 		template <typename T>
 		Relation(const Tensor<T> &matrix) : m_name("untitled")
 		{
-			NNAssertEquals(matrix.dims(), 2, "Relations are only compatible with matrices!");
+			NNHardAssertEquals(matrix.dims(), 2, "Relations are only compatible with matrices!");
 			for(size_t i = 0; i < matrix.size(1); ++i)
 				addAttribute(Attribute("attr" + std::to_string(i)));
 		}
@@ -214,8 +214,8 @@ private:
 	template <typename T>
 	static void writeData(const Tensor<T> &matrix, std::ostream &out, const Relation &relation)
 	{
-		NNAssertEquals(matrix.dims(), 2, "Only matrices are compatible with arff files!");
-		NNAssertEquals(matrix.size(1), relation.attributes(), "Incompatible relation!");
+		NNHardAssertEquals(matrix.dims(), 2, "Only matrices are compatible with arff files!");
+		NNHardAssertEquals(matrix.size(1), relation.attributes(), "Incompatible relation!");
 		
 		out << "@data\n";
 		size_t attributes = relation.attributes();

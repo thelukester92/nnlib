@@ -30,7 +30,8 @@ public:
 	/// Set the "leak" for this ReLU. 0 <= leak < 1.
 	ReLU &leak(T leak)
 	{
-		NNAssert(leak >= 0 && leak < 1, "Invalid parameter for leak! Must be in [0, 1).");
+		NNAssertGreaterThanOrEquals(leak, 0, "Expected positive leak!");
+		NNAssertLessThan(leak, 1, "Expected leak to be a percentage!");
 		m_leak = leak;
 		return *this;
 	}
