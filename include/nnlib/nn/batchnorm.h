@@ -30,6 +30,7 @@ public:
 		m_momentum(0.1)
 	{
 		m_weights.fill(1);
+		m_biases.fill(0);
 	}
 	
 	/// Returns whether this module is in training mode.
@@ -63,22 +64,19 @@ public:
 	{
 		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		size_t n = input.size(0);
+		T norm = 1.0 / n;
 		
 		// Get means and variances to use
 		Tensor<T> means, invStds;
 		if(m_training)
 		{
-			T norm = 1.0 / n;
-			
 			// Get means
 			input.sum(m_means, 0);
 			m_means.scale(norm);
 			
-			// Get unnormalized variances (temporarily stored in invStd)
+			// Get unnormalized variances (temporarily stored in m_invStds)
 			for(size_t i = 0; i < n; ++i)
-			{
 				m_invStds.addV(input.select(0, i).copy().addV(m_means, -1).square());
-			}
 			
 			// Update running mean
 			m_runningMeans.scale(1 - m_momentum).addV(m_means.copy().scale(m_momentum));
@@ -128,7 +126,7 @@ public:
 	{
 		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
-		size_t n = input.size(0);
+		size_t inps = m_inGrad.size(1), bats = m_inGrad.size(0);
 		
 		// Get means and variances to use
 		Tensor<T> means, invStds;
@@ -146,49 +144,41 @@ public:
 			
 			// Turn variance into inverted standard deviation
 			for(T &invStd : invStds)
-			{
 				invStd = 1.0 / sqrt(invStd + 1e-12);
-			}
 		}
 		
-		// gradient of biases
-		m_biasesGrad.addV(outGrad.sum(0));
-		
-		// gradient of weights
-		Tensor<T> product = m_normalized.copy().pointwiseProduct(outGrad);
-		for(size_t i = 0; i < n; ++i)
+		for(size_t i = 0; i < inps; ++i)
 		{
-			m_weightsGrad.addV(product.select(0, i));
-		}
-		
-		// gradient of inputs
-		if(m_training)
-		{
-			Tensor<T> gradMean = outGrad.sum(0).scale(1.0 / n);
-			m_inGrad.copy(outGrad);
+			T sum = 0;
+			for(size_t j = 0; j < bats; ++j)
+				sum += outGrad(j, i);
 			
-			Tensor<T> stuff = m_normalized.pointwiseProduct(outGrad).sum(0);
+			T dotp = 0;
+			for(size_t j = 0; j < bats; ++j)
+				dotp += (input(j, i) - means(i)) * outGrad(j, i);
 			
-			for(size_t i = 0; i < n; ++i)
+			// gradient of inputs
+			if(m_training)
 			{
-				m_inGrad.select(0, i)
-					.add(gradMean, -1)
-					.add(
-						input.select(0, i).copy()
-						.add(means, -1)
-						.pointwiseProduct(stuff)
-						.pointwiseProduct(invStds).scale(1.0 / n), -1)
-					.pointwiseProduct(invStds)
-					.pointwiseProduct(m_weights);
+				T k = dotp * invStds(i) * invStds(i) / bats;
+				for(size_t j = 0; j < bats; ++j)
+					m_inGrad(j, i) = (input(j, i) - means(i)) * k;
+				
+				T gradMean = sum / bats;
+				for(size_t j = 0; j < bats; ++j)
+					m_inGrad(j, i) = (outGrad(j, i) - gradMean - m_inGrad(j, i)) * invStds(i) * m_weights(i);
 			}
-		}
-		else
-		{
-			m_inGrad.copy(outGrad);
-			for(size_t i = 0; i < n; ++i)
+			else
 			{
-				m_inGrad.select(0, i).pointwiseProduct(invStds).pointwiseProduct(m_weights);
+				for(size_t j = 0; j < bats; ++j)
+					m_inGrad(j, i) = outGrad(j, i) * invStds(i) * m_weights(i);
 			}
+		
+			// gradient of biases
+			m_biasesGrad(i) += sum; // .addV(outGrad.sum(0));
+			
+			// gradient of weights
+			m_weightsGrad(i) += dotp * invStds(i);
 		}
 		
 		return m_inGrad;
@@ -236,7 +226,7 @@ public:
 		m_runningVars.resize(dims[1]);
 		m_normalized.resize(dims);
 		m_weights.resize(dims[1]).fill(1);
-		m_biases.resize(dims[1]);
+		m_biases.resize(dims[1]).fill(0);
 		m_weightsGrad.resize(dims[1]);
 		m_biasesGrad.resize(dims[1]);
 		return *this;
