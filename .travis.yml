@@ -5,8 +5,7 @@ compiler:
     - gcc
 dist:
     - trusty
-group:
-    - edge
+group: edge
 cache:
     directories:
     - cache
