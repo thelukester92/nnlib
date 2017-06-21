@@ -29,8 +29,30 @@ public:
 		m_training(true),
 		m_momentum(0.1)
 	{
-		m_weights.fill(1);
-		m_biases.fill(0);
+		reset();
+	}
+	
+	/// Resets the weights/biases.
+	BatchNorm &reset()
+	{
+		if(m_weights.size(0) > 0)
+		{
+			m_weights.rand();
+			m_biases.zeros();
+		}
+		return *this;
+	}
+	
+	/// Get the weights of this module.
+	Tensor<T> &weights()
+	{
+		return m_weights;
+	}
+	
+	/// Get the bias of this module.
+	Tensor<T> &bias()
+	{
+		return m_biases;
 	}
 	
 	/// Returns whether this module is in training mode.

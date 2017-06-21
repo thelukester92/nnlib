@@ -30,6 +30,8 @@ void TestBatchNorm()
 	});
 	
 	BatchNorm<> bn(3, 3);
+	bn.weights().ones();
+	bn.bias().zeros();
 	bn.momentum(1.0);
 	
 	bn.forward(inp);
