@@ -12,6 +12,7 @@ class Container : public Module<T>
 {
 public:
 	using Module<T>::batch;
+	using Module<T>::training;
 	
 	virtual ~Container()
 	{
@@ -19,6 +20,15 @@ public:
 		{
 			delete comp;
 		}
+	}
+	
+	/// Sets whether this module is in training mode.
+	virtual Container &training(bool training) override
+	{
+		Module<T>::training(training);
+		for(Module<T> *comp : m_components)
+			comp->training(training);
+		return *this;
 	}
 	
 	/// Get a specific component from this container.

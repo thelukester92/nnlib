@@ -11,7 +11,21 @@ template <typename T = double>
 class Module
 {
 public:
+	Module() : m_training(true) {}
 	virtual ~Module() {}
+	
+	/// Returns whether this module is in training mode.
+	virtual bool training() const
+	{
+		return m_training;
+	}
+	
+	/// Sets whether this module is in training mode.
+	virtual Module &training(bool training)
+	{
+		m_training = training;
+		return *this;
+	}
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
@@ -174,6 +188,7 @@ protected:
 	Tensor<T> m_flatParameters;
 	Tensor<T> m_flatGrad;
 	Tensor<T> m_flatState;
+	bool m_training;
 };
 
 }

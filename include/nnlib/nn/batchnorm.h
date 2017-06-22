@@ -9,6 +9,7 @@ namespace nnlib
 template <typename T = double>
 class BatchNorm : public Module<T>
 {
+	using Module<T>::m_training;
 public:
 	using Module<T>::inputs;
 	using Module<T>::outputs;
@@ -26,7 +27,6 @@ public:
 		m_biases(inps),
 		m_weightsGrad(inps),
 		m_biasesGrad(inps),
-		m_training(true),
 		m_momentum(0.1)
 	{
 		reset();
@@ -55,19 +55,6 @@ public:
 		return m_biases;
 	}
 	
-	/// Returns whether this module is in training mode.
-	bool training() const
-	{
-		return m_training;
-	}
-	
-	/// Sets whether this module is in training mode.
-	BatchNorm &training(bool training)
-	{
-		m_training = training;
-		return *this;
-	}
-	
 	/// Returns this module's momentum for running averages.
 	T momentum() const
 	{
@@ -92,6 +79,8 @@ public:
 		Tensor<T> means, invStds;
 		if(m_training)
 		{
+			NNAssertGreaterThan(input.size(0), 1, "Expected a batch in training mode!");
+			
 			// Get means
 			input.sum(m_means, 0);
 			m_means.scale(norm);
@@ -332,7 +321,6 @@ private:
 	Tensor<T> m_biases;			///< How much to shift the normalized input.
 	Tensor<T> m_weightsGrad;	///< Gradient of error w.r.t. weights.
 	Tensor<T> m_biasesGrad;		///< Gradient of error w.r.t. biases.
-	bool m_training;			///< Whether we are in training mode.
 	T m_momentum;				///< How much to update running mean and variance.
 };
 
