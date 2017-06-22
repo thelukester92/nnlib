@@ -83,7 +83,7 @@ public:
 		m_fgtGate(new Logistic<T>(outs, 1)),
 		m_inpModX(new Linear<T>(0, outs, 1)),
 		m_inpModY(new Linear<T>(outs, outs, 1)),
-		m_inpMod(new Sequential<T>(new TanH<T>(outs, 1), new BatchNorm<T>())),
+		m_inpMod(new TanH<T>(outs, 1)),
 		m_outGateX(new Linear<T>(0, outs, 1)),
 		m_outGateY(new Linear<T>(outs, outs, 1)),
 		m_outGateH(new Linear<T>(outs, outs, 1)),
