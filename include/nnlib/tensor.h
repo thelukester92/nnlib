@@ -66,7 +66,8 @@ public:
 		m_offset(0),
 		m_data(new Storage<T>(values)),
 		m_shared(m_data),
-		m_size(values.size())
+		m_size(values.size()),
+		m_contiguous(true)
 	{}
 	
 	/// \brief Create a tensor with the given data.
@@ -80,7 +81,8 @@ public:
 		m_offset(0),
 		m_data(new Storage<T>(values)),
 		m_shared(m_data),
-		m_size(values.size())
+		m_size(values.size()),
+		m_contiguous(true)
 	{}
 	
 	/// \brief Create a tensor with the given shape.
@@ -121,7 +123,8 @@ public:
 		m_offset(other.m_offset),
 		m_data(other.m_data),
 		m_shared(other.m_shared),
-		m_size(other.m_size)
+		m_size(other.m_size),
+		m_contiguous(other.m_contiguous)
 	{}
 
 	/// \brief Move constructor for a tensor.
@@ -134,7 +137,8 @@ public:
 		m_offset(other.m_offset),
 		m_data(other.m_data),
 		m_shared(other.m_shared),
-		m_size(other.m_size)
+		m_size(other.m_size),
+		m_contiguous(other.m_contiguous)
 	{}
 	
 	/// \brief Replace tensor contents with new values.
@@ -143,11 +147,12 @@ public:
 	/// \param values A Storage containing the values to store in the new tensor.
 	Tensor &operator=(const Storage<T> &values)
 	{
-		m_dims		= { values.size() };
-		m_strides	= { 1 };
-		m_offset	= 0;
-		*m_data		= values;
-		m_size		= values.size();
+		m_dims			= { values.size() };
+		m_strides		= { 1 };
+		m_offset		= 0;
+		*m_data			= values;
+		m_size			= values.size();
+		m_contiguous	= true;
 		return *this;
 	}
 	
@@ -157,11 +162,12 @@ public:
 	/// \param values An initializer_list containing the values to store in the new tensor.
 	Tensor &operator=(const std::initializer_list<T> &values)
 	{
-		m_dims		= { values.size() };
-		m_strides	= { 1 };
-		m_offset	= 0;
-		*m_data		= values;
-		m_size		= values.size();
+		m_dims			= { values.size() };
+		m_strides		= { 1 };
+		m_offset		= 0;
+		*m_data			= values;
+		m_size			= values.size();
+		m_contiguous	= true;
 		return *this;
 	}
 	
@@ -172,12 +178,13 @@ public:
 	/// \note This essentially performs a shallow copy.
 	Tensor &operator=(Tensor &other)
 	{
-		m_dims		= other.m_dims;
-		m_strides	= other.m_strides;
-		m_offset	= other.m_offset;
-		m_data		= other.m_data;
-		m_shared	= other.m_shared;
-		m_size		= other.m_size;
+		m_dims			= other.m_dims;
+		m_strides		= other.m_strides;
+		m_offset		= other.m_offset;
+		m_data			= other.m_data;
+		m_shared		= other.m_shared;
+		m_size			= other.m_size;
+		m_contiguous	= other.m_contiguous;
 		return *this;
 	}
 	
@@ -188,12 +195,13 @@ public:
 	/// \note This essentially performs a shallow copy.
 	Tensor &operator=(Tensor &&other)
 	{
-		m_dims		= other.m_dims;
-		m_strides	= other.m_strides;
-		m_offset	= other.m_offset;
-		m_data		= other.m_data;
-		m_shared	= other.m_shared;
-		m_size		= other.m_size;
+		m_dims			= other.m_dims;
+		m_strides		= other.m_strides;
+		m_offset		= other.m_offset;
+		m_data			= other.m_data;
+		m_shared		= other.m_shared;
+		m_size			= other.m_size;
+		m_contiguous	= other.m_contiguous;
 		return *this;
 	}
 	
@@ -218,11 +226,10 @@ public:
 		
 		m_strides[m_strides.size() - 1] = 1;
 		for(size_t i = m_strides.size() - 1; i > 0; --i)
-		{
 			m_strides[i - 1] = m_strides[i] * m_dims[i];
-		}
 		
 		m_size = m_strides[0] * m_dims[0];
+		m_contiguous = true;
 		
 		// only resize if necessary, because other tensors may share this data and need it all
 		if(m_offset + m_size > m_data->size())
@@ -340,6 +347,7 @@ public:
 		t.m_dims.erase(dim);
 		t.m_strides.erase(dim);
 		t.recalculateSize();
+		t.checkContiguous();
 		return t;
 	}
 	
@@ -372,6 +380,7 @@ public:
 		t.m_offset = m_offset + index * m_strides[dim];
 		t.m_dims[dim] = size;
 		t.recalculateSize();
+		t.checkContiguous();
 		return t;
 	}
 	
@@ -406,6 +415,7 @@ public:
 		t.m_dims[dim] = size;
 		t.m_strides[dim] = 0;
 		t.recalculateSize();
+		t.checkContiguous();
 		return t;
 	}
 	
@@ -463,6 +473,7 @@ public:
 		}
 		
 		t.recalculateSize();
+		t.checkContiguous();
 		
 		return t;
 	}
@@ -587,6 +598,8 @@ public:
 		t.m_dims[dim1] = t.m_dims[dim2];
 		t.m_dims[dim2] = temp;
 		
+		t.checkContiguous();
+		
 		return t;
 	}
 	
@@ -616,6 +629,12 @@ public:
 	{
 		NNAssertLessThan(dim, m_dims.size(), "Invalid dimension!");
 		return m_dims[dim];
+	}
+	
+	/// Gets whether the tensor is contiguous in memory.
+	bool contiguous() const
+	{
+		return m_contiguous;
 	}
 	
 	/// \brief Gets the stride of a given dimension.
@@ -945,13 +964,9 @@ public:
 	{
 		NNAssertEquals(shape(), x.shape(), "Incompatible operands to add!");
 		if(m_dims.size() == 1)
-		{
 			return addV(x, alpha);
-		}
 		else if(m_dims.size() == 2)
-		{
 			return addM(x, alpha);
-		}
 		else
 		{
 			auto i = x.begin();
@@ -1042,28 +1057,20 @@ public:
 	/// Find the minimum element of this tensor.
 	T min() const
 	{
-		T result = *begin();
+		T result = *ptr();
 		for(const T &v : *this)
-		{
 			if(v < result)
-			{
 				result = v;
-			}
-		}
 		return result;
 	}
 	
 	/// Find the maximum element of this tensor.
 	T max() const
 	{
-		T result = *begin();
+		T result = *ptr();
 		for(const T &v : *this)
-		{
 			if(v > result)
-			{
 				result = v;
-			}
-		}
 		return result;
 	}
 	
@@ -1189,6 +1196,7 @@ private:
 	Storage<T> *m_data;						///< The actual data.
 	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
 	size_t m_size;							///< The total number of elements.
+	bool m_contiguous;						///< Whether this tensor is contiguous (i.e. can be vectorized).
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
 	size_t indexOf(const Storage<size_t> &indices) const
@@ -1209,6 +1217,20 @@ private:
 		for(size_t s : m_dims)
 			m_size *= s;
 	}
+	
+	/// Check and cache whether this tensor is contiguous.
+	void checkContiguous()
+	{
+		m_contiguous = true;
+		
+		size_t stride = 1;
+		for(size_t i = m_dims.size(); m_contiguous && i > 0; --i)
+		{
+			if(m_strides[i - 1] != stride)
+				m_contiguous = false;
+			stride *= m_dims[i - 1];
+		}
+	}
 };
 
 template <typename T>
@@ -1218,25 +1240,25 @@ using TT = typename std::remove_const<T>::type;
 public:
 	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
 		m_tensor(const_cast<Tensor<TT> *>(tensor)),
-		m_indices(tensor->dims(), 0)
+		m_indices(tensor->dims(), 0),
+		m_ptr(m_tensor->ptr())
 	{
-		/// \todo Make the right side of the `||` faster; `size()`` isn't cached, so this will hurt performance.
 		if(end || m_tensor->size() == 0)
 		{
 			m_indices[0] = m_tensor->size(0);
+			if(m_tensor->contiguous())
+				m_ptr += m_tensor->size();
 		}
-	}
-	
-	TensorIterator &advance(size_t dim = (size_t) -1)
-	{
-		dim = std::min(dim, m_tensor->dims());
-		--m_indices.back();
-		++m_indices[dim];
-		return ++*this;
 	}
 	
 	TensorIterator &operator++()
 	{
+		if(m_tensor->contiguous())
+		{
+			++m_ptr;
+			return *this;
+		}
+		
 		size_t dim = m_indices.size() - 1;
 		++m_indices[dim];
 		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
@@ -1256,25 +1278,17 @@ public:
 	
 	T &operator*()
 	{
+		if(m_tensor->contiguous())
+			return *m_ptr;
 		return (*m_tensor)(m_indices);
 	}
 	
 	bool operator==(const TensorIterator &other)
 	{
-		if(m_tensor != other.m_tensor)
-		{
-			return false;
-		}
-		
-		for(size_t i = 0, j = m_indices.size(); i < j; ++i)
-		{
-			if(m_indices[i] != other.m_indices[i])
-			{
-				return false;
-			}
-		}
-		
-		return true;
+		if(m_tensor->contiguous())
+		 	return other.m_tensor->contiguous() && m_ptr == other.m_ptr;
+		else
+			return m_tensor == other.m_tensor && m_indices == other.m_indices;
 	}
 	
 	bool operator !=(const TensorIterator &other)
@@ -1284,6 +1298,7 @@ public:
 private:
 	Tensor<TT> *m_tensor;
 	Storage<size_t> m_indices;
+	TT *m_ptr;
 };
 
 template <typename T>
