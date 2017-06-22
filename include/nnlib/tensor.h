@@ -33,9 +33,7 @@ public:
 	{
 		size_t size = 0;
 		for(Tensor *t : tensors)
-		{
 			size += t->size();
-		}
 		
 		Tensor flattened(size);
 		size_t offset = 0;
@@ -67,7 +65,8 @@ public:
 		m_strides({ 1 }),
 		m_offset(0),
 		m_data(new Storage<T>(values)),
-		m_shared(m_data)
+		m_shared(m_data),
+		m_size(values.size())
 	{}
 	
 	/// \brief Create a tensor with the given data.
@@ -80,7 +79,8 @@ public:
 		m_strides({ 1 }),
 		m_offset(0),
 		m_data(new Storage<T>(values)),
-		m_shared(m_data)
+		m_shared(m_data),
+		m_size(values.size())
 	{}
 	
 	/// \brief Create a tensor with the given shape.
@@ -120,7 +120,8 @@ public:
 		m_strides(other.m_strides),
 		m_offset(other.m_offset),
 		m_data(other.m_data),
-		m_shared(other.m_shared)
+		m_shared(other.m_shared),
+		m_size(other.m_size)
 	{}
 
 	/// \brief Move constructor for a tensor.
@@ -132,7 +133,8 @@ public:
 		m_strides(other.m_strides),
 		m_offset(other.m_offset),
 		m_data(other.m_data),
-		m_shared(other.m_shared)
+		m_shared(other.m_shared),
+		m_size(other.m_size)
 	{}
 	
 	/// \brief Replace tensor contents with new values.
@@ -145,6 +147,7 @@ public:
 		m_strides	= { 1 };
 		m_offset	= 0;
 		*m_data		= values;
+		m_size		= values.size();
 		return *this;
 	}
 	
@@ -158,6 +161,7 @@ public:
 		m_strides	= { 1 };
 		m_offset	= 0;
 		*m_data		= values;
+		m_size		= values.size();
 		return *this;
 	}
 	
@@ -173,6 +177,7 @@ public:
 		m_offset	= other.m_offset;
 		m_data		= other.m_data;
 		m_shared	= other.m_shared;
+		m_size		= other.m_size;
 		return *this;
 	}
 	
@@ -188,6 +193,7 @@ public:
 		m_offset	= other.m_offset;
 		m_data		= other.m_data;
 		m_shared	= other.m_shared;
+		m_size		= other.m_size;
 		return *this;
 	}
 	
@@ -204,13 +210,9 @@ public:
 	{
 		// Don't allow a 0-dimensional tensor.
 		if(dims.size() > 0)
-		{
 			m_dims = dims;
-		}
 		else
-		{
 			m_dims = { 0 };
-		}
 		
 		m_strides.resize(m_dims.size());
 		
@@ -219,12 +221,13 @@ public:
 		{
 			m_strides[i - 1] = m_strides[i] * m_dims[i];
 		}
-		size_t newSize = m_offset + m_strides[0] * m_dims[0];
-		if(newSize > m_data->size())
-		{
-			// only resize if necessary, because other tensors may share this data and need it all
-			m_data->resize(newSize);
-		}
+		
+		m_size = m_strides[0] * m_dims[0];
+		
+		// only resize if necessary, because other tensors may share this data and need it all
+		if(m_offset + m_size > m_data->size())
+			m_data->resize(m_offset + m_size);
+		
 		return *this;
 	}
 	
@@ -336,6 +339,7 @@ public:
 		t.m_offset += index * t.m_strides[dim];
 		t.m_dims.erase(dim);
 		t.m_strides.erase(dim);
+		t.recalculateSize();
 		return t;
 	}
 	
@@ -367,6 +371,7 @@ public:
 		Tensor t = *this;
 		t.m_offset = m_offset + index * m_strides[dim];
 		t.m_dims[dim] = size;
+		t.recalculateSize();
 		return t;
 	}
 	
@@ -400,6 +405,7 @@ public:
 		Tensor t = *this;
 		t.m_dims[dim] = size;
 		t.m_strides[dim] = 0;
+		t.recalculateSize();
 		return t;
 	}
 	
@@ -455,6 +461,8 @@ public:
 			}
 			++dim;
 		}
+		
+		t.recalculateSize();
 		
 		return t;
 	}
@@ -594,16 +602,13 @@ public:
 		return m_dims.size();
 	}
 	
-	/// Calculates the total number of elements in this tensor.
-	/// \todo Find a faster way; maybe cache the result.
+	/// Gets the total number of elements in this tensor.
 	size_t size() const
 	{
-		size_t result = 1;
-		for(size_t s : m_dims)
-		{
-			result *= s;
-		}
-		return result;
+		size_t n = m_size;
+		const_cast<Tensor *>(this)->recalculateSize();
+		NNAssertEquals(n, m_size, "Something went wrong!");
+		return m_size;
 	}
 	
 	/// Gets the size of a given dimension.
@@ -655,9 +660,7 @@ public:
 	Tensor &rand(const T &from = -1, const T &to = 1)
 	{
 		for(T &v : *this)
-		{
 			v = Random<T>::uniform(from, to);
-		}
 		return *this;
 	}
 	
@@ -669,9 +672,7 @@ public:
 	Tensor &randn(const T &mean = 0, const T &stddev = 1)
 	{
 		for(T &v : *this)
-		{
 			v = Random<T>::normal(mean, stddev);
-		}
 		return *this;
 	}
 	
@@ -686,9 +687,7 @@ public:
 	Tensor &randn(const T &mean, const T &stddev, const T &cap)
 	{
 		for(T &v : *this)
-		{
 			v = Random<T>::normal(mean, stddev, cap);
-		}
 		return *this;
 	}
 	
@@ -699,9 +698,7 @@ public:
 	Tensor &scale(T alpha)
 	{
 		for(T &v : *this)
-		{
 			v *= alpha;
-		}
 		return *this;
 	}
 	
@@ -712,9 +709,7 @@ public:
 	Tensor &add(T alpha)
 	{
 		for(T &v : *this)
-		{
 			v += alpha;
-		}
 		return *this;
 	}
 	
@@ -982,9 +977,7 @@ public:
 	{
 		T result = 0;
 		for(const T &v : *this)
-		{
 			result += v;
-		}
 		return result;
 	}
 	
@@ -1006,9 +999,7 @@ public:
 		
 		t.copy(select(dim, 0));
 		for(size_t i = 1, n = m_dims[dim]; i < n; ++i)
-		{
 			t.add(select(dim, i));
-		}
 		
 		return t;
 	}
@@ -1197,6 +1188,7 @@ private:
 	size_t m_offset;						///< Offset of data for this view.
 	Storage<T> *m_data;						///< The actual data.
 	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
+	size_t m_size;							///< The total number of elements.
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
 	size_t indexOf(const Storage<size_t> &indices) const
@@ -1204,11 +1196,18 @@ private:
 		NNAssertEquals(indices.size(), m_dims.size(), "Incorrect number of dimensions!");
 		size_t sum = m_offset;
 		for(size_t i = 0, j = indices.size(); i < j; ++i)
-		{
 			sum += indices[i] * m_strides[i];
-		}
+		
 		NNAssertLessThan(sum, m_data->size(), "Index out of bounds!");
 		return sum;
+	}
+	
+	/// Recalculate and cache the size of this tensor.
+	void recalculateSize()
+	{
+		m_size = 1;
+		for(size_t s : m_dims)
+			m_size *= s;
 	}
 };
 
