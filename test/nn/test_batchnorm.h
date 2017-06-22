@@ -72,6 +72,30 @@ void TestBatchNorm()
 	NNAssertLessThan(bn.grad().add(paramGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (testing) failed! Wrong parameter gradient!");
 	NNAssertLessThan(bn.inGrad().add(inGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (testing) failed! Wrong input gradient!");
 	
+	Storage<size_t> dims = { 3, 6 };
+	bn.resize(dims, dims);
+	NNAssertEquals(bn.inputs(), dims, "BatchNorm::resize failed!");
+	NNAssertEquals(bn.outputs(), dims, "BatchNorm::resize failed!");
+	
+	dims = { 4, 4 };
+	bn.inputs(dims);
+	NNAssertEquals(bn.inputs(), dims, "BatchNorm::inputs failed!");
+	NNAssertEquals(bn.outputs(), dims, "BatchNorm::inputs failed!");
+	
+	dims = { 5, 7 };
+	bn.outputs(dims);
+	NNAssertEquals(bn.inputs(), dims, "BatchNorm::outputs failed!");
+	NNAssertEquals(bn.outputs(), dims, "BatchNorm::outputs failed!");
+	
+	dims = { 100, 7 };
+	bn.safeResize(dims, dims);
+	NNAssertEquals(bn.inputs(), dims, "BatchNorm::safeResize failed!");
+	NNAssertEquals(bn.outputs(), dims, "BatchNorm::safeResize failed!");
+	
+	Tensor<> state = bn.state();
+	state.fill(0);
+	NNAssertAlmostEquals(bn.output().sum(), 0, 1e-12, "BatchNorm::state failed!");
+	
 	TestSerializationOfModule(bn);
 }
 
