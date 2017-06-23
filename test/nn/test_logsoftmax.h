@@ -42,6 +42,12 @@ void TestLogSoftMax()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
 	
+	map.resize({ 3, 4 }, { 3, 4 });
+	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::resize failed!");
+	
+	map.safeResize({ 12, 4 }, { 12, 4 });
+	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::safeResize failed!");
+	
 	TestSerializationOfModule(map);
 }
 
