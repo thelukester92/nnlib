@@ -84,6 +84,10 @@ void TestSequential()
 	NNAssert(module.gradList() == linear->gradList(), "Sequential::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Sequential::stateList failed!");
 	
+	module.add(new Linear<>(10), new Identity<>(), new Linear<>(5), new Identity<>());
+	delete module.remove(2);
+	delete module.remove(4);
+	
 	TestSerializationOfModule(module);
 }
 

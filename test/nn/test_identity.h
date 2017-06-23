@@ -48,6 +48,7 @@ void TestIdentity()
 	map.safeResize({ 12, 4 }, { 12, 4 });
 	NNAssertEquals(map.inputs(), map.outputs(), "Identity::safeResize failed!");
 	
+	map.resize({ 3, 12 }, { 3, 12 });
 	map.safeBackward(inp, grd);
 	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::safeBackward failed!");
 	
