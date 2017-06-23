@@ -65,6 +65,10 @@ void TestLinear()
 	module.outputs(dims);
 	NNAssertEquals(module.outputs(), dims, "Linear::outputs failed!");
 	
+	module.resize({ 1, 2 }, { 3, 4 });
+	NNAssertEquals(module.inputs(), Storage<size_t>({ 3, 2 }), "Linear::resize failed; wrong inputs!")
+	NNAssertEquals(module.outputs(), Storage<size_t>({ 3, 4 }), "Linear::resize failed; wrong outputs!")
+	
 	TestSerializationOfModule(module);
 }
 
