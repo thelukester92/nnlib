@@ -284,6 +284,11 @@ void TestTensor()
 	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y * *y, 1e-12, "Tensor::square failed!");
 	
+	empty = view.copy();
+	view.apply([](double &v) { v = tanh(v); });
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertEquals(*x, tanh(*y), "Tensor::apply failed!");
+	
 	double sum = view.sum();
 	for(auto &v : view)
 		sum -= v;
@@ -365,6 +370,16 @@ void TestTensor()
 		const Tensor<> &constView = constant.sub({ { 2, 4 }, { 0 }, { 7, 2 } });
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 4, 1, 2 }), "const Tensor::sub failed! Wrong shape!");
 		NNAssertEquals(&constView(2, 0, 1), &constant(4, 0, 8), "const Tensor::sub failed! Wrong data!");
+	}
+	
+	{
+		view.randn();
+		empty = view.copy();
+		
+		const Tensor<> &constant = view;
+		double sum = 0.0;
+		constant.apply([&sum](const double &v) { sum += v; });
+		NNAssertEquals(sum, constant.sum(), "const Tensor::apply failed!");
 	}
 	
 	// test serialization

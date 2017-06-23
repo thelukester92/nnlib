@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
+#include <functional>
 
 #include "error.h"
 #include "storage.h"
@@ -981,6 +982,28 @@ public:
 	Tensor &square()
 	{
 		return pointwiseProduct(*this);
+	}
+	
+	// MARK: Functional
+	
+	/// \brief Apply the given function to each element in this tensor.
+	///
+	/// \note We may eventually split to apply(V|M) (see the add method) for acceleration.
+	Tensor &apply(const std::function<void(T&)> &f)
+	{
+		for(T &val : *this)
+			f(val);
+		return *this;
+	}
+	
+	/// \brief Apply the given function to each element in this tensor.
+	///
+	/// \note We may eventually split to apply(V|M) (see the add method) for acceleration.
+	const Tensor &apply(const std::function<void(const T&)> &f) const
+	{
+		for(const T &val : *this)
+			f(val);
+		return *this;
 	}
 	
 	// MARK: Statistical methods
