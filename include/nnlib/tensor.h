@@ -618,9 +618,6 @@ public:
 	/// Gets the total number of elements in this tensor.
 	size_t size() const
 	{
-		size_t n = m_size;
-		const_cast<Tensor *>(this)->recalculateSize();
-		NNAssertEquals(n, m_size, "Something went wrong!");
 		return m_size;
 	}
 	
@@ -655,7 +652,8 @@ public:
 	/// Sets every element in this tensor to the given value.
 	Tensor &fill(const T &value)
 	{
-		std::fill(begin(), end(), value);
+		for(T &v : *this)
+			v = value;
 		return *this;
 	}
 	
@@ -1246,10 +1244,21 @@ public:
 		if(end || m_tensor->size() == 0)
 		{
 			m_indices[0] = m_tensor->size(0);
-			if(m_tensor->contiguous())
-				m_ptr += m_tensor->size();
+			m_ptr += m_tensor->size(0) * m_tensor->stride(0);
 		}
 	}
+	
+	TensorIterator(const TensorIterator &it) :
+		m_tensor(it.m_tensor),
+		m_indices(it.m_indices),
+		m_ptr(it.m_ptr)
+	{}
+	
+	TensorIterator(TensorIterator &&it) :
+		m_tensor(it.m_tensor),
+		m_indices(std::move(it.m_indices)),
+		m_ptr(it.m_ptr)
+	{}
 	
 	TensorIterator &operator++()
 	{
@@ -1261,12 +1270,18 @@ public:
 		
 		size_t dim = m_indices.size() - 1;
 		++m_indices[dim];
+		m_ptr += m_tensor->stride(dim);
+		
 		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
 		{
+			m_ptr -= m_tensor->stride(dim) * m_indices[dim];
 			m_indices[dim] = 0;
+			
 			--dim;
 			++m_indices[dim];
+			m_ptr += m_tensor->stride(dim);
 		}
+		
 		return *this;
 	}
 	
@@ -1278,22 +1293,19 @@ public:
 	
 	T &operator*()
 	{
-		if(m_tensor->contiguous())
-			return *m_ptr;
-		return (*m_tensor)(m_indices);
+		return *m_ptr;
 	}
 	
 	bool operator==(const TensorIterator &other)
 	{
-		if(m_tensor->contiguous())
-		 	return other.m_tensor->contiguous() && m_ptr == other.m_ptr;
-		else
-			return m_tensor == other.m_tensor && m_indices == other.m_indices;
+		return !(*this != other);
 	}
 	
 	bool operator !=(const TensorIterator &other)
 	{
-		return !(*this == other);
+		if(m_tensor->contiguous())
+			return m_tensor != other.m_tensor || m_ptr != other.m_ptr;
+		return m_tensor != other.m_tensor || m_indices != other.m_indices;
 	}
 private:
 	Tensor<TT> *m_tensor;

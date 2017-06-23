@@ -35,6 +35,16 @@ public:
 		}
 	}
 	
+	Storage(Storage &&rhs) :
+		m_ptr(rhs.m_ptr),
+		m_size(rhs.m_size),
+		m_capacity(rhs.m_capacity)
+	{
+		rhs.m_ptr		= nullptr;
+		rhs.m_size		= 0;
+		rhs.m_capacity	= 0;
+	}
+	
 	Storage(const std::initializer_list<T> &values) :
 		m_ptr(new T[values.size()]),
 		m_size(values.size()),

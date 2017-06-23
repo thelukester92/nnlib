@@ -2,6 +2,7 @@
 #define TEST_TENSOR_H
 
 #include "nnlib/tensor.h"
+#include "nnlib/util/timer.h"
 using namespace nnlib;
 
 void TestTensor()
