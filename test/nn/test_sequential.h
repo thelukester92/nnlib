@@ -88,6 +88,14 @@ void TestSequential()
 	delete module.remove(2);
 	delete module.remove(4);
 	
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Sequential::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Sequential::outputs failed!");
+	
 	TestSerializationOfModule(module);
 }
 
