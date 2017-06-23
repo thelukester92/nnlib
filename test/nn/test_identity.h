@@ -24,8 +24,8 @@ void TestIdentity()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Identity::forward failed");
-	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::backward failed");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Identity::forward failed!");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::backward failed!");
 	
 	map.inputs({ 3, 4 });
 	NNAssert(map.inputs() == map.outputs(), "Identity::inputs failed to resize outputs!");
@@ -47,6 +47,9 @@ void TestIdentity()
 	
 	map.safeResize({ 12, 4 }, { 12, 4 });
 	NNAssertEquals(map.inputs(), map.outputs(), "Identity::safeResize failed!");
+	
+	map.safeBackward(inp, grd);
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::safeBackward failed!");
 	
 	TestSerializationOfModule(map);
 }
