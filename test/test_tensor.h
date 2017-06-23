@@ -2,7 +2,7 @@
 #define TEST_TENSOR_H
 
 #include "nnlib/tensor.h"
-#include "nnlib/util/timer.h"
+#include "nnlib/util/tensor_util.h"
 using namespace nnlib;
 
 void TestTensor()
@@ -381,6 +381,42 @@ void TestTensor()
 		constant.apply([&sum](const double &v) { sum += v; });
 		NNAssertEquals(sum, constant.sum(), "const Tensor::apply failed!");
 	}
+	
+	// test tensor util
+	
+	view.randn();
+	
+	empty = view + view;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(2 * *x, *y, 1e-12, "operator+(Tensor, Tensor) failed!");
+	
+	empty += view;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(3 * *x, *y, 1e-12, "operator+=(Tensor, Tensor) failed!");
+	
+	empty = view.copy().scale(2.5) - view;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(1.5 * *x, *y, 1e-12, "operator-(Tensor, Tensor) failed!");
+	
+	empty -= view;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(0.5 * *x, *y, 1e-12, "operator-=(Tensor, Tensor) failed!");
+	
+	empty = view * 2;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x * 2, *y, 1e-12, "operator*(Tensor, T) failed!");
+	
+	empty *= 2;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x * 4, *y, 1e-12, "operator*=(Tensor, T) failed!");
+	
+	empty = view / 2;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x / 2, *y, 1e-12, "operator/(Tensor, T) failed!");
+	
+	empty /= 2;
+	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x / 4, *y, 1e-12, "operator/=(Tensor, T) failed!");
 	
 	// test serialization
 	

@@ -49,4 +49,5 @@
 #include "nnlib/util/batcher.h"
 #include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
+#include "nnlib/util/tensor_util.h"
 #include "nnlib/util/timer.h"
