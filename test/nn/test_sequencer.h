@@ -133,7 +133,7 @@ void TestSequencer()
 	catch(const Error &e) {}
 	NNAssert(ok, "Sequencer::clear failed to throw an error!");
 	
-	Storage<size_t> dims = { 3, 6 };
+	Storage<size_t> dims = { 3, 6, 5 };
 	
 	module.inputs(dims);
 	NNAssertEquals(module.inputs(), dims, "Sequencer::inputs failed!");
@@ -141,7 +141,7 @@ void TestSequencer()
 	module.outputs(dims);
 	NNAssertEquals(module.outputs(), dims, "Sequencer::outputs failed!");
 	
-	dims = { 100, 6 };
+	dims = { 10, 12, 5 };
 	
 	module.safeInputs(dims);
 	NNAssertEquals(module.inputs(), dims, "Sequencer::safeInputs failed!");

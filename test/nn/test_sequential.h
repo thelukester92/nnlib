@@ -86,7 +86,7 @@ void TestSequential()
 	
 	module.add(new Linear<>(10), new Identity<>(), new Linear<>(5), new Identity<>());
 	delete module.remove(2);
-	delete module.remove(4);
+	delete module.remove(0);
 	
 	Storage<size_t> dims = { 3, 6 };
 	
