@@ -127,6 +127,40 @@ void TestLSTM()
 	module.batch(32);
 	NNAssert(module.batch() == 32, "LSTM::batch failed!");
 	
+	bool ok = true;
+	try
+	{
+		module.add(nullptr);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "LSTM::add failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.remove(0);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "LSTM::remove failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.clear();
+		ok = false;
+	}
+	NNAssert(ok, "LSTM::clear failed to throw an error!");
+	
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "LSTM::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "LSTM::outputs failed!");
+	
 	TestSerializationOfModule(module);
 }
 
