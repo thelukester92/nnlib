@@ -57,13 +57,15 @@ void TestLinear()
 	module.batch(32);
 	NNAssert(module.batch() == 32, "Linear::batch failed!");
 	
-	// Linear<> *deserialized = nullptr;
-	// Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	// NNAssert(
-	// 	deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-	// 	"Linear::save and/or Linear::load failed!"
-	// );
-	// delete deserialized;
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Linear::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Linear::outputs failed!");
+	
+	TestSerializationOfModule(module);
 }
 
 #endif
