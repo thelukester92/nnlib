@@ -189,9 +189,7 @@ public:
 		NNAssertEquals(dims.size(), 3, "Expected 3D output!");
 		
 		if(output().size(2) == 0)
-		{
 			outputs(dims);
-		}
 		else
 		{
 			sequenceLength(dims[0]);
