@@ -51,6 +51,9 @@ void TestIdentity()
 	map.safeBackward(inp, grd);
 	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Identity::safeBackward failed!");
 	
+	map.forget();
+	NNAssertAlmostEquals(map.output().sum(), 0.0, 1e-12, "Identity::forget failed!");
+	
 	TestSerializationOfModule(map);
 }
 
