@@ -77,14 +77,16 @@ class Binding
 {
 public:
 	using Constructor = std::function<Base*()>;
+	using CopyConstructor = std::function<Base*(const Base &)>;
 	using Serializer = std::function<void(void*,Base*)>;
 	
 	template <typename Derived>
-	static std::string bindDerived(std::string name)
+	static std::string bindDerived(const std::string &name)
 	{
 		instantiateBinding(static_cast<Derived *>(nullptr), 0);
 		constructors().emplace(name, []() { return new Derived(); });
 		bindingNames().emplace(typeid(Derived), name);
+		Binding::bindCopyConstructor<Derived>(name);
 		return name;
 	}
 	
@@ -111,11 +113,29 @@ public:
 		return i->second;
 	}
 	
-	static Base *construct(std::string name)
+	static Base *construct(const std::string &name)
 	{
 		auto i = constructors().find(name);
-		NNHardAssertNotEquals(i, constructors().end(), "Could not find binding for " + name + "!");
+		NNHardAssertNotEquals(i, constructors().end(), "Could not find constructor for " + name + "!");
 		return i->second();
+	}
+	
+	static Base *construct(const std::type_info &info)
+	{
+		return construct(bindingName(info));
+	}
+	
+	static Base *constructLike(const Base *arg)
+	{
+		return construct(bindingName(typeid(*arg)));
+	}
+	
+	static Base *constructCopy(const Base *arg)
+	{
+		std::string name = bindingName(typeid(*arg));
+		auto i = copyConstructors().find(name);
+		NNHardAssertNotEquals(i, copyConstructors().end(), "Could not find copy constructor for " + name + "!");
+		return i->second(*arg);
 	}
 	
 	template <typename Archive>
@@ -134,9 +154,28 @@ public:
 	}
 	
 private:
+	template <typename Derived>
+	static typename std::enable_if<!std::is_copy_constructible<Derived>::value>::type bindCopyConstructor(const std::string &name)
+	{}
+	
+	template <typename Derived>
+	static typename std::enable_if<std::is_copy_constructible<Derived>::value>::type bindCopyConstructor(const std::string &name)
+	{
+		copyConstructors().emplace(name, [](const Base &arg)
+		{
+			return new Derived(static_cast<const Derived &>(arg));
+		});
+	}
+	
 	static std::unordered_map<std::string, Constructor> &constructors()
 	{
 		static std::unordered_map<std::string, Constructor> map;
+		return map;
+	}
+	
+	static std::unordered_map<std::string, CopyConstructor> &copyConstructors()
+	{
+		static std::unordered_map<std::string, CopyConstructor> map;
 		return map;
 	}
 	
@@ -185,6 +224,16 @@ struct PolymorphicSerializationSupport
 template <typename T>
 void instantiateBinding(T*, int) {}
 
+/// \brief Make a deep copy of the given base class.
+///
+/// This will use registered polymorphic types to clone the derived type through
+/// a pointer to the base class.
+template <typename Base>
+Base *copy(const Base *arg)
+{
+	return detail::Binding<Base>::constructCopy(arg);
+}
+
 } // namespace nnlib
 
 /// \brief Register a new archive type.
@@ -202,6 +251,7 @@ namespace nnlib { \
 /// \brief Register a new polymorphic type.
 ///
 /// Must be placed outside namespace nnlib.
+/// This is used both for serialization and deep copying.
 #define NNRegisterType(Derived, Base) \
 namespace nnlib { namespace detail { \
 	template <> struct BaseOf<Derived> { using type = Base; }; \

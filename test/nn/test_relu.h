@@ -2,6 +2,7 @@
 #define TEST_RELU_H
 
 #include "nnlib/nn/relu.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestReLU()
@@ -55,6 +56,7 @@ void TestReLU()
 	NNAssert(ok, "ReLU::resize allowed unequal inputs and outputs!");
 	
 	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif

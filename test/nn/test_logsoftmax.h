@@ -2,6 +2,7 @@
 #define TEST_LOGSOFTMAX_H
 
 #include "nnlib/nn/logsoftmax.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLogSoftMax()
@@ -49,6 +50,7 @@ void TestLogSoftMax()
 	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::safeResize failed!");
 	
 	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif

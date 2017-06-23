@@ -3,6 +3,7 @@
 
 #include "nnlib/nn/sequencer.h"
 #include "nnlib/nn/lstm.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestSequencer()
@@ -156,6 +157,8 @@ void TestSequencer()
 	NNAssertEquals(sequencer.outputs(), Storage<size_t>({ 10, 20, 30 }), "Sequencer::safeOutputs failed!")
 	
 	TestSerializationOfModule(module);
+	// TestModule(module);
+	/// \todo fix this
 }
 
 #endif

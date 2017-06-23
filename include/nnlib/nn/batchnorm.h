@@ -32,6 +32,41 @@ public:
 		reset();
 	}
 	
+	BatchNorm(const BatchNorm &module) :
+		m_output(module.m_output.copy()),
+		m_inGrad(module.m_inGrad.copy()),
+		m_means(module.m_means.copy()),
+		m_invStds(module.m_invStds.copy()),
+		m_runningMeans(module.m_runningMeans.copy()),
+		m_runningVars(module.m_runningVars.copy()),
+		m_normalized(module.m_normalized.copy()),
+		m_weights(module.m_weights.copy()),
+		m_biases(module.m_biases.copy()),
+		m_weightsGrad(module.m_weightsGrad.copy()),
+		m_biasesGrad(module.m_biasesGrad.copy()),
+		m_momentum(module.m_momentum)
+	{
+		m_training = module.m_training;
+	}
+	
+	BatchNorm &operator=(const BatchNorm &module)
+	{
+		m_output		= module.m_output.copy();
+		m_inGrad		= module.m_inGrad.copy();
+		m_means			= module.m_means.copy();
+		m_invStds		= module.m_invStds.copy();
+		m_runningMeans	= module.m_runningMeans.copy();
+		m_runningVars	= module.m_runningVars.copy();
+		m_normalized	= module.m_normalized.copy();
+		m_weights		= module.m_weights.copy();
+		m_biases		= module.m_biases.copy();
+		m_weightsGrad	= module.m_weightsGrad.copy();
+		m_biasesGrad	= module.m_biasesGrad.copy();
+		m_momentum		= module.m_momentum;
+		m_training		= module.m_training;
+		return *this;
+	}
+	
 	/// Resets the weights/biases.
 	BatchNorm &reset()
 	{

@@ -43,6 +43,25 @@ public:
 		m_states(1, 0)
 	{}
 	
+	Sequencer(const Sequencer &module) :
+		m_module(copy(module.m_module)),
+		m_output(module.m_output.copy()),
+		m_inGrad(module.m_inGrad.copy()),
+		m_state(&m_module->state()),
+		m_states(module.m_states.copy())
+		
+	{}
+	
+	Sequencer &operator=(const Sequencer &module)
+	{
+		m_module	= copy(module.m_module);
+		m_state		= &m_module->state();
+		m_states	= module.m_states.copy();
+		m_inGrad	= module.m_inGrad.copy();
+		m_output	= module.m_output.copy();
+		return *this;
+	}
+	
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.

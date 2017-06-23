@@ -2,6 +2,7 @@
 #define TEST_RECURRENT_H
 
 #include "nnlib/nn/recurrent.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestRecurrent()
@@ -116,6 +117,8 @@ void TestRecurrent()
 	NNAssertEquals(module.outputs(), dims, "Recurrent::outputs failed!");
 	
 	TestSerializationOfModule(module);
+	// TestModule(module);
+	/// \todo fix this
 }
 
 #endif

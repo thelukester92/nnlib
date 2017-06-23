@@ -4,6 +4,7 @@
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/identity.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestSequential()
@@ -97,6 +98,7 @@ void TestSequential()
 	NNAssertEquals(module.outputs(), dims, "Sequential::outputs failed!");
 	
 	TestSerializationOfModule(module);
+	TestModule(module);
 }
 
 #endif

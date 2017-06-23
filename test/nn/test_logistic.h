@@ -2,6 +2,7 @@
 #define TEST_LOGISTIC_H
 
 #include "nnlib/nn/logistic.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLogistic()
@@ -43,6 +44,7 @@ void TestLogistic()
 	NNAssert(ok, "Logistic::resize allowed unequal inputs and outputs!");
 	
 	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif

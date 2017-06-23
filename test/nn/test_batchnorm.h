@@ -2,6 +2,7 @@
 #define TEST_BATCHNORM_H
 
 #include "nnlib/nn/batchnorm.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestBatchNorm()
@@ -97,6 +98,7 @@ void TestBatchNorm()
 	NNAssertAlmostEquals(bn.output().sum(), 0, 1e-12, "BatchNorm::state failed!");
 	
 	TestSerializationOfModule(bn);
+	TestModule(bn);
 }
 
 #endif

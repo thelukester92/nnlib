@@ -66,6 +66,32 @@ public:
 		forget();
 	}
 	
+	Recurrent(const Recurrent &module) :
+		m_inpMod(copy(module.m_inpMod)),
+		m_memMod(copy(module.m_memMod)),
+		m_outMod(copy(module.m_outMod)),
+		m_state(module.m_state.copy()),
+		m_statePrev(module.m_statePrev.copy()),
+		m_stateGrad(module.m_stateGrad.copy()),
+		m_resetGrad(module.m_resetGrad)
+	{
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
+	}
+	
+	Recurrent &operator=(const Recurrent &module)
+	{
+		m_inpMod	= copy(module.m_inpMod);
+		m_memMod	= copy(module.m_memMod);
+		m_outMod	= copy(module.m_outMod);
+		m_state		= module.m_state.copy();
+		m_statePrev	= module.m_statePrev.copy();
+		m_stateGrad	= module.m_stateGrad.copy();
+		m_resetGrad	= module.m_resetGrad;
+		return *this;
+	}
+	
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.

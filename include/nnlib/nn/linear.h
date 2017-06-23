@@ -40,6 +40,28 @@ public:
 		m_addBuffer(1)
 	{}
 	
+	Linear(const Linear &module) :
+		m_weights(module.m_weights.copy()),
+		m_weightsGrad(module.m_weightsGrad.copy()),
+		m_bias(module.m_bias.copy()),
+		m_biasGrad(module.m_biasGrad.copy()),
+		m_inGrad(module.m_inGrad.copy()),
+		m_output(module.m_output.copy()),
+		m_addBuffer(module.m_addBuffer.copy())
+	{}
+	
+	Linear &operator=(const Linear &module)
+	{
+		m_weights		= module.m_weights.copy();
+		m_weightsGrad	= module.m_weightsGrad.copy();
+		m_bias			= module.m_bias.copy();
+		m_biasGrad		= module.m_biasGrad.copy();
+		m_inGrad		= module.m_inGrad.copy();
+		m_output		= module.m_output.copy();
+		m_addBuffer		= module.m_addBuffer.copy();
+		return *this;
+	}
+	
 	/// Set weights to uniformly distributed random values.
 	Linear &reset()
 	{

@@ -122,6 +122,90 @@ public:
 		forget();
 	}
 	
+	LSTM(const LSTM &module) :
+		Container<T>(module),
+		m_inpGateX(copy(module.m_inpGateX)),
+		m_inpGateY(copy(module.m_inpGateY)),
+		m_inpGateH(copy(module.m_inpGateH)),
+		m_inpGate(copy(module.m_inpGate)),
+		m_fgtGateX(copy(module.m_fgtGateX)),
+		m_fgtGateY(copy(module.m_fgtGateY)),
+		m_fgtGateH(copy(module.m_fgtGateH)),
+		m_fgtGate(copy(module.m_fgtGate)),
+		m_inpModX(copy(module.m_inpModX)),
+		m_inpModY(copy(module.m_inpModY)),
+		m_inpMod(copy(module.m_inpMod)),
+		m_outGateX(copy(module.m_outGateX)),
+		m_outGateY(copy(module.m_outGateY)),
+		m_outGateH(copy(module.m_outGateH)),
+		m_outGate(copy(module.m_outGate)),
+		m_outMod(copy(module.m_outMod)),
+		m_inGrad(module.m_inGrad.copy()),
+		m_inpAdd(module.m_inpAdd.copy()),
+		m_fgtAdd(module.m_fgtAdd.copy()),
+		m_outAdd(module.m_outAdd.copy()),
+		m_outGrad(module.m_outGrad.copy()),
+		m_state(module.m_state.copy()),
+		m_prevState(module.m_prevState.copy()),
+		m_prevOutput(module.m_prevOutput.copy()),
+		m_stateGrad(module.m_stateGrad.copy()),
+		m_curStateGrad(module.m_curStateGrad.copy()),
+		m_gradBuffer(module.m_gradBuffer.copy()),
+		m_resetGrad(module.m_resetGrad),
+		m_clip(module.m_clip)
+	{
+		Container<T>::add(m_inpGateX);
+		Container<T>::add(m_inpGateY);
+		Container<T>::add(m_inpGateH);
+		Container<T>::add(m_inpGate);
+		Container<T>::add(m_fgtGateX);
+		Container<T>::add(m_fgtGateY);
+		Container<T>::add(m_fgtGateH);
+		Container<T>::add(m_fgtGate);
+		Container<T>::add(m_inpModX);
+		Container<T>::add(m_inpModY);
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_outGateX);
+		Container<T>::add(m_outGateY);
+		Container<T>::add(m_outGateH);
+		Container<T>::add(m_outGate);
+		Container<T>::add(m_outMod);
+	}
+	
+	LSTM &operator=(const LSTM &module)
+	{
+		*m_inpGateX		= *module.m_inpGateX;
+		*m_inpGateY		= *module.m_inpGateY;
+		*m_inpGateH 	= *module.m_inpGateH;
+		*m_inpGate		= *module.m_inpGate;
+		*m_fgtGateX		= *module.m_fgtGateX;
+		*m_fgtGateY		= *module.m_fgtGateY;
+		*m_fgtGateH		= *module.m_fgtGateH;
+		*m_fgtGate		= *module.m_fgtGate;
+		*m_inpModX		= *module.m_inpModX;
+		*m_inpModY		= *module.m_inpModY;
+		*m_inpMod		= *module.m_inpMod;
+		*m_outGateX		= *module.m_outGateX;
+		*m_outGateY		= *module.m_outGateY;
+		*m_outGateH		= *module.m_outGateH;
+		*m_outGate		= *module.m_outGate;
+		*m_outMod		= *module.m_outMod;
+		m_inGrad		= module.m_inGrad.copy();
+		m_inpAdd		= module.m_inpAdd.copy();
+		m_fgtAdd		= module.m_fgtAdd.copy();
+		m_outAdd		= module.m_outAdd.copy();
+		m_outGrad		= module.m_outGrad.copy();
+		m_state			= module.m_state.copy();
+		m_prevState		= module.m_prevState.copy();
+		m_prevOutput	= module.m_prevOutput.copy();
+		m_stateGrad		= module.m_stateGrad.copy();
+		m_curStateGrad	= module.m_curStateGrad.copy();
+		m_gradBuffer	= module.m_gradBuffer.copy();
+		m_resetGrad		= module.m_resetGrad;
+		m_clip			= module.m_clip;
+		return *this;
+	}
+	
 	LSTM &gradClip(T clip)
 	{
 		m_clip = clip;

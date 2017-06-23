@@ -6,7 +6,10 @@
 namespace nnlib
 {
 
-/// The abtract base class for all neural network modules.
+/// \brief The abtract base class for all neural network modules.
+///
+/// \note The assignment operator invalidates parameters, grad, and state.
+/// They must be reflattened to use them.
 template <typename T = double>
 class Module
 {

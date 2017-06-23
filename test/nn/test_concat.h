@@ -4,6 +4,7 @@
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/identity.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestConcat()
@@ -104,6 +105,7 @@ void TestConcat()
 		NNAssert(!module.component(i)->training(), "Concat::training failed!");
 	
 	TestSerializationOfModule(module);
+	TestModule(module);
 }
 
 #endif

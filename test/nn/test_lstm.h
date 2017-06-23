@@ -2,6 +2,7 @@
 #define TEST_LSTM_H
 
 #include "nnlib/nn/lstm.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLSTM()
@@ -163,6 +164,8 @@ void TestLSTM()
 	NNAssertEquals(module.outputs(), dims, "LSTM::outputs failed!");
 	
 	TestSerializationOfModule(module);
+	// TestModule(module);
+	/// \todo fix this
 }
 
 #endif

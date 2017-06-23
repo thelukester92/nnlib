@@ -34,6 +34,20 @@ public:
 		return *this;
 	}
 	
+	Concat(const Concat &module) :
+		Container<T>(module),
+		m_output(module.m_output.copy()),
+		m_inGrad(module.m_inGrad.copy())
+	{}
+	
+	Concat &operator=(const Concat &module)
+	{
+		*static_cast<Container<T> *>(this) = module;
+		m_output = module.m_output.copy();
+		m_inGrad = module.m_inGrad.copy();
+		return *this;
+	}
+	
 	// MARK: Container methods
 	
 	/// Add a component to this container, enforcing compatibility.

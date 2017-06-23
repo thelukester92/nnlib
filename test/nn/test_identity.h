@@ -2,6 +2,7 @@
 #define TEST_IDENTITY_H
 
 #include "nnlib/nn/identity.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestIdentity()
@@ -56,6 +57,7 @@ void TestIdentity()
 	NNAssertAlmostEquals(map.output().sum(), 0.0, 1e-12, "Identity::forget failed!");
 	
 	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif

@@ -19,6 +19,18 @@ public:
 		m_output(bats, outs)
 	{}
 	
+	Map(const Map &module) :
+		m_inGrad(module.m_inGrad.copy()),
+		m_output(module.m_output.copy())
+	{}
+	
+	Map &operator=(const Map &module)
+	{
+		m_inGrad = module.m_inGrad.copy();
+		m_output = module.m_output.copy();
+		return *this;
+	}
+	
 	/// Single element forward.
 	virtual T forward(const T &x) = 0;
 	

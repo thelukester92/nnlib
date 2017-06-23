@@ -2,6 +2,7 @@
 #define TEST_LINEAR_H
 
 #include "nnlib/nn/linear.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLinear()
@@ -76,6 +77,7 @@ void TestLinear()
 	NNAssertEquals(linear.outputs(), Storage<size_t>({ 7, 11 }), "Linear::safeOutputs failed!")
 	
 	TestSerializationOfModule(module);
+	TestModule(module);
 }
 
 #endif

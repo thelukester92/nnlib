@@ -19,6 +19,18 @@ public:
 		m_output(bats, outs)
 	{}
 	
+	LogSoftMax(const LogSoftMax &module) :
+		m_inGrad(module.m_inGrad.copy()),
+		m_output(module.m_output.copy())
+	{}
+	
+	LogSoftMax &operator=(const LogSoftMax &module)
+	{
+		m_inGrad = module.m_inGrad.copy();
+		m_output = module.m_output.copy();
+		return *this;
+	}
+	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{

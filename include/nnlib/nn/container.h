@@ -14,6 +14,22 @@ public:
 	using Module<T>::batch;
 	using Module<T>::training;
 	
+	Container() {}
+	
+	Container(const Container &module) : m_components(module.m_components)
+	{
+		for(Module<T> *&module : m_components)
+			module = copy(module);
+	}
+	
+	Container &operator=(const Container &module)
+	{
+		m_components = module.m_components;
+		for(Module<T> *&module : m_components)
+			module = copy(module);
+		return *this;
+	}
+	
 	virtual ~Container()
 	{
 		for(Module<T> *comp : m_components)

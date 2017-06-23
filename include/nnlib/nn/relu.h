@@ -21,6 +21,18 @@ public:
 		m_leak(0.0)
 	{}
 	
+	ReLU(const ReLU &module) :
+		Map<T>(module),
+		m_leak(module.m_leak)
+	{}
+	
+	ReLU &operator=(const ReLU &module)
+	{
+		*static_cast<Map<T> *>(this) = module;
+		m_leak = module.m_leak;
+		return *this;
+	}
+	
 	/// Get the "leak" for this ReLU. 0 if non-leaky.
 	T leak() const
 	{

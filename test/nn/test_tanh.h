@@ -2,6 +2,7 @@
 #define TEST_TANH_H
 
 #include "nnlib/nn/tanh.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestTanH()
@@ -43,6 +44,7 @@ void TestTanH()
 	NNAssert(ok, "TanH::resize allowed unequal inputs and outputs!");
 	
 	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif
