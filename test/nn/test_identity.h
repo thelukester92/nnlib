@@ -42,6 +42,12 @@ void TestIdentity()
 	catch(const std::runtime_error &e) {}
 	NNAssert(ok, "Identity::resize allowed unequal inputs and outputs!");
 	
+	map.resize({ 3, 4 }, { 3, 4 });
+	NNAssertEquals(map.inputs(), map.outputs(), "Identity::resize failed!");
+	
+	map.safeResize({ 12, 4 }, { 12, 4 });
+	NNAssertEquals(map.inputs(), map.outputs(), "Identity::safeResize failed!");
+	
 	TestSerializationOfModule(map);
 }
 
