@@ -151,6 +151,7 @@ void TestLSTM()
 		module.clear();
 		ok = false;
 	}
+	catch(const Error &e) {}
 	NNAssert(ok, "LSTM::clear failed to throw an error!");
 	
 	Storage<size_t> dims = { 3, 6 };

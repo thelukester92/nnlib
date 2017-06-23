@@ -88,6 +88,8 @@ void TestSequencer()
 	// Test forward and backward using the parameters and targets above
 	
 	Sequencer<> module(lstm, 3);
+	NNAssertEquals(lstm, &module.module(), "Sequencer::Sequencer failed!");
+	
 	module.forward(inp);
 	module.backward(inp, grd);
 	
@@ -103,6 +105,49 @@ void TestSequencer()
 	
 	module.batch(32);
 	NNAssert(module.batch() == 32, "Sequencer::batch failed!");
+	
+	bool ok = true;
+	try
+	{
+		module.add(nullptr);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Sequencer::add failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.remove(0);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Sequencer::remove failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.clear();
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Sequencer::clear failed to throw an error!");
+	
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Sequencer::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Sequencer::outputs failed!");
+	
+	dims = { 100, 6 };
+	
+	module.safeInputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Sequencer::safeInputs failed!");
+	
+	module.safeOutputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Sequencer::safeOutputs failed!");
 	
 	TestSerializationOfModule(module);
 }

@@ -154,9 +154,7 @@ public:
 		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
 		
 		if(inGrad().size(2) == 0)
-		{
 			inputs(dims);
-		}
 		else
 		{
 			sequenceLength(dims[0]);

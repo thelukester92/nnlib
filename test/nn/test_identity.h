@@ -39,7 +39,7 @@ void TestIdentity()
 		map.resize({ 3, 4 }, { 4, 3 });
 		ok = false;
 	}
-	catch(const std::runtime_error &e) {}
+	catch(const Error &e) {}
 	NNAssert(ok, "Identity::resize allowed unequal inputs and outputs!");
 	
 	map.resize({ 3, 4 }, { 3, 4 });

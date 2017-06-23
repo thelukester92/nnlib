@@ -80,6 +80,41 @@ void TestRecurrent()
 	module.batch(32);
 	NNAssert(module.batch() == 32, "Recurrent::batch failed!");
 	
+	bool ok = true;
+	try
+	{
+		module.add(nullptr);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Recurrent::add failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.remove(0);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Recurrent::remove failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.clear();
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Recurrent::clear failed to throw an error!");
+	
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Recurrent::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Recurrent::outputs failed!");
+	
 	TestSerializationOfModule(module);
 }
 
