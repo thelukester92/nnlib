@@ -49,8 +49,7 @@ public:
 	/// Remove and return a specific component from this container, enforcing compatibility.
 	virtual Module<T> *remove(size_t index) override
 	{
-		Module<T> *comp = m_components[index];
-		m_components.erase(index);
+		Module<T> *comp = Container<T>::remove(index);
 		if(components() > 0)
 			resizeBuffers();
 		return comp;
@@ -62,9 +61,7 @@ public:
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		for(Module<T> *component : m_components)
-		{
 			component->forward(input);
-		}
 		return m_output;
 	}
 	
@@ -101,9 +98,7 @@ public:
 	{
 		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		for(Module<T> *component : m_components)
-		{
 			component->inputs(dims);
-		}
 		return resizeBuffers();
 	}
 	
@@ -162,9 +157,7 @@ private:
 		
 		size_t outs = 0, bats = m_components[0]->outputs()[0], inps = m_components[0]->inputs()[1];
 		for(Module<T> *component : m_components)
-		{
 			outs += component->outputs()[1];
-		}
 		
 		m_output.resize(bats, outs);
 		m_inGrad.resize(bats, inps);

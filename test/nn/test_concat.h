@@ -84,6 +84,25 @@ void TestConcat()
 	NNAssert(module.gradList() == linear->gradList(), "Concat::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Concat::stateList failed!");
 	
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Concat::inputs failed!");
+	
+	bool ok = true;
+	try
+	{
+		module.outputs(dims);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Concat::outputs failed to throw an error!");
+	
+	module.add(new Linear<>(6, 10, 3), new Identity<>(6, 3));
+	module.training(false);
+	for(size_t i = 0; i < module.components(); ++i)
+		NNAssert(!module.component(i)->training(), "Concat::training failed!");
+	
 	TestSerializationOfModule(module);
 }
 
