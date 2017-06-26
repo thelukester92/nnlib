@@ -114,6 +114,7 @@ public:
 		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		Module<T>::inputs(dims);
 		Module<T>::outputs(dims);
+		mask.resize(dims);
 		return *this;
 	}
 	
@@ -139,7 +140,7 @@ public:
 	template <typename Archive>
 	void save(Archive &ar) const
 	{
-		ar(this->inputs());
+		ar(this->inputs(), m_dropProbability);
 	}
 	
 	/// \brief Read from an archive.
@@ -149,7 +150,7 @@ public:
 	void load(Archive &ar)
 	{
 		Storage<size_t> shape;
-		ar(shape);
+		ar(shape, m_dropProbability);
 		this->inputs(shape);
 	}
 	
