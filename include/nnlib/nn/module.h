@@ -2,6 +2,7 @@
 #define NN_MODULE_H
 
 #include "../tensor.h"
+#include "../detail/binding.h"
 
 namespace nnlib
 {
@@ -18,6 +19,15 @@ public:
 	Module(const Module &) = delete;
 	Module &operator=(const Module &) = delete;
 	virtual ~Module() {}
+	
+	/// /brief A convenience method for contructing a copy of the current module.
+	///
+	/// Rather than overriding this in a subclass, simply implement the copy constructor.
+	/// This will only work if the actual type of the instance has been registered with NNRegisterType.
+	virtual Module *copy() final
+	{
+		return detail::Binding<Module>::constructCopy(this);
+	}
 	
 	/// Returns whether this module is in training mode.
 	virtual bool training() const

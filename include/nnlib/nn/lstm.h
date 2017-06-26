@@ -123,22 +123,22 @@ public:
 	}
 	
 	LSTM(const LSTM &module) :
-		m_inpGateX(copy(module.m_inpGateX)),
-		m_inpGateY(copy(module.m_inpGateY)),
-		m_inpGateH(copy(module.m_inpGateH)),
-		m_inpGate(copy(module.m_inpGate)),
-		m_fgtGateX(copy(module.m_fgtGateX)),
-		m_fgtGateY(copy(module.m_fgtGateY)),
-		m_fgtGateH(copy(module.m_fgtGateH)),
-		m_fgtGate(copy(module.m_fgtGate)),
-		m_inpModX(copy(module.m_inpModX)),
-		m_inpModY(copy(module.m_inpModY)),
-		m_inpMod(copy(module.m_inpMod)),
-		m_outGateX(copy(module.m_outGateX)),
-		m_outGateY(copy(module.m_outGateY)),
-		m_outGateH(copy(module.m_outGateH)),
-		m_outGate(copy(module.m_outGate)),
-		m_outMod(copy(module.m_outMod)),
+		m_inpGateX(module.m_inpGateX->copy()),
+		m_inpGateY(module.m_inpGateY->copy()),
+		m_inpGateH(module.m_inpGateH->copy()),
+		m_inpGate(module.m_inpGate->copy()),
+		m_fgtGateX(module.m_fgtGateX->copy()),
+		m_fgtGateY(module.m_fgtGateY->copy()),
+		m_fgtGateH(module.m_fgtGateH->copy()),
+		m_fgtGate(module.m_fgtGate->copy()),
+		m_inpModX(module.m_inpModX->copy()),
+		m_inpModY(module.m_inpModY->copy()),
+		m_inpMod(module.m_inpMod->copy()),
+		m_outGateX(module.m_outGateX->copy()),
+		m_outGateY(module.m_outGateY->copy()),
+		m_outGateH(module.m_outGateH->copy()),
+		m_outGate(module.m_outGate->copy()),
+		m_outMod(module.m_outMod->copy()),
 		m_inGrad(module.m_inGrad.copy()),
 		m_inpAdd(module.m_inpAdd.copy()),
 		m_fgtAdd(module.m_fgtAdd.copy()),
@@ -174,22 +174,22 @@ public:
 	LSTM &operator=(const LSTM &module)
 	{
 		Container<T>::clear();
-		m_inpGateX	= copy(module.m_inpGateX);
-		m_inpGateY	= copy(module.m_inpGateY);
-		m_inpGateH 	= copy(module.m_inpGateH);
-		m_inpGate	= copy(module.m_inpGate);
-		m_fgtGateX	= copy(module.m_fgtGateX);
-		m_fgtGateY	= copy(module.m_fgtGateY);
-		m_fgtGateH	= copy(module.m_fgtGateH);
-		m_fgtGate	= copy(module.m_fgtGate);
-		m_inpModX	= copy(module.m_inpModX);
-		m_inpModY	= copy(module.m_inpModY);
-		m_inpMod	= copy(module.m_inpMod);
-		m_outGateX	= copy(module.m_outGateX);
-		m_outGateY	= copy(module.m_outGateY);
-		m_outGateH	= copy(module.m_outGateH);
-		m_outGate	= copy(module.m_outGate);
-		m_outMod	= copy(module.m_outMod);
+		m_inpGateX	= module.m_inpGateX->copy();
+		m_inpGateY	= module.m_inpGateY->copy();
+		m_inpGateH 	= module.m_inpGateH->copy();
+		m_inpGate	= module.m_inpGate->copy();
+		m_fgtGateX	= module.m_fgtGateX->copy();
+		m_fgtGateY	= module.m_fgtGateY->copy();
+		m_fgtGateH	= module.m_fgtGateH->copy();
+		m_fgtGate	= module.m_fgtGate->copy();
+		m_inpModX	= module.m_inpModX->copy();
+		m_inpModY	= module.m_inpModY->copy();
+		m_inpMod	= module.m_inpMod->copy();
+		m_outGateX	= module.m_outGateX->copy();
+		m_outGateY	= module.m_outGateY->copy();
+		m_outGateH	= module.m_outGateH->copy();
+		m_outGate	= module.m_outGate->copy();
+		m_outMod	= module.m_outMod->copy();
 		
 		Container<T>::add(m_inpGateX);
 		Container<T>::add(m_inpGateY);

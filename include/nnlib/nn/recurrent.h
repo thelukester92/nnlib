@@ -67,9 +67,9 @@ public:
 	}
 	
 	Recurrent(const Recurrent &module) :
-		m_inpMod(copy(module.m_inpMod)),
-		m_memMod(copy(module.m_memMod)),
-		m_outMod(copy(module.m_outMod)),
+		m_inpMod(module.m_inpMod->copy()),
+		m_memMod(module.m_memMod->copy()),
+		m_outMod(module.m_outMod->copy()),
 		m_state(module.m_state.copy()),
 		m_statePrev(module.m_statePrev.copy()),
 		m_stateGrad(module.m_stateGrad.copy()),
@@ -83,9 +83,9 @@ public:
 	Recurrent &operator=(const Recurrent &module)
 	{
 		Container<T>::clear();
-		m_inpMod	= copy(module.m_inpMod);
-		m_memMod	= copy(module.m_memMod);
-		m_outMod	= copy(module.m_outMod);
+		m_inpMod	= module.m_inpMod->copy();
+		m_memMod	= module.m_memMod->copy();
+		m_outMod	= module.m_outMod->copy();
 		
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);

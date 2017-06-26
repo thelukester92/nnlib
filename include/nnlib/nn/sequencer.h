@@ -44,7 +44,7 @@ public:
 	{}
 	
 	Sequencer(const Sequencer &module) :
-		m_module(copy(module.m_module)),
+		m_module(module.m_module->copy()),
 		m_output(module.m_output.copy()),
 		m_inGrad(module.m_inGrad.copy()),
 		m_state(&m_module->state()),
@@ -55,7 +55,7 @@ public:
 	
 	Sequencer &operator=(const Sequencer &module)
 	{
-		m_module	= copy(module.m_module);
+		m_module	= module.m_module->copy();
 		m_state		= &m_module->state();
 		m_states	= module.m_states.copy();
 		m_inGrad	= module.m_inGrad.copy();

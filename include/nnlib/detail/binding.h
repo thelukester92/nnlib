@@ -1,10 +1,11 @@
-#ifndef SERIALIZATION_DETAIL_H
-#define SERIALIZATION_DETAIL_H
+#ifndef BINDING_H
+#define BINDING_H
 
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
 #include <functional>
+#include "traits.h"
 #include "../error.h"
 
 namespace nnlib
@@ -12,32 +13,6 @@ namespace nnlib
 
 namespace detail
 {
-
-// ignore -Wunused-value for this section; it is unused on purpose for SFINAE
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-value"
-
-/// Check whether the given type has the serialize method. Default is false.
-template <typename T, typename = int>
-struct HasSerialize : std::false_type
-{};
-
-/// Check whether the given type has the serialize method. This override determines it does.
-template <typename T>
-struct HasSerialize<T, decltype(&T::template serialize<T>, 0)> : std::true_type
-{};
-
-/// Check whether the given type has the load and save methods. Default is false.
-template <typename T, typename = int, typename = int>
-struct HasLoadAndSave : std::false_type
-{};
-
-/// Check whether the given type has the load and save methods. This override determines it does.
-template <typename T>
-struct HasLoadAndSave<T, decltype(&T::template load<T>, 0), decltype(&T::template save<T>, 0)> : std::true_type
-{};
-
-#pragma GCC diagnostic pop
 
 /// \brief Hook in code before main.
 ///
@@ -220,19 +195,9 @@ struct PolymorphicSerializationSupport
 /// \brief The preferred overload for instantiateBinding.
 ///
 /// Archives will create specializations of this function that will fail,
-/// but the attempt to instantiate them will hook code in mefore main.
+/// but the attempt to instantiate them will hook code in before main.
 template <typename T>
 void instantiateBinding(T*, int) {}
-
-/// \brief Make a deep copy of the given base class.
-///
-/// This will use registered polymorphic types to clone the derived type through
-/// a pointer to the base class.
-template <typename Base>
-Base *copy(const Base *arg)
-{
-	return detail::Binding<Base>::constructCopy(arg);
-}
 
 } // namespace nnlib
 

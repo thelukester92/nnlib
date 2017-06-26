@@ -18,15 +18,15 @@ public:
 	
 	Container(const Container &module) : m_components(module.m_components)
 	{
-		for(Module<T> *&module : m_components)
-			module = copy(module);
+		for(Module<T> *&m : m_components)
+			m = m->copy(); /// \note intentionally not releasing; module still owns the original
 	}
 	
 	Container &operator=(const Container &module)
 	{
 		m_components = module.m_components;
-		for(Module<T> *&module : m_components)
-			module = copy(module);
+		for(Module<T> *&m : m_components)
+			m = m->copy(); /// \note intentionally not releasing; module still owns the original
 		return *this;
 	}
 	

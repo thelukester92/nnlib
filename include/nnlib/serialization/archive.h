@@ -2,7 +2,7 @@
 #define ARCHIVE_H
 
 #include <iostream>
-#include "detail.h"
+#include "../detail/binding.h"
 
 namespace nnlib
 {
