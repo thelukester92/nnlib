@@ -19,7 +19,10 @@ public:
 		m_output(bats, inps),
 		m_mask(bats, inps),
 		m_dropProbability(dropProbability)
-	{}
+	{
+		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
+		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
+	}
 	
 	Dropout(const Dropout &module) :
 		m_inGrad(module.m_inGrad.copy()),
@@ -47,6 +50,8 @@ public:
 	/// Set the probability that an output is not dropped.
 	Dropout &dropProbability(T dropProbability)
 	{
+		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
+		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
 		m_dropProbability = dropProbability;
 		return *this;
 	}
