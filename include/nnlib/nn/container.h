@@ -33,9 +33,7 @@ public:
 	virtual ~Container()
 	{
 		for(Module<T> *comp : m_components)
-		{
 			delete comp;
-		}
 	}
 	
 	/// Sets whether this module is in training mode.
@@ -87,9 +85,7 @@ public:
 	virtual Container &clear()
 	{
 		for(Module<T> *comp : m_components)
-		{
 			delete comp;
-		}
 		m_components.clear();
 		return *this;
 	}
@@ -98,9 +94,7 @@ public:
 	virtual Container &batch(size_t bats) override
 	{
 		for(Module<T> *component : m_components)
-		{
 			component->batch(bats);
-		}
 		return *this;
 	}
 	
@@ -109,12 +103,8 @@ public:
 	{
 		Storage<Tensor<T> *> params;
 		for(Module<T> *comp : m_components)
-		{
 			for(Tensor<T> *param : comp->parameterList())
-			{
 				params.push_back(param);
-			}
-		}
 		return params;
 	}
 	
@@ -123,12 +113,8 @@ public:
 	{
 		Storage<Tensor<T> *> blams;
 		for(Module<T> *comp : m_components)
-		{
 			for(Tensor<T> *blam : comp->gradList())
-			{
 				blams.push_back(blam);
-			}
-		}
 		return blams;
 	}
 	
@@ -137,12 +123,8 @@ public:
 	{
 		Storage<Tensor<T> *> states;
 		for(Module<T> *comp : m_components)
-		{
 			for(Tensor<T> *state : comp->stateList())
-			{
 				states.push_back(state);
-			}
-		}
 		return states;
 	}
 	
