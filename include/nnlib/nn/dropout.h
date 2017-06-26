@@ -35,9 +35,10 @@ public:
 	
 	Dropout &operator=(const Dropout &module)
 	{
-		m_inGrad	= module.m_inGrad.copy();
-		m_output	= module.m_output.copy();
-		m_training	= module.m_training;
+		m_inGrad			= module.m_inGrad.copy();
+		m_output			= module.m_output.copy();
+		m_dropProbability	= module.m_dropProbability;
+		m_training			= module.m_training;
 		return *this;
 	}
 	
