@@ -117,8 +117,7 @@ void TestRecurrent()
 	NNAssertEquals(module.outputs(), dims, "Recurrent::outputs failed!");
 	
 	TestSerializationOfModule(module);
-	// TestModule(module);
-	/// \todo fix this
+	TestModule(module);
 }
 
 #endif

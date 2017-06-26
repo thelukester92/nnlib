@@ -13,8 +13,9 @@ void TestModule(T &module)
 	auto &p1 = module.parameters();
 	auto &p2 = copy.parameters();
 	
+	NNAssertEquals(p1.shape(), p2.shape(), "Module::Module(const Module &) failed! Wrong parameter shape!");
 	for(auto x = p1.begin(), y = p2.begin(), end = p1.end(); x != end; ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Module::Module(const Module &) failed!");
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Module::Module(const Module &) failed! Wrong data!");
 	
 	p1.zeros();
 	p2.ones();

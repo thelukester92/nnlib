@@ -15,6 +15,8 @@ class Module
 {
 public:
 	Module() : m_training(true) {}
+	Module(const Module &) = delete;
+	Module &operator=(const Module &) = delete;
 	virtual ~Module() {}
 	
 	/// Returns whether this module is in training mode.

@@ -49,8 +49,9 @@ public:
 		m_inGrad(module.m_inGrad.copy()),
 		m_state(&m_module->state()),
 		m_states(module.m_states.copy())
-		
-	{}
+	{
+		Container<T>::add(m_module);
+	}
 	
 	Sequencer &operator=(const Sequencer &module)
 	{
@@ -59,6 +60,10 @@ public:
 		m_states	= module.m_states.copy();
 		m_inGrad	= module.m_inGrad.copy();
 		m_output	= module.m_output.copy();
+		
+		Container<T>::clear();
+		Container<T>::add(m_module);
+		
 		return *this;
 	}
 	
@@ -88,6 +93,16 @@ public:
 	Module<T> &module()
 	{
 		return *m_module;
+	}
+	
+	/// \brief Set the module used by this sequencer.
+	///
+	/// This also deletes the module previously used by this sequencer.
+	Sequencer &module(Module<T> &module)
+	{
+		m_module = &module;
+		Container<T>::clear();
+		Container<T>::add(m_module);
 	}
 	
 	/// Set the length of the sequence this module uses.
