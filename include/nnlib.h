@@ -24,6 +24,8 @@
 #include "nnlib/nn/batchnorm.h"
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/container.h"
+#include "nnlib/nn/dropconnect.h"
+#include "nnlib/nn/dropout.h"
 #include "nnlib/nn/identity.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/logistic.h"
