@@ -114,7 +114,7 @@ public:
 		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		Module<T>::inputs(dims);
 		Module<T>::outputs(dims);
-		mask.resize(dims);
+		m_mask.resize(dims);
 		return *this;
 	}
 	
