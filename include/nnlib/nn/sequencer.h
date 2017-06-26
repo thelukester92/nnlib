@@ -19,35 +19,31 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
-	Sequencer(Module<T> *module, size_t sequenceLength = 1) :
+	Sequencer(Module<T> *module = nullptr, size_t sequenceLength = 1) :
 		m_module(module),
-		m_state(&module->state()),
-		m_states(sequenceLength, m_state->size(0))
+		m_state(module == nullptr ? nullptr : &module->state()),
+		m_states(sequenceLength, module == nullptr ? 0 : m_state->size(0))
 	{
-		Storage<size_t> inps = { sequenceLength };
-		for(size_t size : m_module->inputs())
-			inps.push_back(size);
-		m_inGrad.resize(inps);
-		
-		Storage<size_t> outs = { sequenceLength };
-		for(size_t size : m_module->outputs())
-			outs.push_back(size);
-		m_output.resize(outs);
-		
+		if(module != nullptr)
+		{
+			Storage<size_t> inps = { sequenceLength };
+			for(size_t size : m_module->inputs())
+				inps.push_back(size);
+			m_inGrad.resize(inps);
+			
+			Storage<size_t> outs = { sequenceLength };
+			for(size_t size : m_module->outputs())
+				outs.push_back(size);
+			m_output.resize(outs);
+		}
 		Container<T>::add(module);
 	}
 	
-	Sequencer() :
-		m_module(nullptr),
-		m_state(nullptr),
-		m_states(1, 0)
-	{}
-	
 	Sequencer(const Sequencer &module) :
-		m_module(module.m_module->copy()),
+		m_module(module.m_module == nullptr ? nullptr : module.m_module->copy()),
 		m_output(module.m_output.copy()),
 		m_inGrad(module.m_inGrad.copy()),
-		m_state(&m_module->state()),
+		m_state(m_module == nullptr ? nullptr : &m_module->state()),
 		m_states(module.m_states.copy())
 	{
 		Container<T>::add(m_module);
@@ -55,8 +51,8 @@ public:
 	
 	Sequencer &operator=(const Sequencer &module)
 	{
-		m_module	= module.m_module->copy();
-		m_state		= &m_module->state();
+		m_module	= module.m_module == nullptr ? nullptr : module.m_module->copy();
+		m_state		= m_module == nullptr ? nullptr : &m_module->state();
 		m_states	= module.m_states.copy();
 		m_inGrad	= module.m_inGrad.copy();
 		m_output	= module.m_output.copy();
@@ -103,6 +99,7 @@ public:
 		m_module = &module;
 		Container<T>::clear();
 		Container<T>::add(m_module);
+		return *this;
 	}
 	
 	/// Set the length of the sequence this module uses.
