@@ -15,6 +15,7 @@
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
 #include "nn/test_concat.h"
+#include "nn/test_dropout.h"
 #include "nn/test_identity.h"
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
@@ -69,6 +70,7 @@ int main()
 		// nn
 		TEST("nn/", BatchNorm),
 		TEST("nn/", Concat),
+		TEST("nn/", Dropout),
 		TEST("nn/", Identity),
 		TEST("nn/", Linear),
 		TEST("nn/", Logistic),

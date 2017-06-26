@@ -62,16 +62,16 @@ void TestBatchNorm()
 	bn.forward(inp);
 	for(size_t i = 0; i < 3; ++i)
 	{
-		NNAssertLessThan(fabs(bn.output().select(1, i).mean()), 1e-9, "BatchNorm::forward (testing) failed! Non-zero mean!");
+		NNAssertLessThan(fabs(bn.output().select(1, i).mean()), 1e-9, "BatchNorm::forward (inference) failed! Non-zero mean!");
 		NNAssertAlmostEquals(
 			bn.output().select(1, i).scale(sqrt(3) / sqrt(2)).variance(), 1, 1e-9,
-			"BatchNorm::forward (testing) failed! Non-unit variance!"
+			"BatchNorm::forward (inference) failed! Non-unit variance!"
 		);
 	}
 	
 	bn.backward(inp, grad);
-	NNAssertLessThan(bn.grad().add(paramGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (testing) failed! Wrong parameter gradient!");
-	NNAssertLessThan(bn.inGrad().add(inGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (testing) failed! Wrong input gradient!");
+	NNAssertLessThan(bn.grad().add(paramGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (inference) failed! Wrong parameter gradient!");
+	NNAssertLessThan(bn.inGrad().add(inGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (inference) failed! Wrong input gradient!");
 	
 	Storage<size_t> dims = { 3, 6 };
 	bn.resize(dims, dims);
