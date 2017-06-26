@@ -694,6 +694,17 @@ public:
 		return *this;
 	}
 	
+	/// \brief Sets every element in this tensor to a value sampled from a Bernoulli distribution (1 or 0).
+	///
+	/// \param p The probability of a 1.
+	/// \return This tensor, for chaining.
+	Tensor &bernoulli(const T &p = 0.5)
+	{
+		for(T &v : *this)
+			v = Random<T>::bernoulli(p);
+		return *this;
+	}
+	
 	/// \brief Sets every element in this tensor to a normally distributed random value, capped.
 	///
 	/// This resamples from the distribution when it finds a value too far away from the mean,
