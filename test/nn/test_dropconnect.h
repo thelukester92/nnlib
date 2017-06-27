@@ -50,6 +50,36 @@ void TestDropConnect()
 	module.batch(32);
 	NNAssert(module.batch() == 32, "DropConnect::batch failed!");
 	
+	bool ok = true;
+	try
+	{
+		module.add(nullptr);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "DropConnect::add failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.remove(0);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "DropConnect::remove failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.clear();
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "DropConnect::clear failed to throw an error!");
+	
+	module.state().fill(0);
+	NNAssertAlmostEquals(module.output().sum(), 0, 1e-12, "DropConnect::state failed!");
+	
 	TestSerializationOfModule(module);
 	TestModule(module);
 }
