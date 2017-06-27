@@ -160,7 +160,7 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Set the input shape of this module, including batch.
+	/// Set the input shape of this module, including sequence length and batch.
 	virtual Sequencer &inputs(const Storage<size_t> &dims) override
 	{
 		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
@@ -170,13 +170,7 @@ public:
 		m_module->inputs(newDims);
 		
 		m_inGrad.resize(dims);
-		m_output.resizeDim(0, dims[0]);
-		m_output.resizeDim(1, dims[1]);
-		
-		m_module->state();
-		m_states.resizeDim(1, m_state->size(0));
-		
-		return *this;
+		return sequenceLength(dims[0]).batch(dims[1]);
 	}
 	
 	/// Safely (never reset weights) set the input shape of this module.

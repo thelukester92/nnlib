@@ -12,6 +12,9 @@ class DropConnect : public Container<T>
 {
 	using Container<T>::m_training;
 public:
+	using Container<T>::inputs;
+	using Container<T>::outputs;
+	
 	DropConnect(T dropProbability = 0.1, size_t inps = 0, size_t outs = 0, size_t bats = 1) :
 		m_module(new Linear<T>(inps, outs, bats)),
 		m_params(&m_module->parameters()),
@@ -154,6 +157,22 @@ public:
 	virtual Tensor<T> &inGrad() override
 	{
 		return m_module->inGrad();
+	}
+	
+	/// Set the input shape of this module, including batch.
+	virtual DropConnect &inputs(const Storage<size_t> &dims) override
+	{
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
+		m_module->inputs(dims);
+		return *this;
+	}
+	
+	/// Set the output shape of this module, including batch.
+	virtual DropConnect &outputs(const Storage<size_t> &dims) override
+	{
+		NNAssertEquals(dims.size(), 2, "Expected matrix output!");
+		m_module->outputs(dims);
+		return *this;
 	}
 	
 	/// A vector of tensors filled with (views of) this module's internal state.
