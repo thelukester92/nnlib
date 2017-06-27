@@ -13,6 +13,11 @@ template <typename T = double>
 class MSE : public Critic<T>
 {
 public:
+	MSE(bool average = true) :
+		m_inGrad(1, 0),
+		m_average(average)
+	{}
+	
 	MSE(const Storage<size_t> &shape, bool average = true) :
 		m_inGrad(shape, true),
 		m_average(average)
