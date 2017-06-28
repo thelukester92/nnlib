@@ -18,11 +18,18 @@ class InputArchive
 public:
 	InputArchive(Derived *self) : self(self) {}
 	
+	/// Whether deserialization failed.
+	virtual bool fail()
+	{
+		return false;
+	}
+	
 	/// Multiple types at once.
 	template <typename T>
 	void operator()(T && arg)
 	{
 		preprocess(std::forward<T>(arg));
+		NNHardAssert(!fail(), "Deserialization failed!");
 	}
 	
 	/// Multiple types at once.

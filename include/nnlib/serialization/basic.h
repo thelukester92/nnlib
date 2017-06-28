@@ -14,6 +14,12 @@ public:
 		m_in(in)
 	{}
 	
+	/// Whether deserialization failed.
+	virtual bool fail() override
+	{
+		return m_in.fail();
+	}
+	
 	/// Serialize a string.
 	void process(std::string &arg)
 	{
