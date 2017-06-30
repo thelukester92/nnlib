@@ -4,6 +4,7 @@
 #include "../error.h"
 #include "../tensor.h"
 #include <iostream>
+#include <fstream>
 
 namespace nnlib
 {
@@ -71,6 +72,15 @@ public:
 	}
 	
 	template <typename T = double>
+	static Relation read(Tensor<T> &matrix, const std::string &filename)
+	{
+		std::ifstream fin(filename.c_str());
+		Relation rel = read(matrix, fin);
+		fin.close();
+		return rel;
+	}
+	
+	template <typename T = double>
 	static void write(const Tensor<T> &matrix, std::ostream &out)
 	{
 		write(matrix, out, Relation(matrix));
@@ -81,6 +91,22 @@ public:
 	{
 		writeMetadata(out, relation);
 		writeData(matrix, out, relation);
+	}
+	
+	template <typename T = double>
+	static void write(const Tensor<T> &matrix, const std::string &filename)
+	{
+		std::ofstream fout(filename);
+		write(matrix, fout);
+		fout.close();
+	}
+	
+	template <typename T = double>
+	static void write(const Tensor<T> &matrix, const std::string &filename, const Relation &relation)
+	{
+		std::ofstream fout(filename);
+		write(matrix, fout, relation);
+		fout.close();
 	}
 	
 private:
