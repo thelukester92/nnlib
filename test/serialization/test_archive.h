@@ -30,6 +30,20 @@ void TestArchive()
 	out("string with spaces");
 	in(s);
 	NNAssertEquals(s, "string with spaces", "Serialization failed!");
+	
+	bool ok = false;
+	try
+	{
+		Tensor<> t;
+		std::stringstream empty("");
+		InputArchive ar(empty);
+		ar(t);
+	}
+	catch(const Error &e)
+	{
+		ok = true;
+	}
+	NNAssert(ok, "Intentionally bad deserialization did not throw an error!");
 }
 
 template <typename T>

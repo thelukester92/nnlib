@@ -53,6 +53,18 @@ void TestArffSerializer()
 	NNAssertEquals(tensor1.shape(), tensor2.shape(), "ArffSerializer::write without Relation failed! Wrong shape.");
 	for(auto i = tensor1.begin(), j = tensor2.begin(), k = tensor1.end(); i != k; ++i, ++j)
 		NNAssertAlmostEquals(*i, *j, 1e-12, "ArffSerializer::write without Relation failed! Wrong data.");
+	
+	bool ok = false;
+	try
+	{
+		std::stringstream ss4("");
+		ArffSerializer::read(tensor1, ss4);
+	}
+	catch(const Error &e)
+	{
+		ok = true;
+	}
+	NNAssert(ok, "ArffSerializer::read did not throw a meaningful error on an intentionally bad stream!");
 }
 
 #endif
