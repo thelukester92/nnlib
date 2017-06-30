@@ -19,10 +19,7 @@ public:
 	InputArchive(Derived *self) : self(self) {}
 	
 	/// Whether deserialization failed.
-	virtual bool fail()
-	{
-		return false;
-	}
+	virtual bool fail() = 0;
 	
 	/// Multiple types at once.
 	template <typename T>

@@ -48,7 +48,15 @@ void TestDropConnect()
 	NNAssertEquals(sum1, sum2, "DropConnect::backward (inference) failed!");
 	
 	module.batch(32);
-	NNAssert(module.batch() == 32, "DropConnect::batch failed!");
+	NNAssertEquals(module.batch(), 32, "DropConnect::batch failed!");
+	
+	module.inputs({ 3, 4 });
+	NNAssertEquals(module.inputs(), Storage<size_t>({ 3, 4 }), "DropConnect::inputs failed!");
+	NNAssertEquals(module.module().inputs(), module.inputs(), "DropConnect::inputs failed! Wrong inner input shape!");
+	
+	module.outputs({ 12, 3 });
+	NNAssertEquals(module.outputs(), Storage<size_t>({ 12, 3 }), "DropConnect::outputs failed!");
+	NNAssertEquals(module.module().outputs(), module.outputs(), "DropConnect::outputs failed! Wrong inner output shape!");
 	
 	bool ok = true;
 	try
