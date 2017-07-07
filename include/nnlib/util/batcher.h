@@ -21,14 +21,14 @@ public:
 		m_labBatch(m_lab),
 		m_batch(bats)
 	{
-		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels!");
-		NNAssert(bats <= feat.size(0), "Invalid batch size!");
+		NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	
 	Batcher &batch(size_t bats)
 	{
-		NNAssert(bats <= m_feat.size(0), "Invalid batch size!");
+		NNAssertLessThanOrEquals(bats, m_feat.size(0), "Invalid batch size!");
 		m_batch = bats;
 		reset();
 		return *this;
@@ -107,7 +107,7 @@ template <typename T = double>
 class SequenceBatcher
 {
 public:
-	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 0, size_t bats = 1) :
+	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 1, size_t bats = 1) :
 		m_feat(feat),
 		m_lab(lab),
 		m_featBatch(sequenceLength, bats, m_feat.size(1)),
@@ -115,17 +115,20 @@ public:
 		m_batch(bats),
 		m_sequenceLength(sequenceLength)
 	{
-		NNAssert(feat.dims() == 2 && lab.dims() == 2, "SequenceBatcher only works with matrix inputs!");
-		NNAssert(feat.size(0) == lab.size(0), "Incompatible features and labels (" + std::to_string(feat.size(0)) + " != " + std::to_string(lab.size(0)) + ")!");
-		NNAssert(sequenceLength <= feat.size(0), "Invalid sequence length (" + std::to_string(sequenceLength) + " > " + std::to_string(feat.size(0)) + ")!");
-		NNAssert(bats <= feat.size(0), "Invalid batch size (" + std::to_string(bats) + " > " + std::to_string(feat.size(0)) + ")!");
+		NNHardAssertEquals(feat.dims(), 2, "Invalid features!");
+		NNHardAssertEquals(lab.dims(), 2, "Invalid labels!");
+		NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNHardAssertLessThanOrEquals(sequenceLength, feat.size(0), "Invalid sequence length!");
+		NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
 		reset();
 	}
 	
 	SequenceBatcher &sequenceLength(size_t sequenceLength)
 	{
-		NNAssert(sequenceLength <= m_feat.size(0), "Invalid sequence length (" + std::to_string(sequenceLength) + " > " + std::to_string(m_feat.size(0)) + ")!");
+		NNAssertLessThanOrEquals(sequenceLength, m_feat.size(0), "Invalid sequence length!");
 		m_sequenceLength = sequenceLength;
+		m_featBatch.resizeDim(0, sequenceLength);
+		m_labBatch.resizeDim(0, sequenceLength);
 		reset();
 		return *this;
 	}
@@ -137,8 +140,10 @@ public:
 	
 	SequenceBatcher &batch(size_t bats)
 	{
-		NNAssert(bats <= m_feat.size(0), "Invalid batch size (" + std::to_string(bats) + " > " + std::to_string(m_feat.size(0)) + ")!");
+		NNAssertLessThanOrEquals(bats, m_feat.size(0), "Invalid batch size!");
 		m_batch = bats;
+		m_featBatch.resizeDim(1, bats);
+		m_labBatch.resizeDim(1, bats);
 		reset();
 		return *this;
 	}

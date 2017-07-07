@@ -12,13 +12,37 @@ class Container : public Module<T>
 {
 public:
 	using Module<T>::batch;
+	using Module<T>::training;
+	
+	Container() {}
+	
+	Container(const Container &module) : m_components(module.m_components)
+	{
+		for(Module<T> *&m : m_components)
+			m = m->copy(); /// \note intentionally not releasing; module still owns the original
+	}
+	
+	Container &operator=(const Container &module)
+	{
+		m_components = module.m_components;
+		for(Module<T> *&m : m_components)
+			m = m->copy(); /// \note intentionally not releasing; module still owns the original
+		return *this;
+	}
 	
 	virtual ~Container()
 	{
 		for(Module<T> *comp : m_components)
-		{
 			delete comp;
-		}
+	}
+	
+	/// Sets whether this module is in training mode.
+	virtual Container &training(bool training) override
+	{
+		Module<T>::training(training);
+		for(Module<T> *comp : m_components)
+			comp->training(training);
+		return *this;
 	}
 	
 	/// Get a specific component from this container.
@@ -61,9 +85,7 @@ public:
 	virtual Container &clear()
 	{
 		for(Module<T> *comp : m_components)
-		{
 			delete comp;
-		}
 		m_components.clear();
 		return *this;
 	}
@@ -72,9 +94,7 @@ public:
 	virtual Container &batch(size_t bats) override
 	{
 		for(Module<T> *component : m_components)
-		{
 			component->batch(bats);
-		}
 		return *this;
 	}
 	
@@ -83,12 +103,8 @@ public:
 	{
 		Storage<Tensor<T> *> params;
 		for(Module<T> *comp : m_components)
-		{
 			for(Tensor<T> *param : comp->parameterList())
-			{
 				params.push_back(param);
-			}
-		}
 		return params;
 	}
 	
@@ -97,12 +113,8 @@ public:
 	{
 		Storage<Tensor<T> *> blams;
 		for(Module<T> *comp : m_components)
-		{
 			for(Tensor<T> *blam : comp->gradList())
-			{
 				blams.push_back(blam);
-			}
-		}
 		return blams;
 	}
 	
@@ -111,12 +123,8 @@ public:
 	{
 		Storage<Tensor<T> *> states;
 		for(Module<T> *comp : m_components)
-		{
 			for(Tensor<T> *state : comp->stateList())
-			{
 				states.push_back(state);
-			}
-		}
 		return states;
 	}
 	

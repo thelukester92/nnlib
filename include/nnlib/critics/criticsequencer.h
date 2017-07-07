@@ -15,7 +15,7 @@ public:
 	CriticSequencer(Critic<T> *critic, size_t sequenceLength = 1) :
 		m_critic(critic)
 	{
-		NNAssert(m_critic->inGrad().dims() == 2, "CriticSequencer expects matrix critic as input!");
+		NNHardAssertEquals(m_critic->inGrad().dims(), 2, "Expected matrix input!");
 		Storage<size_t> shape = { sequenceLength };
 		for(const size_t &d : m_critic->inputs())
 			shape.push_back(d);
@@ -51,9 +51,10 @@ public:
 	/// Calculate the loss (how far input is from target).
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.dims() == 3 && target.dims() == 3, "CriticSequencer expects a sequence of batches!");
-		NNAssert(input.size() == m_critic->inGrad().size(), "Incompatible input!");
-		NNAssert(target.size() == m_critic->inGrad().size(), "Incompatible target!");
+		NNAssertEquals(input.dims(), 3, "Expected a sequence of batches!");
+		NNAssertEquals(target.dims(), 3, "Expected a sequence of batches!");
+		NNAssertEquals(input.size(), m_critic->inGrad().size(), "Incompatible input!");
+		NNAssertEquals(target.size(), m_critic->inGrad().size(), "Incompatible target!");
 		const Storage<size_t> &shape = m_critic->inGrad().shape();
 		return m_critic->forward(input.view(shape), target.view(shape));
 	}
@@ -61,9 +62,10 @@ public:
 	/// Calculate the gradient of the loss w.r.t. the input.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.dims() == 3 && target.dims() == 3, "CriticSequencer expects a sequence of batches!");
-		NNAssert(input.size() == m_critic->inGrad().size(), "Incompatible input!");
-		NNAssert(target.size() == m_critic->inGrad().size(), "Incompatible target!");
+		NNAssertEquals(input.dims(), 3, "Expected a sequence of batches!");
+		NNAssertEquals(target.dims(), 3, "Expected a sequence of batches!");
+		NNAssertEquals(input.size(), m_critic->inGrad().size(), "Incompatible input!");
+		NNAssertEquals(target.size(), m_critic->inGrad().size(), "Incompatible target!");
 		const Storage<size_t> &shape = m_critic->inGrad().shape();
 		m_critic->backward(input.view(shape), target.view(shape));
 		return m_inGrad;
@@ -78,7 +80,7 @@ public:
 	/// Set the input shape of this critic, including batch and sequence length.
 	virtual CriticSequencer &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "CriticSequencer must have 3D input!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
 		m_inGrad.resize(dims);
 		m_critic->inGrad() = m_inGrad.view(dims[0] * dims[1], dims[2]);
 		return *this;

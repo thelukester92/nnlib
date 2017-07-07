@@ -57,13 +57,45 @@ public:
 		m_stateGrad(m_outMod->outputs(), true),
 		m_resetGrad(true)
 	{
-		NNAssert(m_inpMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
-		NNAssert(m_memMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
-		NNAssert(m_outMod->outputs().size() == 2, "Expected matrix inputs to Recurrent module!");
+		NNAssertEquals(m_inpMod->outputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(m_memMod->outputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(m_outMod->outputs().size(), 2, "Expected matrix input!");
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
 		forget();
+	}
+	
+	Recurrent(const Recurrent &module) :
+		m_inpMod(module.m_inpMod->copy()),
+		m_memMod(module.m_memMod->copy()),
+		m_outMod(module.m_outMod->copy()),
+		m_state(module.m_state.copy()),
+		m_statePrev(module.m_statePrev.copy()),
+		m_stateGrad(module.m_stateGrad.copy()),
+		m_resetGrad(module.m_resetGrad)
+	{
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
+	}
+	
+	Recurrent &operator=(const Recurrent &module)
+	{
+		Container<T>::clear();
+		m_inpMod	= module.m_inpMod->copy();
+		m_memMod	= module.m_memMod->copy();
+		m_outMod	= module.m_outMod->copy();
+		
+		Container<T>::add(m_inpMod);
+		Container<T>::add(m_memMod);
+		Container<T>::add(m_outMod);
+		
+		m_state		= module.m_state.copy();
+		m_statePrev	= module.m_statePrev.copy();
+		m_stateGrad	= module.m_stateGrad.copy();
+		m_resetGrad	= module.m_resetGrad;
+		return *this;
 	}
 	
 	// MARK: Container methods
@@ -71,19 +103,19 @@ public:
 	/// Cannot add a component to this container.
 	virtual Recurrent &add(Module<T> *component) override
 	{
-		throw std::runtime_error("Cannot add components to a recurrent module!");
+		throw Error("Cannot add components to a recurrent module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Module<T> *remove(size_t) override
 	{
-		throw std::runtime_error("Cannot remove components from a recurrent module!");
+		throw Error("Cannot remove components from a recurrent module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Recurrent &clear() override
 	{
-		throw std::runtime_error("Cannot remove components from a recurrent module!");
+		throw Error("Cannot remove components from a recurrent module!");
 	}
 	
 	// MARK: Module methods
@@ -174,36 +206,30 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
 	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Recurrent>::name
-			<< m_inpMod << m_memMod << m_outMod;
+		ar(m_inpMod, m_memMod, m_outMod, m_state);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Recurrent>::name,
-			"Unexpected type! Expected '" + Binding<Recurrent>::name + "', got '" + str + "'!"
-		);
-		
 		Container<T>::clear();
-		in >> m_inpMod >> m_memMod >> m_outMod;
+		ar(m_inpMod, m_memMod, m_outMod, m_state);
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
 		
-		m_state.resize(m_outMod->outputs());
+		NNHardAssertEquals(m_state.shape(), m_outMod->outputs(), "Incompatible recurrent state!");
+		
 		m_statePrev.resize(m_outMod->outputs());
 		m_stateGrad.resize(m_outMod->outputs());
 		m_resetGrad = true;
@@ -221,9 +247,9 @@ private:
 	bool m_resetGrad;
 };
 
-NNSerializable(Recurrent<double>, Module<double>);
-NNSerializable(Recurrent<float>, Module<float>);
-
 }
+
+NNRegisterType(Recurrent<float>, Module<float>);
+NNRegisterType(Recurrent<double>, Module<double>);
 
 #endif

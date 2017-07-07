@@ -114,36 +114,13 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
-	
-	/// \brief Write to an archive.
+	/// \brief Read from/write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive from which to read or to which to write.
+	template <typename Archive>
+	void serialize(Archive &ar)
 	{
-		out << Binding<Sequential>::name << m_components.size();
-		for(Module<T> *component : m_components)
-			out << *component;
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
-	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Sequential>::name,
-			"Unexpected type! Expected '" + Binding<Sequential>::name + "', got '" + str + "'!"
-		);
-		
-		size_t n;
-		in >> n;
-		
-		m_components.resize(n);
-		for(size_t i = 0; i < n; ++i)
-			in >> m_components[i];
+		ar(m_components);
 	}
 	
 private:
@@ -167,9 +144,9 @@ private:
 	}
 };
 
-NNSerializable(Sequential<double>, Module<double>);
-NNSerializable(Sequential<float>, Module<float>);
-
 }
+
+NNRegisterType(Sequential<float>, Module<float>);
+NNRegisterType(Sequential<double>, Module<double>);
 
 #endif

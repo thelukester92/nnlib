@@ -40,6 +40,28 @@ public:
 		m_addBuffer(1)
 	{}
 	
+	Linear(const Linear &module) :
+		m_weights(module.m_weights.copy()),
+		m_weightsGrad(module.m_weightsGrad.copy()),
+		m_bias(module.m_bias.copy()),
+		m_biasGrad(module.m_biasGrad.copy()),
+		m_inGrad(module.m_inGrad.copy()),
+		m_output(module.m_output.copy()),
+		m_addBuffer(module.m_addBuffer.copy())
+	{}
+	
+	Linear &operator=(const Linear &module)
+	{
+		m_weights		= module.m_weights.copy();
+		m_weightsGrad	= module.m_weightsGrad.copy();
+		m_bias			= module.m_bias.copy();
+		m_biasGrad		= module.m_biasGrad.copy();
+		m_inGrad		= module.m_inGrad.copy();
+		m_output		= module.m_output.copy();
+		m_addBuffer		= module.m_addBuffer.copy();
+		return *this;
+	}
+	
 	/// Set weights to uniformly distributed random values.
 	Linear &reset()
 	{
@@ -69,7 +91,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		
 		// output (bats x outs) = input (bats x inps) x weights (inps x outs)
 		m_output.assignMM(input, m_weights);
@@ -83,8 +105,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.dims() == 2, "Linear expects Matrix input!");
-		NNAssert(outGrad.dims() == 2, "Linear expects Matrix output gradient!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
 		
 		// biasGrad (outs x 1) += outGrad^T (outs x bats) x addBuffer (bats x 1)
 		m_biasGrad.assignMTV(outGrad, m_addBuffer, 1, 1);
@@ -113,7 +135,7 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual Linear &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 2, "Linear only works with matrix inputs!");
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		Module<T>::inputs(dims);
 		m_weights.resize(m_inGrad.size(1), m_output.size(1));
 		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
@@ -123,7 +145,7 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual Linear &outputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 2, "Linear only works with matrix outputs!");
+		NNAssertEquals(dims.size(), 2, "Expected matrix output!");
 		Module<T>::outputs(dims);
 		m_weights.resize(m_inGrad.size(1), m_output.size(1));
 		m_weightsGrad.resize(m_inGrad.size(1), m_output.size(1));
@@ -152,37 +174,34 @@ public:
 		return { &m_weightsGrad, &m_biasGrad };
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Linear>::name << m_weights << m_bias << batch();
+		ar(m_weights, m_bias, batch());
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Linear>::name,
-			"Unexpected type! Expected '" + Binding<Linear>::name + "', got '" + str + "'!"
-		);
-		
 		size_t bats;
-		in >> m_weights >> m_bias >> bats;
-		NNAssert(m_weights.dims() == 2 && m_bias.dims() == 1, "Unexpected tensor for Linear!");
+		ar(m_weights, m_bias, bats);
 		
-		Module<T>::inputs({ bats, m_weights.size(0) });
-		Module<T>::outputs({ bats, m_weights.size(1) });
+		NNAssertEquals(m_weights.dims(), 2, "Expected weights to be a matrix!");
+		NNAssertEquals(m_bias.dims(), 1, "Expected bias to be a vector!");
+		NNAssertEquals(m_bias.size(0), m_weights.size(1), "Incompatible weights and bias!");
+		
 		m_weightsGrad.resize(m_weights.shape());
 		m_biasGrad.resize(m_bias.shape());
+		m_inGrad.resize({ bats, m_weights.size(0) });
+		m_output.resize({ bats, m_weights.size(1) });
+		m_addBuffer.resize(bats).fill(1);
 	}
 	
 private:
@@ -198,9 +217,9 @@ private:
 	Tensor<T> m_addBuffer;		///< A vector of 1s for outer-producting bias.
 };
 
-NNSerializable(Linear<double>, Module<double>);
-NNSerializable(Linear<float>, Module<float>);
-
 }
+
+NNRegisterType(Linear<float>, Module<float>);
+NNRegisterType(Linear<double>, Module<double>);
 
 #endif

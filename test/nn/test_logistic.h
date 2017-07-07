@@ -2,6 +2,7 @@
 #define TEST_LOGISTIC_H
 
 #include "nnlib/nn/logistic.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLogistic()
@@ -24,14 +25,14 @@ void TestLogistic()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Logistic::forward failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Logistic::backward failed!");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "Logistic::forward failed!");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "Logistic::backward failed!");
 	
 	map.inputs({ 3, 4 });
-	NNHardAssert(map.inputs() == map.outputs(), "Logistic::inputs failed to resize outputs!");
+	NNAssert(map.inputs() == map.outputs(), "Logistic::inputs failed to resize outputs!");
 	
 	map.outputs({ 12, 3 });
-	NNHardAssert(map.inputs() == map.outputs(), "Logistic::outputs failed to resize inputs!");
+	NNAssert(map.inputs() == map.outputs(), "Logistic::outputs failed to resize inputs!");
 	
 	bool ok = true;
 	try
@@ -39,17 +40,11 @@ void TestLogistic()
 		map.resize({ 3, 4 }, { 4, 3 });
 		ok = false;
 	}
-	catch(const std::runtime_error &e) {}
-	NNHardAssert(ok, "Logistic::resize allowed unequal inputs and outputs!");
+	catch(const Error &e) {}
+	NNAssert(ok, "Logistic::resize allowed unequal inputs and outputs!");
 	
-	Logistic<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNHardAssert(
-		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"Logistic::save and/or Logistic::load failed!"
-	);
-	
-	delete deserialized;
+	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif

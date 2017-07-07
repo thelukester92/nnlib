@@ -55,25 +55,6 @@ public:
 		return step(input, target);
 	}
 	
-	// MARK: Serialization
-	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const
-	{
-		throw std::runtime_error("This optimizer does not support serialization!");
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in)
-	{
-		throw std::runtime_error("This optimizer does not support serialization!");
-	}
-	
 protected:
 	Module<T> &m_model;
 	Critic<T> &m_critic;

@@ -3,6 +3,7 @@
 
 #include "nnlib/nn/sequencer.h"
 #include "nnlib/nn/lstm.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestSequencer()
@@ -88,29 +89,75 @@ void TestSequencer()
 	// Test forward and backward using the parameters and targets above
 	
 	Sequencer<> module(lstm, 3);
+	NNAssertEquals(lstm, &module.module(), "Sequencer::Sequencer failed!");
+	
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	NNHardAssert(module.output().add(out, -1).square().sum() < 1e-9, "Sequencer::forward failed!");
-	NNHardAssert(module.inGrad().add(ing, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong inGrad!");
-	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong grad!");
+	NNAssert(module.output().add(out, -1).square().sum() < 1e-9, "Sequencer::forward failed!");
+	NNAssert(module.inGrad().add(ing, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong inGrad!");
+	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong grad!");
 	
 	lstm->gradClip(0.03);
 	module.forget();
 	module.forward(inp);
 	module.backward(inp, grd);
-	NNHardAssert(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "Sequencer::gradClip failed!");
+	NNAssert(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "Sequencer::gradClip failed!");
 	
 	module.batch(32);
-	NNHardAssert(module.batch() == 32, "Sequencer::batch failed!");
+	NNAssert(module.batch() == 32, "Sequencer::batch failed!");
 	
-	Sequencer<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNHardAssert(
-		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-		"Sequencer::save and/or Sequencer::load failed!"
-	);
-	delete deserialized;
+	bool ok = true;
+	try
+	{
+		module.add(nullptr);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Sequencer::add failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.remove(0);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Sequencer::remove failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.clear();
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Sequencer::clear failed to throw an error!");
+	
+	Storage<size_t> dims = { 3, 6, 5 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Sequencer::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Sequencer::outputs failed!");
+	
+	dims = { 10, 12, 5 };
+	
+	module.safeInputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Sequencer::safeInputs failed!");
+	
+	module.safeOutputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Sequencer::safeOutputs failed!");
+	
+	Sequencer<> sequencer(new Linear<>());
+	sequencer.safeInputs({ 3, 6, 5 });
+	sequencer.safeOutputs({ 10, 20, 30 });
+	NNAssertEquals(sequencer.inputs(), Storage<size_t>({ 10, 20, 5 }), "Sequencer::safeInputs failed!")
+	NNAssertEquals(sequencer.outputs(), Storage<size_t>({ 10, 20, 30 }), "Sequencer::safeOutputs failed!")
+	
+	TestSerializationOfModule(module);
+	TestModule(module);
 }
 
 #endif

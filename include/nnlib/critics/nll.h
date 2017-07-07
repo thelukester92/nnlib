@@ -15,7 +15,7 @@ public:
 		m_inGrad(shape, true),
 		m_average(average)
 	{
-		NNAssert(shape.size() == 2, "Input to NLL must be a matrix!");
+		NNHardAssertEquals(shape.size(), 2, "Expected matrix input!");
 	}
 	
 	bool average() const
@@ -32,15 +32,15 @@ public:
 	/// L = 1/n sum_i( -input(target(i)) )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.size(0) == target.size(0), "Incompatible operands to NLL!");
-		NNAssert(input.dims() == 2, "Input to NLL must be a Matrix!");
-		NNAssert(target.size(1) == 1, "Target for NLL must be a single integer!");
+		NNAssertEquals(input.size(0), target.size(0), "Incompatible operands!");
+		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
+		NNAssertEquals(target.size(1), 1, "Expected single-column target!");
 		
 		T sum = 0;
 		size_t j;
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
-			NNAssert(target(i, 0) >= 0, "Target for NLL must be positive!");
+			NNAssertGreaterThanOrEquals(target(i, 0), 0, "Expected positive target!");
 			j = target(i, 0);
 			sum -= input(i, j);
 		}
@@ -54,9 +54,9 @@ public:
 	/// dL/di = target == i ? -1/n : 0
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.size(0) == target.size(0), "Incompatible operands to NLL!");
-		NNAssert(input.dims() == 2, "Input to NLL must be a Matrix!");
-		NNAssert(target.size(1) == 1, "Target for NLL must be a single integer!");
+		NNAssertEquals(input.size(0), target.size(0), "Incompatible operands!");
+		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
+		NNAssertEquals(target.size(1), 1, "Expected single-column target!");
 		
 		m_inGrad.fill(0);
 		T weight = -1.0;
@@ -67,7 +67,7 @@ public:
 		size_t j;
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
-			NNAssert(target(i, 0) >= 0, "Target for NLL must be positive!");
+			NNAssertGreaterThanOrEquals(target(i, 0), 0, "Expected positive target!");
 			j = target(i, 0);
 			m_inGrad(i, j) = weight;
 		}

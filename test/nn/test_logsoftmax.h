@@ -2,6 +2,7 @@
 #define TEST_LOGSOFTMAX_H
 
 #include "nnlib/nn/logsoftmax.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLogSoftMax()
@@ -24,14 +25,14 @@ void TestLogSoftMax()
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNHardAssert(map.output().addM(out, -1).square().sum() < 1e-9, "LogSoftMax::forward failed!");
-	NNHardAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "LogSoftMax::backward failed!");
+	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "LogSoftMax::forward failed!");
+	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "LogSoftMax::backward failed!");
 	
 	map.inputs({ 3, 4 });
-	NNHardAssert(map.inputs() == map.outputs(), "LogSoftMax::inputs failed to resize outputs!");
+	NNAssert(map.inputs() == map.outputs(), "LogSoftMax::inputs failed to resize outputs!");
 	
 	map.outputs({ 12, 3 });
-	NNHardAssert(map.inputs() == map.outputs(), "LogSoftMax::outputs failed to resize inputs!");
+	NNAssert(map.inputs() == map.outputs(), "LogSoftMax::outputs failed to resize inputs!");
 	
 	bool ok = true;
 	try
@@ -39,17 +40,17 @@ void TestLogSoftMax()
 		map.resize({ 3, 4 }, { 4, 3 });
 		ok = false;
 	}
-	catch(const std::runtime_error &e) {}
-	NNHardAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
+	catch(const Error &e) {}
+	NNAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
 	
-	LogSoftMax<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << map).str()) >> deserialized;
-	NNHardAssert(
-		deserialized != nullptr && map.inputs() == deserialized->inputs() && map.outputs() == deserialized->outputs(),
-		"LogSoftMax::save and/or LogSoftMax::load failed!"
-	);
+	map.resize({ 3, 4 }, { 3, 4 });
+	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::resize failed!");
 	
-	delete deserialized;
+	map.safeResize({ 12, 4 }, { 12, 4 });
+	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::safeResize failed!");
+	
+	TestSerializationOfModule(map);
+	TestModule(map);
 }
 
 #endif

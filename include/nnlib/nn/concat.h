@@ -34,12 +34,28 @@ public:
 		return *this;
 	}
 	
+	Concat(const Concat &module) :
+		Container<T>(module),
+		m_output(module.m_output.copy()),
+		m_inGrad(module.m_inGrad.copy())
+	{}
+	
+	Concat &operator=(const Concat &module)
+	{
+		*static_cast<Container<T> *>(this) = module;
+		m_output = module.m_output.copy();
+		m_inGrad = module.m_inGrad.copy();
+		return *this;
+	}
+	
 	// MARK: Container methods
 	
 	/// Add a component to this container, enforcing compatibility.
 	virtual Concat &add(Module<T> *component) override
 	{
-		NNAssert(components() == 0 || m_components[0]->inputs() == component->inputs(), "Incompatible concat component!");
+		NNAssert(components() == 0 || m_components[0]->inputs() == component->inputs(), "Incompatible component!");
+		NNAssertEquals(component->inputs().size(), 2, "Expected matrix input!");
+		NNAssertEquals(component->outputs().size(), 2, "Expected matrix output!");
 		m_components.push_back(component);
 		return resizeBuffers();
 	}
@@ -47,9 +63,9 @@ public:
 	/// Remove and return a specific component from this container, enforcing compatibility.
 	virtual Module<T> *remove(size_t index) override
 	{
-		Module<T> *comp = m_components[index];
-		m_components.erase(index);
-		resizeBuffers();
+		Module<T> *comp = Container<T>::remove(index);
+		if(components() > 0)
+			resizeBuffers();
 		return comp;
 	}
 	
@@ -59,9 +75,7 @@ public:
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		for(Module<T> *component : m_components)
-		{
 			component->forward(input);
-		}
 		return m_output;
 	}
 	
@@ -96,17 +110,16 @@ public:
 	/// Set the input shape of this module, including batch.
 	virtual Concat &inputs(const Storage<size_t> &dims) override
 	{
+		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
 		for(Module<T> *component : m_components)
-		{
 			component->inputs(dims);
-		}
 		return resizeBuffers();
 	}
 	
 	/// Set the output shape of this module, including batch.
 	virtual Concat &outputs(const Storage<size_t> &dims) override
 	{
-		throw std::runtime_error("Cannot directly change concat outputs! Add or remove components instead.");
+		throw Error("Cannot directly change concat outputs! Add or remove components instead.");
 	}
 	
 	/// Set the batch size of this module.
@@ -118,54 +131,47 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// The archive takes care of whitespace for plaintext.
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Concat>::name << m_components.size();
-		for(Module<T> *component : m_components)
-			out << *component;
+		NNAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
+		ar(m_components);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Concat>::name,
-			"Unexpected type! Expected '" + Binding<Concat>::name + "', got '" + str + "'!"
-		);
+		Container<T>::clear();
+		ar(m_components);
 		
-		size_t n;
-		in >> n;
+		NNHardAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
+		NNHardAssertEquals(m_components[0]->inputs().size(), 2, "Expected matrix input!");
+		NNHardAssertEquals(m_components[0]->outputs().size(), 2, "Expected matrix output!");
 		
-		m_components.resize(n, nullptr);
-		for(size_t i = 0; i < n; ++i)
+		for(size_t i = 1, end = m_components.size(); i != end; ++i)
 		{
-			in >> m_components[i];
-			NNAssert(m_components[i] != nullptr, "Failed to load component!");
+			NNHardAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible component!");
+			NNHardAssertEquals(m_components[i]->outputs().size(), 2, "Expected matrix output!");
 		}
+		
+		resizeBuffers();
 	}
 	
 private:
 	Concat &resizeBuffers()
 	{
-		NNAssert(
-			components() > 0 && m_components[0]->outputs().size() == 2,
-			"Expected matrix input and output for concat!"
-		);
+		NNAssertGreaterThan(components(), 0, "Expected at least one component!");
 		
 		size_t outs = 0, bats = m_components[0]->outputs()[0], inps = m_components[0]->inputs()[1];
 		for(Module<T> *component : m_components)
-		{
 			outs += component->outputs()[1];
-		}
 		
 		m_output.resize(bats, outs);
 		m_inGrad.resize(bats, inps);
@@ -185,9 +191,9 @@ private:
 	Tensor<T> m_inGrad;
 };
 
-NNSerializable(Concat<double>, Module<double>);
-NNSerializable(Concat<float>, Module<float>);
-
 }
+
+NNRegisterType(Concat<double>, Module<double>);
+NNRegisterType(Concat<float>, Module<float>);
 
 #endif

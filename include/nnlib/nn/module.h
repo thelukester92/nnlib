@@ -2,16 +2,45 @@
 #define NN_MODULE_H
 
 #include "../tensor.h"
+#include "../detail/binding.h"
 
 namespace nnlib
 {
 
-/// The abtract base class for all neural network modules.
+/// \brief The abtract base class for all neural network modules.
+///
+/// \note The assignment operator invalidates parameters, grad, and state.
+/// They must be reflattened to use them.
 template <typename T = double>
 class Module
 {
 public:
+	Module() : m_training(true) {}
+	Module(const Module &) = delete;
+	Module &operator=(const Module &) = delete;
 	virtual ~Module() {}
+	
+	/// /brief A convenience method for contructing a copy of the current module.
+	///
+	/// Rather than overriding this in a subclass, simply implement the copy constructor.
+	/// This will only work if the actual type of the instance has been registered with NNRegisterType.
+	virtual Module *copy() final
+	{
+		return detail::Binding<Module>::constructCopy(this);
+	}
+	
+	/// Returns whether this module is in training mode.
+	virtual bool training() const
+	{
+		return m_training;
+	}
+	
+	/// Sets whether this module is in training mode.
+	virtual Module &training(bool training)
+	{
+		m_training = training;
+		return *this;
+	}
 	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
@@ -170,31 +199,11 @@ public:
 		return m_flatState = Tensor<T>::flatten(stateList());
 	}
 	
-	// MARK: Serialization
-	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// By default, modules are not serializable.
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const
-	{
-		throw std::runtime_error("This type is not serializable!");
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// By default, modules are not serializable.
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in)
-	{
-		throw std::runtime_error("This type is not serializable!");
-	}
-	
 protected:
 	Tensor<T> m_flatParameters;
 	Tensor<T> m_flatGrad;
 	Tensor<T> m_flatState;
+	bool m_training;
 };
 
 }

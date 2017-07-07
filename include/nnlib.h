@@ -1,3 +1,10 @@
+/// Serialization (note: these must be included before including serializable types)
+#include "nnlib/serialization/archive.h"
+#include "nnlib/serialization/arff.h"
+#include "nnlib/serialization/basic.h"
+#include "nnlib/serialization/binary.h"
+#include "nnlib/serialization/csv.h"
+
 /// Top-level Classes
 #include "nnlib/error.h"
 #include "nnlib/storage.h"
@@ -17,6 +24,8 @@
 #include "nnlib/nn/batchnorm.h"
 #include "nnlib/nn/concat.h"
 #include "nnlib/nn/container.h"
+#include "nnlib/nn/dropconnect.h"
+#include "nnlib/nn/dropout.h"
 #include "nnlib/nn/identity.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/logistic.h"
@@ -38,10 +47,9 @@
 #include "nnlib/opt/sgd.h"
 
 /// Utilities
-#include "nnlib/util/archive.h"
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"
-#include "nnlib/util/file.h"
 #include "nnlib/util/progress.h"
 #include "nnlib/util/random.h"
+#include "nnlib/util/tensor_util.h"
 #include "nnlib/util/timer.h"

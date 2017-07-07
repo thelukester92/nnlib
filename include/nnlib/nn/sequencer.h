@@ -19,48 +19,68 @@ public:
 	using Container<T>::batch;
 	using Container<T>::add;
 	
-	Sequencer(Module<T> *module, size_t sequenceLength = 1) :
+	Sequencer(Module<T> *module = nullptr, size_t sequenceLength = 1) :
 		m_module(module),
-		m_state(&module->state()),
-		m_states(sequenceLength, m_state->size(0))
+		m_state(module == nullptr ? nullptr : &module->state()),
+		m_states(sequenceLength, module == nullptr ? 0 : m_state->size(0))
 	{
-		Storage<size_t> inps = { sequenceLength };
-		for(size_t size : m_module->inputs())
-			inps.push_back(size);
-		m_inGrad.resize(inps);
-		
-		Storage<size_t> outs = { sequenceLength };
-		for(size_t size : m_module->outputs())
-			outs.push_back(size);
-		m_output.resize(outs);
-		
+		if(module != nullptr)
+		{
+			Storage<size_t> inps = { sequenceLength };
+			for(size_t size : m_module->inputs())
+				inps.push_back(size);
+			m_inGrad.resize(inps);
+			
+			Storage<size_t> outs = { sequenceLength };
+			for(size_t size : m_module->outputs())
+				outs.push_back(size);
+			m_output.resize(outs);
+		}
 		Container<T>::add(module);
 	}
 	
-	Sequencer() :
-		m_module(nullptr),
-		m_state(nullptr),
-		m_states(1, 0)
-	{}
+	Sequencer(const Sequencer &module) :
+		m_module(module.m_module == nullptr ? nullptr : module.m_module->copy()),
+		m_output(module.m_output.copy()),
+		m_inGrad(module.m_inGrad.copy()),
+		m_state(m_module == nullptr ? nullptr : &m_module->state()),
+		m_states(module.m_states.copy())
+	{
+		Container<T>::add(m_module);
+	}
+	
+	Sequencer &operator=(const Sequencer &module)
+	{
+		m_module	= module.m_module == nullptr ? nullptr : module.m_module->copy();
+		m_state		= m_module == nullptr ? nullptr : &m_module->state();
+		m_states	= module.m_states.copy();
+		m_inGrad	= module.m_inGrad.copy();
+		m_output	= module.m_output.copy();
+		
+		Container<T>::clear();
+		Container<T>::add(m_module);
+		
+		return *this;
+	}
 	
 	// MARK: Container methods
 	
 	/// Cannot add a component to this container.
 	virtual Sequencer &add(Module<T> *) override
 	{
-		throw std::runtime_error("Cannot add components to a Sequencer module!");
+		throw Error("Cannot add components to a Sequencer module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Module<T> *remove(size_t) override
 	{
-		throw std::runtime_error("Cannot remove components from a Sequencer module!");
+		throw Error("Cannot remove components from a Sequencer module!");
 	}
 	
 	/// Cannot remove a component from this container.
 	virtual Sequencer &clear() override
 	{
-		throw std::runtime_error("Cannot remove components from a Sequencer module!");
+		throw Error("Cannot remove components from a Sequencer module!");
 	}
 	
 	// MARK: Sequencer methods
@@ -69,6 +89,17 @@ public:
 	Module<T> &module()
 	{
 		return *m_module;
+	}
+	
+	/// \brief Set the module used by this sequencer.
+	///
+	/// This also deletes the module previously used by this sequencer.
+	Sequencer &module(Module<T> &module)
+	{
+		m_module = &module;
+		Container<T>::clear();
+		Container<T>::add(m_module);
+		return *this;
 	}
 	
 	/// Set the length of the sequence this module uses.
@@ -91,7 +122,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		
 		for(size_t i = 0, end = input.size(0); i < end; ++i)
 		{
@@ -105,8 +136,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.shape() == m_inGrad.shape(), "Incompatible input! Must be sequence x batch x inputs!");
-		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible outGrad! Must be sequence x batch x outputs!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
 		
 		for(int i = input.size(0) - 1; i >= 0; --i)
 		{
@@ -129,34 +160,26 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Set the input shape of this module, including batch.
+	/// Set the input shape of this module, including sequence length and batch.
 	virtual Sequencer &inputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
 		
 		Storage<size_t> newDims = dims;
 		newDims.erase(0);
 		m_module->inputs(newDims);
 		
 		m_inGrad.resize(dims);
-		m_output.resizeDim(0, dims[0]);
-		m_output.resizeDim(1, dims[1]);
-		
-		m_module->state();
-		m_states.resizeDim(1, m_state->size(0));
-		
-		return *this;
+		return sequenceLength(dims[0]).batch(dims[1]);
 	}
 	
 	/// Safely (never reset weights) set the input shape of this module.
 	virtual Sequencer &safeInputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D input!");
 		
-		if(dims[2] == 0)
-		{
+		if(inGrad().size(2) == 0)
 			inputs(dims);
-		}
 		else
 		{
 			sequenceLength(dims[0]);
@@ -169,7 +192,7 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual Sequencer &outputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequenceLength x batch x outputs output tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D output!");
 		
 		Storage<size_t> newDims = dims;
 		newDims.erase(0);
@@ -188,12 +211,10 @@ public:
 	/// Safely (never reset weights) set the output shape of this module.
 	virtual Sequencer &safeOutputs(const Storage<size_t> &dims) override
 	{
-		NNAssert(dims.size() == 3, "Sequencer expects a sequence x batch x inputs input tensor!");
+		NNAssertEquals(dims.size(), 3, "Expected 3D output!");
 		
-		if(dims[2] == 0)
-		{
+		if(output().size(2) == 0)
 			outputs(dims);
-		}
 		else
 		{
 			sequenceLength(dims[0]);
@@ -223,33 +244,26 @@ public:
 		return m_output.size(1);
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<Sequencer>::name << sequenceLength() << m_module;
+		ar(sequenceLength(), m_module);
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<Sequencer>::name,
-			"Unexpected type! Expected '" + Binding<Sequencer>::name + "', got '" + str + "'!"
-		);
-		
-		size_t seqLen;
-		in >> seqLen;
-		
 		Container<T>::clear();
-		in >> m_module;
+		size_t seqLen;
+		
+		ar(seqLen, m_module);
+		
 		Container<T>::add(m_module);
 		
 		m_state = &m_module->state();
@@ -276,9 +290,9 @@ private:
 	Tensor<T> m_states;
 };
 
-NNSerializable(Sequencer<double>, Module<double>);
-NNSerializable(Sequencer<float>, Module<float>);
-
 }
+
+NNRegisterType(Sequencer<float>, Module<float>);
+NNRegisterType(Sequencer<double>, Module<double>);
 
 #endif

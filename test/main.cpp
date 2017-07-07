@@ -1,3 +1,12 @@
+// force debugging asserts
+#ifdef OPTIMIZE
+	#warning Debugging asserts have been re-enabled for testing.
+	#undef OPTIMIZE
+#endif
+
+#include "serialization/test_archive.h" // this has to go first
+#include "test_error.h"
+#include "test_storage.h"
 #include "test_tensor.h"
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
@@ -6,6 +15,8 @@
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
 #include "nn/test_concat.h"
+#include "nn/test_dropconnect.h"
+#include "nn/test_dropout.h"
 #include "nn/test_identity.h"
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
@@ -16,6 +27,18 @@
 #include "nn/test_sequencer.h"
 #include "nn/test_sequential.h"
 #include "nn/test_tanh.h"
+#include "opt/test_adam.h"
+#include "opt/test_nadam.h"
+#include "opt/test_rmsprop.h"
+#include "opt/test_sgd.h"
+#include "serialization/test_arff.h"
+#include "serialization/test_basic.h"
+#include "serialization/test_binary.h"
+#include "serialization/test_csv.h"
+#include "util/test_args.h"
+#include "util/test_batcher.h"
+#include "util/test_random.h"
+using namespace nnlib;
 
 #include <iostream>
 #include <string>
@@ -24,51 +47,75 @@
 #include <functional>
 using namespace std;
 
-#define TEST(Class) { std::string("Testing ") + #Class, Test##Class }
+#define TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
 
 int main()
 {
 	int ret = 0;
 	
-	initializer_list<pair<std::string, std::function<void()>>> tests = {
+	initializer_list<pair<string, function<void()>>> tests = {
+		// top level
+		TEST("", Error),
+		TEST("", Storage),
+		TEST("", Tensor),
+		
 		// critics
-		TEST(CriticSequencer),
-		TEST(MSE),
-		TEST(NLL),
+		TEST("critics/", CriticSequencer),
+		TEST("critics/", MSE),
+		TEST("critics/", NLL),
 		
 		// math
-		TEST(MathBase),
-		TEST(MathBLAS),
+		TEST("math/", MathBase),
+		TEST("math/", MathBLAS),
 		
 		// nn
-		TEST(BatchNorm),
-		TEST(Concat),
-		TEST(Identity),
-		TEST(Linear),
-		TEST(Logistic),
-		TEST(LogSoftMax),
-		TEST(LSTM),
-		TEST(Recurrent),
-		TEST(ReLU),
-		TEST(Sequencer),
-		TEST(Sequential),
-		TEST(TanH)
+		TEST("nn/", BatchNorm),
+		TEST("nn/", Concat),
+		TEST("nn/", DropConnect),
+		TEST("nn/", Dropout),
+		TEST("nn/", Identity),
+		TEST("nn/", Linear),
+		TEST("nn/", Logistic),
+		TEST("nn/", LogSoftMax),
+		TEST("nn/", LSTM),
+		TEST("nn/", Recurrent),
+		TEST("nn/", ReLU),
+		TEST("nn/", Sequencer),
+		TEST("nn/", Sequential),
+		TEST("nn/", TanH),
+		
+		// opt
+		TEST("opt/", Adam),
+		TEST("opt/", Nadam),
+		TEST("opt/", RMSProp),
+		TEST("opt/", SGD),
+		
+		// serialization
+		TEST("serialization/", ArffSerializer),
+		TEST("serialization/", BasicArchive),
+		TEST("serialization/", BinaryArchive),
+		TEST("serialization/", CsvSerializer),
+		
+		// util
+		TEST("util/", Args),
+		TEST("util/", Batcher),
+		TEST("util/", Random)
 	};
 	
 	try
 	{
 		for(auto test : tests)
 		{
-			std::cout << test.first << "..." << std::flush;
+			cout << test.first << "..." << flush;
 			test.second();
-			std::cout << " Passed!" << std::endl;
+			cout << " Passed!" << endl;
 		}
 		
-		std::cout << "All tests passed!" << std::endl;
+		cout << "All tests passed!" << endl;
 	}
-	catch(const std::runtime_error &e)
+	catch(const Error &e)
 	{
-		std::cerr << e.what();
+		cerr << endl << "An error occurred:\n\t" << e.what() << endl;
 		ret = 1;
 	}
 	return ret;

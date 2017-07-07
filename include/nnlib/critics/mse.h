@@ -13,11 +13,16 @@ template <typename T = double>
 class MSE : public Critic<T>
 {
 public:
+	MSE(bool average = true) :
+		m_inGrad(1, 0),
+		m_average(average)
+	{}
+	
 	MSE(const Storage<size_t> &shape, bool average = true) :
 		m_inGrad(shape, true),
 		m_average(average)
 	{
-		NNAssert(shape.size() == 2, "Expected matrix input to MSE!");
+		NNHardAssertEquals(shape.size(), 2, "Expected matrix input!");
 	}
 	
 	bool average() const
@@ -34,8 +39,8 @@ public:
 	/// L = 1/n sum_i( (input(i) - target(i))^2 )
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.shape() == target.shape(), "Incompatible operands to MSE!");
-		NNAssert(input.dims() == 2, "Expected matrix input to MSE!");
+		NNAssertEquals(input.shape(), target.shape(), "Incompatible operands!");
+		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 		auto tar = target.begin();
 		T diff, sum = 0;
 		for(const T &inp : input)
@@ -54,8 +59,9 @@ public:
 	/// dL/di = 2/n (input(i) - target(i))
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssert(input.shape() == target.shape() && input.shape() == m_inGrad.shape(), "Incompatible operands to MSE!");
-		NNAssert(input.dims() == 2, "Expected matrix input to MSE!");
+		NNAssertEquals(input.shape(), target.shape(), "Incompatible operands!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible operands!");
+		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 		
 		T norm = 2.0;
 		if(m_average)

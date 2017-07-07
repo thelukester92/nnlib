@@ -2,6 +2,7 @@
 #define TEST_LINEAR_H
 
 #include "nnlib/nn/linear.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLinear()
@@ -50,20 +51,33 @@ void TestLinear()
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	NNHardAssert(module.output().addM(out, -1).square().sum() < 1e-9, "Linear::forward failed!");
-	NNHardAssert(module.inGrad().addM(ing, -1).square().sum() < 1e-9, "Linear::backward failed; wrong inGrad!");
-	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Linear::backward failed; wrong grad!");
+	NNAssert(module.output().addM(out, -1).square().sum() < 1e-9, "Linear::forward failed!");
+	NNAssert(module.inGrad().addM(ing, -1).square().sum() < 1e-9, "Linear::backward failed; wrong inGrad!");
+	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Linear::backward failed; wrong grad!");
 	
 	module.batch(32);
-	NNHardAssert(module.batch() == 32, "Linear::batch failed!");
+	NNAssert(module.batch() == 32, "Linear::batch failed!");
 	
-	Linear<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNHardAssert(
-		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-		"Linear::save and/or Linear::load failed!"
-	);
-	delete deserialized;
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Linear::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Linear::outputs failed!");
+	
+	module.resize({ 1, 2 }, { 3, 4 });
+	NNAssertEquals(module.inputs(), Storage<size_t>({ 3, 2 }), "Linear::resize failed; wrong inputs!")
+	NNAssertEquals(module.outputs(), Storage<size_t>({ 3, 4 }), "Linear::resize failed; wrong outputs!")
+	
+	Linear<> linear;
+	linear.safeInputs({ 3, 6 });
+	linear.safeOutputs({ 7, 11 });
+	NNAssertEquals(linear.inputs(), Storage<size_t>({ 7, 6 }), "Linear::safeInputs failed!")
+	NNAssertEquals(linear.outputs(), Storage<size_t>({ 7, 11 }), "Linear::safeOutputs failed!")
+	
+	TestSerializationOfModule(module);
+	TestModule(module);
 }
 
 #endif

@@ -27,7 +27,7 @@ public:
 		return *this;
 	}
 	
-	bool hasNext()
+	bool hasNext() const
 	{
 		return m_argi < m_argc;
 	}
@@ -43,7 +43,7 @@ public:
 		return false;
 	}
 	
-	bool nextIsNumber()
+	bool nextIsNumber() const
 	{
 		NNHardAssert(hasNext(), "Attempted to use empty argument stack!");
 		try
@@ -84,13 +84,13 @@ private:
 class ArgsParser
 {
 public:
-	explicit ArgsParser(bool help = true) : m_helpOpt(help ? 'h' : '\0')
+	explicit ArgsParser(bool help = true) : m_helpOpt(help ? 'h' : '\0'), m_nextUnnamedOpt(0)
 	{
 		if(m_helpOpt != '\0')
 			addFlag(m_helpOpt, "help");
 	}
 	
-	explicit ArgsParser(char helpOpt, std::string helpLong = "help") : m_helpOpt(helpOpt)
+	explicit ArgsParser(char helpOpt, std::string helpLong = "help") : m_helpOpt(helpOpt), m_nextUnnamedOpt(0)
 	{
 		if(m_helpOpt != '\0')
 			addFlag(m_helpOpt, helpLong);
@@ -119,6 +119,16 @@ public:
 		return *this;
 	}
 	
+	ArgsParser &addInt(std::string longOpt)
+	{
+		return addInt(++m_nextUnnamedOpt, longOpt);
+	}
+	
+	ArgsParser &addInt(std::string longOpt, int defaultValue)
+	{
+		return addInt(++m_nextUnnamedOpt, longOpt, defaultValue);
+	}
+	
 	ArgsParser &addDouble(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
@@ -134,6 +144,16 @@ public:
 		return *this;
 	}
 	
+	ArgsParser &addDouble(std::string longOpt)
+	{
+		return addDouble(++m_nextUnnamedOpt, longOpt);
+	}
+	
+	ArgsParser &addDouble(std::string longOpt, double defaultValue)
+	{
+		return addDouble(++m_nextUnnamedOpt, longOpt, defaultValue);
+	}
+	
 	ArgsParser &addString(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
@@ -146,16 +166,28 @@ public:
 		addString(opt, longOpt);
 		m_data[opt].type = Type::String;
 		m_stringStorage.push_back(defaultValue);
-		m_data[opt].s = m_stringStorage.back().c_str();
+		m_data[opt].i = m_stringStorage.size() - 1;
 		return *this;
+	}
+	
+	ArgsParser &addString(std::string longOpt)
+	{
+		return addString(++m_nextUnnamedOpt, longOpt);
+	}
+	
+	ArgsParser &addString(std::string longOpt, std::string defaultValue)
+	{
+		return addString(++m_nextUnnamedOpt, longOpt, defaultValue);
 	}
 	
 	/// Parses command line arguments.
 	/// If -h or --help is present, this prints help and ends the program.
-	ArgsParser &parse(int argc, const char **argv)
+	ArgsParser &parse(int argc, const char **argv, bool popCommand = true, std::ostream &out = std::cout)
 	{
 		Args args(argc, argv);
-		args.popString();
+		
+		if(popCommand)
+			args.popString();
 		
 		while(args.hasNext())
 		{
@@ -200,26 +232,26 @@ public:
 				break;
 			case Type::String:
 				m_stringStorage.push_back(args.popString());
-				m_data[opt].s = m_stringStorage.back().c_str();
+				m_data[opt].i = m_stringStorage.size() - 1;
 				break;
 			}
 		}
 		
 		if(m_helpOpt != '\0' && getFlag(m_helpOpt))
 		{
-			printHelp();
-			exit(1);
+			printHelp(out);
+			exit(0);
 		}
 		
 		return *this;
 	}
 	
-	ArgsParser &printHelp(std::ostream &out = std::cout)
+	const ArgsParser &printHelp(std::ostream &out = std::cout) const
 	{
 		out << std::left;
 		
-		std::map<std::string, Data> orderedOpts;
-		for(auto &p : m_data)
+		std::map<std::string, Type> orderedOpts;
+		for(auto &p : m_expected)
 		{
 			orderedOpts.emplace(optName(p.first), p.second);
 		}
@@ -233,13 +265,19 @@ public:
 			else
 				opt = m_longToChar.at(p.first);
 			
-			std::string name = std::string("-") + opt;
-			if(p.first.size() > 1)
-			 	name += ",--" + p.first;
+			std::string name;
+			if(opt < 32)
+				name = "--" + p.first;
+			else
+			{
+				name = std::string("-") + opt;
+				if(p.first.size() > 1)
+			 		name += ",--" + p.first;
+			}
 			
 			out << std::setw(25) << name;
 			
-			switch(p.second.type)
+			switch(p.second)
 			{
 			case Type::Bool:
 				out << "Flag";
@@ -255,22 +293,23 @@ public:
 				break;
 			}
 			
-			if(m_data.find(opt) != m_data.end())
+			auto d = m_data.find(opt);
+			if(d != m_data.end())
 			{
 				out << " [value = ";
-				switch(p.second.type)
+				switch(d->second.type)
 				{
 				case Type::Bool:
-					out << (p.second.b ? "true" : "false");
+					out << (d->second.b ? "true" : "false");
 					break;
 				case Type::Int:
-					out << p.second.i;
+					out << d->second.i;
 					break;
 				case Type::Double:
-					out << p.second.d;
+					out << d->second.d;
 					break;
 				case Type::String:
-					out << "\"" << p.second.s << "\"";
+					out << "\"" << m_stringStorage[d->second.i] << "\"";
 					break;
 				}
 				out << "]";
@@ -282,7 +321,7 @@ public:
 		return *this;
 	}
 	
-	ArgsParser &printOpts(std::ostream &out = std::cout)
+	const ArgsParser &printOpts(std::ostream &out = std::cout) const
 	{
 		out << std::left;
 		
@@ -307,7 +346,7 @@ public:
 				out << p.second.d;
 				break;
 			case Type::String:
-				out << p.second.s;
+				out << m_stringStorage[p.second.i];
 				break;
 			}
 			out << std::endl;
@@ -316,13 +355,19 @@ public:
 		return *this;
 	}
 	
-	bool hasOpt(char opt)
+	bool hasOpt(char opt) const
 	{
 		auto i = m_data.find(opt);
 		return i != m_data.end();
 	}
 	
-	std::string optName(char opt)
+	bool hasOpt(std::string longOpt) const
+	{
+		auto i = m_longToChar.find(longOpt);
+		return i != m_longToChar.end() && hasOpt(i->second);
+	}
+	
+	std::string optName(char opt) const
 	{
 		auto i = m_charToLong.find(opt);
 		if(i != m_charToLong.end())
@@ -331,56 +376,56 @@ public:
 			return std::string(1, opt);
 	}
 	
-	bool getFlag(char opt)
+	bool getFlag(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Bool, "Attempted to get an incompatible type!");
 		return m_data.at(opt).b;
 	}
 	
-	bool getFlag(std::string opt)
+	bool getFlag(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
 		return getFlag(i->second);
 	}
 	
-	int getInt(char opt)
+	int getInt(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Int, "Attempted to get an incompatible type!");
 		return m_data.at(opt).i;
 	}
 	
-	int getInt(std::string opt)
+	int getInt(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
 		return getInt(i->second);
 	}
 	
-	double getDouble(char opt, double def = 0)
+	double getDouble(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::Double, "Attempted to get an incompatible type!");
 		return m_data.at(opt).d;
 	}
 	
-	double getDouble(std::string opt)
+	double getDouble(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
 		return getDouble(i->second);
 	}
 	
-	std::string getString(char opt, std::string def = "")
+	std::string getString(char opt) const
 	{
 		NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
 		NNHardAssert(m_data.at(opt).type == Type::String, "Attempted to get an incompatible type!");
-		return m_data.at(opt).s;
+		return m_stringStorage[m_data.at(opt).i];
 	}
 	
-	std::string getString(std::string opt)
+	std::string getString(std::string opt) const
 	{
 		auto i = m_longToChar.find(opt);
 		NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
@@ -397,7 +442,6 @@ private:
 			bool b;
 			int i;
 			double d;
-			const char *s;
 		};
 	};
 	
@@ -414,7 +458,7 @@ private:
 		}
 	}
 	
-	char m_helpOpt;
+	char m_helpOpt, m_nextUnnamedOpt;
 	std::unordered_map<char, Type> m_expected;
 	std::unordered_map<char, Data> m_data;
 	std::unordered_map<std::string, char> m_longToChar;

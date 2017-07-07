@@ -2,7 +2,6 @@
 #define STORAGE_H
 
 #include <initializer_list>
-#include "util/archive.h"
 
 namespace nnlib
 {
@@ -34,6 +33,16 @@ public:
 			m_ptr[index] = value;
 			++index;
 		}
+	}
+	
+	Storage(Storage &&rhs) :
+		m_ptr(rhs.m_ptr),
+		m_size(rhs.m_size),
+		m_capacity(rhs.m_capacity)
+	{
+		rhs.m_ptr		= nullptr;
+		rhs.m_size		= 0;
+		rhs.m_capacity	= 0;
 	}
 	
 	Storage(const std::initializer_list<T> &values) :
@@ -107,7 +116,7 @@ public:
 	
 	Storage &erase(size_t index)
 	{
-		NNAssert(index < m_size, "Attempted to erase an index that is out of bounds!");
+		NNAssertLessThan(index, m_size, "Attempted to erase an index that is out of bounds!");
 		for(size_t i = index + 1; i < m_size; ++i)
 		{
 			m_ptr[i - 1] = m_ptr[i];
@@ -166,37 +175,37 @@ public:
 	
 	T &operator[](size_t i)
 	{
-		NNAssert(i < m_size, "Attempted to access an index that is out of bounds!");
+		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
 		return m_ptr[i];
 	}
 	
 	const T &operator[](size_t i) const
 	{
-		NNAssert(i < m_size, "Attempted to access an index that is out of bounds!");
+		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
 		return m_ptr[i];
 	}
 	
 	T &front()
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return *m_ptr;
 	}
 	
 	const T &front() const
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return *m_ptr;
 	}
 	
 	T &back()
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return m_ptr[m_size - 1];
 	}
 	
 	const T &back() const
 	{
-		NNAssert(m_size > 0, "Attempted to access an index that is out of bounds!");
+		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
 		return m_ptr[m_size - 1];
 	}
 	
@@ -222,21 +231,21 @@ public:
 		return m_ptr + m_size;
 	}
 	
-	// MARK: Serialization
-	
-	void save(Archive &out) const
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << m_size;
+		ar(m_size);
 		for(const T &x : *this)
-			out << x;
+			ar(x);
 	}
 	
-	void load(Archive &in)
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		in >> m_size;
+		ar(m_size);
 		resize(m_size);
 		for(T &x : *this)
-			in >> x;
+			ar(x);
 	}
 	
 private:

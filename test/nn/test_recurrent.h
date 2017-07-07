@@ -2,6 +2,7 @@
 #define TEST_RECURRENT_H
 
 #include "nnlib/nn/recurrent.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestRecurrent()
@@ -73,20 +74,50 @@ void TestRecurrent()
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 	
-	NNHardAssert(outputs.add(out, -1).square().sum() < 1e-6, "Recurrent::forward failed!");
-	NNHardAssert(inGrads.add(ing, -1).square().sum() < 1e-6, "Recurrent::backward failed; wrong inGrad!");
-	NNHardAssert(module.grad().addV(prg, -1).square().sum() < 1e-6, "Recurrent::backward failed; wrong grad!");
+	NNAssert(outputs.add(out, -1).square().sum() < 1e-6, "Recurrent::forward failed!");
+	NNAssert(inGrads.add(ing, -1).square().sum() < 1e-6, "Recurrent::backward failed; wrong inGrad!");
+	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-6, "Recurrent::backward failed; wrong grad!");
 	
 	module.batch(32);
-	NNHardAssert(module.batch() == 32, "Recurrent::batch failed!");
+	NNAssert(module.batch() == 32, "Recurrent::batch failed!");
 	
-	Recurrent<> *deserialized = nullptr;
-	Archive::fromString((Archive::toString() << module).str()) >> deserialized;
-	NNHardAssert(
-		deserialized != nullptr && module.parameters().addV(deserialized->parameters(), -1).square().sum() < 1e-9,
-		"Recurrent::save and/or Recurrent::load failed!"
-	);
-	delete deserialized;
+	bool ok = true;
+	try
+	{
+		module.add(nullptr);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Recurrent::add failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.remove(0);
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Recurrent::remove failed to throw an error!");
+	
+	ok = true;
+	try
+	{
+		module.clear();
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Recurrent::clear failed to throw an error!");
+	
+	Storage<size_t> dims = { 3, 6 };
+	
+	module.inputs(dims);
+	NNAssertEquals(module.inputs(), dims, "Recurrent::inputs failed!");
+	
+	module.outputs(dims);
+	NNAssertEquals(module.outputs(), dims, "Recurrent::outputs failed!");
+	
+	TestSerializationOfModule(module);
+	TestModule(module);
 }
 
 #endif

@@ -19,10 +19,22 @@ public:
 		m_output(bats, outs)
 	{}
 	
+	LogSoftMax(const LogSoftMax &module) :
+		m_inGrad(module.m_inGrad.copy()),
+		m_output(module.m_output.copy())
+	{}
+	
+	LogSoftMax &operator=(const LogSoftMax &module)
+	{
+		m_inGrad = module.m_inGrad.copy();
+		m_output = module.m_output.copy();
+		return *this;
+	}
+	
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.dims() == 2, "LogSoftMax expects Matrix input!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
@@ -40,8 +52,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.dims() == 2, "LogSoftMax expects Matrix input!");
-		NNAssert(outGrad.dims() == 2, "LogSoftMax expects Matrix output gradient!");
+		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
 		
 		for(size_t i = 0, iend = input.size(0); i < iend; ++i)
 		{
@@ -69,7 +81,7 @@ public:
 	/// In LogSoftMax, input shape is always equal to output shape.
 	virtual LogSoftMax &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssert(inps == outs, "LogSoftMax expects the same input and output size!");
+		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
 		return inputs(outs);
 	}
 	
@@ -77,7 +89,7 @@ public:
 	/// In LogSoftMax, input shape is always equal to output shape.
 	virtual LogSoftMax &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssert(inps == outs, "LogSoftMax expects the same input and output size!");
+		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
 		this->safeInputs(inps);
 		return *this;
 	}
@@ -100,40 +112,33 @@ public:
 		return *this;
 	}
 	
-	// MARK: Serialization
-	
 	/// \brief Write to an archive.
 	///
-	/// \param out The archive to which to write.
-	virtual void save(Archive &out) const override
+	/// \param ar The archive to which to write.
+	template <typename Archive>
+	void save(Archive &ar) const
 	{
-		out << Binding<LogSoftMax>::name << this->inputs();
+		ar(this->inputs());
 	}
 	
 	/// \brief Read from an archive.
 	///
-	/// \param in The archive from which to read.
-	virtual void load(Archive &in) override
+	/// \param ar The archive from which to read.
+	template <typename Archive>
+	void load(Archive &ar)
 	{
-		std::string str;
-		in >> str;
-		NNAssert(
-			str == Binding<LogSoftMax>::name,
-			"Unexpected type! Expected '" + Binding<LogSoftMax>::name + "', got '" + str + "'!"
-		);
 		Storage<size_t> shape;
-		in >> shape;
+		ar(shape);
 		this->inputs(shape);
 	}
-	
 private:
 	Tensor<T> m_inGrad;	///< Input gradient buffer.
 	Tensor<T> m_output;	///< Output buffer.
 };
 
-NNSerializable(LogSoftMax<double>, Module<double>);
-NNSerializable(LogSoftMax<float>, Module<float>);
-
 }
+
+NNRegisterType(LogSoftMax<float>, Module<float>);
+NNRegisterType(LogSoftMax<double>, Module<double>);
 
 #endif

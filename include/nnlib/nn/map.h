@@ -19,6 +19,18 @@ public:
 		m_output(bats, outs)
 	{}
 	
+	Map(const Map &module) :
+		m_inGrad(module.m_inGrad.copy()),
+		m_output(module.m_output.copy())
+	{}
+	
+	Map &operator=(const Map &module)
+	{
+		m_inGrad = module.m_inGrad.copy();
+		m_output = module.m_output.copy();
+		return *this;
+	}
+	
 	/// Single element forward.
 	virtual T forward(const T &x) = 0;
 	
@@ -30,7 +42,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssert(input.shape() == m_output.shape(), "Incompatible input shape!");
+		NNAssertEquals(input.shape(), m_output.shape(), "Incompatible input!");
 		auto i = input.begin(), j = input.end();
 		for(auto k = m_output.begin(); i != j; ++i, ++k)
 		{
@@ -42,8 +54,8 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssert(input.shape() == m_output.shape(), "Incompatible input shape!");
-		NNAssert(outGrad.shape() == m_output.shape(), "Incompatible output gradient shape!");
+		NNAssertEquals(input.shape(), m_output.shape(), "Incompatible input!");
+		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
 		auto i = input.begin(), j = input.end(), b = outGrad.begin();
 		for(auto k = m_output.begin(), l = m_inGrad.begin(); i != j; ++i, ++b, ++k, ++l)
 		{
@@ -68,7 +80,7 @@ public:
 	/// In a map, input shape is always equal to output shape.
 	virtual Map &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssert(inps == outs, "Map modules expect the same input and output size!");
+		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
 		return inputs(outs);
 	}
 	
@@ -76,7 +88,7 @@ public:
 	/// In a map, input shape is always equal to output shape.
 	virtual Map &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssert(inps == outs, "Map modules expect the same input and output size!");
+		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
 		this->safeInputs(inps);
 		return *this;
 	}

@@ -16,14 +16,14 @@ void TestCriticSequencer()
 	CriticSequencer<> critic(innerCritic, 5);
 	
 	double mse = critic.forward(inp, tgt);
-	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "CriticSequencer<>::forward with no average failed!");
+	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer<>::forward with no average failed!");
 	
 	critic.inputs({ 10, 10, 10 });
 	mse = critic.safeForward(inp, tgt);
-	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "CriticSequencer<>::safeForward failed!");
+	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer<>::safeForward failed!");
 	
 	critic.backward(inp, tgt);
-	NNHardAssert(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).square().sum() < 1e-12, "CriticSequencer<>::backward failed!");
+	NNAssert(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).square().sum() < 1e-12, "CriticSequencer<>::backward failed!");
 	
 	critic.inputs({ 10, 10, 10 });
 	critic.safeBackward(inp, tgt);
