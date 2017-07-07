@@ -5,48 +5,10 @@
 #include "nnlib/serialization/basic.h"
 #include "nnlib/tensor.h"
 #include "nnlib/nn/linear.h"
+#include "nnlib/nn/sequential.h" // sequential uses serialize instead of load/save
 using namespace nnlib;
 
-template <typename InputArchive, typename OutputArchive>
-void TestArchive()
-{
-	std::stringstream ss;
-	ss.precision(16);
-	
-	Tensor<> a = Tensor<>(3, 2, 4).rand();
-	Tensor<> b;
-	
-	InputArchive in(ss);
-	OutputArchive out(ss);
-	
-	out(a);
-	in(b);
-	
-	NNAssertEquals(a.shape(), b.shape(), "Serialization failed! Wrong shape!");
-	for(auto i = a.begin(), j = b.begin(), k = a.end(); i != k; ++i, ++j)
-		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Wrong data!");
-	
-	std::string s;
-	out("string with spaces");
-	in(s);
-	NNAssertEquals(s, "string with spaces", "Serialization failed!");
-	
-	bool ok = false;
-	try
-	{
-		Tensor<> t;
-		std::stringstream empty("");
-		InputArchive ar(empty);
-		ar(t);
-	}
-	catch(const Error &e)
-	{
-		ok = true;
-	}
-	NNAssert(ok, "Intentionally bad deserialization did not throw an error!");
-}
-
-template <typename T>
+template <typename T, typename InputArchive = BasicInputArchive, typename OutputArchive = BasicOutputArchive>
 void TestSerializationOfModule(T &module)
 {
 	std::stringstream ss1, ss2;
@@ -54,7 +16,7 @@ void TestSerializationOfModule(T &module)
 	ss2.precision(16);
 	
 	{
-		BasicOutputArchive out(ss1);
+		OutputArchive out(ss1);
 		out(module);
 		ss2 << ss1.str();
 	}
@@ -62,7 +24,7 @@ void TestSerializationOfModule(T &module)
 	{
 		T deserialized;
 		
-		BasicInputArchive in(ss1);
+		InputArchive in(ss1);
 		in(deserialized);
 		
 		NNAssertEquals(deserialized.inputs(), module.inputs(), "Serialization failed! Mismatching inputs.");
@@ -78,7 +40,7 @@ void TestSerializationOfModule(T &module)
 	{
 		Module<> *deserialized;
 		
-		BasicInputArchive in(ss2);
+		InputArchive in(ss2);
 		in(deserialized);
 		
 		NNAssertEquals(deserialized->inputs(), module.inputs(), "Generic serialization failed! Mismatching inputs.");
@@ -94,7 +56,7 @@ void TestSerializationOfModule(T &module)
 	}
 }
 
-template <typename T>
+template <typename T, typename InputArchive = BasicInputArchive, typename OutputArchive = BasicOutputArchive>
 void TestSerializationOfIterable(T &iterable)
 {
 	std::stringstream ss;
@@ -102,14 +64,51 @@ void TestSerializationOfIterable(T &iterable)
 	
 	T deserialized;
 	
-	BasicOutputArchive out(ss);
+	OutputArchive out(ss);
 	out(iterable);
 	
-	BasicInputArchive in(ss);
+	InputArchive in(ss);
 	in(deserialized);
 	
 	for(auto i = iterable.begin(), j = deserialized.begin(), k = iterable.end(); i != k; ++i, ++j)
 		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed!");
+}
+
+template <typename InputArchive, typename OutputArchive>
+void TestArchive()
+{
+	Tensor<> t = Tensor<>(3, 2, 4).rand();
+	Linear<> l(2, 3, 4);
+	Sequential<> s(new Linear<>(2, 3, 4), new Linear<>(3, 2, 4));
+	
+	TestSerializationOfIterable<Tensor<>, InputArchive, OutputArchive>(t);
+	TestSerializationOfModule<Linear<>, InputArchive, OutputArchive>(l);
+	TestSerializationOfModule<Sequential<>, InputArchive, OutputArchive>(s);
+	
+	{
+		std::stringstream ss;
+		InputArchive in(ss);
+		OutputArchive out(ss);
+		
+		std::string s;
+		out("string with spaces");
+		in(s);
+		NNAssertEquals(s, "string with spaces", "Serialization failed!");
+	}
+	
+	bool ok = false;
+	try
+	{
+		Tensor<> t;
+		std::stringstream empty("");
+		InputArchive ar(empty);
+		ar(t);
+	}
+	catch(const Error &e)
+	{
+		ok = true;
+	}
+	NNAssert(ok, "Intentionally bad deserialization did not throw an error!");
 }
 
 #endif
