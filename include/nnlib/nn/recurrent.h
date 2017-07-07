@@ -213,7 +213,7 @@ public:
 	template <typename Archive>
 	void save(Archive &ar) const
 	{
-		ar(m_inpMod, m_memMod, m_outMod);
+		ar(m_inpMod, m_memMod, m_outMod, m_state);
 	}
 	
 	/// \brief Read from an archive.
@@ -223,12 +223,13 @@ public:
 	void load(Archive &ar)
 	{
 		Container<T>::clear();
-		ar(m_inpMod, m_memMod, m_outMod);
+		ar(m_inpMod, m_memMod, m_outMod, m_state);
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
 		
-		m_state.resize(m_outMod->outputs());
+		NNHardAssertEquals(m_state.shape(), m_outMod->outputs(), "Incompatible recurrent state!");
+		
 		m_statePrev.resize(m_outMod->outputs());
 		m_stateGrad.resize(m_outMod->outputs());
 		m_resetGrad = true;

@@ -151,14 +151,14 @@ public:
 		Container<T>::clear();
 		ar(m_components);
 		
-		NNAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
-		NNAssertEquals(m_components[0]->inputs().size(), 2, "Expected matrix input!");
-		NNAssertEquals(m_components[0]->outputs().size(), 2, "Expected matrix output!");
+		NNHardAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
+		NNHardAssertEquals(m_components[0]->inputs().size(), 2, "Expected matrix input!");
+		NNHardAssertEquals(m_components[0]->outputs().size(), 2, "Expected matrix output!");
 		
 		for(size_t i = 1, end = m_components.size(); i != end; ++i)
 		{
-			NNAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible component!");
-			NNAssertEquals(m_components[i]->outputs().size(), 2, "Expected matrix output!");
+			NNHardAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible component!");
+			NNHardAssertEquals(m_components[i]->outputs().size(), 2, "Expected matrix output!");
 		}
 		
 		resizeBuffers();

@@ -114,20 +114,11 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write to an archive.
+	/// \brief Read from/write to an archive.
 	///
-	/// \param ar The archive to which to write.
+	/// \param ar The archive from which to read or to which to write.
 	template <typename Archive>
-	void save(Archive &ar) const
-	{
-		ar(m_components);
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	void serialize(Archive &ar)
 	{
 		ar(m_components);
 	}

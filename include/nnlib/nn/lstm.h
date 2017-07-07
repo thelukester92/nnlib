@@ -387,14 +387,18 @@ public:
 	{
 		NNAssertEquals(dims.size(), 2, "Expected matrix output!");
 		
+		m_inpGateX->outputs(dims);
 		m_inpGateY->outputs(dims);
 		m_inpGateH->outputs(dims);
 		m_inpGate->outputs(dims);
+		m_fgtGateX->outputs(dims);
 		m_fgtGateY->outputs(dims);
 		m_fgtGateH->outputs(dims);
 		m_fgtGate->outputs(dims);
+		m_inpModX->outputs(dims);
 		m_inpModY->outputs(dims);
 		m_inpMod->outputs(dims);
+		m_outGateX->outputs(dims);
 		m_outGateY->outputs(dims);
 		m_outGateH->outputs(dims);
 		m_outGate->outputs(dims);
@@ -460,7 +464,7 @@ public:
 	template <typename Archive>
 	void save(Archive &ar) const
 	{
-		ar(this->m_components, m_clip);
+		ar(this->m_components, m_state, m_clip);
 	}
 	
 	/// \brief Read from an archive.
@@ -470,8 +474,8 @@ public:
 	void load(Archive &ar)
 	{
 		Container<T>::clear();
-		ar(this->m_components, m_clip);
-		NNAssertEquals(components(), 16, "Incompatible LSTM components!");
+		ar(this->m_components, m_state, m_clip);
+		NNHardAssertEquals(components(), 16, "Incompatible LSTM components!");
 		
 		m_inpGateX = component(0);
 		m_inpGateY = component(1);
@@ -491,13 +495,13 @@ public:
 		m_outMod = component(15);
 		
 		size_t bats = m_inpGateX->inputs()[0], inps = m_inpGateX->inputs()[1], outs = m_inpGateX->outputs()[1];
+		NNHardAssertEquals(m_state.shape(), Storage<size_t>({ bats, outs }), "Incompatible LSTM state!");
 		
 		m_inGrad.resize(bats, inps);
 		m_inpAdd.resize(bats, outs);
 		m_fgtAdd.resize(bats, outs);
 		m_outAdd.resize(bats, outs);
 		m_outGrad.resize(bats, outs);
-		m_state.resize(bats, outs);
 		m_prevState.resize(bats, outs);
 		m_prevOutput.resize(bats, outs);
 		m_stateGrad.resize(bats, outs);

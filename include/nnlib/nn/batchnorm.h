@@ -336,10 +336,10 @@ public:
 		size_t bats;
 		ar(m_runningMeans, m_runningVars, m_weights, m_biases, m_training, m_momentum, bats);
 		
-		NNAssertEquals(m_runningMeans.shape(), m_runningVars.shape(), "Incompatible means and variances!");
-		NNAssertEquals(m_runningMeans.shape(), m_weights.shape(), "Incompatible means and weights!");
-		NNAssertEquals(m_runningMeans.shape(), m_biases.shape(), "Incompatible means and biases!");
-		NNAssertEquals(m_runningMeans.dims(), 1, "Expected means to be a vector!");
+		NNHardAssertEquals(m_runningMeans.shape(), m_runningVars.shape(), "Incompatible means and variances!");
+		NNHardAssertEquals(m_runningMeans.shape(), m_weights.shape(), "Incompatible means and weights!");
+		NNHardAssertEquals(m_runningMeans.shape(), m_biases.shape(), "Incompatible means and biases!");
+		NNHardAssertEquals(m_runningMeans.dims(), 1, "Expected means to be a vector!");
 		
 		inputs({ bats, m_runningMeans.size(0) });
 	}
