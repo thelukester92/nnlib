@@ -114,6 +114,7 @@ public:
 		m_module = &module;
 		m_params = &module.parameters();
 		m_backup = m_params->copy();
+		m_mask.resize(m_params->size());
 		Container<T>::clear();
 		Container<T>::add(m_module);
 		return *this;

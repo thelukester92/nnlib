@@ -26,6 +26,7 @@ void TestSerializationOfModule(T &module)
 		
 		InputArchive in(ss1);
 		in(deserialized);
+		deserialized.training(module.training());
 		
 		NNAssertEquals(deserialized.inputs(), module.inputs(), "Serialization failed! Mismatching inputs.");
 		NNAssertEquals(deserialized.outputs(), module.outputs(), "Serialization failed! Mismatching outputs.");
@@ -35,6 +36,18 @@ void TestSerializationOfModule(T &module)
 		
 		for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
 			NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Mismatching parameters.");
+		
+		auto tensor = module.output().copy();
+		tensor.resize(module.inputs()).rand();
+		
+		RandomEngine::seed(0);
+		auto &o1 = module.forward(tensor);
+		
+		RandomEngine::seed(0);
+		auto &o2 = deserialized.forward(tensor);
+		
+		for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
+			NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Different outputs for the same input.");
 	}
 	
 	{
@@ -42,15 +55,28 @@ void TestSerializationOfModule(T &module)
 		
 		InputArchive in(ss2);
 		in(deserialized);
+		deserialized->training(module.training());
 		
 		NNAssertEquals(deserialized->inputs(), module.inputs(), "Generic serialization failed! Mismatching inputs.");
 		NNAssertEquals(deserialized->outputs(), module.outputs(), "Generic serialization failed! Mismatching outputs.");
 		
-		Tensor<double> &p1 = module.parameters();
-		Tensor<double> &p2 = deserialized->parameters();
+		auto &p1 = module.parameters();
+		auto &p2 = deserialized->parameters();
 		
 		for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
 			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Mismatching parameters.");
+		
+		auto tensor = module.output().copy();
+		tensor.resize(module.inputs()).rand();
+		
+		RandomEngine::seed(0);
+		auto &o1 = module.forward(tensor);
+		
+		RandomEngine::seed(0);
+		auto &o2 = deserialized->forward(tensor);
+		
+		for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
+			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Different outputs for the same input.");
 		
 		delete deserialized;
 	}
