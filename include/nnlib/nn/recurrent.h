@@ -170,7 +170,10 @@ public:
 	/// Set the output shape of this module, including batch.
 	virtual Recurrent &outputs(const Storage<size_t> &dims) override
 	{
+		m_inpMod->outputs(dims);
+		m_memMod->inputs(dims);
 		m_memMod->outputs(dims);
+		m_outMod->inputs(dims);
 		m_outMod->outputs(dims);
 		m_state.resize(dims);
 		m_statePrev.resize(dims);
@@ -205,7 +208,6 @@ public:
 		m_resetGrad = true;
 		return *this;
 	}
-	
 	
 	/// \brief Write to an archive.
 	///

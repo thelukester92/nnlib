@@ -41,7 +41,9 @@ void TestSerializationOfModule(T &module)
 		tensor.resize(module.inputs()).rand();
 		
 		RandomEngine::seed(0);
-		auto &o1 = module.forward(tensor);
+		Module<> *copy = module.copy();
+		auto o1 = copy->forward(tensor);
+		delete copy;
 		
 		RandomEngine::seed(0);
 		auto &o2 = deserialized.forward(tensor);
@@ -70,7 +72,9 @@ void TestSerializationOfModule(T &module)
 		tensor.resize(module.inputs()).rand();
 		
 		RandomEngine::seed(0);
-		auto &o1 = module.forward(tensor);
+		Module<> *copy = module.copy();
+		auto o1 = copy->forward(tensor);
+		delete copy;
 		
 		RandomEngine::seed(0);
 		auto &o2 = deserialized->forward(tensor);

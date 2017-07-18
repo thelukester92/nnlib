@@ -35,16 +35,15 @@ public:
 	}
 	
 	Concat(const Concat &module) :
-		Container<T>(module),
-		m_output(module.m_output.copy()),
-		m_inGrad(module.m_inGrad.copy())
-	{}
+		Container<T>(module)
+	{
+		resizeBuffers();
+	}
 	
 	Concat &operator=(const Concat &module)
 	{
 		*static_cast<Container<T> *>(this) = module;
-		m_output = module.m_output.copy();
-		m_inGrad = module.m_inGrad.copy();
+		resizeBuffers();
 		return *this;
 	}
 	
