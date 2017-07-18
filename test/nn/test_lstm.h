@@ -163,10 +163,7 @@ void TestLSTM()
 	module.outputs(dims);
 	NNAssertEquals(module.outputs(), dims, "LSTM::outputs failed!");
 	
-	LSTM<> foo(12, 24);
-	TestSerializationOfModule(foo);
-	
-	// TestSerializationOfModule(module);
+	TestSerializationOfModule(module);
 	TestModule(module);
 }
 
