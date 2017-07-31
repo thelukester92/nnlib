@@ -15,7 +15,7 @@ before_install:
     - sudo apt-get install -y gfortran
     - sudo apt-get install -y lcov
     - mkdir -p cache
-    - git clone https://github.com/xianyi/OpenBLAS cache/openblas || true
+    - git clone -q --branch=master https://github.com/xianyi/OpenBLAS cache/openblas || true
     - cd cache/openblas
     - git pull
     - mkdir -p build
