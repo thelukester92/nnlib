@@ -73,7 +73,7 @@ public:
 ///   1) outside of our control (i.e. a non-existant file) and
 ///   2) not in the main training loop.
 
-#define NNHardAssert(x, ...) if(!(x)) throw Error(__FILE__, __func__, __LINE__, ##__VA_ARGS__);
+#define NNHardAssert(x, ...) if(!(x)) throw ::nnlib::Error(__FILE__, __func__, __LINE__, ##__VA_ARGS__);
 
 #define NNHardAssertEquals(x, y, ...)								\
 	NNHardAssert(													\
