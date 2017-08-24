@@ -1,8 +1,8 @@
 #ifndef SERIALIZATION_CSV_H
 #define SERIALIZATION_CSV_H
 
-#include "../error.h"
-#include "../tensor.h"
+#include "../core/error.h"
+#include "../core/tensor.h"
 #include <iostream>
 
 namespace nnlib

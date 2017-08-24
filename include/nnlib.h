@@ -5,10 +5,10 @@
 #include "nnlib/serialization/binary.h"
 #include "nnlib/serialization/csv.h"
 
-/// Top-level Classes
-#include "nnlib/error.h"
-#include "nnlib/storage.h"
-#include "nnlib/tensor.h"
+/// Core
+#include "nnlib/core/error.h"
+#include "nnlib/core/storage.h"
+#include "nnlib/core/tensor.h"
 
 /// Critics
 #include "nnlib/critics/critic.h"

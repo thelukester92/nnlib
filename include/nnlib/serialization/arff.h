@@ -1,8 +1,8 @@
 #ifndef SERIALIZATION_ARFF_H
 #define SERIALIZATION_ARFF_H
 
-#include "../error.h"
-#include "../tensor.h"
+#include "../core/error.h"
+#include "../core/tensor.h"
 #include <iostream>
 #include <fstream>
 

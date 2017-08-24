@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <functional>
 #include "traits.h"
-#include "../error.h"
+#include "../core/error.h"
 
 namespace nnlib
 {

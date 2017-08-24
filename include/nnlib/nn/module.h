@@ -1,7 +1,7 @@
 #ifndef NN_MODULE_H
 #define NN_MODULE_H
 
-#include "../tensor.h"
+#include "../core/tensor.h"
 #include "../detail/binding.h"
 
 namespace nnlib
