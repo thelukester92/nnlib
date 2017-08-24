@@ -41,6 +41,24 @@ void TestSerializationOfModule(T &module)
 {
 	SerializedNode node(module);
 	T serialized = node.as<T>();
+	
+	auto &p1 = module.parameters();
+	auto &p2 = serialized.parameters();
+	
+	for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
+		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Mismatching parameters.");
+	
+	auto tensor = module.output().copy();
+	tensor.resize(module.inputs()).rand();
+	
+	RandomEngine::seed(0);
+	auto &o1 = module.forward(tensor);
+	
+	RandomEngine::seed(0);
+	auto &o2 = serialized.forward(tensor);
+	
+	for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
+		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Different outputs for the same input.");
 }
 
 #endif

@@ -318,39 +318,28 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		node.set("shape", inputs());
+		node.set("runningMeans", m_runningMeans);
+		node.set("runningVars", m_runningVars);
+		node.set("weights", m_weights);
+		node.set("biases", m_biases);
+		node.set("training", m_training);
+		node.set("momentum", m_momentum);
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
-	
-	/*
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	virtual void load(const SerializedNode &node) override
 	{
-		ar(m_runningMeans, m_runningVars, m_weights, m_biases, m_training, m_momentum, m_inGrad.size(0));
+		inputs(node.get<Storage<size_t>>("shape"));
+		node.get("runningMeans", m_runningMeans);
+		node.get("runningVars", m_runningVars);
+		node.get("weights", m_weights);
+		node.get("biases", m_biases);
+		node.get("training", m_training);
+		node.get("momentum", m_momentum);
 	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		size_t bats;
-		ar(m_runningMeans, m_runningVars, m_weights, m_biases, m_training, m_momentum, bats);
-		
-		NNHardAssertEquals(m_runningMeans.shape(), m_runningVars.shape(), "Incompatible means and variances!");
-		NNHardAssertEquals(m_runningMeans.shape(), m_weights.shape(), "Incompatible means and weights!");
-		NNHardAssertEquals(m_runningMeans.shape(), m_biases.shape(), "Incompatible means and biases!");
-		NNHardAssertEquals(m_runningMeans.dims(), 1, "Expected means to be a vector!");
-		
-		inputs({ bats, m_runningMeans.size(0) });
-	}
-	*/
 	
 private:
 	Tensor<T> m_output;			///< Cached output.

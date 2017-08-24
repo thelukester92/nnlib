@@ -61,32 +61,18 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		Map<T>::save(node);
+		node.set("leak", m_leak);
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
-	
-	/*
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	virtual void load(const SerializedNode &node) override
 	{
-		ar(this->inputs(), m_leak);
+		Map<T>::load(node);
+		node.get("leak", m_leak);
 	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Storage<size_t> shape;
-		ar(shape, m_leak);
-		this->inputs(shape);
-	}
-	*/
 	
 private:
 	T m_leak;

@@ -27,34 +27,6 @@ public:
 	{
 		return 1.0 - y * y;
 	}
-	
-	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
-	
-	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
-	
-	/*
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
-	{
-		ar(this->inputs());
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Storage<size_t> shape;
-		ar(shape);
-		this->inputs(shape);
-	}
-	*/
 };
 
 }

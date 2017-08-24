@@ -261,6 +261,15 @@ public:
 		return as<Object>().at(name)->as<T>();
 	}
 	
+	/// \brief In an object, load a value from a name-value pair into a variable.
+	///
+	/// If the current type is not object, this will throw an Error.
+	template <typename T>
+	void get(const std::string &name, T &value) const
+	{
+		value = as<Object>().at(name)->as<T>();
+	}
+	
 	/// \brief In an object, load an array from a name-value pair into a pair of iterators.
 	///
 	/// If the current type is not object, this will throw an Error.
