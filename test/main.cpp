@@ -4,7 +4,6 @@
 	#undef OPTIMIZE
 #endif
 
-#include "serialization/test_archive.h" // this has to go first
 #include "core/test_error.h"
 #include "core/test_storage.h"
 #include "core/test_tensor.h"
@@ -31,10 +30,6 @@
 #include "opt/test_nadam.h"
 #include "opt/test_rmsprop.h"
 #include "opt/test_sgd.h"
-#include "serialization/test_arff.h"
-#include "serialization/test_basic.h"
-#include "serialization/test_binary.h"
-#include "serialization/test_csv.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
 #include "util/test_random.h"
@@ -89,12 +84,6 @@ int main()
 		TEST("opt/", Nadam),
 		TEST("opt/", RMSProp),
 		TEST("opt/", SGD),
-		
-		// serialization
-		TEST("serialization/", ArffSerializer),
-		TEST("serialization/", BasicArchive),
-		TEST("serialization/", BinaryArchive),
-		TEST("serialization/", CsvSerializer),
 		
 		// util
 		TEST("util/", Args),

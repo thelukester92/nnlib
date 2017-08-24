@@ -83,8 +83,6 @@ void TestStorage()
 	NNAssertEquals(constant[2], copy[2], "const Storage::operator[] failed!");
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
 	NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
-	
-	TestSerializationOfIterable(copy);
 }
 
 #endif

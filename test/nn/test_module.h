@@ -36,4 +36,10 @@ void TestModule(T &module)
 		NNAssertAlmostEquals(y, 1, 1e-12, "Module::operator=(const Module &) failed! Not a deep copy!");
 }
 
+template <typename T>
+void TestSerializationOfModule(T &module)
+{
+	std::clog << "Warning: serialization stub!" << std::endl;
+}
+
 #endif
