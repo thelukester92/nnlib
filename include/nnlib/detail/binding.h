@@ -217,7 +217,7 @@ namespace nnlib { \
 ///
 /// Must be placed outside namespace nnlib.
 /// This is used both for serialization and deep copying.
-#define NNRegisterType(Derived, Base) \
+#define NNRegisterType_Deprecated(Derived, Base) \
 namespace nnlib { namespace detail { \
 	template <> struct BaseOf<Derived> { using type = Base; }; \
 	template <> const std::string BindingName<Derived>::value = Binding<Base>::bindDerived<Derived>(#Derived); \

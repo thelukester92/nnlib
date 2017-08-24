@@ -66,6 +66,30 @@ void TestSerializationOfModule(T &module)
 	
 	for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
 		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Different outputs for the same input.");
+	
+	{
+		Module<> *generic = Factory<Module<>>::load(Factory<Module<>>::save(module));
+		
+		auto &p1 = generic->parameters();
+		auto &p2 = serialized.parameters();
+		
+		for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
+			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Mismatching parameters.");
+		
+		auto tensor = generic->output().copy();
+		tensor.resize(generic->inputs()).rand();
+		
+		RandomEngine::seed(0);
+		auto &o1 = generic->forward(tensor);
+		
+		RandomEngine::seed(0);
+		auto &o2 = serialized.forward(tensor);
+		
+		for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
+			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Different outputs for the same input.");
+		
+		delete generic;
+	}
 }
 
 #endif

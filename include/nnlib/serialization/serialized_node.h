@@ -51,17 +51,10 @@ public:
 	
 	/// Create a non-null node.
 	template <typename T>
-	SerializedNode(T && value) :
+	SerializedNode(T &&value) :
 		m_type(Type::Null)
 	{
 		set(std::forward<T>(value));
-	}
-	
-	/// Copy constructor.
-	SerializedNode(const SerializedNode &other) :
-		m_type(Type::Null)
-	{
-		*this = other;
 	}
 	
 	/// Destructor; delete children if type is array or object.
@@ -96,10 +89,14 @@ public:
 				m_string = other.m_string;
 				break;
 			case Type::Array:
-				m_array = other.m_array;
+				m_array.clear();
+				for(SerializedNode *n : other.m_array)
+					m_array.push_back(new SerializedNode(*n));
 				break;
 			case Type::Object:
-				m_object = other.m_object;
+				m_object.clear();
+				for(auto &it : other.m_object)
+					m_object.emplace(it.first, new SerializedNode(*it.second));
 				break;
 			};
 		}
@@ -122,11 +119,15 @@ public:
 		if(type == m_type)
 			return;
 		
+		if(m_type == Type::String)
+			m_string.~basic_string<char>();
 		if(m_type == Type::Array)
 			m_array.~Array();
 		else if(m_type == Type::Object)
 			m_object.~Object();
 		
+		if(type == Type::String)
+			new (&m_string) std::string;
 		if(type == Type::Array)
 			new (&m_array) Array;
 		else if(type == Type::Object)
@@ -145,7 +146,7 @@ public:
 	
 	/// Set a string value.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, std::string>::value>::type set(const T &value)
+	typename std::enable_if<std::is_convertible<T, std::string>::value>::type set(const T &value)
 	{
 		type(Type::String);
 		m_string = value;
@@ -153,7 +154,7 @@ public:
 	
 	/// Set an array value.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, Array>::value>::type set(const T &value)
+	typename std::enable_if<std::is_convertible<T, Array>::value>::type set(const T &value)
 	{
 		type(Type::Array);
 		m_array = value;
@@ -161,7 +162,7 @@ public:
 	
 	/// Set an object value.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, Object>::value>::type set(const T &value)
+	typename std::enable_if<std::is_convertible<T, Object>::value>::type set(const T &value)
 	{
 		type(Type::Object);
 		m_object = value;
@@ -172,6 +173,13 @@ public:
 	typename std::enable_if<detail::HasLoadAndSave<T>::value>::type set(const T &value)
 	{
 		value.save(*this);
+	}
+	
+	/// Assignment.
+	template <typename T>
+	typename std::enable_if<std::is_same<T, SerializedNode>::value>::type set(const T &value)
+	{
+		*this = value;
 	}
 	
 	/// Get a number value.

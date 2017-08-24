@@ -3,6 +3,8 @@
 
 #include "../core/tensor.h"
 #include "../detail/binding.h"
+
+#include "../serialization/factory.h"
 #include "../serialization/serialized_node.h"
 
 namespace nnlib
