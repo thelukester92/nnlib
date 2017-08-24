@@ -2,7 +2,7 @@
 #define TEST_MODULE_H
 
 #include "nnlib/nn/module.h"
-#include "nnlib/tensor.h"
+#include "nnlib/core/tensor.h"
 using namespace std;
 
 template <typename T>

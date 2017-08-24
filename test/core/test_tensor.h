@@ -1,7 +1,7 @@
 #ifndef TEST_TENSOR_H
 #define TEST_TENSOR_H
 
-#include "nnlib/tensor.h"
+#include "nnlib/core/tensor.h"
 #include "nnlib/util/tensor_util.h"
 using namespace nnlib;
 

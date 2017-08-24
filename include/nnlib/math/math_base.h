@@ -1,7 +1,7 @@
 #ifndef MATH_BASE_H
 #define MATH_BASE_H
 
-#include "../error.h"
+#include "../core/error.h"
 
 namespace nnlib
 {

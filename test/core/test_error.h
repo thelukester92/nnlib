@@ -1,8 +1,8 @@
 #ifndef TEST_ERROR_H
 #define TEST_ERROR_H
 
-#include "nnlib/error.h"
-#include "nnlib/tensor.h"
+#include "nnlib/core/error.h"
+#include "nnlib/core/tensor.h"
 using namespace nnlib;
 
 void TestError()

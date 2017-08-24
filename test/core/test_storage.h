@@ -1,8 +1,8 @@
 #ifndef TEST_STORAGE_H
 #define TEST_STORAGE_H
 
-#include "nnlib/error.h"
-#include "nnlib/storage.h"
+#include "nnlib/core/error.h"
+#include "nnlib/core/storage.h"
 using namespace nnlib;
 
 void TestStorage()
