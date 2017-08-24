@@ -131,7 +131,16 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		// SerializedNode::Array array;
+		// array.reserve(m_components.size());
+		// 
+		// for(Module<T> *component : m_components)
+		// 	array.push_back(new SerializedNode(*component));
+		// 
+		// node.set("components", array);
+	}
 	
 	/// Load from a serialized node.
 	virtual void load(const SerializedNode &node) override {}
