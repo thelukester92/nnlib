@@ -39,7 +39,8 @@ void TestModule(T &module)
 template <typename T>
 void TestSerializationOfModule(T &module)
 {
-	std::clog << "Warning: serialization stub!" << std::endl;
+	SerializedNode node(module);
+	T serialized = node.as<T>();
 }
 
 #endif

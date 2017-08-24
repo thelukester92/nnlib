@@ -465,6 +465,13 @@ public:
 		return *this;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param ar The archive to which to write.
@@ -519,6 +526,7 @@ public:
 		m_gradBuffer.resize(bats, outs);
 		m_resetGrad = true;
 	}
+	*/
 	
 private:
 	Module<T> *m_inpGateX;

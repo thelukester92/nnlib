@@ -114,6 +114,13 @@ public:
 		return *this;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Read from/write to an archive.
 	///
 	/// \param ar The archive from which to read or to which to write.
@@ -122,6 +129,7 @@ public:
 	{
 		ar(m_components);
 	}
+	*/
 	
 private:
 	Sequential &resizeDown(size_t start = 1)

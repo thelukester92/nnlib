@@ -201,12 +201,10 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	/// \todo make it pure virtual
-	virtual void save(SerializedNode &node) const {}
+	virtual void save(SerializedNode &node) const = 0;
 	
 	/// Load from a serialized node.
-	/// \todo make it pure virtual
-	virtual void load(const SerializedNode &node) {}
+	virtual void load(const SerializedNode &node) = 0;
 	
 protected:
 	Tensor<T> m_flatParameters;

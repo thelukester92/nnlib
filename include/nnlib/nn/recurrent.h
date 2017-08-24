@@ -209,6 +209,13 @@ public:
 		return *this;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param ar The archive to which to write.
@@ -236,6 +243,7 @@ public:
 		m_stateGrad.resize(m_outMod->outputs());
 		m_resetGrad = true;
 	}
+	*/
 	
 private:
 	Module<T> *m_inpMod;

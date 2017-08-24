@@ -244,6 +244,13 @@ public:
 		return m_output.size(1);
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param ar The archive to which to write.
@@ -279,6 +286,7 @@ public:
 			outs.push_back(size);
 		m_output.resize(outs);
 	}
+	*/
 	
 private:
 	Module<T> *m_module;

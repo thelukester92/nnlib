@@ -317,6 +317,13 @@ public:
 		return states;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -343,6 +350,7 @@ public:
 		
 		inputs({ bats, m_runningMeans.size(0) });
 	}
+	*/
 	
 private:
 	Tensor<T> m_output;			///< Cached output.

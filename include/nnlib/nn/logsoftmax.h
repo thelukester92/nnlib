@@ -112,6 +112,13 @@ public:
 		return *this;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param ar The archive to which to write.
@@ -131,6 +138,8 @@ public:
 		ar(shape);
 		this->inputs(shape);
 	}
+	*/
+	
 private:
 	Tensor<T> m_inGrad;	///< Input gradient buffer.
 	Tensor<T> m_output;	///< Output buffer.

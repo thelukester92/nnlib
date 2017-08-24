@@ -174,6 +174,13 @@ public:
 		return { &m_weightsGrad, &m_biasGrad };
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -203,6 +210,7 @@ public:
 		m_output.resize({ bats, m_weights.size(1) });
 		m_addBuffer.resize(bats).fill(1);
 	}
+	*/
 	
 private:
 	Tensor<T> m_weights;		///< Module weights.

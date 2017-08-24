@@ -1256,7 +1256,7 @@ private:
 };
 
 template <typename T>
-class TensorIterator : public std::iterator<std::forward_iterator_tag, T, typename std::remove_const<T>::type, const T *, T &>
+class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::ptrdiff_t, const T *, T &>
 {
 using TT = typename std::remove_const<T>::type;
 public:

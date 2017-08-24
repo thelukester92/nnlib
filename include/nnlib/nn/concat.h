@@ -130,6 +130,13 @@ public:
 		return *this;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// The archive takes care of whitespace for plaintext.
@@ -162,6 +169,7 @@ public:
 		
 		resizeBuffers();
 	}
+	*/
 	
 private:
 	Concat &resizeBuffers()

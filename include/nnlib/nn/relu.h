@@ -60,6 +60,13 @@ public:
 		return x > 0 ? 1 : m_leak;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(SerializedNode &node) const override {}
+	
+	/// Load from a serialized node.
+	virtual void load(const SerializedNode &node) override {}
+	
+	/*
 	/// \brief Write to an archive.
 	///
 	/// \param ar The archive to which to write.
@@ -79,6 +86,8 @@ public:
 		ar(shape, m_leak);
 		this->inputs(shape);
 	}
+	*/
+	
 private:
 	T m_leak;
 };
