@@ -5,9 +5,9 @@
 #endif
 
 #include "serialization/test_archive.h" // this has to go first
-#include "test_error.h"
-#include "test_storage.h"
-#include "test_tensor.h"
+#include "core/test_error.h"
+#include "core/test_storage.h"
+#include "core/test_tensor.h"
 #include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
 #include "critics/test_nll.h"
