@@ -1197,28 +1197,18 @@ public:
 		return TensorIterator<const T>(this, true);
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param out The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	void save(SerializedNode &node) const
 	{
-		ar(m_dims);
-		for(const T &x : *this)
-			ar(x);
+		node.set("dims", m_dims);
+		node.set("data", begin(), end());
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param in The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	void load(const SerializedNode &node)
 	{
-		ar(m_dims);
-		resize(m_dims);
-		for(T &x : *this)
-			ar(x);
+		resize(node.get<Storage<size_t>>("dims"));
+		node.get("data", begin(), end());
 	}
 	
 private:
@@ -1266,7 +1256,7 @@ private:
 };
 
 template <typename T>
-class TensorIterator : public std::iterator<std::forward_iterator_tag, T, T, const T *, T &>
+class TensorIterator : public std::iterator<std::forward_iterator_tag, T, typename std::remove_const<T>::type, const T *, T &>
 {
 using TT = typename std::remove_const<T>::type;
 public:

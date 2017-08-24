@@ -83,6 +83,16 @@ void TestStorage()
 	NNAssertEquals(constant[2], copy[2], "const Storage::operator[] failed!");
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
 	NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
+	
+	// test serialization
+	
+	Storage<size_t> serializable = { 1, 2, 3, 4, 5 };
+	Storage<size_t> serialized;
+	
+	SerializedNode node;
+	serializable.save(node);
+	serialized.load(node);
+	NNAssertEquals(serializable, serialized, "Storage::save and/or Storage::load failed!");
 }
 
 #endif

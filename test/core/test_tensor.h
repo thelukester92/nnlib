@@ -417,6 +417,18 @@ void TestTensor()
 	empty /= 2;
 	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x / 4, *y, 1e-12, "operator/=(Tensor, T) failed!");
+	
+	// test serialization
+	
+	Tensor<> serializable = Tensor<>(3, 4, 5, 6).rand();
+	Tensor<> serialized;
+	
+	SerializedNode node;
+	serializable.save(node);
+	serialized.load(node);
+	
+	for(auto x = serializable.begin(), y = serialized.begin(); x != serializable.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");
 }
 
 #endif

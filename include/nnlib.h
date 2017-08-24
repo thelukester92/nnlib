@@ -39,6 +39,9 @@
 #include "nnlib/opt/rmsprop.h"
 #include "nnlib/opt/sgd.h"
 
+/// Serialization
+#include "nnlib/serialization/serialized_node.h"
+
 /// Utilities
 #include "nnlib/util/args.h"
 #include "nnlib/util/batcher.h"

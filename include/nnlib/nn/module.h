@@ -3,6 +3,7 @@
 
 #include "../core/tensor.h"
 #include "../detail/binding.h"
+#include "../serialization/serialized_node.h"
 
 namespace nnlib
 {
@@ -198,6 +199,14 @@ public:
 	{
 		return m_flatState = Tensor<T>::flatten(stateList());
 	}
+	
+	/// Save to a serialized node.
+	/// \todo make it pure virtual
+	virtual void save(SerializedNode &node) const {}
+	
+	/// Load from a serialized node.
+	/// \todo make it pure virtual
+	virtual void load(const SerializedNode &node) {}
 	
 protected:
 	Tensor<T> m_flatParameters;
