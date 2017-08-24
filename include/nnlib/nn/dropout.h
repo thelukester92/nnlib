@@ -134,33 +134,20 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		node.set("shape", this->inputs());
+		node.set("dropProbability", m_dropProbability);
+		node.set("training", m_training);
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
-	
-	/*
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	virtual void load(const SerializedNode &node) override
 	{
-		ar(this->inputs(), m_dropProbability);
+		inputs(node.get<Storage<size_t>>("shape"));
+		node.get("dropProbability", m_dropProbability);
+		node.get("training", m_training);
 	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Storage<size_t> shape;
-		ar(shape, m_dropProbability);
-		this->inputs(shape);
-	}
-	*/
 	
 private:
 	Tensor<T> m_inGrad;		///< Input gradient buffer.
