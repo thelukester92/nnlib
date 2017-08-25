@@ -468,20 +468,34 @@ public:
 	/// Save to a serialized node.
 	virtual void save(SerializedNode &node) const override
 	{
-		node.set("components", components());
-		node.set("state", m_state);
+		node.set("inputs", inputs());
 		node.set("outputs", outputs());
+		node.set("state", m_state);
+		node.set("prevState", m_prevState);
+		node.set("prevOutput", m_prevOutput);
 		node.set("clip", m_clip);
+		
+		size_t i = 0;
+		for(Module<T> *component : this->m_components)
+		{
+			node.set(std::string("component") + std::to_string(i++), component);
+		}
 	}
 	
 	/// Load from a serialized node.
 	virtual void load(const SerializedNode &node) override
 	{
-		Container<T>::clear();
+		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
+		node.get("state", m_state);
+		node.get("prevState", m_prevState);
+		node.get("prevOutput", m_prevOutput);
+		node.get("clip", m_clip);
 		
-		outputs(node.get<Storage<size_t>>("outputs"));
-		
-		
+		size_t i = 0;
+		for(Module<T> *component : this->m_components)
+		{
+			component->load(*node.get<SerializedNode::Object>(std::string("component") + std::to_string(i++)).at("value"));
+		}
 	}
 	
 	/*

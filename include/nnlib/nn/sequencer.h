@@ -94,9 +94,9 @@ public:
 	/// \brief Set the module used by this sequencer.
 	///
 	/// This also deletes the module previously used by this sequencer.
-	Sequencer &module(Module<T> &module)
+	Sequencer &module(Module<T> *module)
 	{
-		m_module = &module;
+		m_module = module;
 		Container<T>::clear();
 		Container<T>::add(m_module);
 		return *this;
@@ -245,10 +245,19 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		node.set("module", m_module);
+		node.set("inputs", inputs());
+		node.set("outputs", outputs());
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
+	virtual void load(const SerializedNode &node) override
+	{
+		module(node.get<Module<T> *>("module"));
+		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
+	}
 	
 	/*
 	/// \brief Write to an archive.

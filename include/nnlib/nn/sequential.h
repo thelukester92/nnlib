@@ -115,28 +115,26 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		node.set("components", m_components);
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
-	
-	/*
-	/// \brief Read from/write to an archive.
-	///
-	/// \param ar The archive from which to read or to which to write.
-	template <typename Archive>
-	void serialize(Archive &ar)
+	virtual void load(const SerializedNode &node) override
 	{
-		ar(m_components);
+		this->clear();
+		for(Module<T> *component : node.get<Storage<Module<T> *>>("components"))
+			add(component);
 	}
-	*/
 	
 private:
 	Sequential &resizeDown(size_t start = 1)
 	{
 		for(size_t i = start, count = components(); i < count; ++i)
 		{
-			m_components[i]->inputs(m_components[i-1]->outputs());
+			if(m_components[i]->inputs() != m_components[i-1]->outputs())
+				m_components[i]->inputs(m_components[i-1]->outputs());
 		}
 		return *this;
 	}
