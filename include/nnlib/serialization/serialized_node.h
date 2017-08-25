@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "factory.h"
 #include "traits.h"
 
 namespace nnlib
@@ -161,6 +162,14 @@ public:
 		value.save(*this);
 	}
 	
+	/// Set a polymorphic serializable value (through a pointer).
+	template <typename T>
+	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T *value)
+	{
+		set("type", ?????????????traits::NameOf<T>::value);
+		set("value", *value);
+	}
+	
 	/// Assignment.
 	template <typename T>
 	typename std::enable_if<std::is_same<T, SerializedNode>::value>::type set(const T &value)
@@ -206,6 +215,15 @@ public:
 	{
 		T value;
 		value.load(*this);
+		return value;
+	}
+	
+	/// Get a polymorphic serializable value (through a pointer).
+	template <typename T>
+	typename std::enable_if<traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && std::is_pointer<T>::value, const T>::type as() const
+	{
+		T value = Factory<typename std::remove_pointer<T>::type>::construct(get<std::string>("type"));
+		value->load(get<SerializedNode>("value"));
 		return value;
 	}
 	

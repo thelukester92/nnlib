@@ -60,22 +60,6 @@ public:
 		return copyConstructors()[derivedNames()[typeid(*original)]](*original);
 	}
 	
-	template <typename D>
-	static SerializedNode save(const D &value)
-	{
-		SerializedNode node;
-		node.set("type", traits::NameOf<D>::value);
-		node.set("value", value);
-		return node;
-	}
-	
-	static B *load(const SerializedNode &node)
-	{
-		B *value = construct(node.get<std::string>("type"));
-		value->load(node.get<SerializedNode>("value"));
-		return value;
-	}
-	
 private:
 	static std::unordered_map<std::string, Constructor> &constructors()
 	{

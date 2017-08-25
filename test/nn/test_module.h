@@ -2,7 +2,6 @@
 #define TEST_MODULE_H
 
 #include "nnlib/nn/module.h"
-#include "nnlib/nn/container.h"
 #include "nnlib/core/tensor.h"
 using namespace std;
 
@@ -40,12 +39,6 @@ void TestModule(T &module)
 template <typename T>
 void TestSerializationOfModule(T &module)
 {
-	if(std::is_base_of<Container<double>, T>::value || std::is_base_of<Container<float>, T>::value)
-	{
-		std::clog << " (Serialization stub!) ";
-		return;
-	}
-	
 	SerializedNode node(module);
 	T serialized = node.as<T>();
 	
@@ -68,7 +61,10 @@ void TestSerializationOfModule(T &module)
 		NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Different outputs for the same input.");
 	
 	{
-		Module<> *generic = Factory<Module<>>::load(Factory<Module<>>::save(module));
+		SerializedNode node(&module);
+		
+		Module<> *generic = Factory<Module<>>::construct(node.get<std::string>("type"));
+		node.get("value", generic);
 		
 		auto &p1 = generic->parameters();
 		auto &p2 = serialized.parameters();
