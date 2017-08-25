@@ -155,19 +155,39 @@ public:
 		m_object = value;
 	}
 	
-	/// Set a serializble value.
+	/// Set a serializble value (through a reference).
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T &value)
 	{
-		value.save(*this);
+		bool isPolymorphic = true;
+		
+		try
+		{
+			set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(value)));
+		}
+		catch(const Error &e)
+		{
+			isPolymorphic = false;
+		}
+		
+		if(isPolymorphic)
+		{
+			SerializedNode *n = new SerializedNode();
+			value.save(*n);
+			set("value", n);
+			set("polymorphic", true);
+		}
+		else
+		{
+			value.save(*this);
+		}
 	}
 	
-	/// Set a polymorphic serializable value (through a pointer).
+	/// Set a serializable value (through a pointer).
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T *value)
 	{
-		set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(*value)));
-		set("value", *value);
+		set(*value);
 	}
 	
 	/// Assignment.
@@ -209,20 +229,24 @@ public:
 		return m_object;
 	}
 	
-	/// Get a serializble value.
+	/// Get a serializable value.
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type as() const
 	{
 		T value;
-		value.load(*this);
+		if(m_type == Type::Object && m_object.find("polymorphic") != m_object.end())
+			value.load(get<SerializedNode>("value"));
+		else
+			value.load(*this);
 		return value;
 	}
 	
 	/// Get a polymorphic serializable value (through a pointer).
 	template <typename T>
-	typename std::enable_if<traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && std::is_pointer<T>::value, const T>::type as() const
+	typename std::enable_if<std::is_pointer<T>::value, T>::type as() const
 	{
-		T value = Factory<typename std::remove_pointer<T>::type>::construct(get<std::string>("type"));
+		NNHardAssert(get<bool>("polymorphic"), "Cannot get pointer to a non-polymorphic type!");
+		T value = Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"));
 		value->load(get<SerializedNode>("value"));
 		return value;
 	}
@@ -237,11 +261,20 @@ public:
 	/// \brief In an object, make a name-value pair.
 	///
 	/// If the current type is not already object, this will change the type to object.
+	void set(const std::string &name, SerializedNode *value)
+	{
+		type(Type::Object);
+		m_object.emplace(name, value);
+	}
+	
+	/// \brief In an object, make a name-value pair.
+	///
+	/// If the current type is not already object, this will change the type to object.
 	template <typename T>
 	void set(const std::string &name, const T &value)
 	{
 		type(Type::Object);
-		m_object[name] = new SerializedNode(value);
+		m_object.emplace(name, new SerializedNode(value));
 	}
 	
 	/// \brief In an object, make an array name-value pair from a pair of iterators.
@@ -266,18 +299,14 @@ public:
 	///
 	/// If the current type is not object, this will throw an Error.
 	template <typename T>
-	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<T>::value, T>::type get(const std::string &name) const
+	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<T>::value || std::is_pointer<T>::value, T>::type get(const std::string &name) const
 	{
-		return as<Object>().at(name)->as<T>();
-	}
-	
-	/// \brief In an object, get a non-number, non-serializable pointer type from a name-value pair.
-	///
-	/// If the current type is not object, this will throw an Error.
-	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<T>::value && std::is_pointer<T>::value, T>::type get(const std::string &name) const
-	{
-		return as<Object>().at(name)->as<T>();
+		NNHardAssertEquals(m_type, Type::Object, "Invalid type!");
+		
+		auto i = m_object.find(name);
+		NNHardAssertNotEquals(i, m_object.end(), "No key '" + name + "' in this object!");
+		
+		return i->second->as<T>();
 	}
 	
 	/// \brief In an object, get a non-number, non-serializable, non-pointer type from a name-value pair.
@@ -286,7 +315,12 @@ public:
 	template <typename T>
 	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<T>::value && !std::is_pointer<T>::value, const T &>::type get(const std::string &name) const
 	{
-		return as<Object>().at(name)->as<T>();
+		NNHardAssertEquals(m_type, Type::Object, "Invalid type!");
+		
+		auto i = m_object.find(name);
+		NNHardAssertNotEquals(i, m_object.end(), "No key '" + name + "' in this object!");
+		
+		return i->second->as<T>();
 	}
 	
 	/// \brief In an object, load a value from a name-value pair into a variable.
@@ -295,7 +329,12 @@ public:
 	template <typename T>
 	void get(const std::string &name, T &value) const
 	{
-		value = as<Object>().at(name)->as<T>();
+		NNHardAssertEquals(m_type, Type::Object, "Invalid type!");
+		
+		auto i = m_object.find(name);
+		NNHardAssertNotEquals(i, m_object.end(), "No key '" + name + "' in this object!");
+		
+		value = i->second->as<T>();
 	}
 	
 	/// \brief In an object, load an array from a name-value pair into a pair of iterators.
