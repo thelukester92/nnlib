@@ -63,8 +63,7 @@ void TestSerializationOfModule(T &module)
 	{
 		SerializedNode node(&module);
 		
-		Module<> *generic = Factory<Module<>>::construct(node.get<std::string>("type"));
-		node.get("value", generic);
+		Module<> *generic = node.as<Module<> *>();
 		
 		auto &p1 = generic->parameters();
 		auto &p2 = serialized.parameters();

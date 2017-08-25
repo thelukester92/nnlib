@@ -60,6 +60,11 @@ public:
 		return copyConstructors()[derivedNames()[typeid(*original)]](*original);
 	}
 	
+	static std::string derivedName(const std::type_index &idx)
+	{
+		return derivedNames()[idx];
+	}
+	
 private:
 	static std::unordered_map<std::string, Constructor> &constructors()
 	{
@@ -85,6 +90,7 @@ private:
 #define NNRegisterType(Derived, Base) \
 namespace nnlib { namespace traits { \
 	template <> const std::string NameOf<Derived>::value = Factory<Base>::template registerDerivedType<Derived>(#Derived); \
+	template <> struct BaseOf<Derived> { using type = Base; }; \
 } }
 
 #endif

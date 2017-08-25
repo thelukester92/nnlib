@@ -166,7 +166,7 @@ public:
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T *value)
 	{
-		set("type", ?????????????traits::NameOf<T>::value);
+		set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(*value)));
 		set("value", *value);
 	}
 	
@@ -271,11 +271,20 @@ public:
 		return as<Object>().at(name)->as<T>();
 	}
 	
-	/// \brief In an object, get a non-number, non-serializable type from a name-value pair.
+	/// \brief In an object, get a non-number, non-serializable pointer type from a name-value pair.
 	///
 	/// If the current type is not object, this will throw an Error.
 	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<T>::value, const T &>::type get(const std::string &name) const
+	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<T>::value && std::is_pointer<T>::value, T>::type get(const std::string &name) const
+	{
+		return as<Object>().at(name)->as<T>();
+	}
+	
+	/// \brief In an object, get a non-number, non-serializable, non-pointer type from a name-value pair.
+	///
+	/// If the current type is not object, this will throw an Error.
+	template <typename T>
+	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<T>::value && !std::is_pointer<T>::value, const T &>::type get(const std::string &name) const
 	{
 		return as<Object>().at(name)->as<T>();
 	}

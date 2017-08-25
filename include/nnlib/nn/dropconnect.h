@@ -186,10 +186,20 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		node.set("module", m_module);
+		node.set("dropProbability", m_dropProbability);
+		node.set("training", m_training);
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
+	virtual void load(const SerializedNode &node) override
+	{
+		module(*node.get<Module<T> *>("module"));
+		node.get("dropProbability", m_dropProbability);
+		node.get("training", m_training);
+	}
 	
 	/*
 	/// \brief Write to an archive.
