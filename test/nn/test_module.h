@@ -36,13 +36,11 @@ void TestModule(T &module)
 		NNAssertAlmostEquals(y, 1, 1e-12, "Module::operator=(const Module &) failed! Not a deep copy!");
 }
 
-#include "nnlib/nn/lstm.h"
-#include "nnlib/nn/recurrent.h"
 #include "nnlib/nn/sequencer.h"
 template <typename T>
 void TestSerializationOfModule(T &module)
 {
-	if(std::is_same<T, LSTM<double>>::value || std::is_same<T, LSTM<float>>::value || std::is_same<T, Recurrent<double>>::value || std::is_same<T, Recurrent<float>>::value || std::is_same<T, Sequencer<double>>::value || std::is_same<T, Sequencer<float>>::value)
+	if(std::is_same<T, Sequencer<double>>::value || std::is_same<T, Sequencer<float>>::value)
 	{
 		std::clog << " (serialization stub; recurrent layers suck) ";
 		return;

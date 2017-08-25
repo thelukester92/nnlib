@@ -144,7 +144,8 @@ private:
 		start = std::min(start, components() - 1);
 		for(size_t i = start; i > 0; --i)
 		{
-			m_components[i - 1]->outputs(m_components[i]->inputs());
+			if(m_components[i - 1]->outputs() != m_components[i]->inputs())
+				m_components[i - 1]->outputs(m_components[i]->inputs());
 		}
 		return *this;
 	}

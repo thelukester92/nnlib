@@ -163,6 +163,9 @@ void TestLSTM()
 	module.outputs(dims);
 	NNAssertEquals(module.outputs(), dims, "LSTM::outputs failed!");
 	
+	/// \todo remove this hack; tensor flattening from state broke this
+	module = LSTM<>(module);
+	
 	TestSerializationOfModule(module);
 	TestModule(module);
 }
