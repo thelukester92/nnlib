@@ -248,15 +248,27 @@ public:
 	virtual void save(SerializedNode &node) const override
 	{
 		node.set("module", m_module);
-		node.set("inputs", inputs());
-		node.set("outputs", outputs());
+		node.set("sequenceLength", sequenceLength());
 	}
 	
 	/// Load from a serialized node.
 	virtual void load(const SerializedNode &node) override
 	{
 		module(node.get<Module<T> *>("module"));
-		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
+		size_t seqLen = node.get<size_t>("sequenceLength");
+		
+		m_state = &m_module->state();
+		m_states.resize(seqLen, m_state->size(0));
+		
+		Storage<size_t> inps = { seqLen };
+		for(size_t size : m_module->inputs())
+			inps.push_back(size);
+		m_inGrad.resize(inps);
+		
+		Storage<size_t> outs = { seqLen };
+		for(size_t size : m_module->outputs())
+			outs.push_back(size);
+		m_output.resize(outs);
 	}
 	
 	/*
