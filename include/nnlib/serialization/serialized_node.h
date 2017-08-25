@@ -246,7 +246,10 @@ public:
 	typename std::enable_if<std::is_pointer<T>::value, T>::type as() const
 	{
 		NNHardAssert(get<bool>("polymorphic"), "Cannot get pointer to a non-polymorphic type!");
-		T value = Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"));
+		
+		T value = dynamic_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type")));
+		NNHardAssertNotEquals(value, nullptr, "Failed to get pointer to derived class!");
+		
 		value->load(get<SerializedNode>("value"));
 		return value;
 	}
