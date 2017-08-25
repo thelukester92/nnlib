@@ -466,20 +466,25 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override {}
+	virtual void save(SerializedNode &node) const override
+	{
+		node.set("components", components());
+		node.set("state", m_state);
+		node.set("outputs", outputs());
+		node.set("clip", m_clip);
+	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override {}
+	virtual void load(const SerializedNode &node) override
+	{
+		Container<T>::clear();
+		
+		outputs(node.get<Storage<size_t>>("outputs"));
+		
+		
+	}
 	
 	/*
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
-	{
-		ar(this->m_components, m_state, m_outMod->output(), m_clip);
-	}
 	
 	/// \brief Read from an archive.
 	///

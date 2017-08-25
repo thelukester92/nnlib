@@ -139,6 +139,7 @@ public:
 	/// Load from a serialized node.
 	virtual void load(const SerializedNode &node) override
 	{
+		this->clear();
 		for(Module<T> *component : node.get<Storage<Module<T> *>>("components"))
 			add(component);
 	}

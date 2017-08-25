@@ -109,10 +109,10 @@ public:
 	/// \brief Set the module used by this DropConnect.
 	///
 	/// This also deletes the module previously used by this DropConnect.
-	DropConnect &module(Module<T> &module)
+	DropConnect &module(Module<T> *module)
 	{
-		m_module = &module;
-		m_params = &module.parameters();
+		m_module = module;
+		m_params = &module->parameters();
 		m_backup = m_params->copy();
 		m_mask.resize(m_params->size());
 		Container<T>::clear();
@@ -196,33 +196,10 @@ public:
 	/// Load from a serialized node.
 	virtual void load(const SerializedNode &node) override
 	{
-		module(*node.get<Module<T> *>("module"));
+		module(node.get<Module<T> *>("module"));
 		node.get("dropProbability", m_dropProbability);
 		node.get("training", m_training);
 	}
-	
-	/*
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
-	{
-		ar(m_module, m_dropProbability);
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Module<T> *m;
-		ar(m, m_dropProbability);
-		module(*m);
-	}
-	*/
 	
 private:
 	Module<T> *m_module;	///< The decorated module.
