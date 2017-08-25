@@ -30,6 +30,7 @@
 #include "opt/test_nadam.h"
 #include "opt/test_rmsprop.h"
 #include "opt/test_sgd.h"
+#include "serialization/test_archive.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
 #include "util/test_random.h"
@@ -84,6 +85,9 @@ int main()
 		TEST("opt/", Nadam),
 		TEST("opt/", RMSProp),
 		TEST("opt/", SGD),
+		
+		/// serialization
+		TEST("serialization/", Archive),
 		
 		// util
 		TEST("util/", Args),
