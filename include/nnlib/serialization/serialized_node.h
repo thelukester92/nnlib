@@ -313,13 +313,16 @@ public:
 	}
 	
 private:
+	/// A tag indicating the active type.
 	Type m_type;
+	
+	/// The actual data.
 	union
 	{
-		double m_number;
-		std::string m_string;
-		Array m_array;
-		Object m_object;
+		double m_number;      ///< The number value. All numbers are stored as double here.
+		std::string m_string; ///< The string value.
+		Array m_array;        ///< The array value (a vector of SerializedNodes).
+		Object m_object;      ///< The object value (a map of string -> SerializedNodes).
 	};
 };
 
