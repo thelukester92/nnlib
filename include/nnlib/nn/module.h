@@ -2,8 +2,6 @@
 #define NN_MODULE_H
 
 #include "../core/tensor.h"
-#include "../detail/binding.h"
-
 #include "../serialization/factory.h"
 #include "../serialization/serialized_node.h"
 
@@ -29,7 +27,7 @@ public:
 	/// This will only work if the actual type of the instance has been registered with NNRegisterType.
 	virtual Module *copy() final
 	{
-		return detail::Binding<Module>::constructCopy(this);
+		return Factory<Module>::constructCopy(this);
 	}
 	
 	/// Returns whether this module is in training mode.

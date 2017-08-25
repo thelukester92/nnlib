@@ -4,24 +4,10 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "traits.h"
 
 namespace nnlib
 {
-
-class SerializedNode;
-
-namespace detail
-{
-	/// Check whether the given type has the load and save methods. Default is false.
-	template <typename T, typename = int, typename = int>
-	struct HasLoadAndSave : std::false_type
-	{};
-
-	/// Check whether the given type has the load and save methods. This override determines it does.
-	template <typename T>
-	struct HasLoadAndSave<T, decltype(std::declval<T>().load(std::declval<const SerializedNode &>()), 0), decltype(std::declval<T>().save(std::declval<SerializedNode &>()), 0)> : std::true_type
-	{};
-}
 
 /// \brief A serialized piece of data.
 ///
@@ -170,7 +156,7 @@ public:
 	
 	/// Set a serializble value.
 	template <typename T>
-	typename std::enable_if<detail::HasLoadAndSave<T>::value>::type set(const T &value)
+	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T &value)
 	{
 		value.save(*this);
 	}
@@ -216,7 +202,7 @@ public:
 	
 	/// Get a serializble value.
 	template <typename T>
-	typename std::enable_if<detail::HasLoadAndSave<T>::value, T>::type as() const
+	typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type as() const
 	{
 		T value;
 		value.load(*this);
@@ -262,7 +248,7 @@ public:
 	///
 	/// If the current type is not object, this will throw an Error.
 	template <typename T>
-	typename std::enable_if<std::is_arithmetic<T>::value || detail::HasLoadAndSave<T>::value, T>::type get(const std::string &name) const
+	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<T>::value, T>::type get(const std::string &name) const
 	{
 		return as<Object>().at(name)->as<T>();
 	}
@@ -271,7 +257,7 @@ public:
 	///
 	/// If the current type is not object, this will throw an Error.
 	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !detail::HasLoadAndSave<T>::value, const T &>::type get(const std::string &name) const
+	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<T>::value, const T &>::type get(const std::string &name) const
 	{
 		return as<Object>().at(name)->as<T>();
 	}
