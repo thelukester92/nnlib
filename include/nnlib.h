@@ -40,7 +40,9 @@
 #include "nnlib/opt/sgd.h"
 
 /// Serialization
+#include "nnlib/serialization/factory.h"
 #include "nnlib/serialization/serialized_node.h"
+#include "nnlib/serialization/traits.h"
 
 /// Utilities
 #include "nnlib/util/args.h"
