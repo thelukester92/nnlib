@@ -19,12 +19,9 @@ public:
 	
 	static std::default_random_engine &engine()
 	{
-		static std::default_random_engine eng = std::default_random_engine(std::random_device()());
-		return eng;
+		static std::default_random_engine e = std::default_random_engine(std::random_device()());
+		return e;
 	}
-	
-private:
-	static std::default_random_engine m_engine;
 };
 
 template <typename T = double>
