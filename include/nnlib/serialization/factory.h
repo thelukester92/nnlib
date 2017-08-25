@@ -13,7 +13,9 @@ namespace detail
 {
 	template <typename T>
 	struct NameOf
-	{};
+	{
+		static const std::string value;
+	};
 }
 
 template <typename Base>
@@ -23,15 +25,16 @@ public:
 	using Constructor = std::function<Base*()>;
 	
 	template <typename Derived>
-	static void registerDerivedType(const std::string &name)
+	static std::string registerDerivedType(const std::string &name)
 	{
-		registerDerivedType<Derived>(name, []() { return new Derived(); });
+		return registerDerivedType<Derived>(name, []() { return new Derived(); });
 	}
 	
 	template <typename Derived>
-	static void registerDerivedType(const std::string name, const Constructor &ctor)
+	static std::string registerDerivedType(const std::string name, const Constructor &ctor)
 	{
 		constructors().emplace(name, ctor);
+		return name;
 	}
 	
 	static Base *construct(const std::string &name)
@@ -43,7 +46,7 @@ public:
 	static SerializedNode save(const Derived &value)
 	{
 		SerializedNode node;
-		node.set("type", detail::NameOf<Derived>::value());
+		node.set("type", detail::NameOf<Derived>::value);
 		node.set("value", value);
 		return node;
 	}
@@ -64,27 +67,11 @@ private:
 	}
 };
 
-namespace detail
-{
-	template <typename Derived, typename Base>
-	struct Registerer
-	{
-		Registerer(const std::string &name)
-		{
-			Factory<Base>::template registerDerivedType<Derived>(name);
-		}
-	};
 }
-
-}
-
-#define NNConcatHelper(a, b) a##b
-#define NNConcat(a, b) NNConcatHelper(a, b)
 
 #define NNRegisterType(Derived, Base) \
 namespace nnlib { namespace detail { \
-	static Registerer<Derived, Base> NNConcat(registerer, __COUNTER__)(#Derived); \
-	template <> struct NameOf<Derived> { static std::string value() { return #Derived; } }; \
+	template <> const std::string NameOf<Derived>::value = Factory<Base>::template registerDerivedType<Derived>(#Derived); \
 } }
 
 #endif
