@@ -223,6 +223,13 @@ public:
 		return value;
 	}
 	
+	/// Get identity (useful for convenience).
+	template <typename T>
+	typename std::enable_if<std::is_same<T, SerializedNode>::value, const T &>::type as() const
+	{
+		return *this;
+	}
+	
 	/// \brief In an object, make a name-value pair.
 	///
 	/// If the current type is not already object, this will change the type to object.

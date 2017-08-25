@@ -55,7 +55,7 @@ public:
 	static Base *load(const SerializedNode &node)
 	{
 		Base *value = construct(node.get<std::string>("type"));
-		value->load(*node.as<SerializedNode::Object>().at("value"));
+		value->load(node.get<SerializedNode>("value"));
 		return value;
 	}
 	
