@@ -235,15 +235,14 @@ public:
 	/// Save to a serialized node.
 	void save(SerializedNode &node) const
 	{
-		node.set("size", m_size);
-		node.set("data", begin(), end());
+		node.set(begin(), end());
 	}
 	
 	/// Load from a serialized node.
 	void load(const SerializedNode &node)
 	{
-		resize(node.get<size_t>("size"));
-		node.get("data", begin(), end());
+		resize(node.as<SerializedNode::Array>().size());
+		node.get(begin(), end());
 	}
 	
 private:

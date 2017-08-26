@@ -147,6 +147,23 @@ public:
 		m_array = value;
 	}
 	
+	
+	/// Set an array value from a pair of iterators.
+	template <typename T>
+	void set(T i, const T &end)
+	{
+		Array arr;
+		arr.reserve(std::distance(i, end));
+		
+		while(i != end)
+		{
+			arr.push_back(new SerializedNode(*i));
+			++i;
+		}
+		
+		set(arr);
+	}
+	
 	/// Set an object value.
 	template <typename T>
 	typename std::enable_if<std::is_convertible<T, Object>::value>::type set(const T &value)
@@ -348,6 +365,19 @@ public:
 	{
 		NNHardAssertEquals(std::distance(i, end), get<Array>(name).size(), "Invalid range!");
 		for(SerializedNode *n : get<Array>(name))
+		{
+			*i = n->as<typename std::remove_reference<decltype(*i)>::type>();
+			++i;
+		}
+	}
+	
+	/// Load an array into a pair of iterators.
+	template <typename T>
+	void get(T i, const T &end) const
+	{
+		NNHardAssertEquals(m_type, Type::Array, "Invalid type!");
+		NNHardAssertEquals(std::distance(i, end), m_array.size(), "Invalid range!");
+		for(SerializedNode *n : m_array)
 		{
 			*i = n->as<typename std::remove_reference<decltype(*i)>::type>();
 			++i;
