@@ -37,11 +37,11 @@ public:
 	{}
 	
 	/// Create a non-null node.
-	template <typename T>
-	SerializedNode(T &&value) :
+	template <typename ... Ts>
+	SerializedNode(Ts && ...values) :
 		m_type(Type::Null)
 	{
-		set(std::forward<T>(value));
+		set(std::forward<Ts>(values)...);
 	}
 	
 	/// Destructor; delete children if type is array or object.
@@ -276,6 +276,39 @@ public:
 	typename std::enable_if<std::is_same<T, SerializedNode>::value, const T &>::type as() const
 	{
 		return *this;
+	}
+	
+	/// In an array or object, get the size. Other types always return 1.
+	size_t size() const
+	{
+		switch(m_type)
+		{
+		case Type::Array:
+			return m_array.size();
+		case Type::Object:
+			return m_object.size();
+		default:
+			return 1;
+		}
+	}
+	
+	/// \brief In an array, append a new element.
+	///
+	/// If the current type is not already array, this will change the type to array.
+	void append(SerializedNode *value)
+	{
+		type(Type::Array);
+		m_array.push_back(value);
+	}
+	
+	/// \brief In an array, append a new element.
+	///
+	/// If the current type is not already array, this will change the type to array.
+	template <typename ... Ts>
+	void append(Ts && ...values)
+	{
+		type(Type::Array);
+		m_array.push_back(new SerializedNode(std::forward<Ts>(values)...));
 	}
 	
 	/// \brief In an object, make a name-value pair.
