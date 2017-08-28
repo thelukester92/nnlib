@@ -141,12 +141,20 @@ public:
 	
 	/// Set an array value.
 	template <typename T>
-	typename std::enable_if<std::is_convertible<T, Array>::value>::type set(const T &value)
+	typename std::enable_if<std::is_same<T, Array>::value>::type set(const T &value)
 	{
 		type(Type::Array);
 		m_array = value;
 	}
 	
+	/// Set an array value through a vector.
+	template <typename T>
+	typename std::enable_if<std::is_same<T, std::vector<typename T::value_type>>::value && !std::is_same<T, Array>::value>::type set(const T &value)
+	{
+		type(Type::Array);
+		for(auto &i : value)
+			m_array.push_back(new SerializedNode(i));
+	}
 	
 	/// Set an array value from a pair of iterators.
 	template <typename T>

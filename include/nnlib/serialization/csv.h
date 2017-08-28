@@ -18,7 +18,7 @@ public:
 	
 	static SerializedNode read(std::istream &in, char sep = ',')
 	{
-		SerializedNode rows((SerializedNode::Array()));
+		SerializedNode rows;
 		SerializedNode *row;
 		while((row = readRow(in, sep)))
 			rows.append(row);
@@ -40,7 +40,7 @@ public:
 				if(value->type() == SerializedNode::Type::Number)
 					out << value->as<double>();
 				else
-					out << "\"" << value->as<std::string>() << "\"";
+					writeString(out, value->as<std::string>());
 				
 				++idx;
 			}
@@ -59,23 +59,68 @@ private:
 		}
 		while(line == "");
 		
-		SerializedNode *node = new SerializedNode(SerializedNode::Array());
+		SerializedNode *node = new SerializedNode();
 		std::string value;
 		
 		std::istringstream ss(line);
-		while(std::getline(ss, value, sep))
+		while(ss.peek() != EOF)
 		{
-			try
+			if(ss.peek() == '"' || !std::isdigit(ss.peek()))
 			{
-				node->append(std::stod(value));
-			}
-			catch(const std::invalid_argument &)
-			{
+				readString(ss, value, sep);
 				node->append(value);
+			}
+			else
+			{
+				std::getline(ss, value, sep);
+				try
+				{
+					node->append(std::stod(value));
+				}
+				catch(const std::invalid_argument &e)
+				{
+					throw Error(e.what());
+				}
 			}
 		}
 		
 		return node;
+	}
+	
+	static void readString(std::istream &in, std::string &out, char sep)
+	{
+		if(in.peek() != '"')
+			std::getline(in, out, sep);
+		else
+		{
+			std::string piece;
+			in.get();
+			
+			do
+			{
+				std::getline(in, piece, '"');
+				out += piece;
+				if(in.peek() == '"')
+					out += '"';
+			}
+			while(in.peek() == '"');
+			
+			NNHardAssert(in.peek() == EOF || in.peek() == sep, "Invalid CSV file!");
+			in.get();
+		}
+	}
+	
+	static void writeString(std::ostream &out, const std::string &str)
+	{
+		out << "\"";
+		for(size_t i = 0, end = str.length(); i != end; ++i)
+		{
+			if(str[i] == '"')
+				out << "\"\"";
+			else
+				out << str[i];
+		}
+		out << "\"";
 	}
 };
 
