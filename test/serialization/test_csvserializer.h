@@ -16,18 +16,22 @@ void TestCSVSerializer()
 		s.add(Serialized::Array);
 		s.get<Serialized *>(0)->add(3.14);
 		s.get<Serialized *>(0)->add(12);
-		s.get<Serialized *>(0)->add("Me");
+		s.get<Serialized *>(0)->add("this is a string");
+		
+		s.add(Serialized::Array);
+		s.get<Serialized *>(1)->add("this is a \"string\"");
+		s.get<Serialized *>(1)->add("this, is, a, string");
 		
 		std::stringstream ss;
-		CSVSerializer::write(s, std::cout);
+		CSVSerializer::write(s, ss);
 		
-		/*
-		Serialized d = JSONSerializer::read(ss);
+		Serialized d = CSVSerializer::read(ss);
 		
-		NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
-		NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
-		NNAssertEquals(d.get<size_t>("number"), 42, "JSONSerializer failed!");
-		*/
+		NNAssertAlmostEquals(d.get<Serialized *>(0)->get<double>(0), 3.14, 1e-12, "CSVSerializer failed!");
+		NNAssertEquals(d.get<Serialized *>(0)->get<int>(1), 12, "CSVSerializer failed!");
+		NNAssertEquals(d.get<Serialized *>(0)->get<std::string>(2), "this is a string", "CSVSerializer failed!");
+		NNAssertEquals(d.get<Serialized *>(1)->get<std::string>(0), "this is a \"string\"", "CSVSerializer failed!");
+		NNAssertEquals(d.get<Serialized *>(1)->get<std::string>(1), "this, is, a, string", "CSVSerializer failed!");
 	}
 }
 
