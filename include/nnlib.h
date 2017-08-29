@@ -40,6 +40,7 @@
 #include "nnlib/opt/sgd.h"
 
 /// Serialization
+#include "nnlib/serialization/csvserializer.h"
 #include "nnlib/serialization/factory.h"
 #include "nnlib/serialization/jsonserializer.h"
 #include "nnlib/serialization/parser.h"

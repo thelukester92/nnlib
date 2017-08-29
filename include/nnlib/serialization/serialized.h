@@ -182,9 +182,10 @@ public:
 	};
 	
 	/// Create a node with the given type; default is Null.
-	Serialized(Type type = Null) :
-		m_type(type)
-	{}
+	Serialized(Type t = Null) : m_type(Null)
+	{
+		type(t);
+	}
 	
 	/// Create a node with the given value.
 	template <typename ... Ts>
@@ -455,6 +456,14 @@ public:
 	
 	/// Get a value from an array.
 	template <typename T>
+	typename std::enable_if<!std::is_same<T, Serialized *>::value, T &>::type get(size_t i)
+	{
+		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		return m_array[i]->as<T>();
+	}
+	
+	/// Get a value from an array.
+	template <typename T>
 	typename std::enable_if<!std::is_same<T, Serialized *>::value, const T &>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
@@ -463,7 +472,15 @@ public:
 	
 	/// Get a node from an array.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, Serialized *>::value, const T>::type get(size_t i) const
+	typename std::enable_if<std::is_same<T, Serialized *>::value, const Serialized *>::type get(size_t i) const
+	{
+		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		return m_array[i];
+	}
+	
+	/// Get a node from an array.
+	template <typename T>
+	typename std::enable_if<std::is_same<T, Serialized *>::value, Serialized *>::type get(size_t i)
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		return m_array[i];

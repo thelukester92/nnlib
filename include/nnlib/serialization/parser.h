@@ -37,17 +37,6 @@ public:
 		m_in.ignore();
 	}
 	
-	void consumeWhitespace()
-	{
-		while(true)
-		{
-			char c = m_in.peek();
-			if(c != ' ' && c != '\n' && c != '\t')
-				break;
-			m_in.ignore();
-		}
-	}
-	
 	bool consume(char c)
 	{
 		if(m_in.peek() == c)
@@ -86,9 +75,22 @@ public:
 		return result;
 	}
 	
+	std::string consumeWhitespace()
+	{
+		return consumeCombinationOf(" \r\n\t");
+	}
+	
 	std::string consumeDigits()
 	{
 		return consumeCombinationOf("0123456789");
+	}
+	
+	std::string consumeUntil(const std::string &chars)
+	{
+		std::string result;
+		while(chars.find(m_in.peek()) == std::string::npos && m_in.peek() != EOF)
+			result.push_back(m_in.get());
+		return result;
 	}
 	
 private:

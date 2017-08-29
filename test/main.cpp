@@ -30,6 +30,7 @@
 #include "opt/test_nadam.h"
 #include "opt/test_rmsprop.h"
 #include "opt/test_sgd.h"
+#include "serialization/test_csvserializer.h"
 #include "serialization/test_jsonserializer.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
@@ -76,6 +77,7 @@ int main()
 		TEST("opt/", Nadam),
 		TEST("opt/", RMSProp),
 		TEST("opt/", SGD),
+		TEST("serialization/", CSVSerializer),
 		TEST("serialization/", JSONSerializer),
 		TEST("util/", Args),
 		TEST("util/", Batcher),

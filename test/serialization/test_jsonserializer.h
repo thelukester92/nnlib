@@ -4,7 +4,6 @@
 #include "nnlib/serialization/jsonserializer.h"
 #include "nnlib/serialization/serialized.h"
 
-#include "nnlib/core/tensor.h"
 #include "nnlib/nn/linear.h"
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/tanh.h"
