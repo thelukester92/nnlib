@@ -182,11 +182,11 @@ public:
 	{}
 	
 	/// Create a node with the given value.
-	template <typename T>
-	Serialized(T && value) :
+	template <typename ... Ts>
+	Serialized(Ts && ...values) :
 		m_type(Null)
 	{
-		set(std::forward<T>(value));
+		set(std::forward<Ts>(values)...);
 	}
 	
 	/// Copy constructor.
@@ -326,6 +326,24 @@ public:
 		return m_object;
 	}
 	
+	/// Get a serializable value.
+	template <typename T>
+	typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type as() const
+	{
+		T value;
+		value.load(*this);
+		return value;
+	}
+	
+	/// Get a serializable value (as a pointer).
+	template <typename T>
+	typename std::enable_if<std::is_pointer<T>::value && traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type as() const
+	{
+		T value = nullptr; // Factory::construct /// \todo HERE HERE HERE
+		// value->load(*this);
+		return value;
+	}
+	
 // MARK: Setters
 	
 	/// Set a boolean value.
@@ -369,8 +387,8 @@ public:
 	}
 	
 	/// Set an array value from a pair of iterators.
-	template <typename T, typename U>
-	typename std::enable_if<std::is_same<T, SerializedArray>::value>::type set(U i, const U &end)
+	template <typename T>
+	typename std::enable_if<!std::is_same<T, std::string>::value>::type set(T i, const T &end)
 	{
 		type(Array);
 		m_array.clear();
@@ -384,6 +402,27 @@ public:
 	{
 		type(Object);
 		m_object = value;
+	}
+	
+	/// Set a serializable value (from a reference).
+	template <typename T>
+	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T &value)
+	{
+		value.save(*this);
+	}
+	
+	/// Set a serializable value (from a pointer).
+	template <typename T>
+	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T *value)
+	{
+		value->save(*this);
+	}
+	
+	/// Assignment.
+	template <typename T>
+	typename std::enable_if<std::is_same<T, Serialized>::value>::type set(const T &value)
+	{
+		*this = value;
 	}
 	
 // MARK: Array methods
@@ -405,8 +444,8 @@ public:
 	}
 	
 	/// Load the entire array into a pair of iterators.
-	template <typename T, typename U>
-	typename std::enable_if<std::is_same<T, SerializedArray>::value>::type get(U i, const U &end) const
+	template <typename T>
+	typename std::enable_if<!std::is_same<T, std::string>::value>::type get(T i, const T &end) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		NNHardAssertEquals(m_array.size(), std::distance(i, end), "Invalid range!");
@@ -416,12 +455,12 @@ public:
 	}
 	
 	/// Set a value in an array.
-	template <typename T>
-	typename std::enable_if<!std::is_same<T, Serialized *>::value>::type set(size_t i, const T &value)
+	template <typename ... Ts>
+	void set(size_t i, Ts && ...values)
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		delete m_array[i];
-		m_array[i] = new Serialized(value);
+		m_array[i] = new Serialized(std::forward<Ts>(values)...);
 	}
 	
 	/// Set a node in an array.
@@ -433,11 +472,11 @@ public:
 	}
 	
 	/// Add a value to an array.
-	template <typename T>
-	typename std::enable_if<!std::is_same<T, Serialized *>::value>::type add(const T &value)
+	template <typename ... Ts>
+	void add(Ts && ...values)
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
-		m_array.add(new Serialized(value));
+		m_array.add(new Serialized(std::forward<Ts>(values)...));
 	}
 	
 	/// Add a node to an array.
@@ -449,9 +488,17 @@ public:
 	
 // MARK: Object methods
 	
-	/// Get a value from an object.
+	/// Get a numeric value from an object.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, Serialized *>::value, const T &>::type get(const std::string &key) const
+	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type get(const std::string &key) const
+	{
+		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		return m_object[key]->as<T>();
+	}
+	
+	/// Get a non-numeric value from an object.
+	template <typename T>
+	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && !std::is_same<T, Serialized *>::value, const T &>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key]->as<T>();
@@ -465,12 +512,28 @@ public:
 		return m_object[key];
 	}
 	
-	/// Set a value in an object.
+	/// Load a value into a variable from an object.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, Serialized *>::value>::type set(const std::string &key, const T &value)
+	void get(const std::string &key, T &value) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		m_object.set(key, new Serialized(value));
+		value = m_object[key]->as<T>();
+	}
+	
+	/// Load an entire array into a pair of iterators.
+	template <typename T>
+	typename std::enable_if<!std::is_same<T, std::string>::value>::type get(const std::string &key, T i, const T &end) const
+	{
+		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		m_object[key]->get(i, end);
+	}
+	
+	/// Set a value in an object.
+	template <typename ... Ts>
+	void set(const std::string &key, Ts && ...values)
+	{
+		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		m_object.set(key, new Serialized(std::forward<Ts>(values)...));
 	}
 	
 	/// Set a node in an object.

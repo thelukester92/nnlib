@@ -65,7 +65,7 @@ private:
 			if(i > 0)
 				out << ", ";
 			out << "\"" << key << "\": ";
-			output(object[key], out);
+			output(*object[key], out);
 			++i;
 		}
 		

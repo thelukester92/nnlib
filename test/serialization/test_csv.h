@@ -9,9 +9,11 @@ void TestCsvSerializer()
 {
 	Serialized data(Serialized::Array);
 	
+	/*
 	data.add(std::vector<double>{ 1, 2, 3, 4, 5 });
 	data.add(std::vector<int>{ 6, 7, 8, 9, 0 });
 	data.add(std::vector<std::string>{ "this", "is", "a", "te\"st" });
+	*/
 	
 	CsvSerializer::write(data, std::cout);
 	
