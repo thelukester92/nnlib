@@ -144,6 +144,11 @@ public:
 			return m_values.at(key);
 		}
 		
+		bool has(const std::string &key) const
+		{
+			return m_values.find(key) != m_values.end();
+		}
+		
 		void set(const std::string &key, Serialized *value)
 		{
 			if(m_values.find(key) != m_values.end())
@@ -331,7 +336,12 @@ public:
 	typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type as() const
 	{
 		T value;
-		value.load(*this);
+		
+		if(m_type == Object && m_object.has("polymorphic"))
+			value.load(*get<Serialized *>("data"));
+		else
+			value.load(*this);
+		
 		return value;
 	}
 	
@@ -339,8 +349,13 @@ public:
 	template <typename T>
 	typename std::enable_if<std::is_pointer<T>::value && traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type as() const
 	{
-		T value = nullptr; // Factory::construct /// \todo HERE HERE HERE
-		// value->load(*this);
+		NNHardAssert(m_type == Object && m_object.has("polymorphic"), "Cannot deserialize a pointer to a non-polymorphic type!");
+		
+		std::string type = get<std::string>("type");
+		
+		T value = Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(type);
+		value->load(*get<Serialized *>("data"));
+		
 		return value;
 	}
 	
@@ -408,14 +423,22 @@ public:
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T &value)
 	{
-		value.save(*this);
+		if(Factory<typename traits::BaseOf<T>::type>::isRegistered(typeid(value)))
+		{
+			set("polymorphic", true);
+			set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(value)));
+			set("data", new Serialized());
+			value.save(*m_object["data"]);
+		}
+		else
+			value.save(*this);
 	}
 	
 	/// Set a serializable value (from a pointer).
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T *value)
 	{
-		value->save(*this);
+		set(*value);
 	}
 	
 	/// Assignment.
@@ -506,7 +529,7 @@ public:
 	
 	/// Get a node from an object.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, Serialized *>::value, const T>::type get(const std::string &key) const
+	typename std::enable_if<std::is_same<T, Serialized *>::value, const Serialized *>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key];

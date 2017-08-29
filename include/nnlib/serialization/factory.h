@@ -82,6 +82,11 @@ public:
 		return i->second;
 	}
 	
+	static bool isRegistered(const std::type_index &idx)
+	{
+		return derivedNames().find(idx) != derivedNames().end();
+	}
+	
 private:
 	/// Static map of constructors.
 	static std::unordered_map<std::string, Constructor> &constructors()
