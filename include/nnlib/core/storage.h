@@ -2,7 +2,7 @@
 #define STORAGE_H
 
 #include <initializer_list>
-#include "../serialization/serialized_node.h"
+#include "../serialization/serialized.h"
 
 namespace nnlib
 {

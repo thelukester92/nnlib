@@ -6,7 +6,7 @@
 #include <typeindex>
 #include <type_traits>
 #include <unordered_map>
-#include "serialized_node.h"
+#include "serialized.h"
 #include "traits.h"
 
 namespace nnlib
