@@ -10,127 +10,6 @@
 namespace nnlib
 {
 
-class Serialized;
-
-class SerializedArray
-{
-public:
-	SerializedArray(const SerializedArray &other)
-	{
-		*this = other;
-	}
-	
-	~SerializedArray()
-	{
-		for(Serialized *value : m_values)
-			delete value;
-	}
-	
-	SerializedArray &operator=(const SerializedArray &other)
-	{
-		if(this != &other)
-		{
-			m_values.clear();
-			m_values.reserve(other.m_values);
-			for(Serialized *value : other.m_values)
-				m_values.push_back(new Serialized(*value));
-		}
-		return *this;
-	}
-	
-	size_t size() const
-	{
-		return m_values.size();
-	}
-	
-	Serialized *&operator[](size_t i)
-	{
-		NNHardAssertLessThan(i, m_values.size(), "Index out of bounds!");
-		return m_values[i];
-	}
-	
-	void add(Serialized *value)
-	{
-		m_values.push_back(value);
-	}
-	
-	const Serialized **begin() const
-	{
-		return &m_values.front();
-	}
-	
-	const Serialized **end() const
-	{
-		return &m_values.back();
-	}
-	
-private:
-	std::vector<Serialized *> m_values;
-};
-
-class SerializedObject
-{
-public:
-	SerializedObject(const SerializedObject &other)
-	{
-		*this = other;
-	}
-	
-	~SerializedObject()
-	{
-		for(auto &i : m_values)
-			delete i.second;
-	}
-	
-	SerializedObject &operator=(const SerializedObject &other)
-	{
-		if(this != &other)
-		{
-			m_values.clear();
-			m_keys = other.m_keys;
-			for(auto &it : other.m_values))
-				m_values.emplace(it.first, it.second);
-		}
-		return *this;
-	}
-	
-	size_t size() const
-	{
-		return m_values.size();
-	}
-	
-	Serialized *&operator[](const std::string &key)
-	{
-		NNHardAssertNotEquals(m_values.find(key) != m_values.end(), "No such key '" + key + "'!");
-		return m_values[key];
-	}
-	
-	void set(const std::string &key, Serialized *value)
-	{
-		if(m_values.find(key) != m_values.end())
-		{
-			delete m_values[key];
-		}
-		
-		m_values.emplace(key, value);
-		m_keys.push_back(key);
-	}
-	
-	const std::string &*begin() const
-	{
-		return &m_keys.begin();
-	}
-	
-	const std::string &*end() const
-	{
-		return &m_keys.end();
-	}
-	
-private:
-	std::map<std::string, Serialized *> m_values;
-	std::vector<std::string> m_keys;
-};
-
 /// \brief Serialized data.
 ///
 /// Serialized is an intermediary value between classes and fully serialized data.
@@ -141,6 +20,131 @@ private:
 class Serialized
 {
 public:
+	/// The value of a serialized node when type is array.
+	class SerializedArray
+	{
+	public:
+		SerializedArray() = default;
+		
+		SerializedArray(const SerializedArray &other)
+		{
+			*this = other;
+		}
+		
+		~SerializedArray()
+		{
+			for(Serialized *value : m_values)
+				delete value;
+		}
+		
+		SerializedArray &operator=(const SerializedArray &other)
+		{
+			if(this != &other)
+			{
+				m_values.clear();
+				m_values.reserve(other.m_values.size());
+				for(Serialized *value : other.m_values)
+					m_values.push_back(new Serialized(*value));
+			}
+			return *this;
+		}
+		
+		size_t size() const
+		{
+			return m_values.size();
+		}
+		
+		Serialized *&operator[](size_t i)
+		{
+			NNHardAssertLessThan(i, m_values.size(), "Index out of bounds!");
+			return m_values[i];
+		}
+		
+		void add(Serialized *value)
+		{
+			m_values.push_back(value);
+		}
+		
+		Serialized * const *begin() const
+		{
+			return &m_values.front();
+		}
+		
+		Serialized * const *end() const
+		{
+			return &m_values.back();
+		}
+		
+	private:
+		std::vector<Serialized *> m_values;
+	};
+	
+	/// The value of a serialized node when type is object.
+	class SerializedObject
+	{
+	public:
+		SerializedObject() = default;
+		
+		SerializedObject(const SerializedObject &other)
+		{
+			*this = other;
+		}
+		
+		~SerializedObject()
+		{
+			for(auto &i : m_values)
+				delete i.second;
+		}
+		
+		SerializedObject &operator=(const SerializedObject &other)
+		{
+			if(this != &other)
+			{
+				m_values.clear();
+				m_keys = other.m_keys;
+				for(auto &it : other.m_values)
+					m_values.emplace(it.first, it.second);
+			}
+			return *this;
+		}
+		
+		size_t size() const
+		{
+			return m_values.size();
+		}
+		
+		Serialized *&operator[](const std::string &key)
+		{
+			NNHardAssertNotEquals(m_values.find(key), m_values.end(), "No such key '" + key + "'!");
+			return m_values[key];
+		}
+		
+		void set(const std::string &key, Serialized *value)
+		{
+			if(m_values.find(key) != m_values.end())
+			{
+				delete m_values[key];
+			}
+			
+			m_values.emplace(key, value);
+			m_keys.push_back(key);
+		}
+		
+		const std::string *begin() const
+		{
+			return &m_keys.front();
+		}
+		
+		const std::string *end() const
+		{
+			return &m_keys.back();
+		}
+		
+	private:
+		std::map<std::string, Serialized *> m_values;
+		std::vector<std::string> m_keys;
+	};
+	
 	/// A tag indicating a node's data type.
 	enum Type
 	{
@@ -368,7 +372,7 @@ public:
 	}
 	
 	/// Set a node in an array.
-	void set(size_t i, const Serialized *value)
+	void set(size_t i, Serialized *value)
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		delete m_array[i];
@@ -384,7 +388,7 @@ public:
 	}
 	
 	/// Add a node to an array.
-	void add(const Serialized *value)
+	void add(Serialized *value)
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		m_array.add(value);
@@ -417,7 +421,7 @@ public:
 	}
 	
 	/// Set a node in an object.
-	void set(const std::string &key, const Serialized *value)
+	void set(const std::string &key, Serialized *value)
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		m_object.set(key, value);
@@ -435,6 +439,9 @@ private:
 		SerializedObject m_object;
 	};
 };
+
+using SerializedArray = Serialized::SerializedArray;
+using SerializedObject = Serialized::SerializedObject;
 
 }
 
