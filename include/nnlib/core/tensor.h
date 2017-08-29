@@ -1312,7 +1312,8 @@ public:
 	TensorIterator operator++(int)
 	{
 		TensorIterator it = *this;
-		return ++it;
+		++(*this);
+		return it;
 	}
 	
 	T &operator*()

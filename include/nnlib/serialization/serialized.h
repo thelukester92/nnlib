@@ -455,19 +455,19 @@ public:
 	}
 	
 	/// Set a value in an array.
-	template <typename ... Ts>
-	void set(size_t i, Ts && ...values)
+	template <typename T, typename ... Ts>
+	void set(size_t i, T && value, Ts && ...values)
 	{
-		NNHardAssertEquals(m_type, Array, "Invalid type!");
-		delete m_array[i];
-		m_array[i] = new Serialized(std::forward<Ts>(values)...);
+		set(i, new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
 	}
 	
 	/// Set a node in an array.
 	void set(size_t i, Serialized *value)
 	{
-		NNHardAssertEquals(m_type, Array, "Invalid type!");
-		delete m_array[i];
+		if(m_type != Array)
+			type(Array);
+		else
+			delete m_array[i];
 		m_array[i] = value;
 	}
 	
@@ -529,17 +529,17 @@ public:
 	}
 	
 	/// Set a value in an object.
-	template <typename ... Ts>
-	void set(const std::string &key, Ts && ...values)
+	template <typename T, typename ... Ts>
+	void set(const std::string &key, T && value, Ts && ...values)
 	{
-		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		m_object.set(key, new Serialized(std::forward<Ts>(values)...));
+		type(Object);
+		m_object.set(key, new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
 	}
 	
 	/// Set a node in an object.
 	void set(const std::string &key, Serialized *value)
 	{
-		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		type(Object);
 		m_object.set(key, value);
 	}
 	
