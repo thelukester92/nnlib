@@ -4,6 +4,7 @@
 #include "nnlib/nn/module.h"
 #include "nnlib/core/tensor.h"
 using namespace std;
+using namespace nnlib;
 
 template <typename T>
 void TestModule(T &module)

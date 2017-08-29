@@ -30,8 +30,7 @@
 #include "opt/test_nadam.h"
 #include "opt/test_rmsprop.h"
 #include "opt/test_sgd.h"
-#include "serialization/test_archive.h"
-#include "serialization/test_csv.h"
+#include "serialization/test_jsonserializer.h"
 #include "util/test_args.h"
 #include "util/test_batcher.h"
 #include "util/test_random.h"
@@ -51,21 +50,14 @@ int main()
 	int ret = 0;
 	
 	initializer_list<pair<string, function<void()>>> tests = {
-		// top level
-		TEST("", Error),
-		TEST("", Storage),
-		TEST("", Tensor),
-		
-		// critics
+		TEST("core/", Error),
+		TEST("core/", Storage),
+		TEST("core/", Tensor),
 		TEST("critics/", CriticSequencer),
 		TEST("critics/", MSE),
 		TEST("critics/", NLL),
-		
-		// math
 		TEST("math/", MathBase),
 		TEST("math/", MathBLAS),
-		
-		// nn
 		TEST("nn/", BatchNorm),
 		TEST("nn/", Concat),
 		TEST("nn/", DropConnect),
@@ -80,18 +72,11 @@ int main()
 		TEST("nn/", Sequencer),
 		TEST("nn/", Sequential),
 		TEST("nn/", TanH),
-		
-		// opt
 		TEST("opt/", Adam),
 		TEST("opt/", Nadam),
 		TEST("opt/", RMSProp),
 		TEST("opt/", SGD),
-		
-		/// serialization
-		TEST("serialization/", Archive),
-		TEST("serialization/", CsvSerializer),
-		
-		// util
+		TEST("serialization/", JSONSerializer),
 		TEST("util/", Args),
 		TEST("util/", Batcher),
 		TEST("util/", Random)
