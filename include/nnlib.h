@@ -41,6 +41,8 @@
 
 /// Serialization
 #include "nnlib/serialization/factory.h"
+#include "nnlib/serialization/jsonserializer.h"
+#include "nnlib/serialization/parser.h"
 #include "nnlib/serialization/serialized.h"
 #include "nnlib/serialization/traits.h"
 
