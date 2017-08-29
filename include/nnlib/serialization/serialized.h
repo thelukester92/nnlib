@@ -114,7 +114,7 @@ public:
 				m_values.clear();
 				m_keys = other.m_keys;
 				for(auto &it : other.m_values)
-					m_values.emplace(it.first, it.second);
+					m_values.emplace(it.first, new Serialized(*it.second));
 			}
 			return *this;
 		}
@@ -303,8 +303,11 @@ public:
 	template <typename T>
 	typename std::enable_if<std::is_floating_point<T>::value, T>::type as() const
 	{
-		NNHardAssertEquals(m_type, Float, "Invalid type!");
-		return m_float;
+		NNHardAssert(m_type == Float || m_type == Integer, "Invalid type!");
+		if(m_type == Float)
+			return m_float;
+		else
+			return m_int;
 	}
 	
 	/// Get a string value.
