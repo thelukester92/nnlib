@@ -1198,14 +1198,14 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	void save(SerializedNode &node) const
+	void save(Serialized &node) const
 	{
 		node.set("dims", m_dims);
 		node.set("data", begin(), end());
 	}
 	
 	/// Load from a serialized node.
-	void load(const SerializedNode &node)
+	void load(const Serialized &node)
 	{
 		resize(node.get<Storage<size_t>>("dims"));
 		node.get("data", begin(), end());

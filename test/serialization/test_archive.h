@@ -2,12 +2,12 @@
 #define TEST_ARCHIVE_H
 
 #include "nnlib/serialization/archive.h"
-#include "nnlib/serialization/serialized_node.h"
+#include "nnlib/serialization/serialized.h"
 using namespace nnlib;
 
 void TestArchive()
 {
-	SerializedNode node;
+	Serialized node;
 	node.set("name", "Luke");
 	node.set("age", 25);
 	

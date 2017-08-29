@@ -214,7 +214,7 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override
+	virtual void save(Serialized &node) const override
 	{
 		node.set("inpMod", m_inpMod);
 		node.set("memMod", m_memMod);
@@ -223,7 +223,7 @@ public:
 	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override
+	virtual void load(const Serialized &node) override
 	{
 		Container<T>::clear();
 		

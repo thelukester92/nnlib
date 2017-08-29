@@ -61,14 +61,14 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override
+	virtual void save(Serialized &node) const override
 	{
 		Map<T>::save(node);
 		node.set("leak", m_leak);
 	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override
+	virtual void load(const Serialized &node) override
 	{
 		Map<T>::load(node);
 		node.get("leak", m_leak);

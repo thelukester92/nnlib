@@ -134,7 +134,7 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override
+	virtual void save(Serialized &node) const override
 	{
 		node.set("shape", this->inputs());
 		node.set("dropProbability", m_dropProbability);
@@ -142,7 +142,7 @@ public:
 	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override
+	virtual void load(const Serialized &node) override
 	{
 		inputs(node.get<Storage<size_t>>("shape"));
 		node.get("dropProbability", m_dropProbability);

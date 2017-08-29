@@ -1,7 +1,7 @@
 #ifndef CSV_H
 #define CSV_H
 
-#include "serialized_node.h"
+#include "serialized.h"
 #include <iostream>
 
 namespace nnlib
@@ -16,31 +16,42 @@ class CsvSerializer
 public:
 	CsvSerializer() = delete;
 	
-	static SerializedNode read(std::istream &in, char sep = ',')
+	static Serialized read(std::istream &in, char sep = ',')
 	{
-		SerializedNode rows;
-		SerializedNode *row;
+		Serialized rows;
+		Serialized *row;
 		while((row = readRow(in, sep)))
-			rows.append(row);
+			rows.add(row);
 		return rows;
 	}
 	
-	static void write(const SerializedNode &rows, std::ostream &out, char sep = ',')
+	static void write(const Serialized &rows, std::ostream &out, char sep = ',')
 	{
-		for(SerializedNode *row : rows.as<SerializedNode::Array>())
+		for(Serialized *row : rows.as<SerializedArray>())
 		{
 			size_t idx = 0;
-			for(SerializedNode *value : row->as<SerializedNode::Array>())
+			for(Serialized *value : row->as<SerializedArray>())
 			{
-				NNHardAssert(value->type() == SerializedNode::Type::Number || value->type() == SerializedNode::Type::String, "Invalid type!");
-				
 				if(idx > 0)
 					out << sep;
 				
-				if(value->type() == SerializedNode::Type::Number)
+				switch(value->type())
+				{
+				case Serialized::Null:
+					out << "null";
+					break;
+				case Serialized::Integer:
+					out << value->as<int>();
+					break;
+				case Serialized::Float:
 					out << value->as<double>();
-				else
+					break;
+				case Serialized::String:
 					writeString(out, value->as<std::string>());
+					break;
+				default:
+					throw Error("Invalid type!");
+				}
 				
 				++idx;
 			}
@@ -49,7 +60,7 @@ public:
 	}
 	
 private:
-	static SerializedNode *readRow(std::istream &in, char sep)
+	static Serialized *readRow(std::istream &in, char sep)
 	{
 		std::string line;
 		do
@@ -59,7 +70,7 @@ private:
 		}
 		while(line == "");
 		
-		SerializedNode *node = new SerializedNode();
+		Serialized *node = new Serialized();
 		std::string value;
 		
 		std::istringstream ss(line);
@@ -68,14 +79,14 @@ private:
 			if(ss.peek() == '"' || !std::isdigit(ss.peek()))
 			{
 				readString(ss, value, sep);
-				node->append(value);
+				node->add(value);
 			}
 			else
 			{
 				std::getline(ss, value, sep);
 				try
 				{
-					node->append(std::stod(value));
+					node->add(std::stod(value));
 				}
 				catch(const std::invalid_argument &e)
 				{

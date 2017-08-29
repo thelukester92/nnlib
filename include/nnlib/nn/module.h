@@ -3,7 +3,7 @@
 
 #include "../core/tensor.h"
 #include "../serialization/factory.h"
-#include "../serialization/serialized_node.h"
+#include "../serialization/serialized.h"
 
 namespace nnlib
 {
@@ -201,10 +201,10 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const = 0;
+	virtual void save(Serialized &node) const = 0;
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) = 0;
+	virtual void load(const Serialized &node) = 0;
 	
 protected:
 	Tensor<T> m_flatParameters;

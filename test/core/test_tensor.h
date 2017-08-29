@@ -423,7 +423,7 @@ void TestTensor()
 	Tensor<> serializable = Tensor<>(3, 4, 5, 6).rand();
 	Tensor<> serialized;
 	
-	SerializedNode node;
+	Serialized node;
 	serializable.save(node);
 	serialized.load(node);
 	

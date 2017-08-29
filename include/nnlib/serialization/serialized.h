@@ -33,8 +33,7 @@ public:
 		
 		~SerializedArray()
 		{
-			for(Serialized *value : m_values)
-				delete value;
+			clear();
 		}
 		
 		SerializedArray &operator=(const SerializedArray &other)
@@ -54,7 +53,20 @@ public:
 			return m_values.size();
 		}
 		
+		void clear()
+		{
+			for(Serialized *value : m_values)
+				delete value;
+			m_values.clear();
+		}
+		
 		Serialized *&operator[](size_t i)
+		{
+			NNHardAssertLessThan(i, m_values.size(), "Index out of bounds!");
+			return m_values[i];
+		}
+		
+		const Serialized *operator[](size_t i) const
 		{
 			NNHardAssertLessThan(i, m_values.size(), "Index out of bounds!");
 			return m_values[i];
@@ -92,8 +104,7 @@ public:
 		
 		~SerializedObject()
 		{
-			for(auto &i : m_values)
-				delete i.second;
+			clear();
 		}
 		
 		SerializedObject &operator=(const SerializedObject &other)
@@ -113,10 +124,24 @@ public:
 			return m_values.size();
 		}
 		
+		void clear()
+		{
+			for(auto &i : m_values)
+				delete i.second;
+			m_values.clear();
+			m_keys.clear();
+		}
+		
 		Serialized *&operator[](const std::string &key)
 		{
 			NNHardAssertNotEquals(m_values.find(key), m_values.end(), "No such key '" + key + "'!");
 			return m_values[key];
+		}
+		
+		const Serialized *operator[](const std::string &key) const
+		{
+			NNHardAssertNotEquals(m_values.find(key), m_values.end(), "No such key '" + key + "'!");
+			return m_values.at(key);
 		}
 		
 		void set(const std::string &key, Serialized *value)
@@ -166,6 +191,13 @@ public:
 	
 	/// Copy constructor.
 	Serialized(const Serialized &other) :
+		m_type(Null)
+	{
+		*this = other;
+	}
+	
+	/// Non-const copy constructor (needed to avoid template conflict).
+	Serialized(Serialized &other) :
 		m_type(Null)
 	{
 		*this = other;
@@ -256,7 +288,7 @@ public:
 	
 	/// Get an integer value.
 	template <typename T>
-	typename std::enable_if<std::is_integral<T>::value, T>::type as() const
+	typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value, T>::type as() const
 	{
 		NNHardAssertEquals(m_type, Integer, "Invalid type!");
 		return m_int;
@@ -306,7 +338,7 @@ public:
 	
 	/// Set an integer value.
 	template <typename T>
-	typename std::enable_if<std::is_integral<T>::value>::type set(T value)
+	typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value>::type set(T value)
 	{
 		type(Integer);
 		m_int = value;
@@ -336,6 +368,16 @@ public:
 		m_array = value;
 	}
 	
+	/// Set an array value from a pair of iterators.
+	template <typename T, typename U>
+	typename std::enable_if<std::is_same<T, SerializedArray>::value>::type set(U i, const U &end)
+	{
+		type(Array);
+		m_array.clear();
+		while(i != end)
+			m_array.add(new Serialized(*(i++)));
+	}
+	
 	/// Set an object value.
 	template <typename T>
 	typename std::enable_if<std::is_same<T, SerializedObject>::value>::type set(const T &value)
@@ -348,7 +390,7 @@ public:
 	
 	/// Get a value from an array.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, Serialized *>::value, const T &>::type get(size_t i)
+	typename std::enable_if<!std::is_same<T, Serialized *>::value, const T &>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		return m_array[i]->as<T>();
@@ -356,10 +398,21 @@ public:
 	
 	/// Get a node from an array.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, Serialized *>::value, const T>::type get(size_t i)
+	typename std::enable_if<std::is_same<T, Serialized *>::value, const T>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		return m_array[i];
+	}
+	
+	/// Load the entire array into a pair of iterators.
+	template <typename T, typename U>
+	typename std::enable_if<std::is_same<T, SerializedArray>::value>::type get(U i, const U &end) const
+	{
+		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		NNHardAssertEquals(m_array.size(), std::distance(i, end), "Invalid range!");
+		size_t idx = 0;
+		while(i != end)
+			*(i++) = m_array[idx++]->as<typename std::remove_reference<decltype(*i)>::type>();
 	}
 	
 	/// Set a value in an array.
@@ -398,7 +451,7 @@ public:
 	
 	/// Get a value from an object.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, Serialized *>::value, const T &>::type get(const std::string &key)
+	typename std::enable_if<!std::is_same<T, Serialized *>::value, const T &>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key]->as<T>();
@@ -406,7 +459,7 @@ public:
 	
 	/// Get a node from an object.
 	template <typename T>
-	typename std::enable_if<std::is_same<T, Serialized *>::value, const T>::type get(const std::string &key)
+	typename std::enable_if<std::is_same<T, Serialized *>::value, const T>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key];

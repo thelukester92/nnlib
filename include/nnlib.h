@@ -41,7 +41,7 @@
 
 /// Serialization
 #include "nnlib/serialization/factory.h"
-#include "nnlib/serialization/serialized_node.h"
+#include "nnlib/serialization/serialized.h"
 #include "nnlib/serialization/traits.h"
 
 /// Utilities

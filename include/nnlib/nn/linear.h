@@ -175,7 +175,7 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override
+	virtual void save(Serialized &node) const override
 	{
 		node.set("inputs", inputs());
 		node.set("outputs", outputs());
@@ -184,7 +184,7 @@ public:
 	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override
+	virtual void load(const Serialized &node) override
 	{
 		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
 		node.get("weights", m_weights);

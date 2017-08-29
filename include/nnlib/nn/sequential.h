@@ -115,13 +115,13 @@ public:
 	}
 	
 	/// Save to a serialized node.
-	virtual void save(SerializedNode &node) const override
+	virtual void save(Serialized &node) const override
 	{
 		node.set("components", m_components);
 	}
 	
 	/// Load from a serialized node.
-	virtual void load(const SerializedNode &node) override
+	virtual void load(const Serialized &node) override
 	{
 		this->clear();
 		for(Module<T> *component : node.get<Storage<Module<T> *>>("components"))
