@@ -84,7 +84,7 @@ public:
 		
 		Serialized * const *end() const
 		{
-			return &m_values.back();
+			return &m_values.back() + 1;
 		}
 		
 	private:
@@ -167,7 +167,7 @@ public:
 		
 		const std::string *end() const
 		{
-			return &m_keys.back();
+			return &m_keys.back() + 1;
 		}
 		
 	private:
@@ -498,14 +498,14 @@ public:
 	template <typename ... Ts>
 	void add(Ts && ...values)
 	{
-		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		type(Array);
 		m_array.add(new Serialized(std::forward<Ts>(values)...));
 	}
 	
 	/// Add a node to an array.
 	void add(Serialized *value)
 	{
-		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		type(Array);
 		m_array.add(value);
 	}
 	
