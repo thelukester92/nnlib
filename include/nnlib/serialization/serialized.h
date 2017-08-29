@@ -356,7 +356,7 @@ public:
 		
 		std::string type = get<std::string>("type");
 		
-		T value = Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(type);
+		T value = static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(type));
 		value->load(*get<Serialized *>("data"));
 		
 		return value;
