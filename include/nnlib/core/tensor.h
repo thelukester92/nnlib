@@ -28,6 +28,7 @@ public:
 	/// \brief Flattens a number of tensors into a vector.
 	///
 	/// Each tensor in the parameter becomes a subview into a single shared Storage.
+	/// If any of the tensors shared data, the old links are broken and are no longer shared.
 	/// \param tensors A list of tensors to flatten.
 	/// \return The flattened tensor.
 	static Tensor flatten(const Storage<Tensor *> &tensors)
@@ -55,6 +56,17 @@ public:
 		
 		return flattened;
 	}
+	
+	/// Create a zero-length, one-dimensional tensor.
+	Tensor() :
+		m_dims({ 0 }),
+		m_strides({ 1 }),
+		m_offset(0),
+		m_data(new Storage<T>()),
+		m_shared(m_data),
+		m_size(0),
+		m_contiguous(true)
+	{}
 	
 	/// \brief Create a tensor with the given data.
 	///
@@ -103,14 +115,13 @@ public:
 	///
 	/// This creates an n-dimensional tensor where n is the size of the input parameter.
 	/// \param dims A parameter pack containing the dimension sizes for the new tensor.
-	/// \note This is the default constructor when `sizeof...(dims) == 0`.
 	template <typename ... Ts>
-	explicit Tensor(Ts... dims) :
+	explicit Tensor(size_t dim1, Ts... dims) :
 		m_offset(0),
 		m_data(new Storage<T>()),
 		m_shared(m_data)
 	{
-		resize(dims...);
+		resize({ dim1, static_cast<size_t>(dims)... });
 	}
 	
 	/// \brief Create a tensor as a view of another tensor with the same shape.
@@ -208,33 +219,58 @@ public:
 	
 	// MARK: Size and shape methods.
 	
+	/// Returns whether this tensor shares a buffer with another tensor.
+	bool shared() const
+	{
+		return m_shared.use_count() > 1;
+	}
+	
+	/// Returns whether this tensor shares a buffer with a specific tensor.
+	bool sharedWith(const Tensor &other) const
+	{
+		return m_data == other.m_data;
+	}
+	
+	/// Returns the number of tensors sharing data with this tensor, including this tensor.
+	size_t sharedCount() const
+	{
+		return m_shared.use_count();
+	}
+	
 	/// \brief Resize this tensor in place and, if necessary, resize its underlying storage.
 	///
-	/// This will not change the data, although it will result in a contiguous tensor.
-	/// Thus, if the tensor was a non-contiguous view, it will end up with a different view.
-	/// This method will delete data if resizing smaller or add 0s if resizing bigger.
+	/// If this tensor shares data (i.e. it is a view) and the new size is greater than the current,
+	/// this method will break the connction and allocate a new buffer.
+	/// This method will pad with 0s when resizing bigger.
 	/// \param dims The new shape for the tensor.
+	///
 	/// \return The tensor, for chaining.
-	Tensor &resize(const Storage<size_t> &dims)
+	Tensor &resize(Storage<size_t> dims)
 	{
-		// Don't allow a 0-dimensional tensor.
-		if(dims.size() > 0)
-			m_dims = dims;
+		NNHardAssert(dims.size() > 0, "Cannot create a zero-dimensional tensor!");
+		
+		// Calculate new strides and size.
+		
+		Storage<size_t> strides(dims.size());
+		strides.back() = 1;
+		for(size_t i = strides.size() - 1; i > 0; --i)
+			strides[i - 1] = strides[i] * dims[i];
+		
+		size_t size = strides[0] * dims[0];
+		
+		// Resize underlying storage. If not unique and we are resizing larger, break shared connection.
+		
+		if(shared() && size > m_size)
+			*this = Tensor(*m_data).resize(dims);
 		else
-			m_dims = { 0 };
-		
-		m_strides.resize(m_dims.size());
-		
-		m_strides[m_strides.size() - 1] = 1;
-		for(size_t i = m_strides.size() - 1; i > 0; --i)
-			m_strides[i - 1] = m_strides[i] * m_dims[i];
-		
-		m_size = m_strides[0] * m_dims[0];
-		m_contiguous = true;
-		
-		// only resize if necessary, because other tensors may share this data and need it all
-		if(m_offset + m_size > m_data->size())
-			m_data->resize(m_offset + m_size);
+		{
+			if(!shared())
+				m_data->resize(m_offset + size);
+			m_dims = std::move(dims);
+			m_strides = std::move(strides);
+			m_size = size;
+			m_contiguous = true;
+		}
 		
 		return *this;
 	}
@@ -244,9 +280,16 @@ public:
 	/// \param dims A parameter pack containing the new shape for the tensor. Must not be empty.
 	/// \return The tensor, for chaining.
 	template <typename ... Ts>
-	Tensor &resize(Ts... dims)
+	Tensor &resize(size_t dim1, Ts... dims)
 	{
-		return resize({ static_cast<size_t>(dims)... });
+		return resize(Storage<size_t>{ dim1, static_cast<size_t>(dims)... });
+	}
+	
+	/// Resize this tensor in place, possibly invalidating any other tensors that share data with it.
+	template <typename ... Ts>
+	Tensor &resizeAndInvalidateShared(size_t dim1, Ts... dims)
+	{
+		return resize(Storage<size_t>{ dim1, static_cast<size_t>(dims)... }, true);
 	}
 	
 	/// \brief Resize one dimension of this tensor in place and, if necessary, resize its underlying storage.
@@ -309,7 +352,7 @@ public:
 	/// \return A tensor that with the given shape and a copy of the data in this tensor.
 	Tensor reshape(const Storage<size_t> &dims) const
 	{
-		Tensor t(dims);
+		Tensor t(dims, true);
 		NNAssertEquals(t.size(), size(), "Incompatible dimensions for reshaping!");
 		auto k = t.begin();
 		for(const T &value : *this)

@@ -28,7 +28,10 @@ void TestModule(T &module)
 	}
 	
 	module = copy;
-	p1 = module.parameters();
+	
+	// re-flatten the parameters
+	module.parameters();
+	
 	for(auto &x : p1)
 		NNAssertAlmostEquals(x, 1, 1e-12, "Module::operator=(const Module &) failed!");
 	

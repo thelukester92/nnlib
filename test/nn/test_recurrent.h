@@ -116,9 +116,6 @@ void TestRecurrent()
 	module.outputs(dims);
 	NNAssertEquals(module.outputs(), dims, "Recurrent::outputs failed!");
 	
-	/// \todo remove this hack; tensor flattening from state broke this
-	module = Recurrent<>(module);
-	
 	TestSerializationOfModule(module);
 	TestModule(module);
 }
