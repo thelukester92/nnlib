@@ -29,13 +29,13 @@ public:
 	
 	static Serialized readString(const std::string &s)
 	{
-		istringstream iss(s);
+		std::istringstream iss(s);
 		return read(iss);
 	}
 	
 	static Serialized readFile(const std::string &filename)
 	{
-		ifstream fin(filename);
+		std::ifstream fin(filename);
 		Serialized result = read(fin);
 		fin.close();
 		return result;
@@ -49,7 +49,7 @@ public:
 	
 	static void writeFile(const Serialized &root, const std::string &filename, bool pretty = false)
 	{
-		ofstream fout(filename);
+		std::ofstream fout(filename);
 		write(root, fout, pretty);
 		fout.close();
 	}
