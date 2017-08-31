@@ -59,10 +59,13 @@ bool TestModule_flattening(T &module)
 	if(module.parameterList().size() > 0)
 	{
 		// flatten tensors
-		module.parameters();
+		auto &old = module.parameters();
 		
 		// intentionally break shared connection
 		*module.parameterList()[0] = module.parameterList()[0]->copy();
+		
+		// intentionally add an extra shared connection
+		auto view = old.view(0);
 		
 		// reflatten
 		module.parameters();
@@ -75,10 +78,13 @@ bool TestModule_flattening(T &module)
 	if(module.gradList().size() > 0)
 	{
 		// flatten tensors
-		module.grad();
+		auto &old = module.grad();
 		
 		// intentionally break shared connection
 		*module.gradList()[0] = module.gradList()[0]->copy();
+		
+		// intentionally add an extra shared connection
+		auto view = old.view(0);
 		
 		// reflatten
 		module.grad();
@@ -91,10 +97,13 @@ bool TestModule_flattening(T &module)
 	if(module.stateList().size() > 0)
 	{
 		// flatten tensors
-		module.state();
+		auto &old = module.state();
 		
 		// intentionally break shared connection
 		*module.stateList()[0] = module.stateList()[0]->copy();
+		
+		// intentionally add an extra shared connection
+		auto view = old.view(0);
 		
 		// reflatten
 		module.state();
