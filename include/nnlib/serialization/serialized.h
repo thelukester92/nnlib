@@ -52,6 +52,12 @@ public:
 			return *this;
 		}
 		
+		SerializedArray &operator=(SerializedArray &&other)
+		{
+			m_values = std::move(other.m_values);
+			return *this;
+		}
+		
 		size_t size() const
 		{
 			return m_values.size();
@@ -125,6 +131,13 @@ public:
 				for(auto &it : other.m_values)
 					m_values.emplace(it.first, new Serialized(*it.second));
 			}
+			return *this;
+		}
+		
+		SerializedObject &operator=(SerializedObject &&other)
+		{
+			m_values = std::move(other.m_values);
+			m_keys = std::move(other.m_keys);
 			return *this;
 		}
 		
@@ -323,6 +336,20 @@ public:
 		m_type = type;
 	}
 	
+	/// \brief Get the size of the value stored.
+	///
+	/// For object and array, this is the number of elements contained.
+	/// For other types, this returns 1.
+	size_t size() const
+	{
+		if(m_type == Array)
+			return m_array.size();
+		else if(m_type == Object)
+			return m_object.size();
+		else
+			return 1;
+	}
+	
 // MARK: Getters
 	
 	/// Get a boolean value.
@@ -472,7 +499,7 @@ public:
 	
 	/// Set an array value from a pair of iterators.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, std::string>::value>::type set(T i, const T &end)
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type set(T i, const T &end)
 	{
 		type(Array);
 		m_array.clear();
@@ -568,7 +595,7 @@ public:
 	
 	/// Load the entire array into a pair of iterators.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, std::string>::value>::type get(T i, const T &end) const
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type get(T i, const T &end) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		NNHardAssertEquals(m_array.size(), std::distance(i, end), "Invalid range!");
@@ -668,7 +695,7 @@ public:
 	
 	/// Load an entire array into a pair of iterators.
 	template <typename T>
-	typename std::enable_if<!std::is_same<T, std::string>::value>::type get(const std::string &key, T i, const T &end) const
+	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type get(const std::string &key, T i, const T &end) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		m_object[key]->get(i, end);
