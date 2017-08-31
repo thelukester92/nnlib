@@ -181,6 +181,8 @@ private:
 	
 	static void readObject(Serialized &node, Parser &p)
 	{
+		node.type(Serialized::Object);
+		
 		NNHardAssert(p.consume('{'), "Expected opening bracket!");
 		p.consumeWhitespace();
 		
@@ -309,7 +311,7 @@ private:
 			
 			newline(out, level);
 			indent(out, level >= 0 ? level + 1 : level);
-			write(key, out, level >= 0 ? level + 1 : level);
+			write(key, out);
 			out << ':';
 			if(level >= 0)
 				out << ' ';

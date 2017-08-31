@@ -154,10 +154,13 @@ public:
 			if(m_values.find(key) != m_values.end())
 			{
 				delete m_values[key];
+				m_values[key] = value;
 			}
-			
-			m_values.emplace(key, value);
-			m_keys.push_back(key);
+			else
+			{
+				m_keys.push_back(key);
+				m_values.emplace(key, value);
+			}
 		}
 		
 		const std::string *begin() const
@@ -267,14 +270,14 @@ public:
 		
 		if(m_type == String)
 			m_string.~basic_string<char>();
-		if(m_type == Array)
+		else if(m_type == Array)
 			m_array.~SerializedArray();
 		else if(m_type == Object)
 			m_object.~SerializedObject();
 		
 		if(type == Type::String)
 			new (&m_string) std::string;
-		if(type == Type::Array)
+		else if(type == Type::Array)
 			new (&m_array) SerializedArray;
 		else if(type == Type::Object)
 			new (&m_object) SerializedObject;
@@ -478,6 +481,13 @@ public:
 	
 // MARK: Array methods
 	
+	/// Get the type of an element in an array.
+	Type type(size_t i) const
+	{
+		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		return m_array[i]->type();
+	}
+	
 	/// Get a numeric value from an array.
 	template <typename T>
 	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type get(size_t i) const
@@ -562,6 +572,13 @@ public:
 	}
 	
 // MARK: Object methods
+	
+	/// Get the type of an element in an object.
+	Type type(const std::string &key) const
+	{
+		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		return m_object[key]->type();
+	}
 	
 	/// Get a numeric value from an object.
 	template <typename T>
