@@ -27,31 +27,10 @@ public:
 	{
 		return 1.0 - y * y;
 	}
-	
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
-	{
-		ar(this->inputs());
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Storage<size_t> shape;
-		ar(shape);
-		this->inputs(shape);
-	}
 };
 
 }
 
-NNRegisterType(TanH<float>, Module<float>);
-NNRegisterType(TanH<double>, Module<double>);
+NNRegisterType(TanH, Module);
 
 #endif

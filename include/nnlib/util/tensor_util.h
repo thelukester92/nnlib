@@ -1,7 +1,7 @@
 #ifndef TENSOR_UTIL_H
 #define TENSOR_UTIL_H
 
-#include "../tensor.h"
+#include "../core/tensor.h"
 
 namespace nnlib
 {

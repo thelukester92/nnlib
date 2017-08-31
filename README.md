@@ -1,6 +1,6 @@
 # nnlib - Neural Network Library
 
-[![Build Status](https://travis-ci.org/thelukester92/nnlib.svg?branch=master)](https://travis-ci.org/thelukester92/nnlib)
+[![Build Status](https://api.travis-ci.org/thelukester92/nnlib.svg?branch=master)](https://travis-ci.org/thelukester92/nnlib)
 [![codecov](https://codecov.io/gh/thelukester92/nnlib/branch/develop/graph/badge.svg)](https://codecov.io/gh/thelukester92/nnlib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

@@ -97,7 +97,6 @@ void TestSequential()
 	module.outputs(dims);
 	NNAssertEquals(module.outputs(), dims, "Sequential::outputs failed!");
 	
-	TestSerializationOfModule(module);
 	TestModule(module);
 }
 

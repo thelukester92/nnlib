@@ -43,7 +43,6 @@ void TestTanH()
 	catch(const Error &e) {}
 	NNAssert(ok, "TanH::resize allowed unequal inputs and outputs!");
 	
-	TestSerializationOfModule(map);
 	TestModule(map);
 }
 

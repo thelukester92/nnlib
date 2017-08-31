@@ -49,7 +49,6 @@ void TestLogSoftMax()
 	map.safeResize({ 12, 4 }, { 12, 4 });
 	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::safeResize failed!");
 	
-	TestSerializationOfModule(map);
 	TestModule(map);
 }
 

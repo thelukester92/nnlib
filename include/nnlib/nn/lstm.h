@@ -465,14 +465,48 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(this->m_components, m_state, m_outMod->output(), m_clip);
+		node.set("inputs", inputs());
+		node.set("outputs", outputs());
+		node.set("state", m_state);
+		node.set("output", m_outMod->output());
+		node.set("clip", m_clip);
+		node.set("components", this->m_components);
 	}
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
+	{
+		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
+		node.get("state", m_state);
+		node.get("clip", m_clip);
+		
+		Container<T>::clear();
+		node.get("components", this->m_components);
+		
+		m_inpGateX = component(0);
+		m_inpGateY = component(1);
+		m_inpGateH = component(2);
+		m_inpGate = component(3);
+		m_fgtGateX = component(4);
+		m_fgtGateY = component(5);
+		m_fgtGateH = component(6);
+		m_fgtGate = component(7);
+		m_inpModX = component(8);
+		m_inpModY = component(9);
+		m_inpMod = component(10);
+		m_outGateX = component(11);
+		m_outGateY = component(12);
+		m_outGateH = component(13);
+		m_outGate = component(14);
+		m_outMod = component(15);
+		
+		m_outMod->output().copy(node.get<Tensor<T>>("output"));
+	}
+	
+	/*
 	
 	/// \brief Read from an archive.
 	///
@@ -519,6 +553,7 @@ public:
 		m_gradBuffer.resize(bats, outs);
 		m_resetGrad = true;
 	}
+	*/
 	
 private:
 	Module<T> *m_inpGateX;
@@ -557,7 +592,6 @@ private:
 
 }
 
-NNRegisterType(LSTM<float>, Module<float>);
-NNRegisterType(LSTM<double>, Module<double>);
+NNRegisterType(LSTM, Module);
 
 #endif

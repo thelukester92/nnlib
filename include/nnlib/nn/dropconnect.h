@@ -109,10 +109,10 @@ public:
 	/// \brief Set the module used by this DropConnect.
 	///
 	/// This also deletes the module previously used by this DropConnect.
-	DropConnect &module(Module<T> &module)
+	DropConnect &module(Module<T> *module)
 	{
-		m_module = &module;
-		m_params = &module.parameters();
+		m_module = module;
+		m_params = &module->parameters();
 		m_backup = m_params->copy();
 		m_mask.resize(m_params->size());
 		Container<T>::clear();
@@ -185,25 +185,20 @@ public:
 		return states;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(m_module, m_dropProbability);
+		node.set("module", m_module);
+		node.set("dropProbability", m_dropProbability);
+		node.set("training", m_training);
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		Module<T> *m;
-		ar(m, m_dropProbability);
-		module(*m);
+		module(node.get<Module<T> *>("module"));
+		node.get("dropProbability", m_dropProbability);
+		node.get("training", m_training);
 	}
 	
 private:
@@ -216,7 +211,6 @@ private:
 
 }
 
-NNRegisterType(DropConnect<float>, Module<float>);
-NNRegisterType(DropConnect<double>, Module<double>);
+NNRegisterType(DropConnect, Module);
 
 #endif

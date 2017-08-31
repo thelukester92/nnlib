@@ -1,8 +1,8 @@
 #ifndef TEST_STORAGE_H
 #define TEST_STORAGE_H
 
-#include "nnlib/error.h"
-#include "nnlib/storage.h"
+#include "nnlib/core/error.h"
+#include "nnlib/core/storage.h"
 using namespace nnlib;
 
 void TestStorage()
@@ -84,7 +84,15 @@ void TestStorage()
 	NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
 	NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
 	
-	TestSerializationOfIterable(copy);
+	// test serialization
+	
+	Storage<size_t> serializable = { 1, 2, 3, 4, 5 };
+	Storage<size_t> serialized;
+	
+	Serialized node;
+	serializable.save(node);
+	serialized.load(node);
+	NNAssertEquals(serializable, serialized, "Storage::save and/or Storage::load failed!");
 }
 
 #endif

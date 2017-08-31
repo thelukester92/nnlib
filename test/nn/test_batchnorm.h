@@ -97,7 +97,6 @@ void TestBatchNorm()
 	state.fill(0);
 	NNAssertAlmostEquals(bn.output().sum(), 0, 1e-12, "BatchNorm::state failed!");
 	
-	TestSerializationOfModule(bn);
 	TestModule(bn);
 }
 

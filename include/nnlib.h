@@ -1,14 +1,7 @@
-/// Serialization (note: these must be included before including serializable types)
-#include "nnlib/serialization/archive.h"
-#include "nnlib/serialization/arff.h"
-#include "nnlib/serialization/basic.h"
-#include "nnlib/serialization/binary.h"
-#include "nnlib/serialization/csv.h"
-
-/// Top-level Classes
-#include "nnlib/error.h"
-#include "nnlib/storage.h"
-#include "nnlib/tensor.h"
+/// Core
+#include "nnlib/core/error.h"
+#include "nnlib/core/storage.h"
+#include "nnlib/core/tensor.h"
 
 /// Critics
 #include "nnlib/critics/critic.h"
@@ -45,6 +38,14 @@
 #include "nnlib/opt/optimizer.h"
 #include "nnlib/opt/rmsprop.h"
 #include "nnlib/opt/sgd.h"
+
+/// Serialization
+#include "nnlib/serialization/csvserializer.h"
+#include "nnlib/serialization/factory.h"
+#include "nnlib/serialization/jsonserializer.h"
+#include "nnlib/serialization/parser.h"
+#include "nnlib/serialization/serialized.h"
+#include "nnlib/serialization/traits.h"
 
 /// Utilities
 #include "nnlib/util/args.h"

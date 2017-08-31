@@ -2,7 +2,7 @@
 #define TEST_RANDOM_H
 
 #include "nnlib/util/random.h"
-#include "nnlib/tensor.h"
+#include "nnlib/core/tensor.h"
 using namespace nnlib;
 
 void TestRandom()

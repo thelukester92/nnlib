@@ -60,32 +60,26 @@ public:
 		return x > 0 ? 1 : m_leak;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(this->inputs(), m_leak);
+		Map<T>::save(node);
+		node.set("leak", m_leak);
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		Storage<size_t> shape;
-		ar(shape, m_leak);
-		this->inputs(shape);
+		Map<T>::load(node);
+		node.get("leak", m_leak);
 	}
+	
 private:
 	T m_leak;
 };
 
 }
 
-NNRegisterType(ReLU<float>, Module<float>);
-NNRegisterType(ReLU<double>, Module<double>);
+NNRegisterType(ReLU, Module);
 
 #endif

@@ -2,7 +2,7 @@
 #define RANDOM_H
 
 #include <random>
-#include "../error.h"
+#include "../core/error.h"
 
 namespace nnlib
 {
@@ -14,19 +14,15 @@ public:
 	
 	static void seed(size_t s = 0)
 	{
-		m_engine.seed(s);
+		engine().seed(s);
 	}
 	
 	static std::default_random_engine &engine()
 	{
-		return m_engine;
+		static std::default_random_engine e = std::default_random_engine(std::random_device()());
+		return e;
 	}
-	
-private:
-	static std::default_random_engine m_engine;
 };
-
-std::default_random_engine RandomEngine::m_engine = std::default_random_engine(std::random_device()());
 
 template <typename T = double>
 class Random

@@ -43,7 +43,6 @@ void TestLogistic()
 	catch(const Error &e) {}
 	NNAssert(ok, "Logistic::resize allowed unequal inputs and outputs!");
 	
-	TestSerializationOfModule(map);
 	TestModule(map);
 }
 

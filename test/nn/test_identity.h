@@ -56,7 +56,6 @@ void TestIdentity()
 	map.forget();
 	NNAssertAlmostEquals(map.output().sum(), 0.0, 1e-12, "Identity::forget failed!");
 	
-	TestSerializationOfModule(map);
 	TestModule(map);
 }
 

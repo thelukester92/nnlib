@@ -1,7 +1,7 @@
 #ifndef TEST_TENSOR_H
 #define TEST_TENSOR_H
 
-#include "nnlib/tensor.h"
+#include "nnlib/core/tensor.h"
 #include "nnlib/util/tensor_util.h"
 using namespace nnlib;
 
@@ -420,8 +420,15 @@ void TestTensor()
 	
 	// test serialization
 	
-	view.resize(3, 4, 5, 6).rand();
-	TestSerializationOfIterable(view);
+	Tensor<> serializable = Tensor<>(3, 4, 5, 6).rand();
+	Tensor<> serialized;
+	
+	Serialized node;
+	serializable.save(node);
+	serialized.load(node);
+	
+	for(auto x = serializable.begin(), y = serialized.begin(); x != serializable.end(); ++x, ++y)
+		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");
 }
 
 #endif

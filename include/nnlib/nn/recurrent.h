@@ -82,19 +82,23 @@ public:
 	
 	Recurrent &operator=(const Recurrent &module)
 	{
-		Container<T>::clear();
-		m_inpMod	= module.m_inpMod->copy();
-		m_memMod	= module.m_memMod->copy();
-		m_outMod	= module.m_outMod->copy();
-		
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_memMod);
-		Container<T>::add(m_outMod);
-		
-		m_state		= module.m_state.copy();
-		m_statePrev	= module.m_statePrev.copy();
-		m_stateGrad	= module.m_stateGrad.copy();
-		m_resetGrad	= module.m_resetGrad;
+		if(this != &module)
+		{
+			Container<T>::clear();
+			
+			m_inpMod	= module.m_inpMod->copy();
+			m_memMod	= module.m_memMod->copy();
+			m_outMod	= module.m_outMod->copy();
+			
+			Container<T>::add(m_inpMod);
+			Container<T>::add(m_memMod);
+			Container<T>::add(m_outMod);
+			
+			m_state		= module.m_state.copy();
+			m_statePrev	= module.m_statePrev.copy();
+			m_stateGrad	= module.m_stateGrad.copy();
+			m_resetGrad	= module.m_resetGrad;
+		}
 		return *this;
 	}
 	
@@ -209,32 +213,32 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(m_inpMod, m_memMod, m_outMod, m_state);
+		node.set("inpMod", m_inpMod);
+		node.set("memMod", m_memMod);
+		node.set("outMod", m_outMod);
+		node.set("state", m_state);
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
 		Container<T>::clear();
-		ar(m_inpMod, m_memMod, m_outMod, m_state);
+		
+		node.get("inpMod", m_inpMod);
+		node.get("memMod", m_memMod);
+		node.get("outMod", m_outMod);
+		
 		Container<T>::add(m_inpMod);
 		Container<T>::add(m_memMod);
 		Container<T>::add(m_outMod);
 		
-		NNHardAssertEquals(m_state.shape(), m_outMod->outputs(), "Incompatible recurrent state!");
+		node.get("state", m_state);
 		
 		m_statePrev.resize(m_outMod->outputs());
 		m_stateGrad.resize(m_outMod->outputs());
-		m_resetGrad = true;
 	}
 	
 private:
@@ -251,7 +255,6 @@ private:
 
 }
 
-NNRegisterType(Recurrent<float>, Module<float>);
-NNRegisterType(Recurrent<double>, Module<double>);
+NNRegisterType(Recurrent, Module);
 
 #endif

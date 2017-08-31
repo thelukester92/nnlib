@@ -1,8 +1,9 @@
 #ifndef NN_MODULE_H
 #define NN_MODULE_H
 
-#include "../tensor.h"
-#include "../detail/binding.h"
+#include "../core/tensor.h"
+#include "../serialization/factory.h"
+#include "../serialization/serialized.h"
 
 namespace nnlib
 {
@@ -15,7 +16,13 @@ template <typename T = double>
 class Module
 {
 public:
-	Module() : m_training(true) {}
+	Module() :
+		m_training(true),
+		m_sharedParamCount(0),
+		m_sharedGradCount(0),
+		m_sharedStateCount(0)
+	{}
+	
 	Module(const Module &) = delete;
 	Module &operator=(const Module &) = delete;
 	virtual ~Module() {}
@@ -26,7 +33,7 @@ public:
 	/// This will only work if the actual type of the instance has been registered with NNRegisterType.
 	virtual Module *copy() final
 	{
-		return detail::Binding<Module>::constructCopy(this);
+		return Factory<Module>::constructCopy(this);
 	}
 	
 	/// Returns whether this module is in training mode.
@@ -179,31 +186,92 @@ public:
 	}
 	
 	/// A flattened tensor of all of this module's parameters.
-	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &parameters()
 	{
-		return m_flatParameters = Tensor<T>::flatten(parameterList());
+		Storage<Tensor<T> *> list = parameterList();
+		bool recalculate = m_sharedParamCount != m_flatParameters.sharedCount();
+		
+		for(size_t i = 0, count = list.size(); i != count && !recalculate; ++i)
+		{
+			if(!m_flatParameters.sharedWith(*list[i]))
+				recalculate = true;
+		}
+		
+		if(recalculate)
+		{
+			m_flatParameters = Tensor<T>::flatten(parameterList());
+			m_sharedParamCount = m_flatParameters.sharedCount();
+		}
+		
+		return m_flatParameters;
 	}
 	
 	/// A flattened tensor of all of this module's parameters' gradients.
-	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &grad()
 	{
-		return m_flatGrad = Tensor<T>::flatten(gradList());
+		Storage<Tensor<T> *> list = gradList();
+		bool recalculate = m_sharedGradCount != m_flatGrad.sharedCount();
+		
+		for(size_t i = 0, count = list.size(); i != count && !recalculate; ++i)
+		{
+			if(!m_flatGrad.sharedWith(*list[i]))
+				recalculate = true;
+		}
+		
+		if(recalculate)
+		{
+			m_flatGrad = Tensor<T>::flatten(gradList());
+			m_sharedGradCount = m_flatGrad.sharedCount();
+		}
+		
+		return m_flatGrad;
 	}
 	
 	/// A flattened tensor of all of this module's internal states.
-	/// \todo Don't recalculate each time; can this be cached?
 	Tensor<T> &state()
 	{
-		return m_flatState = Tensor<T>::flatten(stateList());
+		Storage<Tensor<T> *> list = stateList();
+		bool recalculate = m_sharedStateCount != m_flatState.sharedCount();
+		
+		for(size_t i = 0, count = list.size(); i != count && !recalculate; ++i)
+		{
+			if(!m_flatState.sharedWith(*list[i]))
+				recalculate = true;
+		}
+		
+		if(recalculate)
+		{
+			m_flatState = Tensor<T>::flatten(stateList());
+			m_sharedStateCount = m_flatState.sharedCount();
+		}
+		
+		return m_flatState;
 	}
+	
+	/// Invalidate the cached flattened tensors.
+	Module &invalidateCache()
+	{
+		m_sharedParamCount = 0;
+		m_sharedGradCount = 0;
+		m_sharedStateCount = 0;
+	}
+	
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const = 0;
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) = 0;
 	
 protected:
 	Tensor<T> m_flatParameters;
 	Tensor<T> m_flatGrad;
 	Tensor<T> m_flatState;
 	bool m_training;
+	
+private:
+	size_t m_sharedParamCount;
+	size_t m_sharedGradCount;
+	size_t m_sharedStateCount;
 };
 
 }

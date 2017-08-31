@@ -130,37 +130,18 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		NNAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
-		ar(m_components);
+		node.set("components", m_components);
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		Container<T>::clear();
-		ar(m_components);
-		
-		NNHardAssertGreaterThan(m_components.size(), 0, "Expected at least one component!");
-		NNHardAssertEquals(m_components[0]->inputs().size(), 2, "Expected matrix input!");
-		NNHardAssertEquals(m_components[0]->outputs().size(), 2, "Expected matrix output!");
-		
-		for(size_t i = 1, end = m_components.size(); i != end; ++i)
-		{
-			NNHardAssertEquals(m_components[0]->inputs(), m_components[i]->inputs(), "Incompatible component!");
-			NNHardAssertEquals(m_components[i]->outputs().size(), 2, "Expected matrix output!");
-		}
-		
-		resizeBuffers();
+		this->clear();
+		for(Module<T> *component : node.get<Storage<Module<T> *>>("components"))
+			add(component);
 	}
 	
 private:
@@ -192,7 +173,6 @@ private:
 
 }
 
-NNRegisterType(Concat<double>, Module<double>);
-NNRegisterType(Concat<float>, Module<float>);
+NNRegisterType(Concat, Module);
 
 #endif

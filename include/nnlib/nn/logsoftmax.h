@@ -112,25 +112,18 @@ public:
 		return *this;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(this->inputs());
+		node.set("shape", this->inputs());
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		Storage<size_t> shape;
-		ar(shape);
-		this->inputs(shape);
+		inputs(node.get<Storage<size_t>>("shape"));
 	}
+	
 private:
 	Tensor<T> m_inGrad;	///< Input gradient buffer.
 	Tensor<T> m_output;	///< Output buffer.
@@ -138,7 +131,6 @@ private:
 
 }
 
-NNRegisterType(LogSoftMax<float>, Module<float>);
-NNRegisterType(LogSoftMax<double>, Module<double>);
+NNRegisterType(LogSoftMax, Module);
 
 #endif

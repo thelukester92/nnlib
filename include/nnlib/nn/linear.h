@@ -174,34 +174,21 @@ public:
 		return { &m_weightsGrad, &m_biasGrad };
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(m_weights, m_bias, batch());
+		node.set("inputs", inputs());
+		node.set("outputs", outputs());
+		node.set("weights", m_weights);
+		node.set("bias", m_bias);
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		size_t bats;
-		ar(m_weights, m_bias, bats);
-		
-		NNAssertEquals(m_weights.dims(), 2, "Expected weights to be a matrix!");
-		NNAssertEquals(m_bias.dims(), 1, "Expected bias to be a vector!");
-		NNAssertEquals(m_bias.size(0), m_weights.size(1), "Incompatible weights and bias!");
-		
-		m_weightsGrad.resize(m_weights.shape());
-		m_biasGrad.resize(m_bias.shape());
-		m_inGrad.resize({ bats, m_weights.size(0) });
-		m_output.resize({ bats, m_weights.size(1) });
-		m_addBuffer.resize(bats).fill(1);
+		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
+		node.get("weights", m_weights);
+		node.get("bias", m_bias);
 	}
 	
 private:
@@ -219,7 +206,6 @@ private:
 
 }
 
-NNRegisterType(Linear<float>, Module<float>);
-NNRegisterType(Linear<double>, Module<double>);
+NNRegisterType(Linear, Module);
 
 #endif

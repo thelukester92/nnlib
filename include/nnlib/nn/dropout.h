@@ -133,25 +133,20 @@ public:
 		return states;
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// The archive takes care of whitespace for plaintext.
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(this->inputs(), m_dropProbability);
+		node.set("shape", this->inputs());
+		node.set("dropProbability", m_dropProbability);
+		node.set("training", m_training);
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		Storage<size_t> shape;
-		ar(shape, m_dropProbability);
-		this->inputs(shape);
+		inputs(node.get<Storage<size_t>>("shape"));
+		node.get("dropProbability", m_dropProbability);
+		node.get("training", m_training);
 	}
 	
 private:
@@ -163,7 +158,6 @@ private:
 
 }
 
-NNRegisterType(Dropout<float>, Module<float>);
-NNRegisterType(Dropout<double>, Module<double>);
+NNRegisterType(Dropout, Module);
 
 #endif

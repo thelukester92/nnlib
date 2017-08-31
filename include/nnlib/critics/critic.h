@@ -1,7 +1,7 @@
 #ifndef CRITIC_H
 #define CRITIC_H
 
-#include "../tensor.h"
+#include "../core/tensor.h"
 
 namespace nnlib
 {

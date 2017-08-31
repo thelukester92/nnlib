@@ -94,9 +94,9 @@ public:
 	/// \brief Set the module used by this sequencer.
 	///
 	/// This also deletes the module previously used by this sequencer.
-	Sequencer &module(Module<T> &module)
+	Sequencer &module(Module<T> *module)
 	{
-		m_module = &module;
+		m_module = module;
 		Container<T>::clear();
 		Container<T>::add(m_module);
 		return *this;
@@ -244,27 +244,18 @@ public:
 		return m_output.size(1);
 	}
 	
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(sequenceLength(), m_module);
+		node.set("module", m_module);
+		node.set("sequenceLength", sequenceLength());
 	}
 	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
 	{
-		Container<T>::clear();
-		size_t seqLen;
-		
-		ar(seqLen, m_module);
-		
-		Container<T>::add(m_module);
+		module(node.get<Module<T> *>("module"));
+		size_t seqLen = node.get<size_t>("sequenceLength");
 		
 		m_state = &m_module->state();
 		m_states.resize(seqLen, m_state->size(0));
@@ -292,7 +283,6 @@ private:
 
 }
 
-NNRegisterType(Sequencer<float>, Module<float>);
-NNRegisterType(Sequencer<double>, Module<double>);
+NNRegisterType(Sequencer, Module);
 
 #endif

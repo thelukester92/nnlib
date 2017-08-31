@@ -114,13 +114,18 @@ public:
 		return *this;
 	}
 	
-	/// \brief Read from/write to an archive.
-	///
-	/// \param ar The archive from which to read or to which to write.
-	template <typename Archive>
-	void serialize(Archive &ar)
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
 	{
-		ar(m_components);
+		node.set("components", m_components);
+	}
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
+	{
+		this->clear();
+		for(Module<T> *component : node.get<Storage<Module<T> *>>("components"))
+			add(component);
 	}
 	
 private:
@@ -128,7 +133,8 @@ private:
 	{
 		for(size_t i = start, count = components(); i < count; ++i)
 		{
-			m_components[i]->inputs(m_components[i-1]->outputs());
+			if(m_components[i]->inputs() != m_components[i-1]->outputs())
+				m_components[i]->inputs(m_components[i-1]->outputs());
 		}
 		return *this;
 	}
@@ -138,7 +144,8 @@ private:
 		start = std::min(start, components() - 1);
 		for(size_t i = start; i > 0; --i)
 		{
-			m_components[i - 1]->outputs(m_components[i]->inputs());
+			if(m_components[i - 1]->outputs() != m_components[i]->inputs())
+				m_components[i - 1]->outputs(m_components[i]->inputs());
 		}
 		return *this;
 	}
@@ -146,7 +153,6 @@ private:
 
 }
 
-NNRegisterType(Sequential<float>, Module<float>);
-NNRegisterType(Sequential<double>, Module<double>);
+NNRegisterType(Sequential, Module);
 
 #endif

@@ -111,11 +111,25 @@ public:
 		return *this;
 	}
 	
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
+	{
+		node.set("shape", inputs());
+	}
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
+	{
+		inputs(node.get<Storage<size_t>>("shape"));
+	}
+	
 private:
 	Tensor<T> m_inGrad;
 	Tensor<T> m_output;
 };
 
 }
+
+NNRegisterType(Map, Module);
 
 #endif

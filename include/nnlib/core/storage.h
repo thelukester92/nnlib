@@ -2,6 +2,7 @@
 #define STORAGE_H
 
 #include <initializer_list>
+#include "../serialization/serialized.h"
 
 namespace nnlib
 {
@@ -231,21 +232,17 @@ public:
 		return m_ptr + m_size;
 	}
 	
-	template <typename Archive>
-	void save(Archive &ar) const
+	/// Save to a serialized node.
+	void save(Serialized &node) const
 	{
-		ar(m_size);
-		for(const T &x : *this)
-			ar(x);
+		node.set(begin(), end());
 	}
 	
-	template <typename Archive>
-	void load(Archive &ar)
+	/// Load from a serialized node.
+	void load(const Serialized &node)
 	{
-		ar(m_size);
-		resize(m_size);
-		for(T &x : *this)
-			ar(x);
+		resize(node.as<SerializedArray>().size());
+		node.get(begin(), end());
 	}
 	
 private:

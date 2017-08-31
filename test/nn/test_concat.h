@@ -104,7 +104,6 @@ void TestConcat()
 	for(size_t i = 0; i < module.components(); ++i)
 		NNAssert(!module.component(i)->training(), "Concat::training failed!");
 	
-	TestSerializationOfModule(module);
 	TestModule(module);
 }
 

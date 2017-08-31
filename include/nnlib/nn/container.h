@@ -142,4 +142,6 @@ protected:
 
 }
 
+NNRegisterType(Container, Module);
+
 #endif
