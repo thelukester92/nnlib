@@ -271,44 +271,6 @@ public:
 		m_output.resize(outs);
 	}
 	
-	/*
-	/// \brief Write to an archive.
-	///
-	/// \param ar The archive to which to write.
-	template <typename Archive>
-	void save(Archive &ar) const
-	{
-		ar(sequenceLength(), m_module);
-	}
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Container<T>::clear();
-		size_t seqLen;
-		
-		ar(seqLen, m_module);
-		
-		Container<T>::add(m_module);
-		
-		m_state = &m_module->state();
-		m_states.resize(seqLen, m_state->size(0));
-		
-		Storage<size_t> inps = { seqLen };
-		for(size_t size : m_module->inputs())
-			inps.push_back(size);
-		m_inGrad.resize(inps);
-		
-		Storage<size_t> outs = { seqLen };
-		for(size_t size : m_module->outputs())
-			outs.push_back(size);
-		m_output.resize(outs);
-	}
-	*/
-	
 private:
 	Module<T> *m_module;
 	

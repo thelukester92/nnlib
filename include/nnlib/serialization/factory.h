@@ -34,6 +34,14 @@ public:
 		return registerDerivedType<D>(name, []() { return new D(); });
 	}
 	
+	/// Register a derived abstract type.
+	template <typename D>
+	static typename std::enable_if<std::is_abstract<D>::value, std::string>::type
+	registerDerivedType(const std::string &name)
+	{
+		return registerDerivedType<D>(name, []() { return nullptr; });
+	}
+	
 	/// Register a derived type given a specific constructor; copy constructible.
 	template <typename D>
 	static typename std::enable_if<std::is_copy_constructible<D>::value, std::string>::type
@@ -60,7 +68,11 @@ public:
 	{
 		auto i = constructors().find(name);
 		NNHardAssertNotEquals(i, constructors().end(), "Attempted to construct an unregistered type!");
-		return i->second();
+		
+		B *object = i->second();
+		NNHardAssertNotEquals(object, nullptr, "Attempted to construct an abstract type!");
+		
+		return object;
 	}
 	
 	/// Construct a copy of a derived class instance through a base class pointer.

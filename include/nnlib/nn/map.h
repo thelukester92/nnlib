@@ -130,4 +130,7 @@ private:
 
 }
 
+NNRegisterType(Map<double>, Module<double>);
+NNRegisterType(Map<float>, Module<float>);
+
 #endif

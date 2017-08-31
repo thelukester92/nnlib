@@ -157,6 +157,19 @@ void TestModule_serialization(T &module)
 	NNAssert(TestModule_equalParams(module, *s4), "Generic serialization through pointer failed! Parameters are not equal!");
 	NNAssert(TestModule_equalOutput(module, *s4), "Generic serialization through pointer failed! Different outputs for the same input!");
 	delete s4;
+	
+	if(std::is_base_of<Container<>, T>::value)
+	{
+		Container<> *s5 = Serialized(module).as<Container<> *>();
+		NNAssert(TestModule_equalParams(module, *s5), "Generic serialization through Container reference failed! Parameters are not equal!");
+		NNAssert(TestModule_equalOutput(module, *s5), "Generic serialization through Container reference failed! Different outputs for the same input!");
+		delete s5;
+		
+		Container<> *s6 = Serialized(&module).as<Container<> *>();
+		NNAssert(TestModule_equalParams(module, *s6), "Generic serialization through Container pointer failed! Parameters are not equal!");
+		NNAssert(TestModule_equalOutput(module, *s6), "Generic serialization through Container pointer failed! Different outputs for the same input!");
+		delete s6;
+	}
 }
 
 template <typename T>
