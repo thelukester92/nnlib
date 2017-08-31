@@ -2,6 +2,7 @@
 #define TEST_MODULE_H
 
 #include "nnlib/nn/container.h"
+#include "nnlib/nn/map.h"
 #include "nnlib/nn/module.h"
 using namespace std;
 using namespace nnlib;
@@ -168,6 +169,19 @@ void TestModule_serialization(T &module)
 		Container<> *s6 = Serialized(&module).as<Container<> *>();
 		NNAssert(TestModule_equalParams(module, *s6), "Generic serialization through Container pointer failed! Parameters are not equal!");
 		NNAssert(TestModule_equalOutput(module, *s6), "Generic serialization through Container pointer failed! Different outputs for the same input!");
+		delete s6;
+	}
+	
+	if(std::is_base_of<Map<>, T>::value)
+	{
+		Map<> *s5 = Serialized(module).as<Map<> *>();
+		NNAssert(TestModule_equalParams(module, *s5), "Generic serialization through Map reference failed! Parameters are not equal!");
+		NNAssert(TestModule_equalOutput(module, *s5), "Generic serialization through Map reference failed! Different outputs for the same input!");
+		delete s5;
+		
+		Map<> *s6 = Serialized(&module).as<Map<> *>();
+		NNAssert(TestModule_equalParams(module, *s6), "Generic serialization through Map pointer failed! Parameters are not equal!");
+		NNAssert(TestModule_equalOutput(module, *s6), "Generic serialization through Map pointer failed! Different outputs for the same input!");
 		delete s6;
 	}
 }
