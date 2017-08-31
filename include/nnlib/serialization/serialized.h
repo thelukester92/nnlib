@@ -614,10 +614,8 @@ public:
 	/// Set a node in an array.
 	void set(size_t i, Serialized *value)
 	{
-		if(m_type != Array)
-			type(Array);
-		else
-			delete m_array[i];
+		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		delete m_array[i];
 		m_array[i] = value;
 	}
 	
