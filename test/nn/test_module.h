@@ -54,6 +54,60 @@ bool TestModule_equalOutput(Module<T> &m1, Module<T> &m2)
 }
 
 template <typename T>
+bool TestModule_flattening(T &module)
+{
+	if(module.parameterList().size() > 0)
+	{
+		// flatten tensors
+		module.parameters();
+		
+		// intentionally break shared connection
+		*module.parameterList()[0] = module.parameterList()[0]->copy();
+		
+		// reflatten
+		module.parameters();
+		
+		// ensure shared connection is back
+		if(!module.parameterList()[0]->sharedWith(module.parameters()))
+			return false;
+	}
+	
+	if(module.gradList().size() > 0)
+	{
+		// flatten tensors
+		module.grad();
+		
+		// intentionally break shared connection
+		*module.gradList()[0] = module.gradList()[0]->copy();
+		
+		// reflatten
+		module.grad();
+		
+		// ensure shared connection is back
+		if(!module.gradList()[0]->sharedWith(module.grad()))
+			return false;
+	}
+	
+	if(module.stateList().size() > 0)
+	{
+		// flatten tensors
+		module.state();
+		
+		// intentionally break shared connection
+		*module.stateList()[0] = module.stateList()[0]->copy();
+		
+		// reflatten
+		module.state();
+		
+		// ensure shared connection is back
+		if(!module.stateList()[0]->sharedWith(module.state()))
+			return false;
+	}
+	
+	return true;
+}
+
+template <typename T>
 void TestModule_copyConstructor(T &module)
 {
 	module.parameters().rand();
@@ -102,6 +156,7 @@ void TestModule(T &module)
 	TestModule_copyConstructor(module);
 	TestModule_assignment(module);
 	TestModule_serialization(module);
+	TestModule_flattening(module);
 }
 
 #endif
