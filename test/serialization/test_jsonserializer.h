@@ -78,6 +78,14 @@ void TestJSONSerializer()
 			NNAssertEquals(d.get<std::string>(0), "hello, my name is \"bingo\"", "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<double>(1), 12.2, 1e-12, "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<double>(2), 5.12, 1e-12, "JSONSerializer failed!");
+			
+			std::stringstream ss2;
+			JSONSerializer::write(d, ss2);
+			d = JSONSerializer::read(ss2);
+			
+			NNAssertEquals(d.get<std::string>(0), "hello, my name is \"bingo\"", "JSONSerializer failed!");
+			NNAssertAlmostEquals(d.get<double>(1), 12.2, 1e-12, "JSONSerializer failed!");
+			NNAssertAlmostEquals(d.get<double>(2), 5.12, 1e-12, "JSONSerializer failed!");
 		}
 		
 		// incompatibility

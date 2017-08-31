@@ -31,6 +31,10 @@ public:
 			*this = other;
 		}
 		
+		SerializedArray(SerializedArray &&other) :
+			m_values(std::move(other.m_values))
+		{}
+		
 		~SerializedArray()
 		{
 			clear();
@@ -101,6 +105,11 @@ public:
 		{
 			*this = other;
 		}
+		
+		SerializedObject(SerializedObject &&other) :
+			m_values(std::move(other.m_values)),
+			m_keys(std::move(other.m_keys))
+		{}
 		
 		~SerializedObject()
 		{
@@ -210,6 +219,35 @@ public:
 		m_type(Null)
 	{
 		*this = other;
+	}
+	
+	/// Move constructor.
+	Serialized(Serialized &&other) :
+		m_type(other.m_type)
+	{
+		switch(m_type)
+		{
+		case Null:
+			break;
+		case Boolean:
+			m_bool = other.m_bool;
+			break;
+		case Integer:
+			m_int = other.m_int;
+			break;
+		case Float:
+			m_float = other.m_float;
+			break;
+		case String:
+			m_string = std::move(other.m_string);
+			break;
+		case Array:
+			m_array = std::move(other.m_array);
+			break;
+		case Object:
+			m_object = std::move(other.m_object);
+			break;
+		}
 	}
 	
 	/// Destructor.
