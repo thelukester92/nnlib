@@ -55,7 +55,6 @@ void TestReLU()
 	catch(const Error &e) {}
 	NNAssert(ok, "ReLU::resize allowed unequal inputs and outputs!");
 	
-	TestSerializationOfModule(map);
 	TestModule(map);
 }
 

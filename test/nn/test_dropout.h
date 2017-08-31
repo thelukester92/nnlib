@@ -68,7 +68,6 @@ void TestDropout()
 	module.state().fill(0);
 	NNAssertAlmostEquals(module.output().sum(), 0, 1e-12, "Dropout::state failed!");
 	
-	TestSerializationOfModule(module);
 	TestModule(module);
 }
 

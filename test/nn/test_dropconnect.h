@@ -88,7 +88,6 @@ void TestDropConnect()
 	module.state().fill(0);
 	NNAssertAlmostEquals(module.output().sum(), 0, 1e-12, "DropConnect::state failed!");
 	
-	TestSerializationOfModule(module);
 	TestModule(module);
 }
 

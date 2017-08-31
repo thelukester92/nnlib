@@ -1,97 +1,107 @@
 #ifndef TEST_MODULE_H
 #define TEST_MODULE_H
 
+#include "nnlib/nn/container.h"
 #include "nnlib/nn/module.h"
-#include "nnlib/core/tensor.h"
 using namespace std;
 using namespace nnlib;
 
 template <typename T>
-void TestModule(T &module)
+bool TestModule_equalParams(Module<T> &m1, Module<T> &m2)
 {
-	T copy(module);
+	auto &p1 = m1.parameters();
+	auto &p2 = m2.parameters();
 	
-	auto &p1 = module.parameters();
-	auto &p2 = copy.parameters();
-	
-	NNAssertEquals(p1.shape(), p2.shape(), "Module::Module(const Module &) failed! Wrong parameter shape!");
-	for(auto x = p1.begin(), y = p2.begin(), end = p1.end(); x != end; ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Module::Module(const Module &) failed! Wrong data!");
-	
-	p1.zeros();
-	p2.ones();
+	if(p1.shape() != p2.shape())
+		return false;
 	
 	for(auto x = p1.begin(), y = p2.begin(), end = p1.end(); x != end; ++x, ++y)
 	{
-		NNAssertAlmostEquals(*x, 0, 1e-12, "Module::Module(const Module &) failed! Not a deep copy!");
-		NNAssertAlmostEquals(*y, 1, 1e-12, "Module::Module(const Module &) failed! Not a deep copy!");
+		if(std::abs(*x - *y) > 1e-12)
+			return false;
 	}
 	
-	module = copy;
-	
-	// re-flatten the parameters
-	module.parameters();
-	
-	for(auto &x : p1)
-		NNAssertAlmostEquals(x, 1, 1e-12, "Module::operator=(const Module &) failed!");
-	
-	p1.zeros();
-	for(auto &y : p2)
-		NNAssertAlmostEquals(y, 1, 1e-12, "Module::operator=(const Module &) failed! Not a deep copy!");
+	return true;
 }
 
 template <typename T>
-void TestSerializationOfModule(T &module)
+bool TestModule_notShared(Module<T> &m1, Module<T> &m2)
 {
-	// test direct serialization
+	return !m1.parameters().sharedWith(m2.parameters());
+}
+
+template <typename T>
+bool TestModule_equalOutput(Module<T> &m1, Module<T> &m2)
+{
+	if(m1.inputs() != m2.inputs() || m1.outputs() != m2.outputs())
+		return false;
+	
+	Tensor<T> input = Tensor<T>(m1.inputs(), true).rand();
+	
+	RandomEngine::seed(0);
+	auto &o1 = m1.forward(input);
+	
+	RandomEngine::seed(0);
+	auto &o2 = m2.forward(input);
+	
+	for(auto x = o1.begin(), y = o2.begin(), end = o1.end(); x != end; ++x, ++y)
 	{
-		Serialized node(module);
-		T serialized = node.as<T>();
-		
-		auto &p1 = module.parameters();
-		auto &p2 = serialized.parameters();
-		
-		for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
-			NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Mismatching parameters.");
-		
-		auto tensor = module.output().copy();
-		tensor.resize(module.inputs()).rand();
-		
-		RandomEngine::seed(0);
-		auto &o1 = module.forward(tensor);
-		
-		RandomEngine::seed(0);
-		auto &o2 = serialized.forward(tensor);
-		
-		for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
-			NNAssertAlmostEquals(*i, *j, 1e-12, "Serialization failed! Different outputs for the same input.");
+		if(std::fabs(*x - *y) > 1e-12)
+			return false;
 	}
 	
-	// test polymorphic serialization
-	{
-		Serialized node(&module);
-		Module<> *generic = node.as<Module<> *>();
-		
-		auto &p1 = module.parameters();
-		auto &p2 = generic->parameters();
-		
-		for(auto i = p1.begin(), j = p2.begin(), k = p1.end(); i != k; ++i, ++j)
-			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Mismatching parameters.");
-		
-		auto tensor = module.output().copy();
-		tensor.resize(module.inputs()).rand();
-		
-		RandomEngine::seed(0);
-		auto &o1 = module.forward(tensor);
-		
-		RandomEngine::seed(0);
-		auto &o2 = generic->forward(tensor);
-		
-		for(auto i = o1.begin(), j = o2.begin(), k = o1.end(); i != k; ++i, ++j)
-			NNAssertAlmostEquals(*i, *j, 1e-12, "Generic serialization failed! Different outputs for the same input.");
-		
-		delete generic;
-	}
+	return true;
+}
+
+template <typename T>
+void TestModule_copyConstructor(T &module)
+{
+	module.parameters().rand();
+	T copy(module);
+	NNAssert(TestModule_equalParams(module, copy), "Module::Module(const Module &) failed! Parameters are not equal!");
+	NNAssert(TestModule_notShared(module, copy), "Module::Module(const Module &) failed! Sharing parameters; not a deep copy!");
+	NNAssert(TestModule_equalOutput(module, copy), "Module::Module(const Module &) failed! Different outputs for the same input!");
+}
+
+template <typename T>
+void TestModule_assignment(T &module)
+{
+	module.parameters().rand();
+	T copy;
+	copy = module;
+	NNAssert(TestModule_equalParams(module, copy), "Module::operator=(const Module &) failed! Parameters are not equal!");
+	NNAssert(TestModule_notShared(module, copy), "Module::operator=(const Module &) failed! Sharing parameters; not a deep copy!");
+	NNAssert(TestModule_equalOutput(module, copy), "Module::operator=(const Module &) failed! Different outputs for the same input!");
+}
+
+template <typename T>
+void TestModule_serialization(T &module)
+{
+	T s1 = Serialized(module).as<T>();
+	NNAssert(TestModule_equalParams(module, s1), "Serialization through reference failed! Parameters are not equal!");
+	NNAssert(TestModule_equalOutput(module, s1), "Serialization through reference failed! Different outputs for the same input!");
+	
+	T s2 = Serialized(&module).as<T>();
+	NNAssert(TestModule_equalParams(module, s2), "Serialization through pointer failed! Parameters are not equal!");
+	NNAssert(TestModule_equalOutput(module, s2), "Serialization through pointer failed! Different outputs for the same input!");
+	
+	Module<> *s3 = Serialized(module).as<Module<> *>();
+	NNAssert(TestModule_equalParams(module, *s3), "Generic serialization through reference failed! Parameters are not equal!");
+	NNAssert(TestModule_equalOutput(module, *s3), "Generic serialization through reference failed! Different outputs for the same input!");
+	delete s3;
+	
+	Module<> *s4 = Serialized(&module).as<Module<> *>();
+	NNAssert(TestModule_equalParams(module, *s4), "Generic serialization through pointer failed! Parameters are not equal!");
+	NNAssert(TestModule_equalOutput(module, *s4), "Generic serialization through pointer failed! Different outputs for the same input!");
+	delete s4;
+}
+
+template <typename T>
+void TestModule(T &module)
+{
+	TestModule_copyConstructor(module);
+	TestModule_assignment(module);
+	TestModule_serialization(module);
 }
 
 #endif

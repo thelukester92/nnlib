@@ -156,7 +156,6 @@ void TestSequencer()
 	NNAssertEquals(sequencer.inputs(), Storage<size_t>({ 10, 20, 5 }), "Sequencer::safeInputs failed!")
 	NNAssertEquals(sequencer.outputs(), Storage<size_t>({ 10, 20, 30 }), "Sequencer::safeOutputs failed!")
 	
-	TestSerializationOfModule(module);
 	TestModule(module);
 }
 
