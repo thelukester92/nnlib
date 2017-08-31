@@ -32,7 +32,6 @@ public:
 
 }
 
-NNRegisterType(Identity<float>, Module<float>);
-NNRegisterType(Identity<double>, Module<double>);
+NNRegisterType(Identity, Module);
 
 #endif

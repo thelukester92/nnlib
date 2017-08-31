@@ -124,15 +124,18 @@ private:
 
 }
 
-/// \brief Register a derived type for serialization and copy-construction.
-///
-/// This should only be used once for each Derived class; serialization through multiple
-/// base classes is not supported.
-/// The call to this macro must be placed outside namespace nnlib.
-#define NNRegisterType(Derived, Base) \
+#define NNRegisterType_Helper_Helper(Derived, Base, Name) \
 namespace nnlib { namespace traits { \
-	template <> const std::string NameOf<Derived>::value = Factory<Base>::template registerDerivedType<Derived>(#Derived); \
+	namespace { std::string Name = Factory<Base>::template registerDerivedType<Derived>(#Derived); } \
+	template <> struct NameOf<Derived> { constexpr static const char * value = #Derived; }; \
 	template <> struct BaseOf<Derived> { using type = Base; }; \
 } }
+
+#define NNRegisterType_Helper(Derived, Base, Type) NNRegisterType_Helper_Helper(Derived<Type>, Base<Type>, Derived##Base##Type)
+
+/// \brief Register a derived type for serialization and copy-construction.
+///
+/// The call to this macro must be placed outside namespace nnlib.
+#define NNRegisterType(Derived, Base) NNRegisterType_Helper(Derived, Base, float) NNRegisterType_Helper(Derived, Base, double)
 
 #endif

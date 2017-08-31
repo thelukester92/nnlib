@@ -80,7 +80,6 @@ private:
 
 }
 
-NNRegisterType(ReLU<float>, Module<float>);
-NNRegisterType(ReLU<double>, Module<double>);
+NNRegisterType(ReLU, Module);
 
 #endif

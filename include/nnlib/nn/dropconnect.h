@@ -211,7 +211,6 @@ private:
 
 }
 
-NNRegisterType(DropConnect<float>, Module<float>);
-NNRegisterType(DropConnect<double>, Module<double>);
+NNRegisterType(DropConnect, Module);
 
 #endif

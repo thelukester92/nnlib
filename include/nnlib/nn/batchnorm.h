@@ -358,7 +358,6 @@ private:
 
 }
 
-NNRegisterType(BatchNorm<double>, Module<double>);
-NNRegisterType(BatchNorm<float>, Module<float>);
+NNRegisterType(BatchNorm, Module);
 
 #endif

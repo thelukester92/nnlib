@@ -173,7 +173,6 @@ private:
 
 }
 
-NNRegisterType(Concat<double>, Module<double>);
-NNRegisterType(Concat<float>, Module<float>);
+NNRegisterType(Concat, Module);
 
 #endif

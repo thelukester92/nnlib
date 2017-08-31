@@ -131,7 +131,6 @@ private:
 
 }
 
-NNRegisterType(LogSoftMax<float>, Module<float>);
-NNRegisterType(LogSoftMax<double>, Module<double>);
+NNRegisterType(LogSoftMax, Module);
 
 #endif

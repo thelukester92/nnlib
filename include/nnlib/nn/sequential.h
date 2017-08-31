@@ -153,7 +153,6 @@ private:
 
 }
 
-NNRegisterType(Sequential<float>, Module<float>);
-NNRegisterType(Sequential<double>, Module<double>);
+NNRegisterType(Sequential, Module);
 
 #endif

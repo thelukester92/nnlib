@@ -206,7 +206,6 @@ private:
 
 }
 
-NNRegisterType(Linear<float>, Module<float>);
-NNRegisterType(Linear<double>, Module<double>);
+NNRegisterType(Linear, Module);
 
 #endif

@@ -31,7 +31,6 @@ public:
 
 }
 
-NNRegisterType(TanH<float>, Module<float>);
-NNRegisterType(TanH<double>, Module<double>);
+NNRegisterType(TanH, Module);
 
 #endif

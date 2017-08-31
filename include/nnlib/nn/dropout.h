@@ -158,7 +158,6 @@ private:
 
 }
 
-NNRegisterType(Dropout<float>, Module<float>);
-NNRegisterType(Dropout<double>, Module<double>);
+NNRegisterType(Dropout, Module);
 
 #endif

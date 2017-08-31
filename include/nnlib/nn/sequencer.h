@@ -283,7 +283,6 @@ private:
 
 }
 
-NNRegisterType(Sequencer<float>, Module<float>);
-NNRegisterType(Sequencer<double>, Module<double>);
+NNRegisterType(Sequencer, Module);
 
 #endif

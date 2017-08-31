@@ -592,7 +592,6 @@ private:
 
 }
 
-NNRegisterType(LSTM<float>, Module<float>);
-NNRegisterType(LSTM<double>, Module<double>);
+NNRegisterType(LSTM, Module);
 
 #endif

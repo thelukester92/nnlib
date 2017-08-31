@@ -142,7 +142,6 @@ protected:
 
 }
 
-NNRegisterType(Container<double>, Module<double>);
-NNRegisterType(Container<float>, Module<float>);
+NNRegisterType(Container, Module);
 
 #endif

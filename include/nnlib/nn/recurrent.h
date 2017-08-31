@@ -255,7 +255,6 @@ private:
 
 }
 
-NNRegisterType(Recurrent<float>, Module<float>);
-NNRegisterType(Recurrent<double>, Module<double>);
+NNRegisterType(Recurrent, Module);
 
 #endif

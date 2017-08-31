@@ -31,7 +31,6 @@ public:
 
 }
 
-NNRegisterType(Logistic<float>, Module<float>);
-NNRegisterType(Logistic<double>, Module<double>);
+NNRegisterType(Logistic, Module);
 
 #endif
