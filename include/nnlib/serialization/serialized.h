@@ -578,7 +578,7 @@ public:
 	}
 	
 	/// Get a node from an array.
-	template <typename T>
+	template <typename T = Serialized *>
 	typename std::enable_if<std::is_same<T, Serialized *>::value, const Serialized *>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
@@ -586,7 +586,7 @@ public:
 	}
 	
 	/// Get a node from an array.
-	template <typename T>
+	template <typename T = Serialized *>
 	typename std::enable_if<std::is_same<T, Serialized *>::value, Serialized *>::type get(size_t i)
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
@@ -675,7 +675,7 @@ public:
 	}
 	
 	/// Get a node from an object.
-	template <typename T>
+	template <typename T = Serialized *>
 	typename std::enable_if<std::is_same<T, Serialized *>::value, const Serialized *>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
@@ -683,7 +683,7 @@ public:
 	}
 	
 	/// Get a node from an object.
-	template <typename T>
+	template <typename T = Serialized *>
 	typename std::enable_if<std::is_same<T, Serialized *>::value, Serialized *>::type get(const std::string &key)
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
