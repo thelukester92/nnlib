@@ -636,6 +636,13 @@ public:
 	
 // MARK: Object methods
 	
+	/// Check whether the given key exists in an object.
+	bool has(const std::string &key) const
+	{
+		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		return m_object.has(key);
+	}
+	
 	/// Get the type of an element in an object.
 	Type type(const std::string &key) const
 	{

@@ -99,6 +99,8 @@ void TestSerialized()
 		
 		NNAssertEquals(obj.get<Serialized *>("null")->size(), 1, "Serialized::size() failed!");
 		NNAssertEquals(obj.size(), 7, "Serialized::size() failed!");
+		NNAssert(obj.has("null"), "Serialized::has(string) failed!");
+		NNAssert(!obj.has("bull"), "Serialized::has(string) failed!");
 		
 		Serialized s;
 		
