@@ -107,9 +107,25 @@ template <typename T = double>
 class SequenceBatcher
 {
 public:
+	SequenceBatcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t sequenceLength = 1, size_t bats = 1) :
+		m_feat(std::move(feat)),
+		m_lab(std::move(lab)),
+		m_featBatch(sequenceLength, bats, m_feat.size(1)),
+		m_labBatch(sequenceLength, bats, m_lab.size(1)),
+		m_batch(bats),
+		m_sequenceLength(sequenceLength)
+	{
+		NNHardAssertEquals(feat.dims(), 2, "Invalid features!");
+		NNHardAssertEquals(lab.dims(), 2, "Invalid labels!");
+		NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNHardAssertLessThanOrEquals(sequenceLength, feat.size(0), "Invalid sequence length!");
+		NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
+		reset();
+	}
+	
 	SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 1, size_t bats = 1) :
-		m_feat(feat),
-		m_lab(lab),
+		m_feat(feat.copy()),
+		m_lab(lab.copy()),
 		m_featBatch(sequenceLength, bats, m_feat.size(1)),
 		m_labBatch(sequenceLength, bats, m_lab.size(1)),
 		m_batch(bats),
@@ -185,8 +201,8 @@ public:
 	}
 	
 private:
-	const Tensor<T> &m_feat;
-	const Tensor<T> &m_lab;
+	Tensor<T> m_feat;
+	Tensor<T> m_lab;
 	Tensor<T> m_featBatch;
 	Tensor<T> m_labBatch;
 	size_t m_batch;

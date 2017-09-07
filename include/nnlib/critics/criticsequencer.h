@@ -53,10 +53,10 @@ public:
 	{
 		NNAssertEquals(input.dims(), 3, "Expected a sequence of batches!");
 		NNAssertEquals(target.dims(), 3, "Expected a sequence of batches!");
-		NNAssertEquals(input.size(), m_critic->inGrad().size(), "Incompatible input!");
-		NNAssertEquals(target.size(), m_critic->inGrad().size(), "Incompatible target!");
-		const Storage<size_t> &shape = m_critic->inGrad().shape();
-		return m_critic->forward(input.view(shape), target.view(shape));
+		return m_critic->forward(
+			input.view(input.size(0) * input.size(1), input.size(2)),
+			target.view(target.size(0) * target.size(1), target.size(2))
+		);
 	}
 	
 	/// Calculate the gradient of the loss w.r.t. the input.
@@ -64,17 +64,17 @@ public:
 	{
 		NNAssertEquals(input.dims(), 3, "Expected a sequence of batches!");
 		NNAssertEquals(target.dims(), 3, "Expected a sequence of batches!");
-		NNAssertEquals(input.size(), m_critic->inGrad().size(), "Incompatible input!");
-		NNAssertEquals(target.size(), m_critic->inGrad().size(), "Incompatible target!");
-		const Storage<size_t> &shape = m_critic->inGrad().shape();
-		m_critic->backward(input.view(shape), target.view(shape));
+		m_critic->backward(
+			input.view(input.size(0) * input.size(1), input.size(2)),
+			target.view(target.size(0) * target.size(1), target.size(2))
+		);
 		return m_inGrad;
 	}
 	
 	/// Input gradient buffer.
 	virtual Tensor<T> &inGrad() override
 	{
-		return m_critic->inGrad();
+		return m_inGrad;
 	}
 	
 	/// Set the input shape of this critic, including batch and sequence length.
