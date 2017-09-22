@@ -9,15 +9,9 @@ namespace nnlib
 template <typename T = double>
 class BatchNorm : public Module<T>
 {
-	using Module<T>::m_training;
 public:
-	using Module<T>::inputs;
-	using Module<T>::outputs;
-	using Module<T>::batch;
-	
 	BatchNorm(size_t inps = 0, size_t bats = 1) :
-		m_output(bats, inps),
-		m_inGrad(bats, inps),
+		Module<T>({ bats, inps }, { bats, inps }),
 		m_means(inps),
 		m_invStds(inps),
 		m_runningMeans(inps),
@@ -29,12 +23,13 @@ public:
 		m_biasesGrad(inps),
 		m_momentum(0.1)
 	{
+		m_output.resize(bats, inps);
+		m_inGrad.resize(bats, inps);
 		reset();
 	}
 	
 	BatchNorm(const BatchNorm &module) :
-		m_output(module.m_output.copy()),
-		m_inGrad(module.m_inGrad.copy()),
+		Module<T>(module.inputShape(), module.outputShape()),
 		m_means(module.m_means.copy()),
 		m_invStds(module.m_invStds.copy()),
 		m_runningMeans(module.m_runningMeans.copy()),
@@ -46,13 +41,13 @@ public:
 		m_biasesGrad(module.m_biasesGrad.copy()),
 		m_momentum(module.m_momentum)
 	{
+		m_output = module.m_output.copy();
+		m_inGrad = module.m_inGrad.copy();
 		m_training = module.m_training;
 	}
 	
 	BatchNorm &operator=(const BatchNorm &module)
 	{
-		m_output		= module.m_output.copy();
-		m_inGrad		= module.m_inGrad.copy();
 		m_means			= module.m_means.copy();
 		m_invStds		= module.m_invStds.copy();
 		m_runningMeans	= module.m_runningMeans.copy();
@@ -63,6 +58,10 @@ public:
 		m_weightsGrad	= module.m_weightsGrad.copy();
 		m_biasesGrad	= module.m_biasesGrad.copy();
 		m_momentum		= module.m_momentum;
+		m_output		= module.m_output.copy();
+		m_inGrad		= module.m_inGrad.copy();
+		m_outputShape	= module.m_outputShape;
+		m_inputShape	= module.m_inputShape;
 		m_training		= module.m_training;
 		return *this;
 	}
@@ -103,8 +102,36 @@ public:
 		return *this;
 	}
 	
+	// MARK: Serialization
+	
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
+	{
+		node.set("shape", m_inputShape);
+		node.set("runningMeans", m_runningMeans);
+		node.set("runningVars", m_runningVars);
+		node.set("weights", m_weights);
+		node.set("biases", m_biases);
+		node.set("training", m_training);
+		node.set("momentum", m_momentum);
+	}
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
+	{
+		resizeInputs(node.get<Storage<size_t>>("shape"));
+		node.get("runningMeans", m_runningMeans);
+		node.get("runningVars", m_runningVars);
+		node.get("weights", m_weights);
+		node.get("biases", m_biases);
+		node.get("training", m_training);
+		node.get("momentum", m_momentum);
+	}
+	
+	// MARK: Computation
+	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual const Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		size_t n = input.size(0);
@@ -168,7 +195,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual const Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
 		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
@@ -230,67 +257,41 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Cached output.
-	virtual Tensor<T> &output() override
+	// MARK: Size Management
+	
+	/// Set the output shape of this module.
+	/// In batchnorm, input shape is always equal to output shape.
+	virtual void resizeOutputs(const Storage<size_t> &dims) override
 	{
-		return m_output;
+		NNAssertEquals(dims.size(), 1, "Expected one-dimensional input!");
+		
+		Module<T>::inputs(dims);
+		Module<T>::outputs(dims);
+		
+		m_means.resize(dims[0]);
+		m_invStds.resize(dims[0]);
+		m_runningMeans.resize(dims[0]);
+		m_runningVars.resize(dims[0]);
+		m_normalized.resizeDim(1, dims);
+		m_weights.resize(dims[0]).fill(1);
+		m_biases.resize(dims[0]).fill(0);
+		m_weightsGrad.resize(dims[0]);
+		m_biasesGrad.resize(dims[0]);
 	}
 	
-	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	/// Set the input shape of this module.
+	/// In batchnorm, input shape is always equal to output shape.
+	virtual void resizeInputs(const Storage<size_t> &dims) override
 	{
-		return m_inGrad;
+		resizeOutputs(dims);
 	}
 	
 	/// Set the input and output shapes of this module.
 	/// In batchnorm, input shape is always equal to output shape.
-	virtual BatchNorm &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	virtual void resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
 		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		return inputs(outs);
-	}
-	
-	/// Safely (never reset weights) set the input and output shapes of this module.
-	/// In batchnorm, input shape is always equal to output shape.
-	virtual BatchNorm &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
-	{
-		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		this->safeInputs(inps);
-		return *this;
-	}
-	
-	/// Set the input shape of this module, including batch.
-	/// In batchnorm, input shape is always equal to output shape.
-	virtual BatchNorm &inputs(const Storage<size_t> &dims) override
-	{
-		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
-		m_means.resize(dims[1]);
-		m_invStds.resize(dims[1]);
-		m_runningMeans.resize(dims[1]);
-		m_runningVars.resize(dims[1]);
-		m_normalized.resize(dims);
-		m_weights.resize(dims[1]).fill(1);
-		m_biases.resize(dims[1]).fill(0);
-		m_weightsGrad.resize(dims[1]);
-		m_biasesGrad.resize(dims[1]);
-		return *this;
-	}
-	
-	/// Set the output shape of this module, including batch.
-	/// In batchnorm, input shape is always equal to output shape.
-	virtual BatchNorm &outputs(const Storage<size_t> &dims) override
-	{
-		return inputs(dims);
-	}
-	
-	/// Set the batch size of this module.
-	virtual BatchNorm &batch(size_t bats) override
-	{
-		Module<T>::batch(bats);
-		m_normalized.resizeDim(0, bats);
-		return *this;
+		resizeOutputs(outs);
 	}
 	
 	/// A vector of tensors filled with (views of) this module's parameters.
@@ -317,33 +318,14 @@ public:
 		return states;
 	}
 	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const override
-	{
-		node.set("shape", inputs());
-		node.set("runningMeans", m_runningMeans);
-		node.set("runningVars", m_runningVars);
-		node.set("weights", m_weights);
-		node.set("biases", m_biases);
-		node.set("training", m_training);
-		node.set("momentum", m_momentum);
-	}
-	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) override
-	{
-		inputs(node.get<Storage<size_t>>("shape"));
-		node.get("runningMeans", m_runningMeans);
-		node.get("runningVars", m_runningVars);
-		node.get("weights", m_weights);
-		node.get("biases", m_biases);
-		node.get("training", m_training);
-		node.get("momentum", m_momentum);
-	}
+protected:
+	using Module<T>::m_output;
+	using Module<T>::m_inGrad;
+	using Module<T>::m_outputShape;
+	using Module<T>::m_inputShape;
+	using Module<T>::m_training;
 	
 private:
-	Tensor<T> m_output;			///< Cached output.
-	Tensor<T> m_inGrad;			///< Gradient of error w.r.t. inputs.
 	Tensor<T> m_means;			///< Mean of each input dimension within the batch.
 	Tensor<T> m_invStds;		///< Inverted standard deviation of each input dimension within the batch.
 	Tensor<T> m_runningMeans;	///< A running mean for each input, for after training.

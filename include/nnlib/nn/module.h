@@ -23,9 +23,95 @@ public:
 		m_sharedStateCount(0)
 	{}
 	
+	Module(const Storage<size_t> &inps, const Storage<size_t> &outs) :
+		m_outputShape(outs),
+		m_inputShape(inps),
+		m_training(true),
+		m_sharedParamCount(0),
+		m_sharedGradCount(0),
+		m_sharedStateCount(0)
+	{}
+	
 	Module(const Module &) = delete;
 	Module &operator=(const Module &) = delete;
 	virtual ~Module() {}
+	
+	// MARK: Serialization
+	
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const = 0;
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) = 0;
+	
+	// MARK: Computation
+	
+	/// Forward propagate input, returning output.
+	virtual const Tensor<T> &forward(const Tensor<T> &input) = 0;
+	
+	/// Backward propagate input and output gradient, returning input gradient.
+	virtual const Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
+	
+	// MARK: Size Management
+	
+	/// Change the output size, not including batch dimensions.
+	virtual void resizeOutputs(const Storage<size_t> &dims)
+	{
+		m_outputShape = dims;
+	}
+	
+	/// Change the input size, not including batch dimensions.
+	virtual void resizeInputs(const Storage<size_t> &dims)
+	{
+		m_inputShape = dims;
+	}
+	
+	/// Change the input and output sizes, not including batch dimensions.
+	virtual void resize(const Storage<size_t> &inps, const Storage<size_t> &outs)
+	{
+		resizeOutputs(outs);
+		resizeInputs(inps);
+	}
+	
+	/// Change the output size, not including batch dimensions (convenience method).
+	template <typename ... Ts>
+	void resizeOutputs(Ts... dims)
+	{
+		resizeOutputs({ static_cast<size_t>(dims)... });
+	}
+	
+	/// Change the input size, not including batch dimensions (convenience method).
+	template <typename ... Ts>
+	void resizeInputs(Ts... dims)
+	{
+		resizeInputs({ static_cast<size_t>(dims)... });
+	}
+	
+	// MARK: Getters, etc.
+	
+	/// Get cached output.
+	const Tensor<T> &output() const
+	{
+		return m_output;
+	}
+	
+	/// Get cached input gradient.
+	const Tensor<T> &inGrad() const
+	{
+		return m_inGrad;
+	}
+	
+	/// Get output shape. This does not include batch or batch-like dimensions.
+	const Storage<size_t> &outputShape() const
+	{
+		return m_outputShape;
+	}
+	
+	/// Get input shape. This does not include batch or batch-like dimensions.
+	const Storage<size_t> &inputShape() const
+	{
+		return m_inputShape;
+	}
 	
 	/// /brief A convenience method for contructing a copy of the current module.
 	///
@@ -46,115 +132,6 @@ public:
 	virtual Module &training(bool training)
 	{
 		m_training = training;
-		return *this;
-	}
-	
-	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
-	
-	/// Forward propagate input, returning output.
-	/// Automatically resize to fit, if possible, without changing weights.
-	virtual Tensor<T> &safeForward(const Tensor<T> &input)
-	{
-		safeInputs(input.shape());
-		return forward(input);
-	}
-	
-	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
-	
-	/// Backward propagate input and output gradient, returning input gradient.
-	/// Automatically resize to fit, if possible, without changing weights.
-	virtual Tensor<T> &safeBackward(const Tensor<T> &input, const Tensor<T> &outGrad)
-	{
-		safeInputs(input.shape());
-		safeOutputs(outGrad.shape());
-		return backward(input, outGrad);
-	}
-	
-	/// Cached output.
-	virtual Tensor<T> &output() = 0;
-	
-	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() = 0;
-	
-	/// Set the input and output shapes of this module.
-	virtual Module &resize(const Storage<size_t> &inps, const Storage<size_t> &outs)
-	{
-		inputs(inps);
-		return outputs(outs);
-	}
-	
-	/// Safely (never reset weights) set the input and output shapes of this module.
-	virtual Module &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs)
-	{
-		safeInputs(inps);
-		return safeOutputs(outs);
-	}
-	
-	/// Get the input shape of this module, including batch.
-	virtual const Storage<size_t> &inputs() const
-	{
-		return const_cast<Module<T> *>(this)->inGrad().shape();
-	}
-	
-	/// Set the input shape of this module, including batch.
-	/// By default, this resizes the input gradient and resets the batch to dims[0].
-	virtual Module &inputs(const Storage<size_t> &dims)
-	{
-		inGrad().resize(dims);
-		return batch(dims[0]);
-	}
-	
-	/// Safely (never reset weights) set the input shape of this module.
-	/// By default, this assumes the first dimension (0) is the batch.
-	virtual Module &safeInputs(const Storage<size_t> &dims)
-	{
-		if(inGrad().size(1) == 0)
-			inputs(dims);
-		else
-			batch(dims[0]);
-		return *this;
-	}
-	
-	/// Get the output shape of this module, including batch.
-	virtual const Storage<size_t> &outputs() const
-	{
-		return const_cast<Module<T> *>(this)->output().shape();
-	}
-	
-	/// Set the output shape of this module, including batch.
-	/// By default, this resizes the output and resets the batch to dims[0].
-	virtual Module &outputs(const Storage<size_t> &dims)
-	{
-		output().resize(dims);
-		return batch(dims[0]);
-	}
-	
-	/// Safely (never reset weights) set the output shape of this module.
-	/// By default, this assumes the first dimension (0) is the batch.
-	virtual Module &safeOutputs(const Storage<size_t> &dims)
-	{
-		if(output().size(1) == 0)
-			outputs(dims);
-		else
-			batch(dims[0]);
-		return *this;
-	}
-	
-	/// Get the batch size of this module.
-	/// By default, this returns the first dimension of the input shape.
-	virtual size_t batch() const
-	{
-		return const_cast<Module<T> *>(this)->inGrad().size(0);
-	}
-	
-	/// Set the batch size of this module.
-	/// By default, this resizes the first dimension of the input gradient and output.
-	virtual Module &batch(size_t bats)
-	{
-		inGrad().resizeDim(0, bats);
-		output().resizeDim(0, bats);
 		return *this;
 	}
 	
@@ -256,13 +233,12 @@ public:
 		m_sharedStateCount = 0;
 	}
 	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const = 0;
-	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) = 0;
-	
 protected:
+	Tensor<T> m_output;
+	Tensor<T> m_inGrad;
+	Storage<size_t> m_outputShape;
+	Storage<size_t> m_inputShape;
+	
 	Tensor<T> m_flatParameters;
 	Tensor<T> m_flatGrad;
 	Tensor<T> m_flatState;
