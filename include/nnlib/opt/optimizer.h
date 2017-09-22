@@ -23,14 +23,6 @@ public:
 	
 	virtual ~Optimizer() {}
 	
-	/// Batch the model and critic.
-	Optimizer &batch(size_t bats)
-	{
-		m_model.batch(bats);
-		m_critic.batch(bats);
-		return *this;
-	}
-	
 	/// Get the model.
 	Module<T> &model()
 	{
@@ -45,15 +37,6 @@ public:
 	
 	/// Perform a single step of training given an input and a target.
 	virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
-	
-	/// Perform a single step of training given an input and a target.
-	/// Safely (without ruining weights) resize if possible.
-	virtual Optimizer &safeStep(const Tensor<T> &input, const Tensor<T> &target)
-	{
-		m_model.safeResize(input.shape(), target.shape());
-		m_critic.inputs(m_model.outputs());
-		return step(input, target);
-	}
 	
 protected:
 	Module<T> &m_model;

@@ -14,23 +14,22 @@ void TestSGD()
 	Tensor<> lab = Tensor<>(10, 3).rand();
 	
 	Linear<> nn(2, 3);
-	MSE<> critic(nn.outputs());
+	MSE<> critic(nn.outputShape());
 	
-	double errBefore = critic.safeForward(nn.safeForward(feat), lab);
+	double errBefore = critic.forward(nn.forward(feat), lab);
 	
 	SGD<> opt(nn, critic);
-	opt.batch(1);
 	opt.step(feat.narrow(0, 0), lab.narrow(0, 0));
-	opt.safeStep(feat, lab);
+	opt.step(feat, lab);
 	
-	double errAfter = critic.safeForward(nn.safeForward(feat), lab);
+	double errAfter = critic.forward(nn.forward(feat), lab);
 	
 	NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
 	
 	errBefore = errAfter;
 	opt.momentum(0.25);
 	opt.step(feat, lab);
-	errAfter = critic.safeForward(nn.safeForward(feat), lab);
+	errAfter = critic.forward(nn.forward(feat), lab);
 	
 	NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
 }

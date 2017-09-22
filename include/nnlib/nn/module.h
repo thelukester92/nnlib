@@ -151,7 +151,7 @@ public:
 	/// By default, this is only the calculated output.
 	virtual Storage<Tensor<T> *> stateList()
 	{
-		return { &output() };
+		return { &m_output };
 	}
 	
 	/// Reset the internal state of this module.

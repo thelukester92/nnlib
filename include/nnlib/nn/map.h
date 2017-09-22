@@ -11,23 +11,18 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
-	using Module<T>::inputs;
-	using Module<T>::outputs;
-	
 	Map(size_t outs = 0, size_t bats = 1) :
-		m_inGrad(bats, outs),
-		m_output(bats, outs)
+		Module<T>({ outs }, { outs })
 	{}
 	
 	Map(const Map &module) :
-		m_inGrad(module.m_inGrad.copy()),
-		m_output(module.m_output.copy())
+		Module<T>(module.inputShape(), module.outputShape())
 	{}
 	
 	Map &operator=(const Map &module)
 	{
-		m_inGrad = module.m_inGrad.copy();
-		m_output = module.m_output.copy();
+		resizeOutputs(module.m_outputShape);
+		resizeInputs(module.m_inputShape);
 		return *this;
 	}
 	
@@ -37,10 +32,24 @@ public:
 	/// Single element backward.
 	virtual T backward(const T &x, const T &y) = 0;
 	
-	// MARK: Module methods
+	// MARK: Serialization
+	
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
+	{
+		node.set("shape", this->inputShape());
+	}
+	
+	/// Load from a serialized node.
+	virtual void load(const Serialized &node) override
+	{
+		resizeInputs(node.get<Storage<size_t>>("shape"));
+	}
+	
+	// MARK: Computation
 	
 	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
+	virtual const Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		NNAssertEquals(input.shape(), m_output.shape(), "Incompatible input!");
 		auto i = input.begin(), j = input.end();
@@ -52,7 +61,7 @@ public:
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual const Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.shape(), m_output.shape(), "Incompatible input!");
 		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
@@ -64,68 +73,36 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Cached output.
-	virtual Tensor<T> &output() override
+	// MARK: Size Management
+	
+	/// Set the output shape of this module.
+	/// In a map, input shape is always equal to output shape.
+	virtual void resizeOutputs(const Storage<size_t> &dims) override
 	{
-		return m_output;
+		Module<T>::resizeInputs(dims);
+		Module<T>::resizeOutputs(dims);
 	}
 	
-	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	/// Set the input shape of this module.
+	/// In a map, input shape is always equal to output shape.
+	virtual void resizeInputs(const Storage<size_t> &dims) override
 	{
-		return m_inGrad;
+		Module<T>::resizeInputs(dims);
+		Module<T>::resizeOutputs(dims);
 	}
 	
 	/// Set the input and output shapes of this module.
 	/// In a map, input shape is always equal to output shape.
-	virtual Map &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
+	virtual void resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
 		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		return inputs(outs);
+		Module<T>::resizeInputs(inps);
+		Module<T>::resizeOutputs(inps);
 	}
 	
-	/// Safely (never reset weights) set the input and output shapes of this module.
-	/// In a map, input shape is always equal to output shape.
-	virtual Map &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
-	{
-		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		this->safeInputs(inps);
-		return *this;
-	}
-	
-	/// Set the input shape of this module, including batch.
-	/// In a map, input shape is always equal to output shape.
-	virtual Map &inputs(const Storage<size_t> &dims) override
-	{
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
-		return *this;
-	}
-	
-	/// Set the output shape of this module, including batch.
-	/// In a map, input shape is always equal to output shape.
-	virtual Map &outputs(const Storage<size_t> &dims) override
-	{
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
-		return *this;
-	}
-	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const override
-	{
-		node.set("shape", inputs());
-	}
-	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) override
-	{
-		inputs(node.get<Storage<size_t>>("shape"));
-	}
-	
-private:
-	Tensor<T> m_inGrad;
-	Tensor<T> m_output;
+protected:
+	using Module<T>::m_output;
+	using Module<T>::m_inGrad;
 };
 
 }

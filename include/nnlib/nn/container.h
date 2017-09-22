@@ -11,7 +11,6 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
-	using Module<T>::batch;
 	using Module<T>::training;
 	
 	Container() {}
@@ -87,14 +86,6 @@ public:
 		for(Module<T> *comp : m_components)
 			delete comp;
 		m_components.clear();
-		return *this;
-	}
-	
-	/// Set the batch size of this module.
-	virtual Container &batch(size_t bats) override
-	{
-		for(Module<T> *component : m_components)
-			component->batch(bats);
 		return *this;
 	}
 	

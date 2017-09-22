@@ -22,7 +22,7 @@ public:
 		m_inGrad(shape, true),
 		m_average(average)
 	{
-		NNHardAssertEquals(shape.size(), 2, "Expected matrix input!");
+		NNHardAssertEquals(shape.size(), 1, "Expected one-dimensional input!");
 	}
 	
 	bool average() const

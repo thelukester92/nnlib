@@ -20,12 +20,12 @@ void TestLinear()
 	}).resize(2, 3);
 	
 	// Linear layer with weights and bias, arbitrary
-	Linear<> module(2, 3, 2);
-	module.weights().copy({
+	Linear<> module(2, 3);
+	const_cast<Tensor<> &>(module.weights()).copy({
 		-3, -2, 2,
 		3, 4, 5
 	});
-	module.bias().copy({ -5, 7, 8862.37 });
+	const_cast<Tensor<> &>(module.bias()).copy({ -5, 7, 8862.37 });
 	
 	// Output, fixed given input
 	Tensor<> out = Tensor<>({
@@ -51,30 +51,21 @@ void TestLinear()
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	NNAssert(module.output().addM(out, -1).square().sum() < 1e-9, "Linear::forward failed!");
-	NNAssert(module.inGrad().addM(ing, -1).square().sum() < 1e-9, "Linear::backward failed; wrong inGrad!");
+	NNAssert(module.output().copy().addM(out, -1).square().sum() < 1e-9, "Linear::forward failed!");
+	NNAssert(module.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "Linear::backward failed; wrong inGrad!");
 	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Linear::backward failed; wrong grad!");
 	
-	module.batch(32);
-	NNAssert(module.batch() == 32, "Linear::batch failed!");
+	Storage<size_t> dims = { 5 };
 	
-	Storage<size_t> dims = { 3, 6 };
+	module.resizeInputs(dims);
+	NNAssertEquals(module.inputShape(), dims, "Linear::inputs failed!");
 	
-	module.inputs(dims);
-	NNAssertEquals(module.inputs(), dims, "Linear::inputs failed!");
+	module.resizeOutputs(dims);
+	NNAssertEquals(module.outputShape(), dims, "Linear::outputs failed!");
 	
-	module.outputs(dims);
-	NNAssertEquals(module.outputs(), dims, "Linear::outputs failed!");
-	
-	module.resize({ 1, 2 }, { 3, 4 });
-	NNAssertEquals(module.inputs(), Storage<size_t>({ 3, 2 }), "Linear::resize failed; wrong inputs!")
-	NNAssertEquals(module.outputs(), Storage<size_t>({ 3, 4 }), "Linear::resize failed; wrong outputs!")
-	
-	Linear<> linear;
-	linear.safeInputs({ 3, 6 });
-	linear.safeOutputs({ 7, 11 });
-	NNAssertEquals(linear.inputs(), Storage<size_t>({ 7, 6 }), "Linear::safeInputs failed!")
-	NNAssertEquals(linear.outputs(), Storage<size_t>({ 7, 11 }), "Linear::safeOutputs failed!")
+	module.resize({ 1 }, { 3 });
+	NNAssertEquals(module.inputShape(), Storage<size_t>({ 1 }), "Linear::resize failed; wrong inputs!")
+	NNAssertEquals(module.outputShape(), Storage<size_t>({ 3 }), "Linear::resize failed; wrong outputs!")
 	
 	TestModule(module);
 }

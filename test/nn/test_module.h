@@ -34,10 +34,10 @@ bool TestModule_notShared(Module<T> &m1, Module<T> &m2)
 template <typename T>
 bool TestModule_equalOutput(Module<T> &m1, Module<T> &m2)
 {
-	if(m1.inputs() != m2.inputs() || m1.outputs() != m2.outputs())
+	if(m1.inputShape() != m2.inputShape() || m1.outputShape() != m2.outputShape())
 		return false;
 	
-	Tensor<T> input = Tensor<T>(m1.inputs(), true).rand();
+	Tensor<T> input = Tensor<T>(m1.inputShape(), true).rand();
 	
 	RandomEngine::seed(0);
 	auto &o1 = m1.forward(input);

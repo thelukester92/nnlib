@@ -12,36 +12,15 @@ class Critic
 public:
 	virtual ~Critic() {}
 	
-	/// Calculate the loss (how far input is from target).
-	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) = 0;
+	// MARK: Computation
 	
 	/// Calculate the loss (how far input is from target).
-	/// Automatically resize to fit.
-	virtual T safeForward(const Tensor<T> &input, const Tensor<T> &target)
-	{
-		inputs(input.shape());
-		return forward(input, target);
-	}
+	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) = 0;
 	
 	/// Calculate the gradient of the loss w.r.t. the input.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) = 0;
 	
-	//// Calculate the gradient of the loss w.r.t. the input.
-	/// Automatically resize to fit.
-	virtual Tensor<T> &safeBackward(const Tensor<T> &input, const Tensor<T> &target)
-	{
-		inputs(input.shape());
-		return backward(input, target);
-	}
-	
-	/// Input gradient buffer.
-	virtual Tensor<T> &inGrad() = 0;
-	
-	/// Get the input shape of this critic, including batch.
-	virtual const Storage<size_t> &inputs() const
-	{
-		return const_cast<Critic<T> *>(this)->inGrad().shape();
-	}
+	// MARK: Size Management
 	
 	/// Set the input shape of this critic, including batch.
 	/// By default, this resizes the input gradient and resets the batch to dims[0].
