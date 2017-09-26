@@ -11,8 +11,13 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
+	using Module<T>::resizeInputs;
+	using Module<T>::resizeOutputs;
+	
+	Map() {}
+	
 	template <typename ... Ts>
-	Map(size_t first = 0, Ts... rest) :
+	Map(size_t first, Ts... rest) :
 		Module<T>({ first, static_cast<size_t>(rest)... }, { first, static_cast<size_t>(rest)... })
 	{}
 	
@@ -51,7 +56,7 @@ public:
 	/// Forward propagate input, returning output.
 	virtual const Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		m_output.resize(input.shape());
+		resizeInputs(input.shape());
 		
 		auto i = input.begin(), j = input.end();
 		for(auto k = m_output.begin(); i != j; ++i, ++k)
@@ -64,9 +69,7 @@ public:
 	virtual const Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
-		
-		m_output.resize(input.shape());
-		m_inGrad.resize(outGrad.shape());
+		resizeInputs(input.shape());
 		
 		auto i = input.begin(), j = input.end(), b = outGrad.begin();
 		for(auto k = m_output.begin(), l = m_inGrad.begin(); i != j; ++i, ++b, ++k, ++l)
@@ -78,28 +81,26 @@ public:
 	// MARK: Size Management
 	
 	/// Set the output shape of this module.
-	/// In a map, input shape is always equal to output shape.
 	virtual void resizeOutputs(const Storage<size_t> &dims) override
 	{
 		Module<T>::resizeInputs(dims);
 		Module<T>::resizeOutputs(dims);
+		m_output.resize(dims);
+		m_inGrad.resize(dims);
 	}
 	
 	/// Set the input shape of this module.
-	/// In a map, input shape is always equal to output shape.
 	virtual void resizeInputs(const Storage<size_t> &dims) override
 	{
-		Module<T>::resizeInputs(dims);
-		Module<T>::resizeOutputs(dims);
+		resizeOutputs(dims);
 	}
 	
 	/// Set the input and output shapes of this module.
 	/// In a map, input shape is always equal to output shape.
 	virtual void resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
 	{
-		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		Module<T>::resizeInputs(inps);
-		Module<T>::resizeOutputs(inps);
+		NNAssertEquals(inps, outs, "Maps must have equal input and output shapes!");
+		resizeOutputs(inps);
 	}
 	
 protected:

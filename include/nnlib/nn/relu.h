@@ -12,13 +12,17 @@ template <typename T = double>
 class ReLU : public Map<T>
 {
 public:
-	using Map<T>::Map;
 	using Map<T>::forward;
 	using Map<T>::backward;
 	
-	ReLU(size_t outs = 0, size_t bats = 1) :
-		Map<T>(outs, bats),
-		m_leak(0.0)
+	ReLU(double leak = 0.1) :
+		m_leak(leak)
+	{}
+	
+	template <typename ... Ts>
+	ReLU(double leak, size_t first, Ts... rest) :
+		Map<T>(first, rest...),
+		m_leak(leak)
 	{}
 	
 	ReLU(const ReLU &module) :
