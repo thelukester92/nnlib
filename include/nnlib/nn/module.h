@@ -20,8 +20,7 @@ public:
 	// MARK: Computation
 	
 	virtual void updateOutput(const Tensor<T> &input) = 0;
-	virtual void updateInGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
-	virtual void updateParamsGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
+	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
 	
 	Tensor<T> &forward(const Tensor<T> &input)
 	{
@@ -31,8 +30,7 @@ public:
 	
 	Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 	{
-		updateInGrad(input, outGrad);
-		updateParamsGrad(input, outGrad);
+		updateGrad(input, outGrad);
 		return m_inGrad;
 	}
 	

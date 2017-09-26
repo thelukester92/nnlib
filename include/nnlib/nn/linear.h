@@ -103,37 +103,24 @@ public:
 		}
 	}
 	
-	virtual void updateInGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
-	{
-		NNAssertEquals(input.dims(), outGrad.dims(), "Incompatible input and outGrad!");
-		if(input.dims() == 1)
-		{
-			m_inGrad.resize(m_weights.size(0));
-			m_inGrad.assignMV(m_weights, outGrad);
-		}
-		else if(input.dims() == 2)
-		{
-			m_inGrad.resize(input.size(0), m_weights.size(0));
-			m_inGrad.assignMMT(outGrad, m_weights);
-		}
-		else
-		{
-			throw Error("Expected vector or matrix input and outGrad!");
-		}
-	}
-	
-	virtual void updateParamsGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.dims(), outGrad.dims(), "Incompatible input and outGrad!");
 		if(input.dims() == 1)
 		{
 			m_weightsGrad.assignVV(input, outGrad, 1, 1);
 			m_biasGrad.addV(outGrad);
+			
+			m_inGrad.resize(m_weights.size(0));
+			m_inGrad.assignMV(m_weights, outGrad);
 		}
 		else if(input.dims() == 2)
 		{
 			m_weightsGrad.assignMTM(input, outGrad, 1, 1);
 			m_biasGrad.assignMTV(outGrad, m_ones.resize(input.size(0)).fill(1), 1, 1);
+			
+			m_inGrad.resize(input.size(0), m_weights.size(0));
+			m_inGrad.assignMMT(outGrad, m_weights);
 		}
 		else
 		{
