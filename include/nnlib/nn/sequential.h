@@ -14,25 +14,6 @@ public:
 	using Container<T>::Container;
 	using Container<T>::components;
 	
-	// MARK: Container methods
-	
-	/// Add a component to this container, enforcing compatibility.
-	virtual Sequential &add(Module<T> *component) override
-	{
-		m_components.push_back(component);
-		return *this;
-	}
-	
-	/// Remove and return a specific component from this container, enforcing compatibility.
-	virtual Module<T> *remove(size_t index) override
-	{
-		Module<T> *comp = m_components[index];
-		m_components.erase(index);
-		return comp;
-	}
-	
-	// MARK: Module methods
-	
 	/// Forward propagate input, returning output.
 	virtual void updateOutput(const Tensor<T> &input) override
 	{
