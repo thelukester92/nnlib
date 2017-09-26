@@ -18,6 +18,8 @@ public:
 	virtual ~Module() = default;
 	Module &operator=(const Module &) = delete;
 	
+	virtual void training(bool training) {}
+	
 	// MARK: Serialization
 	
 	virtual void save(Serialized &) const = 0;

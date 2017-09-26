@@ -12,7 +12,7 @@
 // #include "critics/test_nll.h"
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
-// #include "nn/test_batchnorm.h"
+#include "nn/test_batchnorm.h"
 // #include "nn/test_concat.h"
 // #include "nn/test_dropconnect.h"
 // #include "nn/test_dropout.h"
@@ -59,7 +59,7 @@ int main()
 		// TEST("critics/", NLL),
 		TEST("math/", MathBase),
 		TEST("math/", MathBLAS),
-		// TEST("nn/", BatchNorm),
+		TEST("nn/", BatchNorm),
 		// TEST("nn/", Concat),
 		// TEST("nn/", DropConnect),
 		// TEST("nn/", Dropout),

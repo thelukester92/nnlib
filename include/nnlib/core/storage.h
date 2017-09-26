@@ -124,6 +124,13 @@ public:
 		return *this;
 	}
 	
+	Storage &append(const Storage &other)
+	{
+		for(const T &value : other)
+			push_back(value);
+		return *this;
+	}
+	
 	Storage &erase(size_t index)
 	{
 		NNAssertLessThan(index, m_size, "Attempted to erase an index that is out of bounds!");
