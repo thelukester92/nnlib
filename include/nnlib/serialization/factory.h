@@ -39,7 +39,7 @@ public:
 	static typename std::enable_if<std::is_abstract<D>::value, std::string>::type
 	registerDerivedType(const std::string &name)
 	{
-		return registerDerivedType<D>(name, []() { return nullptr; });
+		return registerDerivedType<D>(name, [](const Serialized &node) { return nullptr; });
 	}
 	
 	/// Register a derived type given a specific constructor; copy constructible.

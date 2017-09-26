@@ -13,17 +13,15 @@ class TanH : public Map<T>
 {
 public:
 	using Map<T>::Map;
-	using Map<T>::forward;
-	using Map<T>::backward;
 	
 	/// Single element forward.
-	virtual T forward(const T &x) override
+	virtual T forwardOne(const T &x) override
 	{
 		return tanh(x);
 	}
 	
 	/// Single element backward.
-	virtual T backward(const T &x, const T &y) override
+	virtual T backwardOne(const T &x, const T &y) override
 	{
 		return 1.0 - y * y;
 	}

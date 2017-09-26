@@ -76,7 +76,7 @@ public:
 	
 	// MARK: Serialization
 	
-	virtual void save(Serialized &node) override
+	virtual void save(Serialized &node) const override
 	{
 		node.set("weights", m_weights);
 		node.set("bias", m_bias);

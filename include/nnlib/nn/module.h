@@ -15,7 +15,7 @@ class Module
 public:
 	// MARK: Serialization
 	
-	virtual void save(Serialized &) = 0;
+	virtual void save(Serialized &) const = 0;
 	
 	// MARK: Computation
 	
