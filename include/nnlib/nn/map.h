@@ -11,7 +11,7 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
-	Map() {}
+	Map() = default;
 	Map(const Serialized &) {}
 	
 	/// Single element forward.

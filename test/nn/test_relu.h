@@ -2,7 +2,6 @@
 #define TEST_RELU_H
 
 #include "nnlib/nn/relu.h"
-#include "test_map.h"
 using namespace nnlib;
 
 void TestReLU()
@@ -22,7 +21,11 @@ void TestReLU()
 	ing(0, 0) *= 0.5;
 	
 	ReLU<> map(0.5);
-	TestMap("ReLU", map, inp, grd, out, ing);
+	map.forward(inp);
+	map.backward(inp, grd);
+	
+	NNAssert(map.output().copy().addM(out, -1).square().sum() < 1e-9, "ReLU::forward failed!");
+	NNAssert(map.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "ReLU::backward failed!");
 }
 
 #endif

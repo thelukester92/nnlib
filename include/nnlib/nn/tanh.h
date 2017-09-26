@@ -14,6 +14,9 @@ class TanH : public Map<T>
 public:
 	using Map<T>::Map;
 	
+	TanH(const TanH &) = default;
+	TanH &operator=(const TanH &) = default;
+	
 	/// Single element forward.
 	virtual T forwardOne(const T &x) override
 	{

@@ -22,7 +22,7 @@
 // #include "nn/test_logsoftmax.h"
 // #include "nn/test_lstm.h"
 // #include "nn/test_recurrent.h"
-// #include "nn/test_relu.h"
+#include "nn/test_relu.h"
 // #include "nn/test_sequencer.h"
 // #include "nn/test_sequential.h"
 #include "nn/test_tanh.h"
@@ -70,7 +70,7 @@ int main()
 		// TEST("nn/", LogSoftMax),
 		// TEST("nn/", LSTM),
 		// TEST("nn/", Recurrent),
-		// TEST("nn/", ReLU),
+		TEST("nn/", ReLU),
 		// TEST("nn/", Sequencer),
 		// TEST("nn/", Sequential),
 		TEST("nn/", TanH),

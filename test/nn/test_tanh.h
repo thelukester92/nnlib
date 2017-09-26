@@ -7,8 +7,6 @@ using namespace nnlib;
 
 void TestTanH()
 {
-	TanH<> map;
-	
 	// Input, arbitrary
 	Tensor<> inp = Tensor<>({ -1.3, 1.0, 3.14 }).resize(1, 3);
 	
@@ -21,6 +19,7 @@ void TestTanH()
 	// Input gradient, fixed given input and output gradient
 	Tensor<> ing = Tensor<>({ 0.5148663934, -1.25992302484, 0.00746560404 }).resize(1, 3);
 	
+	TanH<> map;
 	map.forward(inp);
 	map.backward(inp, grd);
 	

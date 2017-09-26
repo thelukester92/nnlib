@@ -12,29 +12,31 @@ template <typename T = double>
 class ReLU : public Map<T>
 {
 public:
-	using Map<T>::forward;
-	using Map<T>::backward;
+	using Map<T>::Map;
 	
 	ReLU(double leak = 0.1) :
 		m_leak(leak)
 	{}
 	
-	template <typename ... Ts>
-	ReLU(double leak, size_t first, Ts... rest) :
-		Map<T>(first, rest...),
-		m_leak(leak)
+	ReLU(const ReLU &module) :
+		m_leak(module.m_leak)
 	{}
 	
-	ReLU(const ReLU &module) :
-		Map<T>(module),
-		m_leak(module.m_leak)
+	ReLU(const Serialized &node) :
+		m_leak(node.get<T>("leak"))
 	{}
 	
 	ReLU &operator=(const ReLU &module)
 	{
-		*static_cast<Map<T> *>(this) = module;
 		m_leak = module.m_leak;
 		return *this;
+	}
+	
+	/// Save to a serialized node.
+	virtual void save(Serialized &node) const override
+	{
+		Map<T>::save(node);
+		node.set("leak", m_leak);
 	}
 	
 	/// Get the "leak" for this ReLU. 0 if non-leaky.
@@ -53,29 +55,15 @@ public:
 	}
 	
 	/// Single element forward.
-	virtual T forward(const T &x) override
+	virtual T forwardOne(const T &x) override
 	{
 		return x > 0 ? x : m_leak * x;
 	}
 	
 	/// Single element backward.
-	virtual T backward(const T &x, const T &y) override
+	virtual T backwardOne(const T &x, const T &y) override
 	{
 		return x > 0 ? 1 : m_leak;
-	}
-	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const override
-	{
-		Map<T>::save(node);
-		node.set("leak", m_leak);
-	}
-	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) override
-	{
-		Map<T>::load(node);
-		node.get("leak", m_leak);
 	}
 	
 private:

@@ -13,6 +13,11 @@ template <typename T = double>
 class Module
 {
 public:
+	Module() = default;
+	Module(const Module &) = delete;
+	virtual ~Module() = default;
+	Module &operator=(const Module &) = delete;
+	
 	// MARK: Serialization
 	
 	virtual void save(Serialized &) const = 0;
