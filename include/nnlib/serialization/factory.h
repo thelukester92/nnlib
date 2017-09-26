@@ -64,12 +64,12 @@ public:
 	}
 	
 	/// Construct an instance of a derived class by registered class name.
-	static B *construct(const std::string &name)
+	static B *construct(const std::string &name, const Serialized &node)
 	{
 		auto i = constructors().find(name);
 		NNHardAssertNotEquals(i, constructors().end(), "Attempted to construct an unregistered type!");
 		
-		B *object = i->second();
+		B *object = i->second(node);
 		NNHardAssertNotEquals(object, nullptr, "Attempted to construct an abstract type!");
 		
 		return object;

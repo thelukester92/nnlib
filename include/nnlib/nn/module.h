@@ -20,6 +20,11 @@ public:
 	
 	virtual void training(bool training) {}
 	
+	Module *copy()
+	{
+		return Factory<Module>::constructCopy(this);
+	}
+	
 	// MARK: Serialization
 	
 	virtual void save(Serialized &) const = 0;

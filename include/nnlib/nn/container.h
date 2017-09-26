@@ -11,20 +11,33 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
-	Container() = default;
-	Container(const Serialized &) {}
+	template <typename ... Ms>
+	Container(Ms... components) :
+		m_components({ static_cast<Module<T> *>(components)... })
+	{}
 	
-	Container(const Container &module) : m_components(module.m_components)
+	Container(const Container &module) :
+		m_components(module.m_components)
 	{
 		for(Module<T> *&m : m_components)
-			m = m->copy(); /// \note intentionally not releasing; module still owns the original
+		{
+			/// \note intentionally not releasing; module still owns the original
+			m = m->copy();
+		}
 	}
+	
+	Container(const Serialized &node) :
+		m_components(node.get<Storage<Module<T> *>>("components"))
+	{}
 	
 	Container &operator=(const Container &module)
 	{
 		m_components = module.m_components;
 		for(Module<T> *&m : m_components)
-			m = m->copy(); /// \note intentionally not releasing; module still owns the original
+		{
+			/// \note intentionally not releasing; module still owns the original
+			m = m->copy();
+		}
 		return *this;
 	}
 	
@@ -34,13 +47,15 @@ public:
 			delete comp;
 	}
 	
-	/// Sets whether this module is in training mode.
-	virtual Container &training(bool training) override
+	virtual void training(bool training) override
 	{
-		Module<T>::training(training);
 		for(Module<T> *comp : m_components)
 			comp->training(training);
-		return *this;
+	}
+	
+	virtual void save(Serialized &node) const override
+	{
+		node.set("components", m_components);
 	}
 	
 	/// Get a specific component from this container.
@@ -71,7 +86,7 @@ public:
 		return *this;
 	}
 	
-	/// Remove and return a specific component from this container.
+	/// Remove and return a specific component from this container. Caller is responsible for deleting this module.
 	virtual Module<T> *remove(size_t index)
 	{
 		Module<T> *comp = m_components[index];
@@ -79,7 +94,7 @@ public:
 		return comp;
 	}
 	
-	/// Remove all components from this container.
+	/// Remove all components from this container and delete them.
 	virtual Container &clear()
 	{
 		for(Module<T> *comp : m_components)
@@ -89,12 +104,11 @@ public:
 	}
 	
 	/// A vector of tensors filled with (views of) each sub-module's parameters.
-	virtual Storage<Tensor<T> *> parameterList() override
+	virtual Storage<Tensor<T> *> paramsList() override
 	{
 		Storage<Tensor<T> *> params;
 		for(Module<T> *comp : m_components)
-			for(Tensor<T> *param : comp->parameterList())
-				params.push_back(param);
+			params.append(comp->paramsList());
 		return params;
 	}
 	
@@ -103,8 +117,7 @@ public:
 	{
 		Storage<Tensor<T> *> blams;
 		for(Module<T> *comp : m_components)
-			for(Tensor<T> *blam : comp->gradList())
-				blams.push_back(blam);
+			blams.append(comp->gradList());
 		return blams;
 	}
 	
@@ -113,17 +126,8 @@ public:
 	{
 		Storage<Tensor<T> *> states;
 		for(Module<T> *comp : m_components)
-			for(Tensor<T> *state : comp->stateList())
-				states.push_back(state);
+			states.append(comp->stateList());
 		return states;
-	}
-	
-	/// Reset the internal state of this module.
-	virtual Container &forget() override
-	{
-		for(Module<T> *comp : m_components)
-			comp->forget();
-		return *this;
 	}
 	
 protected:

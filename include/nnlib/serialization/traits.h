@@ -31,6 +31,16 @@ namespace traits
 	};
 	
 	/// Check whether the given type has the load and save methods. Default is false.
+	template <typename, typename = int>
+	struct HasSave : std::false_type
+	{};
+
+	/// Check whether the given type has the load and save methods. This override determines it does.
+	template <typename T>
+	struct HasSave<T, decltype(std::declval<T>().save(std::declval<Serialized &>()), 0)> : std::true_type
+	{};
+	
+	/// Check whether the given type has the load and save methods. Default is false.
 	template <typename, typename = int, typename = int>
 	struct HasLoadAndSave : std::false_type
 	{};

@@ -3,8 +3,7 @@
 
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/linear.h"
-#include "nnlib/nn/identity.h"
-#include "test_module.h"
+#include "nnlib/nn/tanh.h"
 using namespace nnlib;
 
 void TestSequential()
@@ -22,7 +21,7 @@ void TestSequential()
 	}).resize(2, 3);
 	
 	// Linear layer with weights and bias, arbitrary
-	Linear<> *linear = new Linear<>(2, 3, 2);
+	Linear<> *linear = new Linear<>(2, 3);
 	linear->weights().copy({
 		-3, -2, 2,
 		3, 4, 5
@@ -48,12 +47,9 @@ void TestSequential()
 		-3, -1, 5
 	});
 	
-	// Identity layer
-	Identity<> *identity = new Identity<>(2, 2);
-	
 	// Test forward and backward using the parameters and targets above
 	
-	Sequential<> module(linear, identity);
+	Sequential<> module(linear);
 	module.forward(inp);
 	module.backward(inp, grd);
 	
@@ -62,42 +58,16 @@ void TestSequential()
 	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Sequential::backward failed; wrong grad!");
 	
 	NNAssert(module.component(0) == linear, "Sequential::component failed to get the correct component!");
-	NNAssert(module.component(1) == identity, "Sequential::component failed to get the correct component!");
-	
-	NNAssert(module.components() == 2, "Sequential::components failed!");
-	
+	NNAssert(module.components() == 1, "Sequential::components failed!");
 	NNAssert(module.remove(0) == linear, "Sequential::remove failed to return the removed component!");
-	NNAssert(module.components() == 1, "Sequential::remove failed!");
-	NNAssert(module.component(0) == identity, "Sequential::remove failed!");
-	NNAssert(module.outputs() == identity->outputs(), "Sequential::remove failed!");
 	
 	module.clear();
 	NNAssert(module.components() == 0, "Sequential::clear failed!");
 	
 	module.add(linear);
-	NNAssert(module.outputs() == linear->outputs(), "Sequential::add failed!");
-	
-	module.batch(32);
-	NNAssert(module.batch() == 32, "Sequential::batch failed to batch container!");
-	NNAssert(linear->batch() == 32, "Sequential::batch failed to batch children!");
-	
-	NNAssert(module.parameterList() == linear->parameterList(), "Sequential::parameterList failed!");
+	NNAssert(module.paramsList() == linear->paramsList(), "Sequential::paramsList failed!");
 	NNAssert(module.gradList() == linear->gradList(), "Sequential::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Sequential::stateList failed!");
-	
-	module.add(new Linear<>(10), new Identity<>(), new Linear<>(5), new Identity<>());
-	delete module.remove(2);
-	delete module.remove(0);
-	
-	Storage<size_t> dims = { 3, 6 };
-	
-	module.inputs(dims);
-	NNAssertEquals(module.inputs(), dims, "Sequential::inputs failed!");
-	
-	module.outputs(dims);
-	NNAssertEquals(module.outputs(), dims, "Sequential::outputs failed!");
-	
-	TestModule(module);
 }
 
 #endif

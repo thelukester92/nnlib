@@ -439,16 +439,10 @@ public:
 	
 	/// Get a serializable value (as a pointer).
 	template <typename T>
-	typename std::enable_if<std::is_pointer<T>::value && traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type as() const
+	typename std::enable_if<std::is_pointer<T>::value, T>::type as() const
 	{
 		NNHardAssert(m_type == Object && m_object.has("polymorphic"), "Cannot deserialize a pointer to a non-polymorphic type!");
-		
-		std::string type = get<std::string>("type");
-		
-		T value = static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(type));
-		value->load(*get<Serialized *>("data"));
-		
-		return value;
+		return static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"), *get<Serialized *>("data")));
 	}
 	
 // MARK: Setters
@@ -513,7 +507,7 @@ public:
 	
 	/// Set a serializable value (from a reference).
 	template <typename T>
-	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T &value)
+	typename std::enable_if<traits::HasSave<T>::value>::type set(const T &value)
 	{
 		if(Factory<typename traits::BaseOf<T>::type>::isRegistered(typeid(value)))
 		{
@@ -528,7 +522,7 @@ public:
 	
 	/// Set a serializable value (from a pointer).
 	template <typename T>
-	typename std::enable_if<traits::HasLoadAndSave<T>::value>::type set(const T *value)
+	typename std::enable_if<traits::HasSave<T>::value>::type set(const T *value)
 	{
 		set(*value);
 	}
