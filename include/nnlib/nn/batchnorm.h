@@ -6,12 +6,19 @@
 namespace nnlib
 {
 
+/// \brief Batch normalization.
+///
+/// Requires matrix input where the first dimension is batch.
+/// Input/output shapes are always in terms of matrices.
 template <typename T = double>
 class BatchNorm : public Module<T>
 {
 public:
+	BatchNorm() {}
+	
+	template <typename ... Ts>
 	BatchNorm(size_t inps = 0, size_t bats = 1) :
-		Module<T>({ bats, inps }, { bats, inps }),
+		Module<T>({ bats, inps }, { first, static_cast<size_t>(rest)... }),
 		m_means(inps),
 		m_invStds(inps),
 		m_runningMeans(inps),

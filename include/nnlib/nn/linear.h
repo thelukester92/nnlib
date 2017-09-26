@@ -6,7 +6,10 @@
 namespace nnlib
 {
 
-/// A standard feed-forward layer that returns a linear combination of inputs.
+/// \brief A standard feed-forward layer that returns a linear combination of inputs.
+///
+/// Input and output shapes are always in terms of vectors, but if a matrix input is given
+/// it will batch accelerate and return a matrix output.
 template <typename T = double>
 class Linear : public Module<T>
 {

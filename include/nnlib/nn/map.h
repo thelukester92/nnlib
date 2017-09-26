@@ -6,7 +6,10 @@
 namespace nnlib
 {
 
-/// Abstract base class for pointwise functions on inputs, also known as activation functions.
+/// \brief Abstract base class for pointwise functions on inputs, also known as activation functions.
+///
+/// Input and output shapes are arbitrary.
+/// It can be given an explicit shape, but will always reshape output to each new input.
 template <typename T = double>
 class Map : public Module<T>
 {
