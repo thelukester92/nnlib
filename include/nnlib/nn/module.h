@@ -13,38 +13,43 @@ template <typename T = double>
 class Module
 {
 public:
+	/// Explicitly default the no-argument constructor.
 	Module() = default;
+	
+	/// No copy construction possible at this level.
 	Module(const Module &) = delete;
+	
+	/// Virtualize the destructor.
 	virtual ~Module() = default;
+	
+	/// No assignment possible at this level.
 	Module &operator=(const Module &) = delete;
 	
-	virtual void training(bool training) {}
-	
+	/// Construct a copy of this module. Must be registered with NNRegisterType.
 	Module *copy()
 	{
 		return Factory<Module>::constructCopy(this);
 	}
 	
+	/// Set whether this module is in training mode. Useful for modules like batchnorm that behave differently at evaluation time.
+	virtual void training(bool training)
+	{}
+	
 	// MARK: Serialization
 	
+	/// \brief Save the current module to a serialized node.
+	///
+	/// The load method is omitted; instead, a constructor taking a Serialized& should be implemented
+	/// in subclasses of Module.
 	virtual void save(Serialized &) const = 0;
 	
 	// MARK: Computation
 	
-	virtual void updateOutput(const Tensor<T> &input) = 0;
-	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
+	/// Evaluate the module and return the new output.
+	virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
 	
-	Tensor<T> &forward(const Tensor<T> &input)
-	{
-		updateOutput(input);
-		return m_output;
-	}
-	
-	Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad)
-	{
-		updateGrad(input, outGrad);
-		return m_inGrad;
-	}
+	/// Take the derivative of the module and return the gradient of the input.
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
 	
 	// MARK: Buffers
 	

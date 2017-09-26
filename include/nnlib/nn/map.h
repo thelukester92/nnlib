@@ -24,21 +24,23 @@ public:
 	
 	// MARK: Computation
 	
-	virtual void updateOutput(const Tensor<T> &input) override
+	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		m_output.resize(input.shape());
 		auto i = input.begin(), j = input.end();
 		for(auto k = m_output.begin(); i != j; ++i, ++k)
 			*k = forwardOne(*i);
+		return m_output;
 	}
 	
-	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
 		m_inGrad.resize(input.shape());
 		auto i = input.begin(), j = input.end(), b = outGrad.begin();
 		for(auto k = m_output.begin(), l = m_inGrad.begin(); i != j; ++i, ++b, ++k, ++l)
 			*l = *b * backwardOne(*i, *k);
+		return m_inGrad;
 	}
 	
 protected:

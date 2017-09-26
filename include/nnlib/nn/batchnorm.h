@@ -131,7 +131,7 @@ public:
 	
 	// MARK: Computation
 	
-	virtual void updateOutput(const Tensor<T> &input) override
+	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 		NNAssertEquals(input.size(1), m_weights.size(), "Incompatible input!");
@@ -194,9 +194,11 @@ public:
 			// Rescale and reshift using the parameters
 			out.pointwiseProduct(m_weights).addV(m_biases);
 		}
+		
+		return m_output;
 	}
 	
-	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 		NNAssertEquals(input.size(1), m_weights.size(), "Incompatible input!");
@@ -258,6 +260,8 @@ public:
 			// gradient of weights
 			m_weightsGrad(i) += dotp * invStds(i);
 		}
+		
+		return m_inGrad;
 	}
 	
 	// MARK: Buffers

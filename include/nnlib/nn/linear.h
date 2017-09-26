@@ -84,7 +84,7 @@ public:
 	
 	// MARK: Computation
 	
-	virtual void updateOutput(const Tensor<T> &input) override
+	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		if(input.dims() == 1)
 		{
@@ -101,9 +101,11 @@ public:
 		{
 			throw Error("Expected vector or matrix input!");
 		}
+		
+		return m_output;
 	}
 	
-	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		NNAssertEquals(input.dims(), outGrad.dims(), "Incompatible input and outGrad!");
 		if(input.dims() == 1)
@@ -126,6 +128,8 @@ public:
 		{
 			throw Error("Expected vector or matrix input and outGrad!");
 		}
+		
+		return m_inGrad;
 	}
 	
 	// MARK: Buffers

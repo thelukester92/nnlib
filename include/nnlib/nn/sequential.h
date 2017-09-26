@@ -15,21 +15,21 @@ public:
 	using Container<T>::components;
 	
 	/// Forward propagate input, returning output.
-	virtual void updateOutput(const Tensor<T> &input) override
+	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		Tensor<T> *inp = const_cast<Tensor<T> *>(&input);
 		for(Module<T> *component : m_components)
 			inp = &component->forward(*inp);
-		m_output = *inp;
+		return m_output = *inp;
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
-	virtual void updateGrad(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
 		const Tensor<T> *grad = &outGrad;
 		for(size_t i = components() - 1; i > 0; --i)
 			grad = &m_components[i]->backward(m_components[i - 1]->output(), *grad);
-		m_inGrad = m_components[0]->backward(input, *grad);
+		return m_inGrad = m_components[0]->backward(input, *grad);
 	}
 	
 protected:
