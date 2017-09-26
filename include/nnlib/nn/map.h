@@ -11,8 +11,9 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
-	Map(size_t outs = 0, size_t bats = 1) :
-		Module<T>({ outs }, { outs })
+	template <typename ... Ts>
+	Map(size_t first = 0, Ts... rest) :
+		Module<T>({ first, static_cast<size_t>(rest)... }, { first, static_cast<size_t>(rest)... })
 	{}
 	
 	Map(const Map &module) :
@@ -21,8 +22,7 @@ public:
 	
 	Map &operator=(const Map &module)
 	{
-		resizeOutputs(module.m_outputShape);
-		resizeInputs(module.m_inputShape);
+		resizeInputs(module.inputShape());
 		return *this;
 	}
 	
@@ -51,25 +51,27 @@ public:
 	/// Forward propagate input, returning output.
 	virtual const Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssertEquals(input.shape(), m_output.shape(), "Incompatible input!");
+		m_output.resize(input.shape());
+		
 		auto i = input.begin(), j = input.end();
 		for(auto k = m_output.begin(); i != j; ++i, ++k)
-		{
 			*k = forward(*i);
-		}
+		
 		return m_output;
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual const Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssertEquals(input.shape(), m_output.shape(), "Incompatible input!");
-		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
+		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
+		
+		m_output.resize(input.shape());
+		m_inGrad.resize(outGrad.shape());
+		
 		auto i = input.begin(), j = input.end(), b = outGrad.begin();
 		for(auto k = m_output.begin(), l = m_inGrad.begin(); i != j; ++i, ++b, ++k, ++l)
-		{
 			*l = *b * backward(*i, *k);
-		}
+		
 		return m_inGrad;
 	}
 	

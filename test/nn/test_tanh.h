@@ -21,18 +21,18 @@ void TestTanH()
 	
 	// Begin test
 	
-	TanH<> map(3, 1);
+	TanH<> map(3);
 	map.forward(inp);
 	map.backward(inp, grd);
 	
-	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "TanH::forward failed!");
-	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "TanH::backward failed!");
+	NNAssert(map.output().copy().addM(out, -1).square().sum() < 1e-9, "TanH::forward failed!");
+	NNAssert(map.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "TanH::backward failed!");
 	
-	map.inputs({ 3, 4 });
-	NNAssert(map.inputs() == map.outputs(), "TanH::inputs failed to resize outputs!");
+	map.resizeInputs({ 3, 4 });
+	NNAssert(map.inputShape() == map.outputShape(), "TanH::inputs failed to resize outputs!");
 	
-	map.outputs({ 12, 3 });
-	NNAssert(map.inputs() == map.outputs(), "TanH::outputs failed to resize inputs!");
+	map.resizeOutputs({ 12, 3 });
+	NNAssert(map.inputShape() == map.outputShape(), "TanH::outputs failed to resize inputs!");
 	
 	bool ok = true;
 	try
