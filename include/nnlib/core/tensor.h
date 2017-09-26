@@ -153,6 +153,12 @@ public:
 		m_contiguous(other.m_contiguous)
 	{}
 	
+	/// Load from a serialized node.
+	Tensor(const Serialized &node) : Tensor(node.get<Storage<size_t>>("dims"), true)
+	{
+		node.get("data", begin(), end());
+	}
+	
 	/// \brief Replace tensor contents with new values.
 	///
 	/// Resizes the tensor to be a vector (one-dimensional) and copies data from values.
@@ -1245,13 +1251,6 @@ public:
 	{
 		node.set("dims", m_dims);
 		node.set("data", begin(), end());
-	}
-	
-	/// Load from a serialized node.
-	void load(const Serialized &node)
-	{
-		resize(node.get<Storage<size_t>>("dims"));
-		node.get("data", begin(), end());
 	}
 	
 private:

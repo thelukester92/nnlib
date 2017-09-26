@@ -20,7 +20,7 @@ template <typename B>
 class Factory
 {
 public:
-	using Constructor = std::function<B*()>;
+	using Constructor = std::function<B*(const Serialized &)>;
 	using CopyConstructor = std::function<B*(const B &)>;
 	
 	/// All methods are static; instances are not needed.
@@ -28,10 +28,10 @@ public:
 	
 	/// Register a derived type using default constructor.
 	template <typename D>
-	static typename std::enable_if<std::is_default_constructible<D>::value, std::string>::type
+	static typename std::enable_if<traits::HasLoadAndSave<D>::value, std::string>::type
 	registerDerivedType(const std::string &name)
 	{
-		return registerDerivedType<D>(name, []() { return new D(); });
+		return registerDerivedType<D>(name, [](const Serialized &node) { return new D(node); });
 	}
 	
 	/// Register a derived abstract type.

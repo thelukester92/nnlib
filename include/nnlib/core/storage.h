@@ -59,6 +59,15 @@ public:
 		}
 	}
 	
+	/// Load from a serialized node.
+	Storage(const Serialized &node) :
+		m_ptr(new T[node.size()]),
+		m_size(node.size()),
+		m_capacity(node.size())
+	{
+		node.get(begin(), end());
+	}
+	
 	~Storage()
 	{
 		delete[] m_ptr;
@@ -236,13 +245,6 @@ public:
 	void save(Serialized &node) const
 	{
 		node.set(begin(), end());
-	}
-	
-	/// Load from a serialized node.
-	void load(const Serialized &node)
-	{
-		resize(node.as<SerializedArray>().size());
-		node.get(begin(), end());
 	}
 	
 private:

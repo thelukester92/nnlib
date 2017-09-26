@@ -425,7 +425,7 @@ void TestTensor()
 	
 	Serialized node;
 	serializable.save(node);
-	serialized.load(node);
+	serialized = Tensor<>(node);
 	
 	for(auto x = serializable.begin(), y = serialized.begin(); x != serializable.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");

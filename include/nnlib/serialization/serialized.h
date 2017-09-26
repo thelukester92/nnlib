@@ -431,14 +431,10 @@ public:
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type as() const
 	{
-		T value;
-		
 		if(m_type == Object && m_object.has("polymorphic"))
-			value.load(*get<Serialized *>("data"));
+			return T(*get<Serialized *>("data"));
 		else
-			value.load(*this);
-		
-		return value;
+			return T(*this);
 	}
 	
 	/// Get a serializable value (as a pointer).

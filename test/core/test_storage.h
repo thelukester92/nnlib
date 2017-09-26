@@ -91,7 +91,7 @@ void TestStorage()
 	
 	Serialized node;
 	serializable.save(node);
-	serialized.load(node);
+	serialized = Storage<size_t>(node);
 	NNAssertEquals(serializable, serialized, "Storage::save and/or Storage::load failed!");
 }
 

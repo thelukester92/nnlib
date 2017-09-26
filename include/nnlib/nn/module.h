@@ -16,13 +16,12 @@ public:
 	// MARK: Serialization
 	
 	virtual void save(Serialized &) = 0;
-	virtual void load(const Serialized &) = 0;
 	
 	// MARK: Computation
 	
 	virtual void updateOutput(const Tensor<T> &input) = 0;
 	virtual void updateInGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
-	virtual void updateParamGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
+	virtual void updateParamsGrad(const Tensor<T> &input, const Tensor<T> &outGrad) = 0;
 	
 	Tensor<T> &forward(const Tensor<T> &input)
 	{

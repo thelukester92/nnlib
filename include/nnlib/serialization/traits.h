@@ -37,7 +37,7 @@ namespace traits
 
 	/// Check whether the given type has the load and save methods. This override determines it does.
 	template <typename T>
-	struct HasLoadAndSave<T, decltype(std::declval<T>().load(std::declval<const Serialized &>()), 0), decltype(std::declval<T>().save(std::declval<Serialized &>()), 0)> : std::true_type
+	struct HasLoadAndSave<T, decltype(T(std::declval<const Serialized &>()), 0), decltype(std::declval<T>().save(std::declval<Serialized &>()), 0)> : std::true_type
 	{};
 
 	/// Check whether the given type has the begin and end methods. Default is false.

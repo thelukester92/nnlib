@@ -1,12 +1,13 @@
 #ifndef TEST_MODULE_H
 #define TEST_MODULE_H
 
-#include "nnlib/nn/container.h"
-#include "nnlib/nn/map.h"
+// #include "nnlib/nn/container.h"
+// #include "nnlib/nn/map.h"
 #include "nnlib/nn/module.h"
 using namespace std;
 using namespace nnlib;
 
+/*
 template <typename T>
 bool TestModule_equalParams(Module<T> &m1, Module<T> &m2)
 {
@@ -185,14 +186,17 @@ void TestModule_serialization(T &module)
 		delete s6;
 	}
 }
+*/
 
-template <typename T>
-void TestModule(T &module)
+template <template <typename> class M, typename T>
+void TestModule(const std::string &name, M<T> &module, const Tensor<T> &inp, const Tensor<T> &grd, const Tensor<T> &out, const Tensor<T> &ing, const Tensor<T> &prg)
 {
+	/*
 	TestModule_copyConstructor(module);
 	TestModule_assignment(module);
 	TestModule_serialization(module);
 	TestModule_flattening(module);
+	*/
 }
 
 #endif
