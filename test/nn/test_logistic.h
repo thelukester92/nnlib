@@ -2,7 +2,6 @@
 #define TEST_LOGISTIC_H
 
 #include "nnlib/nn/logistic.h"
-#include "test_map.h"
 using namespace nnlib;
 
 void TestLogistic()
@@ -19,7 +18,12 @@ void TestLogistic()
 	// Input gradient, fixed given input and output gradient
 	Tensor<> ing = Tensor<>({ 0.33659672493, -0.58983579972, 0.03976593824 }).resize(1, 3);
 	
-	TestMap<Logistic<>>("Logistic", inp, grd, out, ing);
+	Logistic<> map(0.5);
+	map.forward(inp);
+	map.backward(inp, grd);
+	
+	NNAssert(map.output().copy().addM(out, -1).square().sum() < 1e-9, "Logistic::forward failed!");
+	NNAssert(map.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "Logistic::backward failed!");
 }
 
 #endif
