@@ -12,20 +12,20 @@
 // #include "critics/test_nll.h"
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
-#include "nn/test_batchnorm.h"
+// #include "nn/test_batchnorm.h"
 // #include "nn/test_concat.h"
 // #include "nn/test_dropconnect.h"
 // #include "nn/test_dropout.h"
-#include "nn/test_identity.h"
+// #include "nn/test_identity.h"
 #include "nn/test_linear.h"
 // #include "nn/test_logistic.h"
 // #include "nn/test_logsoftmax.h"
 // #include "nn/test_lstm.h"
 // #include "nn/test_recurrent.h"
-#include "nn/test_relu.h"
+// #include "nn/test_relu.h"
 // #include "nn/test_sequencer.h"
 // #include "nn/test_sequential.h"
-#include "nn/test_tanh.h"
+// #include "nn/test_tanh.h"
 // #include "opt/test_adam.h"
 // #include "opt/test_nadam.h"
 // #include "opt/test_rmsprop.h"
@@ -60,20 +60,20 @@ int main()
 		// TEST("critics/", NLL),
 		TEST("math/", MathBase),
 		TEST("math/", MathBLAS),
-		TEST("nn/", BatchNorm),
+		// TEST("nn/", BatchNorm),
 		// TEST("nn/", Concat),
 		// TEST("nn/", DropConnect),
 		// TEST("nn/", Dropout),
-		TEST("nn/", Identity),
+		// TEST("nn/", Identity),
 		TEST("nn/", Linear),
 		// TEST("nn/", Logistic),
 		// TEST("nn/", LogSoftMax),
 		// TEST("nn/", LSTM),
 		// TEST("nn/", Recurrent),
-		TEST("nn/", ReLU),
+		// TEST("nn/", ReLU),
 		// TEST("nn/", Sequencer),
 		// TEST("nn/", Sequential),
-		TEST("nn/", TanH),
+		// TEST("nn/", TanH),
 		// TEST("opt/", Adam),
 		// TEST("opt/", Nadam),
 		// TEST("opt/", RMSProp),
