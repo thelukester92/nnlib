@@ -11,9 +11,6 @@ template <typename T = double>
 class Map : public Module<T>
 {
 public:
-	Map() = default;
-	Map(const Serialized &) {}
-	
 	/// Single element forward.
 	virtual T forwardOne(const T &x) = 0;
 	

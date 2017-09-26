@@ -11,9 +11,8 @@ template <typename T = double>
 class Container : public Module<T>
 {
 public:
-	using Module<T>::training;
-	
-	Container() {}
+	Container() = default;
+	Container(const Serialized &) {}
 	
 	Container(const Container &module) : m_components(module.m_components)
 	{

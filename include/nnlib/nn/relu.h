@@ -12,8 +12,6 @@ template <typename T = double>
 class ReLU : public Map<T>
 {
 public:
-	using Map<T>::Map;
-	
 	ReLU(double leak = 0.1) :
 		m_leak(leak)
 	{}

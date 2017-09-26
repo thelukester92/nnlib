@@ -12,8 +12,8 @@ template <typename T = double>
 class TanH : public Map<T>
 {
 public:
-	using Map<T>::Map;
-	
+	TanH() = default;
+	TanH(const Serialized &) {}
 	TanH(const TanH &) = default;
 	TanH &operator=(const TanH &) = default;
 	

@@ -12,7 +12,8 @@ template <typename T = double>
 class Logistic : public Map<T>
 {
 public:
-	using Map<T>::Map;
+	Logistic() = default;
+	Logistic(const Serialized &) {}
 	
 	/// Single element forward.
 	virtual T forwardOne(const T &x) override
