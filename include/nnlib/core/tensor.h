@@ -251,9 +251,12 @@ public:
 	/// \param dims The new shape for the tensor.
 	///
 	/// \return The tensor, for chaining.
-	Tensor &resize(Storage<size_t> dims)
+	Tensor &resize(const Storage<size_t> &dims)
 	{
 		NNHardAssert(dims.size() > 0, "Cannot create a zero-dimensional tensor!");
+		
+		if(dims == m_dims)
+			return *this;
 		
 		// Calculate new strides and size.
 		
@@ -305,8 +308,13 @@ public:
 	/// \return The tensor, for chaining.
 	Tensor &resizeDim(size_t dim, size_t size)
 	{
-		m_dims[dim] = size;
-		return resize(m_dims);
+		if(m_dims[dim] == size)
+			return *this;
+		
+		Storage<size_t> dims = m_dims;
+		dims[dim] = size;
+		
+		return resize(dims);
 	}
 	
 	/// \brief Creates a new tensor with a view of this tensor's storage but (perhaps) a new shape.

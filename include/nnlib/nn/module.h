@@ -32,7 +32,7 @@ public:
 	}
 	
 	/// Set whether this module is in training mode. Useful for modules like batchnorm that behave differently at evaluation time.
-	virtual void training(bool training)
+	virtual void training(bool training = true)
 	{}
 	
 	// MARK: Serialization
