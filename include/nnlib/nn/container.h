@@ -32,12 +32,18 @@ public:
 	
 	Container &operator=(const Container &module)
 	{
-		m_components = module.m_components;
-		for(Module<T> *&m : m_components)
+		Module<T> *components = module.m_components;
+		for(Module<T> *&m : components)
 		{
 			/// \note intentionally not releasing; module still owns the original
 			m = m->copy();
 		}
+		
+		for(Module<T> *m : m_components)
+			delete m;
+		
+		m_components = components;
+		
 		return *this;
 	}
 	
