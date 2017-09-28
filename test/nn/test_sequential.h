@@ -3,7 +3,6 @@
 
 #include "nnlib/nn/sequential.h"
 #include "nnlib/nn/linear.h"
-#include "nnlib/nn/tanh.h"
 using namespace nnlib;
 
 void TestSequential()

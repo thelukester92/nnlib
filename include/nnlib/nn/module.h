@@ -71,42 +71,24 @@ public:
 	Tensor<T> &params()
 	{
 		auto list = paramsList();
-		bool recalculate = false;
-		
-		for(size_t i = 0; i < list.size() && !recalculate; ++i)
-			recalculate = !list[i]->sharedWith(m_params);
-		
-		if(recalculate)
+		if(!m_params.sharedWith(list))
 			m_params = Tensor<T>::flatten(list);
-		
 		return m_params;
 	}
 	
 	Tensor<T> &grad()
 	{
 		auto list = gradList();
-		bool recalculate = false;
-		
-		for(size_t i = 0; i < list.size() && !recalculate; ++i)
-			recalculate = !list[i]->sharedWith(m_grad);
-		
-		if(recalculate)
+		if(!m_grad.sharedWith(list))
 			m_grad = Tensor<T>::flatten(list);
-		
 		return m_grad;
 	}
 	
 	Tensor<T> &state()
 	{
 		auto list = stateList();
-		bool recalculate = false;
-		
-		for(size_t i = 0; i < list.size() && !recalculate; ++i)
-			recalculate = !list[i]->sharedWith(m_state);
-		
-		if(recalculate)
+		if(!m_state.sharedWith(list))
 			m_state = Tensor<T>::flatten(list);
-		
 		return m_state;
 	}
 	

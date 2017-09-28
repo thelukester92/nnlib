@@ -57,6 +57,45 @@ public:
 		return flattened;
 	}
 	
+	/// \brief Concatenates a number of tensors along the given dimension.
+	///
+	/// Each tensor in the parameter becomes a subview into a single shared Storage.
+	/// If any of the tensors shared data, the old links are broken and are no longer shared.
+	/// Unlike flatten, concatenate requires that the tensors are compatible (same dimensions except for the concatinating dimension).
+	/// \param tensors A list of tensors to concatenate.
+	/// \return The concatenated tensor.
+	static Tensor concatenate(const Storage<Tensor *> &tensors, size_t dim)
+	{
+		if(tensors.size() == 0)
+			return Tensor();
+		
+		// Check compatibility and calculate result dimensions
+		
+		Storage<size_t> dims = tensors[0]->shape();
+		for(size_t i = 1, count = tensors.size(); i < count; ++i)
+		{
+			NNAssertEquals(tensors[i]->select(dim, 0).shape(), tensors[0]->select(dim, 0).shape(), "Incompatible tensors for concatenation along the given dimension!");
+			dims[dim] += tensors[i]->size(dim);
+		}
+		
+		// Create the shared tensor
+		
+		Tensor concatenated(dims, true);
+		
+		// Copy data from tensors into the shared tensor, then give tensors views into the shared tensor
+		
+		size_t dimOffset = 0;
+		for(Tensor *t : tensors)
+		{
+			Tensor view = concatenated.narrow(dim, dimOffset, t->size(dim));
+			view.copy(*t);
+			dimOffset += t->size(dim);
+			*t = view;
+		}
+		
+		return concatenated;
+	}
+	
 	/// Create a zero-length, one-dimensional tensor.
 	Tensor() :
 		m_dims({ 0 }),
@@ -235,6 +274,15 @@ public:
 	bool sharedWith(const Tensor &other) const
 	{
 		return m_data == other.m_data;
+	}
+	
+	/// Returns whether this tensor shares a buffer with all the given tensors.
+	bool sharedWith(const Storage<Tensor *> &tensors) const
+	{
+		for(size_t i = 0, count = tensors.size(); i < count; ++i)
+			if(!sharedWith(*tensors[i]))
+				return false;
+		return true;
 	}
 	
 	/// Returns the number of tensors sharing data with this tensor, including this tensor.
