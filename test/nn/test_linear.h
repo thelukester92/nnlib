@@ -36,7 +36,7 @@ void TestLinear()
 	NNAssert(module.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "Linear::backward failed; wrong input gradient!");
 	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Linear::backward failed; wrong parameter gradient!");
 	
-	TestModule("Linear", module);
+	TestModule("Linear", module, inp);
 }
 
 #endif

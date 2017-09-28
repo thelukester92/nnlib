@@ -2,7 +2,7 @@
 #define TEST_TANH_H
 
 #include "nnlib/nn/tanh.h"
-// #include "test_module.h"
+#include "test_map.h"
 using namespace nnlib;
 
 void TestTanH()
@@ -25,6 +25,8 @@ void TestTanH()
 	
 	NNAssert(map.output().copy().addM(out, -1).square().sum() < 1e-9, "TanH::forward failed!");
 	NNAssert(map.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "TanH::backward failed!");
+	
+	TestMap("TanH", map, inp);
 }
 
 #endif

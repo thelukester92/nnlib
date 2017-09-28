@@ -12,8 +12,10 @@ template <typename T = double>
 class Logistic : public Map<T>
 {
 public:
-	Logistic() = default;
+	Logistic() {}
 	Logistic(const Serialized &) {}
+	Logistic(const Logistic &) {}
+	Logistic &operator=(const Logistic &) { return *this; }
 	
 	/// Single element forward.
 	virtual T forwardOne(const T &x) override

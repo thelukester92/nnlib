@@ -41,17 +41,12 @@ public:
 		size_t offset = 0;
 		for(Tensor *t : tensors)
 		{
-			size_t i = offset;
-			for(const T &value : *t)
-			{
-				flattened(i) = value;
-				++i;
-			}
+			flattened.narrow(0, offset, t->size()).copy(*t);
 			t->m_data = flattened.m_data;		// make t share data with flattened
 			t->m_shared = flattened.m_shared;	// ARC
 			t->m_offset = offset;				// give t the appropriate offset in flattened
 			t->resize(t->shape());				// reset strides of t to be contiguous
-			offset = i;
+			offset += t->size();
 		}
 		
 		return flattened;
@@ -62,12 +57,15 @@ public:
 	/// Each tensor in the parameter becomes a subview into a single shared Storage.
 	/// If any of the tensors shared data, the old links are broken and are no longer shared.
 	/// Unlike flatten, concatenate requires that the tensors are compatible (same dimensions except for the concatinating dimension).
+	/// By default, this will concatenate along the final dimension.
 	/// \param tensors A list of tensors to concatenate.
 	/// \return The concatenated tensor.
-	static Tensor concatenate(const Storage<Tensor *> &tensors, size_t dim)
+	static Tensor concatenate(const Storage<Tensor *> &tensors, size_t dim = (size_t) -1)
 	{
 		if(tensors.size() == 0)
 			return Tensor();
+		
+		dim = std::min(dim, tensors[0]->dims() - 1);
 		
 		// Check compatibility and calculate result dimensions
 		
@@ -740,6 +738,14 @@ public:
 		return m_contiguous;
 	}
 	
+	/// Makes the tensor contiguous in memory.
+	Tensor &makeContiguous()
+	{
+		if(!m_contiguous)
+			*this = copy();
+		return *this;
+	}
+	
 	/// \brief Gets the stride of a given dimension.
 	///
 	/// The stide is the distance between elements in the given dimension.
@@ -983,6 +989,7 @@ public:
 		NNAssertEquals(stride(1), 1, "This must be contiguous!");
 		NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
 		NNAssertEquals(B.size(1), size(1), "Incompatible operands!");
+		NNAssertEquals(A.size(1), B.size(0), "Incompatible operands!");
 		
 		Math<T>::mAdd_mm(
 			A.size(0), B.size(1), A.size(1),
@@ -1015,6 +1022,7 @@ public:
 		NNAssertEquals(stride(1), 1, "This must be contiguous!");
 		NNAssertEquals(A.size(1), size(0), "Incompatible operands!");
 		NNAssertEquals(B.size(1), size(1), "Incompatible operands!");
+		NNAssertEquals(A.size(0), B.size(0), "Incompatible operands!");
 		
 		Math<T>::mAdd_mtm(
 			A.size(1), B.size(1), A.size(0),
@@ -1047,6 +1055,7 @@ public:
 		NNAssertEquals(stride(1), 1, "This must be contiguous!");
 		NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
 		NNAssertEquals(B.size(0), size(1), "Incompatible operands!");
+		NNAssertEquals(A.size(1), B.size(1), "Incompatible operands!");
 		
 		Math<T>::mAdd_mmt(
 			A.size(0), B.size(0), A.size(1),

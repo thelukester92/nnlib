@@ -2,6 +2,7 @@
 #define TEST_BATCHNORM_H
 
 #include "nnlib/nn/batchnorm.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestBatchNorm()
@@ -75,6 +76,8 @@ void TestBatchNorm()
 	Tensor<> state = bn.state();
 	state.fill(0);
 	NNAssertAlmostEquals(bn.output().sum(), 0, 1e-12, "BatchNorm::state failed!");
+	
+	TestModule("BatchNorm", bn, inp);
 }
 
 #endif

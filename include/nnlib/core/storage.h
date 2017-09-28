@@ -102,6 +102,13 @@ public:
 	
 	Storage &resize(size_t n, const T &defaultValue = T())
 	{
+		reserve(n, defaultValue);
+		m_size = n;
+		return *this;
+	}
+	
+	Storage &reserve(size_t n, const T &defaultValue = T())
+	{
 		if(n > m_capacity)
 		{
 			T *ptr = new T[n];
@@ -113,7 +120,6 @@ public:
 			m_ptr = ptr;
 			m_capacity = n;
 		}
-		m_size = n;
 		return *this;
 	}
 	
@@ -126,6 +132,7 @@ public:
 	
 	Storage &append(const Storage &other)
 	{
+		reserve(m_size + other.m_size);
 		for(const T &value : other)
 			push_back(value);
 		return *this;

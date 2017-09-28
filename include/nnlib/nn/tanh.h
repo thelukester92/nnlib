@@ -12,10 +12,10 @@ template <typename T = double>
 class TanH : public Map<T>
 {
 public:
-	TanH() = default;
+	TanH() {}
 	TanH(const Serialized &) {}
-	TanH(const TanH &) = default;
-	TanH &operator=(const TanH &) = default;
+	TanH(const TanH &) {}
+	TanH &operator=(const TanH &) { return *this; }
 	
 	/// Single element forward.
 	virtual T forwardOne(const T &x) override

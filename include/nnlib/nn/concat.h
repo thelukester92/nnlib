@@ -46,7 +46,7 @@ public:
 	{}
 	
 	Concat(const Concat &module) :
-		Container<T>(static_cast<const Module<T> &>(module)),
+		Container<T>(static_cast<const Container<T> &>(module)),
 		m_concatDim(module.m_concatDim)
 	{}
 	

@@ -2,6 +2,7 @@
 #define TEST_LOGISTIC_H
 
 #include "nnlib/nn/logistic.h"
+#include "test_map.h"
 using namespace nnlib;
 
 void TestLogistic()
@@ -24,6 +25,8 @@ void TestLogistic()
 	
 	NNAssert(map.output().copy().addM(out, -1).square().sum() < 1e-9, "Logistic::forward failed!");
 	NNAssert(map.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "Logistic::backward failed!");
+	
+	TestMap("Logistic", map, inp);
 }
 
 #endif

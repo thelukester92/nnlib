@@ -41,13 +41,13 @@ public:
 	
 	BatchNorm(const Serialized &node) :
 		m_weights(node.get<Tensor<T>>("weights")),
-		m_weightsGrad(m_weights.shape()),
+		m_weightsGrad(m_weights.shape(), true),
 		m_biases(node.get<Tensor<T>>("biases")),
-		m_biasesGrad(m_biases.shape()),
+		m_biasesGrad(m_biases.shape(), true),
 		m_runningMeans(node.get<Tensor<T>>("runningMeans")),
 		m_runningVars(node.get<Tensor<T>>("runningVars")),
-		m_means(m_weights.shape()),
-		m_invStds(m_weights.shape()),
+		m_means(m_weights.shape(), true),
+		m_invStds(m_weights.shape(), true),
 		m_momentum(node.get<T>("momentum")),
 		m_training(node.get<bool>("training"))
 	{
@@ -127,6 +127,7 @@ public:
 		node.set("runningMeans", m_runningMeans);
 		node.set("runningVars", m_runningVars);
 		node.set("momentum", m_momentum);
+		node.set("training", m_training);
 	}
 	
 	// MARK: Computation

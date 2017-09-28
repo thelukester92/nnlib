@@ -26,7 +26,7 @@ public:
 	Module &operator=(const Module &) = delete;
 	
 	/// Construct a copy of this module. Must be registered with NNRegisterType.
-	Module *copy()
+	Module *copy() const
 	{
 		return Factory<Module>::constructCopy(this);
 	}

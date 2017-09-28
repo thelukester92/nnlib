@@ -32,7 +32,7 @@ public:
 	
 	Container &operator=(const Container &module)
 	{
-		Module<T> *components = module.m_components;
+		Storage<Module<T> *> components = module.m_components;
 		for(Module<T> *&m : components)
 		{
 			/// \note intentionally not releasing; module still owns the original
