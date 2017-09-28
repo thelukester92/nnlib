@@ -1327,6 +1327,18 @@ private:
 	bool m_contiguous;						///< Whether this tensor is contiguous (i.e. can be vectorized).
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
+	size_t indexOf(const std::initializer_list<size_t> &indices) const
+	{
+		NNAssertEquals(indices.size(), m_dims.size(), "Incorrect number of dimensions!");
+		size_t i = 0, sum = m_offset;
+		for(size_t idx : indices)
+			sum += idx * m_strides[i++];
+		
+		NNAssertLessThan(sum, m_data->size(), "Index out of bounds!");
+		return sum;
+	}
+	
+	/// Get the appropriate contiguous index given the multidimensional index.
 	size_t indexOf(const Storage<size_t> &indices) const
 	{
 		NNAssertEquals(indices.size(), m_dims.size(), "Incorrect number of dimensions!");
