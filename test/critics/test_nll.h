@@ -10,7 +10,7 @@ void TestNLL()
 	Tensor<> tgt = Tensor<>({ 2, 0 }).resize(2, 1);
 	Tensor<> dif = Tensor<>({ -3, -4 }).resize(2, 1);
 	Tensor<> grd = Tensor<>({ 0, 0, -1.0, -1.0, 0, 0 }).resize(2, 3);
-	NLL<> critic(inp.shape(), false);
+	NLL<> critic(false);
 	
 	double nll = critic.forward(inp, tgt);
 	NNHardAssert(fabs(nll - dif.sum()) < 1e-12, "NLL<>::forward with no average failed!");
@@ -20,10 +20,6 @@ void TestNLL()
 	dif.scale(1.0/6.0);
 	NNHardAssert(fabs(nll - dif.sum()) < 1e-12, "NLL<>::forward with average failed!");
 	
-	critic.inputs({ 10, 10 });
-	nll = critic.safeForward(inp, tgt);
-	NNHardAssert(fabs(nll - dif.sum()) < 1e-12, "NLL<>::safeForward failed!");
-	
 	critic.average(false);
 	critic.backward(inp, tgt);
 	NNHardAssert(critic.inGrad().addM(grd, -1).square().sum() < 1e-12, "NLL<>::backward with no average failed!");
@@ -31,9 +27,6 @@ void TestNLL()
 	critic.average(true);
 	critic.backward(inp, tgt);
 	NNHardAssert(critic.inGrad().addM(grd, -1.0 / inp.size()).square().sum() < 1e-12, "NLL<>::backward with average failed!");
-	
-	critic.batch(12);
-	NNHardAssert(critic.batch() == 12, "NLL<>::batch failed!");
 }
 
 #endif

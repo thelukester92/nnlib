@@ -6,24 +6,16 @@
 namespace nnlib
 {
 
-/// Mean squared error critic.
-/// Assumes the last dimension is inputs, leaving earlier
-/// dimensions for batch size and sequence length.
+/// \brief Mean squared error critic.
+///
+/// When average = false, this is sum squared error.
 template <typename T = double>
 class MSE : public Critic<T>
 {
 public:
 	MSE(bool average = true) :
-		m_inGrad(1, 0),
 		m_average(average)
 	{}
-	
-	MSE(const Storage<size_t> &shape, bool average = true) :
-		m_inGrad(shape, true),
-		m_average(average)
-	{
-		NNHardAssertEquals(shape.size(), 1, "Expected one-dimensional input!");
-	}
 	
 	bool average() const
 	{
@@ -40,7 +32,7 @@ public:
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssertEquals(input.shape(), target.shape(), "Incompatible operands!");
-		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
+		
 		auto tar = target.begin();
 		T diff, sum = 0;
 		for(const T &inp : input)
@@ -60,8 +52,7 @@ public:
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
 		NNAssertEquals(input.shape(), target.shape(), "Incompatible operands!");
-		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible operands!");
-		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
+		m_inGrad.resize(input.shape());
 		
 		T norm = 2.0;
 		if(m_average)
@@ -78,15 +69,11 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Input gradient buffer.
-	virtual Tensor<T> &inGrad() override
-	{
-		return m_inGrad;
-	}
+protected:
+	using Critic<T>::m_inGrad;
 
 private:
-	Tensor<T> m_inGrad;	///< The gradient of the loss w.r.t. the input.
-	bool m_average;		///< Whether to average the result. Default: true.
+	bool m_average;
 };
 
 }

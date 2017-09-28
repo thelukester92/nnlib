@@ -6,17 +6,16 @@
 namespace nnlib
 {
 
-/// Negative log loss critic.
+/// \brief Negative log loss critic.
+///
+/// This critic requires matrix input and single-column matrix output.
 template <typename T = double>
 class NLL : public Critic<T>
 {
 public:
-	NLL(const Storage<size_t> &shape, bool average = true) :
-		m_inGrad(shape, true),
+	NLL(bool average = true) :
 		m_average(average)
-	{
-		NNHardAssertEquals(shape.size(), 2, "Expected matrix input!");
-	}
+	{}
 	
 	bool average() const
 	{
@@ -58,7 +57,7 @@ public:
 		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 		NNAssertEquals(target.size(1), 1, "Expected single-column target!");
 		
-		m_inGrad.fill(0);
+		m_inGrad.resize(input.shape()).fill(0);
 		T weight = -1.0;
 		
 		if(m_average)
@@ -75,15 +74,11 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Input gradient buffer.
-	virtual Tensor<T> &inGrad() override
-	{
-		return m_inGrad;
-	}
-
+protected:
+	using Critic<T>::m_inGrad;
+	
 private:
-	Tensor<T> m_inGrad;	///< The gradient of the loss w.r.t. the input.
-	bool m_average;		///< Whether to average the result. Default: true.
+	bool m_average;
 };
 
 }

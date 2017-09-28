@@ -8,8 +8,8 @@
 #include "core/test_storage.h"
 #include "core/test_tensor.h"
 // #include "critics/test_criticsequencer.h"
-// #include "critics/test_mse.h"
-// #include "critics/test_nll.h"
+#include "critics/test_mse.h"
+#include "critics/test_nll.h"
 #include "math/test_math_base.h"
 #include "math/test_math_blas.h"
 #include "nn/test_batchnorm.h"
@@ -55,8 +55,8 @@ int main()
 		TEST("core/", Storage),
 		TEST("core/", Tensor),
 		// TEST("critics/", CriticSequencer),
-		// TEST("critics/", MSE),
-		// TEST("critics/", NLL),
+		TEST("critics/", MSE),
+		TEST("critics/", NLL),
 		TEST("math/", MathBase),
 		TEST("math/", MathBLAS),
 		TEST("nn/", BatchNorm),
