@@ -40,7 +40,7 @@ public:
 	{}
 	
 	template <typename ... Ms>
-	Concat(size_t concatDim = (size_t) -1, Ms... components) :
+	Concat(size_t concatDim, Ms... components) :
 		Container<T>(components...),
 		m_concatDim(concatDim)
 	{}

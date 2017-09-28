@@ -207,14 +207,14 @@ public:
 	};
 	
 	/// Create a node with the given type; default is Null.
-	Serialized(Type t = Null) : m_type(Null)
+	explicit Serialized(Type t = Null) : m_type(Null)
 	{
 		type(t);
 	}
 	
 	/// Create a node with the given value.
 	template <typename ... Ts>
-	Serialized(Ts && ...values) :
+	explicit Serialized(Ts && ...values) :
 		m_type(Null)
 	{
 		set(std::forward<Ts>(values)...);

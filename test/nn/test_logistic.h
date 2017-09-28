@@ -19,7 +19,7 @@ void TestLogistic()
 	// Input gradient, fixed given input and output gradient
 	Tensor<> ing = Tensor<>({ 0.33659672493, -0.58983579972, 0.03976593824 }).resize(1, 3);
 	
-	Logistic<> map(0.5);
+	Logistic<> map;
 	map.forward(inp);
 	map.backward(inp, grd);
 	

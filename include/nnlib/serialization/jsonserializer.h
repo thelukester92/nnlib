@@ -41,10 +41,22 @@ public:
 		return result;
 	}
 	
+	template <typename T>
+	static void write(const T &value, std::ostream &out, bool pretty = false)
+	{
+		write(Serialized(value), out, pretty);
+	}
+	
 	static void write(const Serialized &root, std::ostream &out, bool pretty = false)
 	{
 		out.precision(std::numeric_limits<double>::digits10);
 		write(root, out, pretty ? 0 : -1);
+	}
+	
+	template <typename T>
+	static void writeFile(const T &value, const std::string &filename, bool pretty = false)
+	{
+		writeFile(Serialized(value), filename, pretty);
 	}
 	
 	static void writeFile(const Serialized &root, const std::string &filename, bool pretty = false)

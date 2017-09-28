@@ -109,7 +109,7 @@ void TestJSONSerializer()
 		Sequential<> nn(
 			new Linear<>(10, 5),
 			new TanH<>(),
-			new Linear<>(10),
+			new Linear<>(5, 10),
 			new TanH<>()
 		);
 		
@@ -118,8 +118,8 @@ void TestJSONSerializer()
 		
 		Sequential<> *deserialized = JSONSerializer::read(ss).as<Sequential<> *>();
 		
-		auto &p1 = nn.parameters();
-		auto &p2 = deserialized->parameters();
+		auto &p1 = nn.params();
+		auto &p2 = deserialized->params();
 		
 		for(auto i = p1.begin(), j = p2.begin(), end = p1.end(); i != end; ++i, ++j)
 		{
