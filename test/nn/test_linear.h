@@ -2,7 +2,7 @@
 #define TEST_LINEAR_H
 
 #include "nnlib/nn/linear.h"
-// #include "test_module.h"
+#include "test_module.h"
 using namespace nnlib;
 
 void TestLinear()
@@ -35,6 +35,8 @@ void TestLinear()
 	NNAssert(module.output().copy().addM(out, -1).square().sum() < 1e-9, "Linear::forward failed; wrong output!");
 	NNAssert(module.inGrad().copy().addM(ing, -1).square().sum() < 1e-9, "Linear::backward failed; wrong input gradient!");
 	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Linear::backward failed; wrong parameter gradient!");
+	
+	TestModule("Linear", module);
 }
 
 #endif

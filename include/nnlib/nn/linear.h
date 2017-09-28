@@ -22,16 +22,16 @@ public:
 	
 	Linear(const Linear &module) :
 		m_weights(module.m_weights.copy()),
-		m_weightsGrad(m_weights.shape()),
+		m_weightsGrad(m_weights.shape(), true),
 		m_bias(module.m_bias.copy()),
-		m_biasGrad(m_bias.shape())
+		m_biasGrad(m_bias.shape(), true)
 	{}
 	
 	Linear(const Serialized &node) :
 		m_weights(node.get<Tensor<T>>("weights")),
-		m_weightsGrad(m_weights.shape()),
+		m_weightsGrad(m_weights.shape(), true),
 		m_bias(node.get<Tensor<T>>("bias")),
-		m_biasGrad(m_bias.shape())
+		m_biasGrad(m_bias.shape(), true)
 	{
 		NNAssertEquals(m_weights.dims(), 2, "Expected matrix weights!");
 		NNAssertEquals(m_bias.dims(), 1, "Expected vector bias!");
