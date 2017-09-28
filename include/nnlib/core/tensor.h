@@ -38,15 +38,14 @@ public:
 			size += t->size();
 		
 		Tensor flattened(size);
+		
 		size_t offset = 0;
 		for(Tensor *t : tensors)
 		{
-			flattened.narrow(0, offset, t->size()).copy(*t);
-			t->m_data = flattened.m_data;		// make t share data with flattened
-			t->m_shared = flattened.m_shared;	// ARC
-			t->m_offset = offset;				// give t the appropriate offset in flattened
-			t->resize(t->shape());				// reset strides of t to be contiguous
+			Tensor view = flattened.narrow(0, offset, t->size());
+			view.copy(*t);
 			offset += t->size();
+			*t = view.view(t->shape());
 		}
 		
 		return flattened;
