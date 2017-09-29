@@ -2,6 +2,7 @@
 #define TEST_SEQUENTIAL_H
 
 #include "nnlib/nn/sequential.h"
+#include "nnlib/nn/batchnorm.h"
 #include "nnlib/nn/linear.h"
 using namespace nnlib;
 
@@ -80,6 +81,13 @@ void TestSequential()
 	NNAssert(module.paramsList() == linear->paramsList(), "Sequential::paramsList failed!");
 	NNAssert(module.gradList() == linear->gradList(), "Sequential::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Sequential::stateList failed!");
+	
+	{
+		BatchNorm<> *b = new BatchNorm<>(10);
+		Sequential<> s(b);
+		s.training(false);
+		NNAssert(!b->isTraining(), "Sequential::training failed!");
+	}
 	
 	Sequential<> module2(new Linear<>(5, 10), new Linear<>(10, 2));
 	TestContainer("Sequential", module2, Tensor<>(100, 5).rand());

@@ -115,6 +115,11 @@ public:
 		return *this;
 	}
 	
+	bool isTraining() const
+	{
+		return m_training;
+	}
+	
 	virtual void training(bool training = true) override
 	{
 		m_training = training;
