@@ -14,7 +14,7 @@ using Optimizer<T>::m_critic;
 public:
 	Nadam(Module<T> &model, Critic<T> &critic) :
 		Optimizer<T>(model, critic),
-		m_parameters(model.parameters()),
+		m_parameters(model.params()),
 		m_grads(model.grad()),
 		m_learningRate(0.001),
 		m_beta1(0.9),

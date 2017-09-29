@@ -14,7 +14,7 @@ using Optimizer<T>::m_critic;
 public:
 	SGD(Module<T> &model, Critic<T> &critic) :
 		Optimizer<T>(model, critic),
-		m_parameters(model.parameters()),
+		m_parameters(model.params()),
 		m_grads(model.grad()),
 		m_velocity(m_grads.size(0)),
 		m_learningRate(0.001),

@@ -14,7 +14,7 @@ void TestSGD()
 	Tensor<> lab = Tensor<>(10, 3).rand();
 	
 	Linear<> nn(2, 3);
-	MSE<> critic(nn.outputShape());
+	MSE<> critic;
 	
 	double errBefore = critic.forward(nn.forward(feat), lab);
 	

@@ -25,10 +25,10 @@
 // #include "nn/test_sequencer.h"
 #include "nn/test_sequential.h"
 #include "nn/test_tanh.h"
-// #include "opt/test_adam.h"
-// #include "opt/test_nadam.h"
-// #include "opt/test_rmsprop.h"
-// #include "opt/test_sgd.h"
+#include "opt/test_adam.h"
+#include "opt/test_nadam.h"
+#include "opt/test_rmsprop.h"
+#include "opt/test_sgd.h"
 #include "serialization/test_csvserializer.h"
 #include "serialization/test_jsonserializer.h"
 #include "serialization/test_serialized.h"
@@ -72,10 +72,10 @@ int main()
 		// TEST("nn/", Sequencer),
 		TEST("nn/", Sequential),
 		TEST("nn/", TanH),
-		// TEST("opt/", Adam),
-		// TEST("opt/", Nadam),
-		// TEST("opt/", RMSProp),
-		// TEST("opt/", SGD),
+		TEST("opt/", Adam),
+		TEST("opt/", Nadam),
+		TEST("opt/", RMSProp),
+		TEST("opt/", SGD),
 		TEST("serialization/", CSVSerializer),
 		TEST("serialization/", JSONSerializer),
 		TEST("serialization/", Serialized),
