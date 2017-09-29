@@ -33,6 +33,7 @@ public:
 	{
 		NNAssertEquals(input.size(0), target.size(0), "Incompatible operands!");
 		NNAssertEquals(input.dims(), 2, "Expected matrix input!");
+		NNAssertEquals(target.dims(), 2, "Expected matrix target!");
 		NNAssertEquals(target.size(1), 1, "Expected single-column target!");
 		
 		T sum = 0;

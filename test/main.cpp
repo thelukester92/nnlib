@@ -7,7 +7,7 @@
 #include "core/test_error.h"
 #include "core/test_storage.h"
 #include "core/test_tensor.h"
-// #include "critics/test_criticsequencer.h"
+#include "critics/test_criticsequencer.h"
 #include "critics/test_mse.h"
 #include "critics/test_nll.h"
 #include "math/test_math_base.h"
@@ -54,7 +54,7 @@ int main()
 		TEST("core/", Error),
 		TEST("core/", Storage),
 		TEST("core/", Tensor),
-		// TEST("critics/", CriticSequencer),
+		TEST("critics/", CriticSequencer),
 		TEST("critics/", MSE),
 		TEST("critics/", NLL),
 		TEST("math/", MathBase),

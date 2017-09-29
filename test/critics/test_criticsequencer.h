@@ -12,31 +12,14 @@ void TestCriticSequencer()
 	Tensor<> tgt = Tensor<>({  2,  4,  6,  8,  0 }).resize(shape);
 	Tensor<> sqd = Tensor<>({  1,  4,  9, 16, 25 }).resize(shape);
 	Tensor<> dif = Tensor<>({ -2, -4, -6, -8, 10 }).resize(shape);
-	MSE<> *innerCritic = new MSE<>({ 1, 1 }, false);
-	CriticSequencer<> critic(innerCritic, 5);
+	MSE<> *innerCritic = new MSE<>(false);
+	CriticSequencer<> critic(innerCritic);
 	
 	double mse = critic.forward(inp, tgt);
-	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer<>::forward with no average failed!");
-	
-	critic.inputs({ 10, 10, 10 });
-	mse = critic.safeForward(inp, tgt);
-	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer<>::safeForward failed!");
+	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer::forward with no average failed!");
 	
 	critic.backward(inp, tgt);
-	NNAssert(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).square().sum() < 1e-12, "CriticSequencer<>::backward failed!");
-	
-	critic.inputs({ 10, 10, 10 });
-	critic.safeBackward(inp, tgt);
-	NNHardAssert(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).square().sum() < 1e-12, "CriticSequencer<>::safeBackward failed!");
-	
-	critic.batch(12);
-	NNHardAssert(critic.batch() == 12, "CriticSequencer<>::batch failed!");
-	
-	critic.sequenceLength(10);
-	NNHardAssert(critic.sequenceLength() == 10, "CriticSequencer<>::sequenceLength failed!");
-	
-	critic.safeForward(inp, tgt);
-	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "CriticSequencer<>::safeForward failed!");
+	NNAssert(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).square().sum() < 1e-12, "CriticSequencer::backward failed!");
 }
 
 #endif
