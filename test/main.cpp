@@ -19,8 +19,7 @@
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
 #include "nn/test_logsoftmax.h"
-// #include "nn/test_lstm.h"
-// #include "nn/test_recurrent.h"
+#include "nn/test_lstm.h"
 #include "nn/test_relu.h"
 // #include "nn/test_sequencer.h"
 #include "nn/test_sequential.h"
@@ -66,8 +65,7 @@ int main()
 		TEST("nn/", Linear),
 		TEST("nn/", Logistic),
 		TEST("nn/", LogSoftMax),
-		// TEST("nn/", LSTM),
-		// TEST("nn/", Recurrent),
+		TEST("nn/", LSTM),
 		TEST("nn/", ReLU),
 		// TEST("nn/", Sequencer),
 		TEST("nn/", Sequential),

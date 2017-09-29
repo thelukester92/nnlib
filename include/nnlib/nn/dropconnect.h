@@ -13,7 +13,6 @@ class DropConnect : public Module<T>
 public:
 	DropConnect(Module<T> *module, T dropProbability = 0.1) :
 		m_module(module),
-		m_params(&m_module->params()),
 		m_dropProbability(dropProbability),
 		m_training(true)
 	{
@@ -23,14 +22,12 @@ public:
 	
 	DropConnect(const DropConnect &module) :
 		m_module(module.m_module->copy()),
-		m_params(&m_module->params()),
 		m_dropProbability(module.m_dropProbability),
 		m_training(module.m_training)
 	{}
 	
 	DropConnect(const Serialized &node) :
 		m_module(node.get<Module<T> *>("module")),
-		m_params(&m_module->params()),
 		m_dropProbability(node.get<T>("dropProbability")),
 		m_training(node.get<bool>("training"))
 	{}
@@ -50,7 +47,6 @@ public:
 	{
 		using std::swap;
 		swap(a.m_module, b.m_module);
-		swap(a.m_params, b.m_params);
 		swap(a.m_dropProbability, b.m_dropProbability);
 		swap(a.m_training, b.m_training);
 	}
@@ -66,7 +62,6 @@ public:
 	{
 		delete m_module;
 		m_module = module;
-		m_params = &module->params();
 	}
 	
 	/// Get the probability that an output is not dropped.
@@ -105,10 +100,10 @@ public:
 		if(m_training)
 		{
 			m_output.resize(input.shape());
-			m_mask.resize(m_params->shape());
-			m_backup.resize(m_params->shape());
-			m_backup.copy(*m_params);
-			m_params->pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
+			m_mask.resize(m_module->params().shape());
+			m_backup.resize(m_module->params().shape());
+			m_backup.copy(m_module->params());
+			m_module->params().pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
 			m_output = m_module->forward(input);
 		}
 		else
@@ -122,7 +117,7 @@ public:
 		if(m_training)
 		{
 			m_inGrad = m_module->backward(input, outGrad);
-			m_params->copy(m_backup);
+			m_module->params().copy(m_backup);
 		}
 		else
 			m_inGrad = m_module->backward(input, outGrad).scale(1 - m_dropProbability);
@@ -153,7 +148,6 @@ protected:
 	
 private:
 	Module<T> *m_module;
-	Tensor<T> *m_params;
 	Tensor<T> m_backup;
 	Tensor<T> m_mask;
 	T m_dropProbability;

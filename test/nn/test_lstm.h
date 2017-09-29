@@ -23,7 +23,7 @@ void TestLSTM()
 	
 	// LSTM layer with specific weights and bias, arbitrary
 	LSTM<> module(2, 3);
-	module.parameters().copy({
+	module.params().copy({
 		// inpGateX: 9
 		0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
 		
@@ -87,26 +87,28 @@ void TestLSTM()
 	
 	// Test forward and backward using the parameters and targets above
 	
-	Tensor<> &state = module.state();
-	Tensor<> states(inp.size(0), state.size());
+	Tensor<> states(inp.size(0), 0);
+	
 	Tensor<> outputs(3, 1, 3);
 	Tensor<> inGrads(3, 1, 2);
 	
 	for(size_t i = 0; i < inp.size(0); ++i)
 	{
 		outputs.select(0, i).copy(module.forward(inp.select(0, i)));
-		states.select(0, i).copy(state);
+		if(i == 0)
+			states.resizeDim(1, module.state().size());
+		states.select(0, i).copy(module.state());
 	}
 	
 	for(size_t i = inp.size(0); i > 0; --i)
 	{
-		state.copy(states.select(0, i - 1));
+		module.state().copy(states.select(0, i - 1));
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 	
-	NNAssert(outputs.add(out, -1).square().sum() < 1e-6, "LSTM::forward failed!");
-	NNAssert(inGrads.add(ing, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong inGrad!");
-	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-6, "LSTM::backward failed; wrong grad!");
+	NNAssertLessThan(outputs.add(out, -1).square().sum(), 1e-6, "LSTM::forward failed!");
+	NNAssertLessThan(inGrads.add(ing, -1).square().sum(), 1e-6, "LSTM::backward failed; wrong inGrad!");
+	NNAssertLessThan(module.grad().addV(prg, -1).square().sum(), 1e-6, "LSTM::backward failed; wrong grad!");
 	
 	module.gradClip(0.03);
 	module.forget();
@@ -114,56 +116,18 @@ void TestLSTM()
 	for(size_t i = 0; i < inp.size(0); ++i)
 	{
 		outputs.select(0, i).copy(module.forward(inp.select(0, i)));
-		states.select(0, i).copy(state);
+		states.select(0, i).copy(module.state());
 	}
 	
 	for(size_t i = inp.size(0); i > 0; --i)
 	{
-		state.copy(states.select(0, i - 1));
+		module.state().copy(states.select(0, i - 1));
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 	
 	NNAssert(inGrads.add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "LSTM::gradClip failed!");
 	
-	module.batch(32);
-	NNAssert(module.batch() == 32, "LSTM::batch failed!");
-	
-	bool ok = true;
-	try
-	{
-		module.add(nullptr);
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "LSTM::add failed to throw an error!");
-	
-	ok = true;
-	try
-	{
-		module.remove(0);
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "LSTM::remove failed to throw an error!");
-	
-	ok = true;
-	try
-	{
-		module.clear();
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "LSTM::clear failed to throw an error!");
-	
-	Storage<size_t> dims = { 3, 6 };
-	
-	module.inputs(dims);
-	NNAssertEquals(module.inputs(), dims, "LSTM::inputs failed!");
-	
-	module.outputs(dims);
-	NNAssertEquals(module.outputs(), dims, "LSTM::outputs failed!");
-	
-	TestModule(module);
+	TestModule("LSTM", module, inp.select(0, 0));
 }
 
 #endif

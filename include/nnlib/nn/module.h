@@ -32,8 +32,13 @@ public:
 	}
 	
 	/// Set whether this module is in training mode. Useful for modules like batchnorm that behave differently at evaluation time.
-	virtual void training(bool training = true)
-	{}
+	virtual void training(bool training = true) {}
+	
+	/// Reset the internal state of this module. Useful for recurrent modules that have additional inner state.
+	virtual void forget()
+	{
+		state().fill(0);
+	}
 	
 	// MARK: Serialization
 	

@@ -25,7 +25,6 @@
 #include "nnlib/nn/lstm.h"
 #include "nnlib/nn/map.h"
 #include "nnlib/nn/module.h"
-#include "nnlib/nn/recurrent.h"
 #include "nnlib/nn/relu.h"
 #include "nnlib/nn/sequencer.h"
 #include "nnlib/nn/sequential.h"

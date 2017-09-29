@@ -46,9 +46,11 @@ protected:
 		Tensor<T> input = Tensor<T>(sampleInput.shape(), true).rand();
 		
 		RandomEngine::seed(0);
+		m1.forget();
 		auto &o1 = m1.forward(input);
 		
 		RandomEngine::seed(0);
+		m2.forget();
 		auto &o2 = m2.forward(input);
 		
 		for(auto x = o1.begin(), y = o2.begin(), end = o1.end(); x != end; ++x, ++y)
@@ -66,9 +68,11 @@ private:
 		Tensor<T> input = Tensor<T>(sampleInput.shape(), true).rand();
 		
 		RandomEngine::seed(0);
+		module.forget();
 		auto o1 = module.forward(input).copy();
 		
 		RandomEngine::seed(0);
+		module.forget();
 		auto o2 = module.forward(input).copy();
 		
 		for(auto x = o1.begin(), y = o2.begin(), end = o1.end(); x != end; ++x, ++y)

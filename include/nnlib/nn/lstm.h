@@ -1,9 +1,6 @@
 #ifndef NN_LSTM_H
 #define NN_LSTM_H
 
-#include "concat.h"
-#include "container.h"
-#include "sequential.h"
 #include "linear.h"
 #include "logistic.h"
 #include "tanh.h"
@@ -11,114 +8,34 @@
 namespace nnlib
 {
 
-/// LSTM recurrent module.
+/// \brief Long short-term memory recurrent module.
+///
+/// This implementation makes a strong assumption that inputs and outputs are matrices.
 template <typename T = double>
-class LSTM : public Container<T>
+class LSTM : public Module<T>
 {
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	using Container<T>::batch;
-	using Container<T>::components;
-	using Container<T>::component;
-	
-	LSTM(size_t inps, size_t outs, size_t bats = 1) :
-		m_inpGateX(new Linear<T>(inps, outs, bats)),
-		m_inpGateY(new Linear<T>(outs, outs, bats)),
-		m_inpGateH(new Linear<T>(outs, outs, bats)),
-		m_inpGate(new Logistic<T>(outs, bats)),
-		m_fgtGateX(new Linear<T>(inps, outs, bats)),
-		m_fgtGateY(new Linear<T>(outs, outs, bats)),
-		m_fgtGateH(new Linear<T>(outs, outs, bats)),
-		m_fgtGate(new Logistic<T>(outs, bats)),
-		m_inpModX(new Linear<T>(inps, outs, bats)),
-		m_inpModY(new Linear<T>(outs, outs, bats)),
-		m_inpMod(new TanH<T>(outs, bats)),
-		m_outGateX(new Linear<T>(inps, outs, bats)),
-		m_outGateY(new Linear<T>(outs, outs, bats)),
-		m_outGateH(new Linear<T>(outs, outs, bats)),
-		m_outGate(new Logistic<T>(outs, bats)),
-		m_outMod(new TanH<T>(outs, bats)),
-		m_inGrad(bats, inps),
-		m_inpAdd(bats, outs),
-		m_fgtAdd(bats, outs),
-		m_outAdd(bats, outs),
-		m_outGrad(bats, outs),
-		m_state(bats, outs),
-		m_prevState(bats, outs),
-		m_prevOutput(bats, outs),
-		m_stateGrad(bats, outs),
-		m_curStateGrad(bats, outs),
-		m_gradBuffer(bats, outs),
+	LSTM(size_t inps, size_t outs) :
+		m_inpGateX(new Linear<T>(inps, outs)),
+		m_inpGateY(new Linear<T>(outs, outs)),
+		m_inpGateH(new Linear<T>(outs, outs)),
+		m_inpGate(new Logistic<T>()),
+		m_fgtGateX(new Linear<T>(inps, outs)),
+		m_fgtGateY(new Linear<T>(outs, outs)),
+		m_fgtGateH(new Linear<T>(outs, outs)),
+		m_fgtGate(new Logistic<T>()),
+		m_inpModX(new Linear<T>(inps, outs)),
+		m_inpModY(new Linear<T>(outs, outs)),
+		m_inpMod(new TanH<T>()),
+		m_outGateX(new Linear<T>(inps, outs)),
+		m_outGateY(new Linear<T>(outs, outs)),
+		m_outGateH(new Linear<T>(outs, outs)),
+		m_outGate(new Logistic<T>()),
+		m_outMod(new TanH<T>()),
 		m_resetGrad(true),
-		m_clip(0)
+		m_clip(0),
+		m_outs(outs)
 	{
-		Container<T>::add(m_inpGateX);
-		Container<T>::add(m_inpGateY);
-		Container<T>::add(m_inpGateH);
-		Container<T>::add(m_inpGate);
-		Container<T>::add(m_fgtGateX);
-		Container<T>::add(m_fgtGateY);
-		Container<T>::add(m_fgtGateH);
-		Container<T>::add(m_fgtGate);
-		Container<T>::add(m_inpModX);
-		Container<T>::add(m_inpModY);
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_outGateX);
-		Container<T>::add(m_outGateY);
-		Container<T>::add(m_outGateH);
-		Container<T>::add(m_outGate);
-		Container<T>::add(m_outMod);
-		forget();
-	}
-	
-	LSTM(size_t outs = 0) :
-		m_inpGateX(new Linear<T>(0, outs, 1)),
-		m_inpGateY(new Linear<T>(outs, outs, 1)),
-		m_inpGateH(new Linear<T>(outs, outs, 1)),
-		m_inpGate(new Logistic<T>(outs, 1)),
-		m_fgtGateX(new Linear<T>(0, outs, 1)),
-		m_fgtGateY(new Linear<T>(outs, outs, 1)),
-		m_fgtGateH(new Linear<T>(outs, outs, 1)),
-		m_fgtGate(new Logistic<T>(outs, 1)),
-		m_inpModX(new Linear<T>(0, outs, 1)),
-		m_inpModY(new Linear<T>(outs, outs, 1)),
-		m_inpMod(new TanH<T>(outs, 1)),
-		m_outGateX(new Linear<T>(0, outs, 1)),
-		m_outGateY(new Linear<T>(outs, outs, 1)),
-		m_outGateH(new Linear<T>(outs, outs, 1)),
-		m_outGate(new Logistic<T>(outs, 1)),
-		m_outMod(new TanH<T>(outs, 1)),
-		m_inGrad(1, 0),
-		m_inpAdd(1, outs),
-		m_fgtAdd(1, outs),
-		m_outAdd(1, outs),
-		m_outGrad(1, outs),
-		m_state(1, outs),
-		m_prevState(1, outs),
-		m_prevOutput(1, outs),
-		m_stateGrad(1, outs),
-		m_curStateGrad(1, outs),
-		m_gradBuffer(1, outs),
-		m_resetGrad(true),
-		m_clip(0)
-	{
-		Container<T>::add(m_inpGateX);
-		Container<T>::add(m_inpGateY);
-		Container<T>::add(m_inpGateH);
-		Container<T>::add(m_inpGate);
-		Container<T>::add(m_fgtGateX);
-		Container<T>::add(m_fgtGateY);
-		Container<T>::add(m_fgtGateH);
-		Container<T>::add(m_fgtGate);
-		Container<T>::add(m_inpModX);
-		Container<T>::add(m_inpModY);
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_outGateX);
-		Container<T>::add(m_outGateY);
-		Container<T>::add(m_outGateH);
-		Container<T>::add(m_outGate);
-		Container<T>::add(m_outMod);
 		forget();
 	}
 	
@@ -139,89 +56,81 @@ public:
 		m_outGateH(module.m_outGateH->copy()),
 		m_outGate(module.m_outGate->copy()),
 		m_outMod(module.m_outMod->copy()),
-		m_inGrad(module.m_inGrad.copy()),
-		m_inpAdd(module.m_inpAdd.copy()),
-		m_fgtAdd(module.m_fgtAdd.copy()),
-		m_outAdd(module.m_outAdd.copy()),
-		m_outGrad(module.m_outGrad.copy()),
-		m_state(module.m_state.copy()),
-		m_prevState(module.m_prevState.copy()),
-		m_prevOutput(module.m_prevOutput.copy()),
-		m_stateGrad(module.m_stateGrad.copy()),
-		m_curStateGrad(module.m_curStateGrad.copy()),
-		m_gradBuffer(module.m_gradBuffer.copy()),
 		m_resetGrad(module.m_resetGrad),
-		m_clip(module.m_clip)
+		m_clip(module.m_clip),
+		m_outs(module.m_outs)
+	{}
+	
+	LSTM(const Serialized &node) :
+		m_inpGateX(node.get<Module<T> *>("inpGateX")),
+		m_inpGateY(node.get<Module<T> *>("inpGateY")),
+		m_inpGateH(node.get<Module<T> *>("inpGateH")),
+		m_inpGate(node.get<Module<T> *>("inpGate")),
+		m_fgtGateX(node.get<Module<T> *>("fgtGateX")),
+		m_fgtGateY(node.get<Module<T> *>("fgtGateY")),
+		m_fgtGateH(node.get<Module<T> *>("fgtGateH")),
+		m_fgtGate(node.get<Module<T> *>("fgtGate")),
+		m_inpModX(node.get<Module<T> *>("inpModX")),
+		m_inpModY(node.get<Module<T> *>("inpModY")),
+		m_inpMod(node.get<Module<T> *>("inpMod")),
+		m_outGateX(node.get<Module<T> *>("outGateX")),
+		m_outGateY(node.get<Module<T> *>("outGateY")),
+		m_outGateH(node.get<Module<T> *>("outGateH")),
+		m_outGate(node.get<Module<T> *>("outGate")),
+		m_outMod(node.get<Module<T> *>("outMod")),
+		m_resetGrad(node.get<bool>("resetGrad")),
+		m_clip(node.get<T>("clip")),
+		m_outs(node.get<size_t>("outs"))
+	{}
+	
+	virtual ~LSTM()
 	{
-		Container<T>::add(m_inpGateX);
-		Container<T>::add(m_inpGateY);
-		Container<T>::add(m_inpGateH);
-		Container<T>::add(m_inpGate);
-		Container<T>::add(m_fgtGateX);
-		Container<T>::add(m_fgtGateY);
-		Container<T>::add(m_fgtGateH);
-		Container<T>::add(m_fgtGate);
-		Container<T>::add(m_inpModX);
-		Container<T>::add(m_inpModY);
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_outGateX);
-		Container<T>::add(m_outGateY);
-		Container<T>::add(m_outGateH);
-		Container<T>::add(m_outGate);
-		Container<T>::add(m_outMod);
+		delete m_inpGateX;
+		delete m_inpGateY;
+		delete m_inpGateH;
+		delete m_inpGate;
+		delete m_fgtGateX;
+		delete m_fgtGateY;
+		delete m_fgtGateH;
+		delete m_fgtGate;
+		delete m_inpModX;
+		delete m_inpModY;
+		delete m_inpMod;
+		delete m_outGateX;
+		delete m_outGateY;
+		delete m_outGateH;
+		delete m_outGate;
+		delete m_outMod;
 	}
 	
-	LSTM &operator=(const LSTM &module)
+	LSTM &operator=(LSTM module)
 	{
-		Container<T>::clear();
-		m_inpGateX	= module.m_inpGateX->copy();
-		m_inpGateY	= module.m_inpGateY->copy();
-		m_inpGateH 	= module.m_inpGateH->copy();
-		m_inpGate	= module.m_inpGate->copy();
-		m_fgtGateX	= module.m_fgtGateX->copy();
-		m_fgtGateY	= module.m_fgtGateY->copy();
-		m_fgtGateH	= module.m_fgtGateH->copy();
-		m_fgtGate	= module.m_fgtGate->copy();
-		m_inpModX	= module.m_inpModX->copy();
-		m_inpModY	= module.m_inpModY->copy();
-		m_inpMod	= module.m_inpMod->copy();
-		m_outGateX	= module.m_outGateX->copy();
-		m_outGateY	= module.m_outGateY->copy();
-		m_outGateH	= module.m_outGateH->copy();
-		m_outGate	= module.m_outGate->copy();
-		m_outMod	= module.m_outMod->copy();
-		
-		Container<T>::add(m_inpGateX);
-		Container<T>::add(m_inpGateY);
-		Container<T>::add(m_inpGateH);
-		Container<T>::add(m_inpGate);
-		Container<T>::add(m_fgtGateX);
-		Container<T>::add(m_fgtGateY);
-		Container<T>::add(m_fgtGateH);
-		Container<T>::add(m_fgtGate);
-		Container<T>::add(m_inpModX);
-		Container<T>::add(m_inpModY);
-		Container<T>::add(m_inpMod);
-		Container<T>::add(m_outGateX);
-		Container<T>::add(m_outGateY);
-		Container<T>::add(m_outGateH);
-		Container<T>::add(m_outGate);
-		Container<T>::add(m_outMod);
-		
-		m_inGrad		= module.m_inGrad.copy();
-		m_inpAdd		= module.m_inpAdd.copy();
-		m_fgtAdd		= module.m_fgtAdd.copy();
-		m_outAdd		= module.m_outAdd.copy();
-		m_outGrad		= module.m_outGrad.copy();
-		m_state			= module.m_state.copy();
-		m_prevState		= module.m_prevState.copy();
-		m_prevOutput	= module.m_prevOutput.copy();
-		m_stateGrad		= module.m_stateGrad.copy();
-		m_curStateGrad	= module.m_curStateGrad.copy();
-		m_gradBuffer	= module.m_gradBuffer.copy();
-		m_resetGrad		= module.m_resetGrad;
-		m_clip			= module.m_clip;
+		swap(*this, module);
 		return *this;
+	}
+	
+	friend void swap(LSTM &a, LSTM &b)
+	{
+		using std::swap;
+		swap(a.m_inpGateX, b.m_inpGateX);
+		swap(a.m_inpGateY, b.m_inpGateY);
+		swap(a.m_inpGateH, b.m_inpGateH);
+		swap(a.m_inpGate, b.m_inpGate);
+		swap(a.m_fgtGateX, b.m_fgtGateX);
+		swap(a.m_fgtGateY, b.m_fgtGateY);
+		swap(a.m_fgtGateH, b.m_fgtGateH);
+		swap(a.m_fgtGate, b.m_fgtGate);
+		swap(a.m_inpModX, b.m_inpModX);
+		swap(a.m_inpModY, b.m_inpModY);
+		swap(a.m_inpMod, b.m_inpMod);
+		swap(a.m_outGateX, b.m_outGateX);
+		swap(a.m_outGateY, b.m_outGateY);
+		swap(a.m_outGateH, b.m_outGateH);
+		swap(a.m_outGate, b.m_outGate);
+		swap(a.m_outMod, b.m_outMod);
+		swap(a.m_resetGrad, b.m_resetGrad);
+		swap(a.m_clip, b.m_clip);
+		swap(a.m_outs, b.m_outs);
 	}
 	
 	LSTM &gradClip(T clip)
@@ -235,34 +144,48 @@ public:
 		return m_clip;
 	}
 	
-	// MARK: Container methods
-	
-	/// Cannot add a component to this container.
-	virtual LSTM &add(Module<T> *) override
+	virtual void forget() override
 	{
-		throw Error("Cannot add components to a LSTM module!");
+		Module<T>::forget();
+		m_outMod->output().fill(0);
+		m_resetGrad = true;
 	}
 	
-	/// Cannot remove a component from this container.
-	virtual Module<T> *remove(size_t) override
+	// MARK: Serialization
+	
+	virtual void save(Serialized &node) const override
 	{
-		throw Error("Cannot remove components from a LSTM module!");
+		node.set("inpGateX", m_inpGateX);
+		node.set("inpGateY", m_inpGateY);
+		node.set("inpGateH", m_inpGateH);
+		node.set("inpGate", m_inpGate);
+		node.set("fgtGateX", m_fgtGateX);
+		node.set("fgtGateY", m_fgtGateY);
+		node.set("fgtGateH", m_fgtGateH);
+		node.set("fgtGate", m_fgtGate);
+		node.set("inpModX", m_inpModX);
+		node.set("inpModY", m_inpModY);
+		node.set("inpMod", m_inpMod);
+		node.set("outGateX", m_outGateX);
+		node.set("outGateY", m_outGateY);
+		node.set("outGateH", m_outGateH);
+		node.set("outGate", m_outGate);
+		node.set("outMod", m_outMod);
+		node.set("resetGrad", m_resetGrad);
+		node.set("clip", m_clip);
+		node.set("outs", m_outs);
 	}
 	
-	/// Cannot remove a component from this container.
-	virtual LSTM &clear() override
-	{
-		throw Error("Cannot remove components from a LSTM module!");
-	}
+	// MARK: Computation
 	
-	// MARK: Module methods
-	
-	/// Forward propagate input, returning output.
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
-		
+		m_state.resize(input.size(0), m_outs);
+		m_prevState.resize(input.size(0), m_outs);
 		m_prevState.copy(m_state);
+		
+		m_outMod->output().resize(input.size(0), m_outs);
+		m_prevOutput.resize(input.size(0), m_outs);
 		m_prevOutput.copy(m_outMod->output());
 		
 		// input gate
@@ -283,7 +206,9 @@ public:
 		m_inpMod->forward(m_inpModX->output());
 		
 		// update memory cell (hidden state)
+		m_inpAdd.resize(m_inpGate->output().shape());
 		m_inpAdd.copy(m_inpGate->output()).pointwiseProduct(m_inpMod->output());
+		m_fgtAdd.resize(m_fgtGate->output().shape());
 		m_fgtAdd.copy(m_fgtGate->output()).pointwiseProduct(m_state);
 		m_state.copy(m_inpAdd).addM(m_fgtAdd);
 		
@@ -292,17 +217,21 @@ public:
 		m_outGateX->output().addM(m_outGateY->forward(m_prevOutput));
 		m_outGateX->output().addM(m_outGateH->forward(m_state));
 		m_outGate->forward(m_outGateX->output());
+		m_outAdd.resize(m_outGate->output().shape());
 		m_outAdd.copy(m_outGate->output()).pointwiseProduct(m_state);
 		
 		// final output
-		return m_outMod->forward(m_outAdd);
+		return m_output = m_outMod->forward(m_outAdd);
 	}
 	
-	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
-		NNAssertEquals(outGrad.shape(), m_outMod->outputs(), "Incompatible output!");
+		NNAssertEquals(input.size(0), outGrad.size(0), "Incompatible input and outGrad!");
+		m_outGrad.resize(input.size(0), m_outs);
+		m_stateGrad.resize(input.size(0), m_outs);
+		m_curStateGrad.resize(input.size(0), m_outs);
+		m_gradBuffer.resize(input.size(0), m_outs);
+		m_inGrad.resize(input.shape());
 		
 		if(m_resetGrad)
 		{
@@ -356,204 +285,77 @@ public:
 		return m_inGrad;
 	}
 	
-	/// Cached output.
-	virtual Tensor<T> &output() override
+	// MARK: Buffers
+	
+	virtual Storage<Tensor<T> *> paramsList() override
 	{
-		return m_outMod->output();
+		Storage<Tensor<T> *> list;
+		list.append(m_inpGateX->paramsList());
+		list.append(m_inpGateY->paramsList());
+		list.append(m_inpGateH->paramsList());
+		list.append(m_inpGate->paramsList());
+		list.append(m_fgtGateX->paramsList());
+		list.append(m_fgtGateY->paramsList());
+		list.append(m_fgtGateH->paramsList());
+		list.append(m_fgtGate->paramsList());
+		list.append(m_inpModX->paramsList());
+		list.append(m_inpModY->paramsList());
+		list.append(m_inpMod->paramsList());
+		list.append(m_outGateX->paramsList());
+		list.append(m_outGateY->paramsList());
+		list.append(m_outGateH->paramsList());
+		list.append(m_outGate->paramsList());
+		list.append(m_outMod->paramsList());
+		return list;
 	}
 	
-	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
+	virtual Storage<Tensor<T> *> gradList() override
 	{
-		return m_inGrad;
+		Storage<Tensor<T> *> list;
+		list.append(m_inpGateX->gradList());
+		list.append(m_inpGateY->gradList());
+		list.append(m_inpGateH->gradList());
+		list.append(m_inpGate->gradList());
+		list.append(m_fgtGateX->gradList());
+		list.append(m_fgtGateY->gradList());
+		list.append(m_fgtGateH->gradList());
+		list.append(m_fgtGate->gradList());
+		list.append(m_inpModX->gradList());
+		list.append(m_inpModY->gradList());
+		list.append(m_inpMod->gradList());
+		list.append(m_outGateX->gradList());
+		list.append(m_outGateY->gradList());
+		list.append(m_outGateH->gradList());
+		list.append(m_outGate->gradList());
+		list.append(m_outMod->gradList());
+		return list;
 	}
 	
-	/// Set the input shape of this module, including batch.
-	virtual LSTM &inputs(const Storage<size_t> &dims) override
-	{
-		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
-		
-		m_inpGateX->inputs(dims);
-		m_fgtGateX->inputs(dims);
-		m_inpModX->inputs(dims);
-		m_outGateX->inputs(dims);
-		m_inGrad.resize(dims);
-		
-		return batch(dims[0]);
-	}
-	
-	/// Set the output shape of this module, including batch.
-	virtual LSTM &outputs(const Storage<size_t> &dims) override
-	{
-		NNAssertEquals(dims.size(), 2, "Expected matrix output!");
-		
-		m_inpGateX->outputs(dims);
-		m_inpGateY->inputs(dims);
-		m_inpGateY->outputs(dims);
-		m_inpGateH->inputs(dims);
-		m_inpGateH->outputs(dims);
-		m_inpGate->outputs(dims);
-		m_fgtGateX->outputs(dims);
-		m_fgtGateY->inputs(dims);
-		m_fgtGateY->outputs(dims);
-		m_fgtGateH->inputs(dims);
-		m_fgtGateH->outputs(dims);
-		m_fgtGate->outputs(dims);
-		m_inpModX->outputs(dims);
-		m_inpModY->inputs(dims);
-		m_inpModY->outputs(dims);
-		m_inpMod->outputs(dims);
-		m_outGateX->outputs(dims);
-		m_outGateY->inputs(dims);
-		m_outGateY->outputs(dims);
-		m_outGateH->inputs(dims);
-		m_outGateH->outputs(dims);
-		m_outGate->outputs(dims);
-		m_outMod->outputs(dims);
-		
-		m_inpAdd.resize(dims);
-		m_fgtAdd.resize(dims);
-		m_outAdd.resize(dims);
-		m_outGrad.resize(dims);
-		m_state.resize(dims);
-		m_prevState.resize(dims);
-		m_prevOutput.resize(dims);
-		m_stateGrad.resize(dims);
-		m_curStateGrad.resize(dims);
-		m_gradBuffer.resize(dims);
-		
-		return batch(dims[0]);
-	}
-	
-	/// Set the batch size of this module.
-	virtual LSTM &batch(size_t bats) override
-	{
-		Container<T>::batch(bats);
-		
-		m_inGrad.resizeDim(0, bats);
-		m_inpAdd.resizeDim(0, bats);
-		m_fgtAdd.resizeDim(0, bats);
-		m_outAdd.resizeDim(0, bats);
-		m_outGrad.resizeDim(0, bats);
-		m_state.resizeDim(0, bats);
-		m_prevState.resizeDim(0, bats);
-		m_prevOutput.resizeDim(0, bats);
-		m_stateGrad.resizeDim(0, bats);
-		m_curStateGrad.resizeDim(0, bats);
-		m_gradBuffer.resizeDim(0, bats);
-		
-		return *this;
-	}
-	
-	/// A vector of tensors filled with (views of) this module's internal state.
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		Storage<Tensor<T> *> states = Container<T>::stateList();
-		states.push_back(&m_state);
-		states.push_back(&m_prevState);
-		states.push_back(&m_prevOutput);
-		states.push_back(&m_outAdd);
-		return states;
+		Storage<Tensor<T> *> list;
+		list.append(m_inpGateX->stateList());
+		list.append(m_inpGateY->stateList());
+		list.append(m_inpGateH->stateList());
+		list.append(m_inpGate->stateList());
+		list.append(m_fgtGateX->stateList());
+		list.append(m_fgtGateY->stateList());
+		list.append(m_fgtGateH->stateList());
+		list.append(m_fgtGate->stateList());
+		list.append(m_inpModX->stateList());
+		list.append(m_inpModY->stateList());
+		list.append(m_inpMod->stateList());
+		list.append(m_outGateX->stateList());
+		list.append(m_outGateY->stateList());
+		list.append(m_outGateH->stateList());
+		list.append(m_outGate->stateList());
+		list.append(m_outMod->stateList());
+		return list.append({ &m_state, &m_prevState, &m_prevOutput, &m_outAdd });
 	}
 	
-	/// Reset the internal state of this module.
-	virtual LSTM &forget() override
-	{
-		m_outMod->output().fill(0);
-		m_state.fill(0);
-		m_resetGrad = true;
-		return *this;
-	}
-	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const override
-	{
-		node.set("inputs", inputs());
-		node.set("outputs", outputs());
-		node.set("state", m_state);
-		node.set("output", m_outMod->output());
-		node.set("clip", m_clip);
-		node.set("components", this->m_components);
-	}
-	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) override
-	{
-		this->resize(node.get<Storage<size_t>>("inputs"), node.get<Storage<size_t>>("outputs"));
-		node.get("state", m_state);
-		node.get("clip", m_clip);
-		
-		Container<T>::clear();
-		node.get("components", this->m_components);
-		
-		m_inpGateX = component(0);
-		m_inpGateY = component(1);
-		m_inpGateH = component(2);
-		m_inpGate = component(3);
-		m_fgtGateX = component(4);
-		m_fgtGateY = component(5);
-		m_fgtGateH = component(6);
-		m_fgtGate = component(7);
-		m_inpModX = component(8);
-		m_inpModY = component(9);
-		m_inpMod = component(10);
-		m_outGateX = component(11);
-		m_outGateY = component(12);
-		m_outGateH = component(13);
-		m_outGate = component(14);
-		m_outMod = component(15);
-		
-		m_outMod->output().copy(node.get<Tensor<T>>("output"));
-	}
-	
-	/*
-	
-	/// \brief Read from an archive.
-	///
-	/// \param ar The archive from which to read.
-	template <typename Archive>
-	void load(Archive &ar)
-	{
-		Container<T>::clear();
-		Tensor<T> output;
-		ar(this->m_components, m_state, output, m_clip);
-		NNHardAssertEquals(components(), 16, "Incompatible LSTM components!");
-		
-		m_inpGateX = component(0);
-		m_inpGateY = component(1);
-		m_inpGateH = component(2);
-		m_inpGate = component(3);
-		m_fgtGateX = component(4);
-		m_fgtGateY = component(5);
-		m_fgtGateH = component(6);
-		m_fgtGate = component(7);
-		m_inpModX = component(8);
-		m_inpModY = component(9);
-		m_inpMod = component(10);
-		m_outGateX = component(11);
-		m_outGateY = component(12);
-		m_outGateH = component(13);
-		m_outGate = component(14);
-		m_outMod = component(15);
-		
-		m_outMod->output().copy(output);
-		
-		size_t bats = m_inpGateX->inputs()[0], inps = m_inpGateX->inputs()[1], outs = m_inpGateX->outputs()[1];
-		NNHardAssertEquals(m_state.shape(), Storage<size_t>({ bats, outs }), "Incompatible LSTM state!");
-		
-		m_inGrad.resize(bats, inps);
-		m_inpAdd.resize(bats, outs);
-		m_fgtAdd.resize(bats, outs);
-		m_outAdd.resize(bats, outs);
-		m_outGrad.resize(bats, outs);
-		m_prevState.resize(bats, outs);
-		m_prevOutput.resize(bats, outs);
-		m_stateGrad.resize(bats, outs);
-		m_curStateGrad.resize(bats, outs);
-		m_gradBuffer.resize(bats, outs);
-		m_resetGrad = true;
-	}
-	*/
+protected:
+	using Module<T>::m_output;
+	using Module<T>::m_inGrad;
 	
 private:
 	Module<T> *m_inpGateX;
@@ -573,7 +375,6 @@ private:
 	Module<T> *m_outGate;
 	Module<T> *m_outMod;
 	
-	Tensor<T> m_inGrad;
 	Tensor<T> m_inpAdd;
 	Tensor<T> m_fgtAdd;
 	Tensor<T> m_outAdd;
@@ -588,6 +389,7 @@ private:
 	
 	bool m_resetGrad;
 	T m_clip;
+	size_t m_outs;
 };
 
 }
