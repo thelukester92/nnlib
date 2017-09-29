@@ -17,7 +17,7 @@ void TestDropout()
 	double p = 0.75, sum1 = 0, sum2 = 0;
 	size_t c = 100;
 	
-	Dropout<> module(p, 25, 4);
+	Dropout<> module(p);
 	NNAssertEquals(module.dropProbability(), p, "Dropout::Dropout failed!");
 	
 	for(size_t i = 0; i < c; ++i)
@@ -41,34 +41,10 @@ void TestDropout()
 	NNAssertAlmostEquals(sum1, c * (1 - p), 2, "Dropout::forward (inference) failed! (Note: this may be due to the random process).");
 	NNAssertEquals(sum1, sum2, "Dropout::backward (inference) failed!");
 	
-	module.batch(32);
-	NNAssert(module.batch() == 32, "Dropout::batch failed!");
-	
-	module.inputs({ 3, 4 });
-	NNAssert(module.inputs() == module.outputs(), "Dropout::inputs failed to resize outputs!");
-	
-	module.outputs({ 12, 3 });
-	NNAssert(module.inputs() == module.outputs(), "Dropout::outputs failed to resize inputs!");
-	
-	bool ok = true;
-	try
-	{
-		module.resize({ 3, 4 }, { 4, 3 });
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "Dropout::resize allowed unequal inputs and outputs!");
-	
-	module.resize({ 3, 4 }, { 3, 4 });
-	NNAssertEquals(module.inputs(), module.outputs(), "Dropout::resize failed!");
-	
-	module.safeResize({ 12, 4 }, { 12, 4 });
-	NNAssertEquals(module.inputs(), module.outputs(), "Dropout::safeResize failed!");
-	
 	module.state().fill(0);
 	NNAssertAlmostEquals(module.output().sum(), 0, 1e-12, "Dropout::state failed!");
 	
-	TestModule(module);
+	TestModule("Dropout", module, ones);
 }
 
 #endif

@@ -15,7 +15,7 @@
 #include "nn/test_batchnorm.h"
 #include "nn/test_concat.h"
 // #include "nn/test_dropconnect.h"
-// #include "nn/test_dropout.h"
+#include "nn/test_dropout.h"
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
 #include "nn/test_logsoftmax.h"
@@ -62,7 +62,7 @@ int main()
 		TEST("nn/", BatchNorm),
 		TEST("nn/", Concat),
 		// TEST("nn/", DropConnect),
-		// TEST("nn/", Dropout),
+		TEST("nn/", Dropout),
 		TEST("nn/", Linear),
 		TEST("nn/", Logistic),
 		TEST("nn/", LogSoftMax),

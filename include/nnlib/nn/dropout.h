@@ -9,34 +9,27 @@ namespace nnlib
 template <typename T = double>
 class Dropout : public Module<T>
 {
-	using Module<T>::m_training;
 public:
-	using Module<T>::inputs;
-	using Module<T>::outputs;
-	
-	Dropout(T dropProbability = 0.1, size_t inps = 0, size_t bats = 1) :
-		m_inGrad(bats, inps),
-		m_output(bats, inps),
-		m_mask(bats, inps),
-		m_dropProbability(dropProbability)
+	Dropout(T dropProbability = 0.1) :
+		m_dropProbability(dropProbability),
+		m_training(true)
 	{
 		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
 		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
 	}
 	
 	Dropout(const Dropout &module) :
-		m_inGrad(module.m_inGrad.copy()),
-		m_output(module.m_output.copy()),
-		m_mask(module.m_mask.copy()),
-		m_dropProbability(module.m_dropProbability)
-	{
-		m_training = module.m_training;
-	}
+		m_dropProbability(module.m_dropProbability),
+		m_training(module.m_training)
+	{}
+	
+	Dropout(const Serialized &node) :
+		m_dropProbability(node.get<T>("dropProbability")),
+		m_training(node.get<bool>("training"))
+	{}
 	
 	Dropout &operator=(const Dropout &module)
 	{
-		m_inGrad			= module.m_inGrad.copy();
-		m_output			= module.m_output.copy();
 		m_dropProbability	= module.m_dropProbability;
 		m_training			= module.m_training;
 		return *this;
@@ -57,10 +50,26 @@ public:
 		return *this;
 	}
 	
-	/// Forward propagate input, returning output.
+	virtual void training(bool training = true) override
+	{
+		m_training = training;
+	}
+	
+	// MARK: Serialization
+	
+	virtual void save(Serialized &node) const override
+	{
+		node.set("dropProbability", m_dropProbability);
+		node.set("training", m_training);
+	}
+	
+	// MARK: Computation
+	
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
+		m_mask.resize(input.shape());
+		m_output.resize(input.shape());
+		
 		if(m_training)
 			return m_output.copy(input).pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
 		else
@@ -70,90 +79,31 @@ public:
 	/// Backward propagate input and output gradient, returning input gradient.
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
 	{
-		NNAssertEquals(input.shape(), m_inGrad.shape(), "Incompatible input!");
-		NNAssertEquals(outGrad.shape(), m_output.shape(), "Incompatible output!");
+		NNAssertEquals(input.shape(), m_mask.shape(), "Dropout::forward must be called first!");
+		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
+		m_inGrad.resize(input.shape());
+		
 		if(m_training)
 			return m_inGrad.copy(outGrad).pointwiseProduct(m_mask);
 		else
 			return m_inGrad.copy(outGrad).scale(1 - m_dropProbability);
 	}
 	
-	/// Cached output.
-	virtual Tensor<T> &output() override
-	{
-		return m_output;
-	}
+	// MARK: Buffers
 	
-	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
-	{
-		return m_inGrad;
-	}
-	
-	/// Set the input and output shapes of this module.
-	/// In dropout, input shape is always equal to output shape.
-	virtual Dropout &resize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
-	{
-		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		return inputs(outs);
-	}
-	
-	/// Safely (never reset weights) set the input and output shapes of this module.
-	/// In dropout, input shape is always equal to output shape.
-	virtual Dropout &safeResize(const Storage<size_t> &inps, const Storage<size_t> &outs) override
-	{
-		NNAssertEquals(inps, outs, "Expected input and output sizes to be equal!");
-		this->safeInputs(inps);
-		return *this;
-	}
-	
-	/// Set the input shape of this module, including batch.
-	/// In dropout, input shape is always equal to output shape.
-	virtual Dropout &inputs(const Storage<size_t> &dims) override
-	{
-		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
-		Module<T>::inputs(dims);
-		Module<T>::outputs(dims);
-		m_mask.resize(dims);
-		return *this;
-	}
-	
-	/// Set the output shape of this module, including batch.
-	/// In dropout, input shape is always equal to output shape.
-	virtual Dropout &outputs(const Storage<size_t> &dims) override
-	{
-		return inputs(dims);
-	}
-	
-	/// A vector of tensors filled with (views of) this module's internal state.
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		Storage<Tensor<T> *> states = Module<T>::stateList();
-		states.push_back(&m_mask);
-		return states;
+		return Module<T>::stateList().push_back(&m_mask);
 	}
 	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const override
-	{
-		node.set("shape", this->inputs());
-		node.set("dropProbability", m_dropProbability);
-		node.set("training", m_training);
-	}
-	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) override
-	{
-		inputs(node.get<Storage<size_t>>("shape"));
-		node.get("dropProbability", m_dropProbability);
-		node.get("training", m_training);
-	}
+protected:
+	using Module<T>::m_output;
+	using Module<T>::m_inGrad;
 	
 private:
-	Tensor<T> m_inGrad;		///< Input gradient buffer.
-	Tensor<T> m_output;		///< Output buffer.
-	Tensor<T> m_mask;		///< Randomly-generated mask.
-	T m_dropProbability;	///< The probability that an output is dropped.
+	Tensor<T> m_mask;
+	T m_dropProbability;
+	bool m_training;
 };
 
 }
