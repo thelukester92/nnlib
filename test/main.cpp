@@ -18,7 +18,7 @@
 // #include "nn/test_dropout.h"
 #include "nn/test_linear.h"
 #include "nn/test_logistic.h"
-// #include "nn/test_logsoftmax.h"
+#include "nn/test_logsoftmax.h"
 // #include "nn/test_lstm.h"
 // #include "nn/test_recurrent.h"
 #include "nn/test_relu.h"
@@ -65,7 +65,7 @@ int main()
 		// TEST("nn/", Dropout),
 		TEST("nn/", Linear),
 		TEST("nn/", Logistic),
-		// TEST("nn/", LogSoftMax),
+		TEST("nn/", LogSoftMax),
 		// TEST("nn/", LSTM),
 		// TEST("nn/", Recurrent),
 		TEST("nn/", ReLU),

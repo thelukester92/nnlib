@@ -21,35 +21,14 @@ void TestLogSoftMax()
 	
 	// Begin test
 	
-	LogSoftMax<> map(3, 1);
+	LogSoftMax<> map;
 	map.forward(inp);
 	map.backward(inp, grd);
 	
 	NNAssert(map.output().addM(out, -1).square().sum() < 1e-9, "LogSoftMax::forward failed!");
 	NNAssert(map.inGrad().addM(ing, -1).square().sum() < 1e-9, "LogSoftMax::backward failed!");
 	
-	map.inputs({ 3, 4 });
-	NNAssert(map.inputs() == map.outputs(), "LogSoftMax::inputs failed to resize outputs!");
-	
-	map.outputs({ 12, 3 });
-	NNAssert(map.inputs() == map.outputs(), "LogSoftMax::outputs failed to resize inputs!");
-	
-	bool ok = true;
-	try
-	{
-		map.resize({ 3, 4 }, { 4, 3 });
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "LogSoftMax::resize allowed unequal inputs and outputs!");
-	
-	map.resize({ 3, 4 }, { 3, 4 });
-	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::resize failed!");
-	
-	map.safeResize({ 12, 4 }, { 12, 4 });
-	NNAssertEquals(map.inputs(), map.outputs(), "LogSoftMax::safeResize failed!");
-	
-	TestModule(map);
+	TestModule("LogSoftMax", map, inp);
 }
 
 #endif

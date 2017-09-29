@@ -6,7 +6,9 @@
 namespace nnlib
 {
 
-/// Batch normalization.
+/// \brief Batch normalization.
+///
+/// Works only on 2D tensors.
 template <typename T = double>
 class BatchNorm : public Module<T>
 {
