@@ -650,7 +650,7 @@ public:
 	
 	/// Get a non-numeric value from an object.
 	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && !std::is_same<T, Serialized *>::value, const T &>::type get(const std::string &key) const
+	typename std::enable_if<!std::is_arithmetic<T>::value && !std::is_pointer<T>::value && !traits::HasLoadAndSave<T>::value, const T &>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key]->as<T>();
@@ -658,7 +658,15 @@ public:
 	
 	/// Get a non-numeric value from an object.
 	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && !std::is_same<T, Serialized *>::value, T &>::type get(const std::string &key)
+	typename std::enable_if<!std::is_arithmetic<T>::value && !std::is_pointer<T>::value && !traits::HasLoadAndSave<T>::value, T &>::type get(const std::string &key)
+	{
+		NNHardAssertEquals(m_type, Object, "Invalid type!");
+		return m_object[key]->as<T>();
+	}
+	
+	/// Get a pointer value from an object.
+	template <typename T>
+	typename std::enable_if<std::is_pointer<T>::value && !std::is_same<T, Serialized *>::value, T>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key]->as<T>();

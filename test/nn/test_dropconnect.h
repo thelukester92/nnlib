@@ -19,7 +19,7 @@ void TestDropConnect()
 	double p = 0.75, sum1 = 0, sum2 = 0;
 	size_t c = 100;
 	
-	Linear<> *linear = new Linear<>(25, 1, 4);
+	Linear<> *linear = new Linear<>(25, 1);
 	linear->weights().ones();
 	linear->bias().zeros();
 	
@@ -47,48 +47,10 @@ void TestDropConnect()
 	NNAssertAlmostEquals(sum1, c * (1 - p), 2, "DropConnect::forward (inference) failed! (Note: this may be due to the random process).");
 	NNAssertEquals(sum1, sum2, "DropConnect::backward (inference) failed!");
 	
-	module.batch(32);
-	NNAssertEquals(module.batch(), 32, "DropConnect::batch failed!");
-	
-	module.inputs({ 3, 4 });
-	NNAssertEquals(module.inputs(), Storage<size_t>({ 3, 4 }), "DropConnect::inputs failed!");
-	NNAssertEquals(module.module().inputs(), module.inputs(), "DropConnect::inputs failed! Wrong inner input shape!");
-	
-	module.outputs({ 12, 3 });
-	NNAssertEquals(module.outputs(), Storage<size_t>({ 12, 3 }), "DropConnect::outputs failed!");
-	NNAssertEquals(module.module().outputs(), module.outputs(), "DropConnect::outputs failed! Wrong inner output shape!");
-	
-	bool ok = true;
-	try
-	{
-		module.add(nullptr);
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "DropConnect::add failed to throw an error!");
-	
-	ok = true;
-	try
-	{
-		module.remove(0);
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "DropConnect::remove failed to throw an error!");
-	
-	ok = true;
-	try
-	{
-		module.clear();
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "DropConnect::clear failed to throw an error!");
-	
 	module.state().fill(0);
 	NNAssertAlmostEquals(module.output().sum(), 0, 1e-12, "DropConnect::state failed!");
 	
-	TestModule(module);
+	TestModule("DropConnect", module, inp);
 }
 
 #endif

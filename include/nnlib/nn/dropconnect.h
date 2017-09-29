@@ -7,60 +7,67 @@
 namespace nnlib
 {
 
+/// A module decorator that randomly drops parameters with a given probability.
 template <typename T = double>
-class DropConnect : public Container<T>
+class DropConnect : public Module<T>
 {
-	using Container<T>::m_training;
 public:
-	using Container<T>::inputs;
-	using Container<T>::outputs;
-	
-	DropConnect(T dropProbability = 0.1, size_t inps = 0, size_t outs = 0, size_t bats = 1) :
-		m_module(new Linear<T>(inps, outs, bats)),
-		m_params(&m_module->parameters()),
-		m_backup(m_params->copy()),
-		m_mask(m_params->size()),
-		m_dropProbability(dropProbability)
-	{
-		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
-		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
-		Container<T>::add(m_module);
-	}
-	
 	DropConnect(Module<T> *module, T dropProbability = 0.1) :
 		m_module(module),
-		m_params(module == nullptr ? nullptr : &m_module->parameters()),
-		m_backup(module == nullptr ? Tensor<T>(0) : m_params->copy()),
-		m_mask(module == nullptr ? 0 : m_params->size()),
-		m_dropProbability(dropProbability)
+		m_params(&m_module->params()),
+		m_dropProbability(dropProbability),
+		m_training(true)
 	{
 		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
 		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
-		Container<T>::add(m_module);
 	}
 	
 	DropConnect(const DropConnect &module) :
-		m_module(module.m_module == nullptr ? nullptr : module.m_module->copy()),
-		m_params(module.m_module == nullptr ? nullptr : &module.m_module->parameters()),
-		m_backup(module.m_module == nullptr ? Tensor<T>(0) : m_params->copy()),
-		m_mask(module.m_module == nullptr ? 0 : m_params->size()),
-		m_dropProbability(module.m_dropProbability)
+		m_module(module.m_module->copy()),
+		m_params(&m_module->params()),
+		m_dropProbability(module.m_dropProbability),
+		m_training(module.m_training)
+	{}
+	
+	DropConnect(const Serialized &node) :
+		m_module(node.get<Module<T> *>("module")),
+		m_params(&m_module->params()),
+		m_dropProbability(node.get<T>("dropProbability")),
+		m_training(node.get<bool>("training"))
+	{}
+	
+	DropConnect &operator=(DropConnect module)
 	{
-		m_training = module.m_training;
-		Container<T>::add(m_module);
+		swap(*this, module);
+		return *this;
 	}
 	
-	DropConnect &operator=(const DropConnect &module)
+	virtual ~DropConnect()
 	{
-		m_module			= module.m_module == nullptr ? nullptr : module.m_module->copy();
-		m_params			= module.m_module == nullptr ? nullptr : &module.m_module->parameters();
-		m_backup			= module.m_module == nullptr ? Tensor<T>(0) : Tensor<T>(m_params->size());
-		m_mask				= module.m_mask.copy();
-		m_dropProbability	= module.m_dropProbability;
-		m_training			= module.m_training;
-		Container<T>::clear();
-		Container<T>::add(m_module);
-		return *this;
+		delete m_module;
+	}
+	
+	friend void swap(DropConnect &a, DropConnect &b)
+	{
+		using std::swap;
+		swap(a.m_module, b.m_module);
+		swap(a.m_params, b.m_params);
+		swap(a.m_dropProbability, b.m_dropProbability);
+		swap(a.m_training, b.m_training);
+	}
+	
+	/// Get the module this is decorating.
+	Module<T> &module()
+	{
+		return *m_module;
+	}
+	
+	/// Set the module this is decorating.
+	DropConnect &module(Module<T> *module)
+	{
+		delete m_module;
+		m_module = module;
+		m_params = &module->params();
 	}
 	
 	/// Get the probability that an output is not dropped.
@@ -78,114 +85,13 @@ public:
 		return *this;
 	}
 	
-	// MARK: Container methods
-	
-	/// Cannot add a component to this container.
-	virtual DropConnect &add(Module<T> *) override
+	virtual void training(bool training = true) override
 	{
-		throw Error("Cannot add components to a DropConnect module!");
+		m_training = training;
 	}
 	
-	/// Cannot remove a component from this container.
-	virtual Module<T> *remove(size_t) override
-	{
-		throw Error("Cannot remove components from a DropConnect module!");
-	}
+	// MARK: Serialization
 	
-	/// Cannot remove a component from this container.
-	virtual DropConnect &clear() override
-	{
-		throw Error("Cannot remove components from a DropConnect module!");
-	}
-	
-	// MARK: DropConnect methods
-	
-	/// Get the module used by this DropConnect.
-	Module<T> &module()
-	{
-		return *m_module;
-	}
-	
-	/// \brief Set the module used by this DropConnect.
-	///
-	/// This also deletes the module previously used by this DropConnect.
-	DropConnect &module(Module<T> *module)
-	{
-		m_module = module;
-		m_params = &module->parameters();
-		m_backup = m_params->copy();
-		m_mask.resize(m_params->size());
-		Container<T>::clear();
-		Container<T>::add(m_module);
-		return *this;
-	}
-	
-	// MARK: Module methods
-	
-	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
-	{
-		if(m_training)
-		{
-			m_backup.copy(*m_params);
-			m_params->pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
-			return m_module->forward(input);
-		}
-		else
-			return m_module->forward(input).scale(1 - m_dropProbability);
-	}
-	
-	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
-	{
-		if(m_training)
-		{
-			m_module->backward(input, outGrad);
-			m_params->copy(m_backup);
-			return m_module->inGrad();
-		}
-		else
-			return m_module->backward(input, outGrad).scale(1 - m_dropProbability);
-	}
-	
-	/// Cached output.
-	virtual Tensor<T> &output() override
-	{
-		return m_module->output();
-	}
-	
-	/// Cached input gradient.
-	virtual Tensor<T> &inGrad() override
-	{
-		return m_module->inGrad();
-	}
-	
-	/// Set the input shape of this module, including batch.
-	virtual DropConnect &inputs(const Storage<size_t> &dims) override
-	{
-		NNAssertEquals(dims.size(), 2, "Expected matrix input!");
-		m_module->inputs(dims);
-		return *this;
-	}
-	
-	/// Set the output shape of this module, including batch.
-	virtual DropConnect &outputs(const Storage<size_t> &dims) override
-	{
-		NNAssertEquals(dims.size(), 2, "Expected matrix output!");
-		m_module->outputs(dims);
-		return *this;
-	}
-	
-	/// A vector of tensors filled with (views of) this module's internal state.
-	virtual Storage<Tensor<T> *> stateList() override
-	{
-		Storage<Tensor<T> *> states = Container<T>::stateList();
-		states.push_back(&m_mask);
-		states.push_back(&m_backup);
-		return states;
-	}
-	
-	/// Save to a serialized node.
 	virtual void save(Serialized &node) const override
 	{
 		node.set("module", m_module);
@@ -193,20 +99,56 @@ public:
 		node.set("training", m_training);
 	}
 	
-	/// Load from a serialized node.
-	virtual void load(const Serialized &node) override
+	// MARK: Computation
+	
+	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		module(node.get<Module<T> *>("module"));
-		node.get("dropProbability", m_dropProbability);
-		node.get("training", m_training);
+		if(m_training)
+		{
+			m_output.resize(input.shape());
+			m_mask.resize(m_params->shape());
+			m_backup.resize(m_params->shape());
+			m_backup.copy(*m_params);
+			m_params->pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
+			m_output = m_module->forward(input);
+		}
+		else
+			m_output = m_module->forward(input).scale(1 - m_dropProbability);
+		
+		return m_output;
 	}
 	
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
+	{
+		if(m_training)
+		{
+			m_inGrad = m_module->backward(input, outGrad);
+			m_params->copy(m_backup);
+		}
+		else
+			m_inGrad = m_module->backward(input, outGrad).scale(1 - m_dropProbability);
+		
+		return m_inGrad;
+	}
+	
+	// MARK: Buffers
+	
+	virtual Storage<Tensor<T> *> stateList() override
+	{
+		return Module<T>::stateList().append({ &m_mask, &m_backup });
+	}
+	
+protected:
+	using Module<T>::m_output;
+	using Module<T>::m_inGrad;
+	
 private:
-	Module<T> *m_module;	///< The decorated module.
-	Tensor<T> *m_params;	///< A pointer to the flattened parameters from m_module.
-	Tensor<T> m_backup;		///< Backup buffer for the unmasked parameters.
-	Tensor<T> m_mask;		///< Randomly-generated mask.
-	T m_dropProbability;	///< The probability that an output is dropped.
+	Module<T> *m_module;
+	Tensor<T> *m_params;
+	Tensor<T> m_backup;
+	Tensor<T> m_mask;
+	T m_dropProbability;
+	bool m_training;
 };
 
 }
