@@ -2,7 +2,6 @@
 #define DROPCONNECT_H
 
 #include "module.h"
-#include "linear.h"
 
 namespace nnlib
 {
@@ -132,6 +131,16 @@ public:
 	}
 	
 	// MARK: Buffers
+	
+	virtual Storage<Tensor<T> *> paramsList() override
+	{
+		return m_module->paramsList();
+	}
+	
+	virtual Storage<Tensor<T> *> gradList() override
+	{
+		return m_module->gradList();
+	}
 	
 	virtual Storage<Tensor<T> *> stateList() override
 	{

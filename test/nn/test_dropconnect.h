@@ -50,6 +50,22 @@ void TestDropConnect()
 	module.state().fill(0);
 	NNAssertAlmostEquals(module.output().sum(), 0, 1e-12, "DropConnect::state failed!");
 	
+	{
+		auto l1 = module.paramsList();
+		auto l2 = linear->paramsList();
+		NNAssertEquals(l1.size(), l2.size(), "DropConnect::paramsList failed!");
+		for(auto i = l1.begin(), j = l2.begin(), end = l1.end(); i != end; ++i, ++j)
+			NNAssertEquals(*i, *j, "DropConnect::paramsList failed!");
+	}
+	
+	{
+		auto l1 = module.gradList();
+		auto l2 = linear->gradList();
+		NNAssertEquals(l1.size(), l2.size(), "DropConnect::gradList failed!");
+		for(auto i = l1.begin(), j = l2.begin(), end = l1.end(); i != end; ++i, ++j)
+			NNAssertEquals(*i, *j, "DropConnect::gradList failed!");
+	}
+	
 	TestModule("DropConnect", module, inp);
 }
 
