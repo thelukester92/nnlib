@@ -24,7 +24,7 @@ void TestSequencer()
 	
 	// LSTM layer with specific weights and bias, arbitrary
 	LSTM<> *lstm = new LSTM<>(2, 3);
-	lstm->parameters().copy({
+	lstm->params().copy({
 		// inpGateX: 9
 		0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
 		
@@ -88,75 +88,23 @@ void TestSequencer()
 	
 	// Test forward and backward using the parameters and targets above
 	
-	Sequencer<> module(lstm, 3);
+	Sequencer<> module(lstm);
 	NNAssertEquals(lstm, &module.module(), "Sequencer::Sequencer failed!");
 	
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	NNAssert(module.output().add(out, -1).square().sum() < 1e-9, "Sequencer::forward failed!");
-	NNAssert(module.inGrad().add(ing, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong inGrad!");
-	NNAssert(module.grad().addV(prg, -1).square().sum() < 1e-9, "Sequencer::backward failed; wrong grad!");
+	NNAssertLessThan(module.output().add(out, -1).square().sum(), 1e-9, "Sequencer::forward failed!");
+	NNAssertLessThan(module.inGrad().add(ing, -1).square().sum(), 1e-9, "Sequencer::backward failed; wrong inGrad!");
+	NNAssertLessThan(module.grad().addV(prg, -1).square().sum(), 1e-9, "Sequencer::backward failed; wrong grad!");
 	
 	lstm->gradClip(0.03);
 	module.forget();
 	module.forward(inp);
 	module.backward(inp, grd);
-	NNAssert(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "Sequencer::gradClip failed!");
+	NNAssertLessThan(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum(), 1e-6, "Sequencer::gradClip failed!");
 	
-	module.batch(32);
-	NNAssert(module.batch() == 32, "Sequencer::batch failed!");
-	
-	bool ok = true;
-	try
-	{
-		module.add(nullptr);
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "Sequencer::add failed to throw an error!");
-	
-	ok = true;
-	try
-	{
-		module.remove(0);
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "Sequencer::remove failed to throw an error!");
-	
-	ok = true;
-	try
-	{
-		module.clear();
-		ok = false;
-	}
-	catch(const Error &e) {}
-	NNAssert(ok, "Sequencer::clear failed to throw an error!");
-	
-	Storage<size_t> dims = { 3, 6, 5 };
-	
-	module.inputs(dims);
-	NNAssertEquals(module.inputs(), dims, "Sequencer::inputs failed!");
-	
-	module.outputs(dims);
-	NNAssertEquals(module.outputs(), dims, "Sequencer::outputs failed!");
-	
-	dims = { 10, 12, 5 };
-	
-	module.safeInputs(dims);
-	NNAssertEquals(module.inputs(), dims, "Sequencer::safeInputs failed!");
-	
-	module.safeOutputs(dims);
-	NNAssertEquals(module.outputs(), dims, "Sequencer::safeOutputs failed!");
-	
-	Sequencer<> sequencer(new Linear<>());
-	sequencer.safeInputs({ 3, 6, 5 });
-	sequencer.safeOutputs({ 10, 20, 30 });
-	NNAssertEquals(sequencer.inputs(), Storage<size_t>({ 10, 20, 5 }), "Sequencer::safeInputs failed!")
-	NNAssertEquals(sequencer.outputs(), Storage<size_t>({ 10, 20, 30 }), "Sequencer::safeOutputs failed!")
-	
-	TestModule(module);
+	TestModule("Sequencer", module, inp);
 }
 
 #endif

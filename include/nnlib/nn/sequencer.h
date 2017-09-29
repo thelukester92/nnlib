@@ -54,6 +54,16 @@ public:
 		return *this;
 	}
 	
+	virtual void training(bool training = true) override
+	{
+		m_module->training(training);
+	}
+	
+	virtual void forget() override
+	{
+		m_module->forget();
+	}
+	
 	/// MARK: Serialization
 	
 	virtual void save(Serialized &node) const override
@@ -68,9 +78,9 @@ public:
 		m_module->forward(input.select(0, 0));
 		
 		m_output.resize(Storage<size_t>({ input.size(0) }).append(m_module->output().shape()));
-		m_output.select(0, 0).copy(m_module.output());
+		m_output.select(0, 0).copy(m_module->output());
 		
-		m_states.resize(Storage<size_t>({ input.size(0) }).append(m_module->state()->shape()));
+		m_states.resize(Storage<size_t>({ input.size(0) }).append(m_module->state().shape()));
 		m_states.select(0, 0).copy(m_module->state());
 		
 		for(size_t i = 1, end = input.size(0); i < end; ++i)

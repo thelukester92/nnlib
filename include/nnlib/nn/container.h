@@ -53,10 +53,16 @@ public:
 			delete comp;
 	}
 	
-	virtual void training(bool training) override
+	virtual void training(bool training = true) override
 	{
 		for(Module<T> *comp : m_components)
 			comp->training(training);
+	}
+	
+	virtual void forget() override
+	{
+		for(Module<T> *comp : m_components)
+			comp->forget();
 	}
 	
 	virtual void save(Serialized &node) const override

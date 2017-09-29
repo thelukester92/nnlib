@@ -82,6 +82,12 @@ public:
 	virtual void training(bool training = true) override
 	{
 		m_training = training;
+		m_module->training(training);
+	}
+	
+	virtual void forget() override
+	{
+		m_module->forget();
 	}
 	
 	// MARK: Serialization
