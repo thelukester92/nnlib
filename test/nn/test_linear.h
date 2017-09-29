@@ -39,9 +39,26 @@ void TestLinear()
 	module.forward(inp.select(0, 0));
 	module.backward(inp.select(0, 0), grd.select(0, 0));
 	
-	NNAssertLessThan(module.output().copy().addM(out.select(0, 0), -1).square().sum(), 1e-9, "Linear::forward failed for a vector; wrong output!");
-	NNAssertLessThan(module.inGrad().copy().addM(ing.select(0, 0), -1).square().sum(), 1e-9, "Linear::backward failed for a vector; wrong input gradient!");
-	NNAssertLessThan(module.grad().addV(prg.select(0, 0), -1).square().sum(), 1e-9, "Linear::backward failed for a vector; wrong parameter gradient!");
+	NNAssertLessThan(module.output().copy().add(out.select(0, 0), -1).square().sum(), 1e-9, "Linear::forward failed for a vector; wrong output!");
+	NNAssertLessThan(module.inGrad().copy().add(ing.select(0, 0), -1).square().sum(), 1e-9, "Linear::backward failed for a vector; wrong input gradient!");
+	
+	bool ok = true;
+	try
+	{
+		module.forward(Tensor<>(1, 1, 1));
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Linear::forward accepted an invalid input shape!");
+	
+	ok = true;
+	try
+	{
+		module.backward(Tensor<>(1, 1, 1), Tensor<>(1, 1, 1));
+		ok = false;
+	}
+	catch(const Error &e) {}
+	NNAssert(ok, "Linear::backward accepted invalid input and outGrad shapes!");
 	
 	TestModule("Linear", module, inp);
 }

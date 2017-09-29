@@ -7,6 +7,21 @@ using namespace nnlib;
 
 void TestTensor()
 {
+	// test empty concat
+	
+	{
+		Tensor<> empty = Tensor<>::concatenate({});
+		NNAssertEquals(empty.size(), 0, "Tensor::concatenate on an empty list failed!");
+	}
+	
+	// test resizing to the same size
+	
+	{
+		Tensor<> t(3);
+		t.resizeDim(0, 3);
+		NNAssertEquals(t.size(0), 3, "Tensor::resizeDim to the same size failed!");
+	}
+	
 	// test constructors
 	
 	Tensor<> empty;

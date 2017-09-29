@@ -104,6 +104,13 @@ void TestSequencer()
 	module.backward(inp, grd);
 	NNAssertLessThan(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum(), 1e-6, "Sequencer::gradClip failed!");
 	
+	{
+		BatchNorm<> *b = new BatchNorm<>(10);
+		Sequencer<> s(b);
+		s.training(false);
+		NNAssert(!b->isTraining(), "Sequencer::training failed!");
+	}
+	
 	TestModule("Sequencer", module, inp);
 }
 
