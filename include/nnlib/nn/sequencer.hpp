@@ -26,6 +26,11 @@ public:
 		m_module(node.get<Module<T> *>("module"))
 	{}
 	
+	~Sequencer()
+	{
+		delete m_module;
+	}
+	
 	Sequencer &operator=(Sequencer module)
 	{
 		swap(*this, module);
@@ -54,6 +59,32 @@ public:
 		return *this;
 	}
 	
+	/// Begin a sequence. This is automatically called by forward.
+	void startForward(const Tensor<T> &first, size_t sequenceLength)
+	{
+		m_module->forward(first);
+		
+		m_output.resize(Storage<size_t>({ sequenceLength }).append(m_module->output().shape()));
+		m_output.select(0, 0).copy(m_module->output());
+		
+		m_states.resize(Storage<size_t>({ sequenceLength }).append(m_module->state().shape()));
+		m_states.select(0, 0).copy(m_module->state());
+	}
+	
+	/// Forward the next sample in the sequence. This is automatically called by forward.
+	void stepForward(const Tensor<T> &singleInput, size_t i)
+	{
+		m_output.select(0, i).copy(m_module->forward(singleInput));
+		m_states.select(0, i).copy(m_module->state());
+	}
+	
+	/// Backward the next sample in the sequence. This is automatically called by backward.
+	void stepBackward(const Tensor<T> &singleInput, const Tensor<T> &singleOutGrad, size_t i)
+	{
+		m_module->state().copy(m_states.select(0, i));
+		m_inGrad.select(0, i).copy(m_module->backward(singleInput, singleOutGrad));
+	}
+	
 	virtual void training(bool training = true) override
 	{
 		m_module->training(training);
@@ -75,20 +106,9 @@ public:
 	
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		m_module->forward(input.select(0, 0));
-		
-		m_output.resize(Storage<size_t>({ input.size(0) }).append(m_module->output().shape()));
-		m_output.select(0, 0).copy(m_module->output());
-		
-		m_states.resize(Storage<size_t>({ input.size(0) }).append(m_module->state().shape()));
-		m_states.select(0, 0).copy(m_module->state());
-		
+		startForward(input.select(0, 0), input.size(0));
 		for(size_t i = 1, end = input.size(0); i < end; ++i)
-		{
-			m_output.select(0, i).copy(m_module->forward(input.select(0, i)));
-			m_states.select(0, i).copy(m_module->state());
-		}
-		
+			stepForward(input.select(0, i), i);
 		return m_output;
 	}
 	
@@ -99,10 +119,7 @@ public:
 		m_inGrad.resize(input.shape());
 		
 		for(int i = input.size(0) - 1; i >= 0; --i)
-		{
-			m_module->state().copy(m_states.select(0, i));
-			m_inGrad.select(0, i).copy(m_module->backward(input.select(0, i), outGrad.select(0, i)));
-		}
+			stepBackward(input.select(0, i), outGrad.select(0, i), i);
 		
 		return m_inGrad;
 	}

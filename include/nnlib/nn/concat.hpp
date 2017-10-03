@@ -62,6 +62,17 @@ public:
 		return *this;
 	}
 	
+	size_t concatDim() const
+	{
+		return m_concatDim;
+	}
+	
+	Concat &concatDim(size_t dim)
+	{
+		m_concatDim = dim;
+		return *this;
+	}
+	
 	virtual void save(Serialized &node) const override
 	{
 		Container<T>::save(node);
@@ -95,8 +106,8 @@ public:
 			offset += stride;
 		}
 		
-		m_inGrad = m_components[0]->inGrad().copy();
-		for(size_t i = 1, count = components(); i < count; ++i)
+		m_inGrad.resize(m_components[0]->inGrad().shape());
+		for(size_t i = 0, count = components(); i < count; ++i)
 			m_inGrad.add(m_components[i]->inGrad());
 		
 		return m_inGrad;
