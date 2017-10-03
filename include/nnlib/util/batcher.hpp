@@ -26,6 +26,18 @@ public:
 		reset();
 	}
 	
+	Batcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t bats) :
+		m_feat(feat.copy()),
+		m_lab(lab.copy()),
+		m_featBatch(m_feat),
+		m_labBatch(m_lab),
+		m_batch(bats)
+	{
+		NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+		NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
+		reset();
+	}
+	
 	Batcher &batch(size_t bats)
 	{
 		NNAssertLessThanOrEquals(bats, m_feat.size(0), "Invalid batch size!");

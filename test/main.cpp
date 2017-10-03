@@ -43,48 +43,62 @@ using namespace nnlib;
 #include <functional>
 using namespace std;
 
-#define TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
+#include "toy_problems/classification.hpp"
+
+#define UNIT_TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
+#define TOY_PROBLEM(Name) { string("Running toy problem: ") + #Name, Toy##Name }
 
 int main()
 {
 	int ret = 0;
 	
-	initializer_list<pair<string, function<void()>>> tests = {
-		TEST("core/", Error),
-		TEST("core/", Storage),
-		TEST("core/", Tensor),
-		TEST("critics/", CriticSequencer),
-		TEST("critics/", MSE),
-		TEST("critics/", NLL),
-		TEST("math/", MathBase),
-		TEST("math/", MathBLAS),
-		TEST("nn/", BatchNorm),
-		TEST("nn/", Concat),
-		TEST("nn/", DropConnect),
-		TEST("nn/", Dropout),
-		TEST("nn/", Linear),
-		TEST("nn/", Logistic),
-		TEST("nn/", LogSoftMax),
-		TEST("nn/", LSTM),
-		TEST("nn/", ReLU),
-		TEST("nn/", Sequencer),
-		TEST("nn/", Sequential),
-		TEST("nn/", TanH),
-		TEST("opt/", Adam),
-		TEST("opt/", Nadam),
-		TEST("opt/", RMSProp),
-		TEST("opt/", SGD),
-		TEST("serialization/", CSVSerializer),
-		TEST("serialization/", JSONSerializer),
-		TEST("serialization/", Serialized),
-		TEST("util/", Args),
-		TEST("util/", Batcher),
-		TEST("util/", Random)
+	initializer_list<pair<string, function<void()>>> unit_tests = {
+		UNIT_TEST("core/", Error),
+		UNIT_TEST("core/", Storage),
+		UNIT_TEST("core/", Tensor),
+		UNIT_TEST("critics/", CriticSequencer),
+		UNIT_TEST("critics/", MSE),
+		UNIT_TEST("critics/", NLL),
+		UNIT_TEST("math/", MathBase),
+		UNIT_TEST("math/", MathBLAS),
+		UNIT_TEST("nn/", BatchNorm),
+		UNIT_TEST("nn/", Concat),
+		UNIT_TEST("nn/", DropConnect),
+		UNIT_TEST("nn/", Dropout),
+		UNIT_TEST("nn/", Linear),
+		UNIT_TEST("nn/", Logistic),
+		UNIT_TEST("nn/", LogSoftMax),
+		UNIT_TEST("nn/", LSTM),
+		UNIT_TEST("nn/", ReLU),
+		UNIT_TEST("nn/", Sequencer),
+		UNIT_TEST("nn/", Sequential),
+		UNIT_TEST("nn/", TanH),
+		UNIT_TEST("opt/", Adam),
+		UNIT_TEST("opt/", Nadam),
+		UNIT_TEST("opt/", RMSProp),
+		UNIT_TEST("opt/", SGD),
+		UNIT_TEST("serialization/", CSVSerializer),
+		UNIT_TEST("serialization/", JSONSerializer),
+		UNIT_TEST("serialization/", Serialized),
+		UNIT_TEST("util/", Args),
+		UNIT_TEST("util/", Batcher),
+		UNIT_TEST("util/", Random)
+	};
+	
+	initializer_list<pair<string, function<void()>>> toy_problems = {
+		TOY_PROBLEM(Classification)
 	};
 	
 	try
 	{
-		for(auto test : tests)
+		for(auto test : unit_tests)
+		{
+			cout << test.first << "..." << flush;
+			test.second();
+			cout << " Passed!" << endl;
+		}
+		
+		for(auto test : toy_problems)
 		{
 			cout << test.first << "..." << flush;
 			test.second();
