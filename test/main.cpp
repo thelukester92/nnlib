@@ -16,6 +16,7 @@
 #include "nn/test_concat.hpp"
 #include "nn/test_dropconnect.hpp"
 #include "nn/test_dropout.hpp"
+#include "nn/test_identity.hpp"
 #include "nn/test_linear.hpp"
 #include "nn/test_logistic.hpp"
 #include "nn/test_logsoftmax.hpp"
@@ -67,6 +68,7 @@ int main()
 		UNIT_TEST("nn/", Concat),
 		UNIT_TEST("nn/", DropConnect),
 		UNIT_TEST("nn/", Dropout),
+		UNIT_TEST("nn/", Identity),
 		UNIT_TEST("nn/", Linear),
 		UNIT_TEST("nn/", Logistic),
 		UNIT_TEST("nn/", LogSoftMax),

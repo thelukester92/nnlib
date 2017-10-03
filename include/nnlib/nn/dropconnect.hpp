@@ -150,7 +150,7 @@ public:
 	
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		return Module<T>::stateList().append({ &m_mask, &m_backup });
+		return Module<T>::stateList().append(m_module->stateList()).append({ &m_mask, &m_backup });
 	}
 	
 protected:
