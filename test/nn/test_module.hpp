@@ -9,12 +9,12 @@ template <template <typename> class M, typename T = double>
 class ModuleTests
 {
 public:
-	static void run(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
+	static void run(const std::string &name, M<T> &module, const Tensor<T> &sampleInput, bool randomizeInput = true)
 	{
-		testDeterministic(name, module, sampleInput);
-		testCopyConstructor(name, module, sampleInput);
-		testAssignment(name, module, sampleInput);
-		testSerialization(name, module, sampleInput);
+		testDeterministic(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
+		testCopyConstructor(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
+		testAssignment(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
+		testSerialization(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
 		testFlattening(name, module);
 	}
 	
@@ -41,10 +41,8 @@ protected:
 		return !m1.params().sharedWith(m2.params());
 	}
 	
-	static bool testEqualOutput(Module<T> &m1, Module<T> &m2, const Tensor<T> &sampleInput)
+	static bool testEqualOutput(Module<T> &m1, Module<T> &m2, const Tensor<T> &input)
 	{
-		Tensor<T> input = Tensor<T>(sampleInput.shape(), true).rand();
-		
 		RandomEngine::seed(0);
 		m1.forget();
 		auto &o1 = m1.forward(input);
@@ -63,10 +61,8 @@ protected:
 	}
 	
 private:
-	static void testDeterministic(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
+	static void testDeterministic(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
-		Tensor<T> input = Tensor<T>(sampleInput.shape(), true).rand();
-		
 		RandomEngine::seed(0);
 		module.forget();
 		auto o1 = module.forward(input).copy();
@@ -79,16 +75,16 @@ private:
 			NNAssertAlmostEquals(*x, *y, 1e-12, name + "::forward() failed! Different outputs for the same input and random seed!");
 	}
 	
-	static void testCopyConstructor(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
+	static void testCopyConstructor(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
 		module.params().rand();
 		M<T> copy(module);
 		NNAssert(testEqualParams(module, copy), name + "::" + name + "(const " + name + " &) failed! Parameters are not equal!");
 		NNAssert(testNotShared(module, copy), name + "::" + name + "(const " + name + " &) failed! Sharing parameters; not a deep copy!");
-		NNAssert(testEqualOutput(module, copy, sampleInput), name + "::" + name + "(const " + name + " &) failed! Different outputs for the same input!");
+		NNAssert(testEqualOutput(module, copy, input), name + "::" + name + "(const " + name + " &) failed! Different outputs for the same input!");
 	}
 	
-	static void testAssignment(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
+	static void testAssignment(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
 		module.params().rand();
 		
@@ -98,29 +94,29 @@ private:
 		
 		NNAssert(testEqualParams(module, copy), name + "::operator=(const " + name + " &) failed! Parameters are not equal!");
 		NNAssert(testNotShared(module, copy), name + "::operator=(const " + name + " &) failed! Sharing parameters; not a deep copy!");
-		NNAssert(testEqualOutput(module, copy, sampleInput), name + "::operator=(const " + name + " &) failed! Different outputs for the same input!");
+		NNAssert(testEqualOutput(module, copy, input), name + "::operator=(const " + name + " &) failed! Different outputs for the same input!");
 		
 		// delete copy;
 	}
 	
-	static void testSerialization(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
+	static void testSerialization(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
 		M<T> s1 = Serialized(module).as<M<T>>();
 		NNAssert(testEqualParams(module, s1), "Serialization through reference failed! Parameters are not equal!");
-		NNAssert(testEqualOutput(module, s1, sampleInput), "Serialization through reference failed! Different outputs for the same input!");
+		NNAssert(testEqualOutput(module, s1, input), "Serialization through reference failed! Different outputs for the same input!");
 		
 		M<T> s2 = Serialized(&module).as<M<T>>();
 		NNAssert(testEqualParams(module, s2), "Serialization through pointer failed! Parameters are not equal!");
-		NNAssert(testEqualOutput(module, s2, sampleInput), "Serialization through pointer failed! Different outputs for the same input!");
+		NNAssert(testEqualOutput(module, s2, input), "Serialization through pointer failed! Different outputs for the same input!");
 		
 		Module<T> *s3 = Serialized(module).as<Module<T> *>();
 		NNAssert(testEqualParams(module, *s3), "Generic serialization through reference failed! Parameters are not equal!");
-		NNAssert(testEqualOutput(module, *s3, sampleInput), "Generic serialization through reference failed! Different outputs for the same input!");
+		NNAssert(testEqualOutput(module, *s3, input), "Generic serialization through reference failed! Different outputs for the same input!");
 		delete s3;
 		
 		Module<T> *s4 = Serialized(&module).as<Module<T> *>();
 		NNAssert(testEqualParams(module, *s4), "Generic serialization through pointer failed! Parameters are not equal!");
-		NNAssert(testEqualOutput(module, *s4, sampleInput), "Generic serialization through pointer failed! Different outputs for the same input!");
+		NNAssert(testEqualOutput(module, *s4, input), "Generic serialization through pointer failed! Different outputs for the same input!");
 		delete s4;
 	}
 	
@@ -183,9 +179,9 @@ private:
 };
 
 template <template <typename> class M, typename T>
-void TestModule(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
+void TestModule(const std::string &name, M<T> &module, const Tensor<T> &input, bool randomizeInput = true)
 {
-	ModuleTests<M, T>::run(name, module, sampleInput);
+	ModuleTests<M, T>::run(name, module, input, randomizeInput);
 }
 
 #endif

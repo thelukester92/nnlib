@@ -1402,6 +1402,11 @@ public:
 		m_ptr(it.m_ptr)
 	{}
 	
+	const Storage<size_t> &indices() const
+	{
+		return m_indices;
+	}
+	
 	TensorIterator &operator++()
 	{
 		if(m_tensor->contiguous())

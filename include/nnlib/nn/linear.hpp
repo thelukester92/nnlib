@@ -148,7 +148,6 @@ protected:
 	using Module<T>::m_output;
 	using Module<T>::m_inGrad;
 	
-private:
 	Tensor<T> m_weights;
 	Tensor<T> m_weightsGrad;
 	Tensor<T> m_bias;

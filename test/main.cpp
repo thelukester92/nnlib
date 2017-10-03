@@ -23,6 +23,7 @@
 #include "nn/test_relu.hpp"
 #include "nn/test_sequencer.hpp"
 #include "nn/test_sequential.hpp"
+#include "nn/test_sparselinear.hpp"
 #include "nn/test_tanh.hpp"
 #include "opt/test_adam.hpp"
 #include "opt/test_nadam.hpp"
@@ -73,6 +74,7 @@ int main()
 		UNIT_TEST("nn/", ReLU),
 		UNIT_TEST("nn/", Sequencer),
 		UNIT_TEST("nn/", Sequential),
+		UNIT_TEST("nn/", SparseLinear),
 		UNIT_TEST("nn/", TanH),
 		UNIT_TEST("opt/", Adam),
 		UNIT_TEST("opt/", Nadam),

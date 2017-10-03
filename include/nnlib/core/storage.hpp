@@ -130,6 +130,12 @@ public:
 		return *this;
 	}
 	
+	Storage &pop_back()
+	{
+		--m_size;
+		return *this;
+	}
+	
 	Storage &append(const Storage &other)
 	{
 		reserve(m_size + other.m_size);
