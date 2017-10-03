@@ -44,6 +44,7 @@ using namespace nnlib;
 using namespace std;
 
 #include "toy_problems/classification.hpp"
+#include "toy_problems/timeseries.hpp"
 
 #define UNIT_TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
 #define TOY_PROBLEM(Name) { string("Running toy problem: ") + #Name, Toy##Name }
@@ -86,7 +87,8 @@ int main()
 	};
 	
 	initializer_list<pair<string, function<void()>>> toy_problems = {
-		TOY_PROBLEM(Classification)
+		TOY_PROBLEM(Classification),
+		TOY_PROBLEM(TimeSeries)
 	};
 	
 	try
