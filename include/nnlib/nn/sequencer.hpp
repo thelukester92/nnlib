@@ -14,16 +14,19 @@ template <typename T = double>
 class Sequencer : public Module<T>
 {
 public:
-	Sequencer(Module<T> *module) :
-		m_module(module)
+	Sequencer(Module<T> *module, bool reverse = false) :
+		m_module(module),
+		m_reverse(reverse)
 	{}
 	
 	Sequencer(const Sequencer &module) :
-		m_module(module.m_module->copy())
+		m_module(module.m_module->copy()),
+		m_reverse(module.m_reverse)
 	{}
 	
 	Sequencer(const Serialized &node) :
-		m_module(node.get<Module<T> *>("module"))
+		m_module(node.get<Module<T> *>("module")),
+		m_reverse(node.get<bool>("reverse"))
 	{}
 	
 	~Sequencer()
@@ -41,6 +44,7 @@ public:
 	{
 		using std::swap;
 		swap(a.m_module, b.m_module);
+		swap(a.m_reverse, b.m_reverse);
 	}
 	
 	/// Get the module used by this sequencer.
@@ -59,16 +63,35 @@ public:
 		return *this;
 	}
 	
+	/// Check whether this sequencer reverses the input sequence.
+	bool isReversed()
+	{
+		return m_reverse;
+	}
+	
+	/// Set whether this sequencer reverses the input sequence.
+	Sequencer &reverse(bool reverse = true)
+	{
+		m_reverse = reverse;
+		return *this;
+	}
+	
 	/// Begin a sequence. This is automatically called by forward.
 	void startForward(const Tensor<T> &first, size_t sequenceLength)
 	{
 		m_module->forward(first);
 		
 		m_output.resize(Storage<size_t>({ sequenceLength }).append(m_module->output().shape()));
-		m_output.select(0, 0).copy(m_module->output());
+		if(m_reverse)
+			m_output.select(0, sequenceLength - 1).copy(m_module->output());
+		else
+			m_output.select(0, 0).copy(m_module->output());
 		
 		m_states.resize(Storage<size_t>({ sequenceLength }).append(m_module->state().shape()));
-		m_states.select(0, 0).copy(m_module->state());
+		if(m_reverse)
+			m_states.select(0, sequenceLength - 1).copy(m_module->state());
+		else
+			m_states.select(0, 0).copy(m_module->state());
 	}
 	
 	/// Forward the next sample in the sequence. This is automatically called by forward.
@@ -100,15 +123,27 @@ public:
 	virtual void save(Serialized &node) const override
 	{
 		node.set("module", m_module);
+		node.set("reverse", m_reverse);
 	}
 	
 	// MARK: Computation
 	
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
-		startForward(input.select(0, 0), input.size(0));
-		for(size_t i = 1, end = input.size(0); i < end; ++i)
-			stepForward(input.select(0, i), i);
+		if(m_reverse)
+		{
+			size_t len = input.size(0);
+			startForward(input.select(0, len - 1), len);
+			for(size_t i = len - 1; i > 0; --i)
+				stepForward(input.select(0, i - 1), i - 1);
+		}
+		else
+		{
+			startForward(input.select(0, 0), input.size(0));
+			for(size_t i = 1, end = input.size(0); i < end; ++i)
+				stepForward(input.select(0, i), i);
+		}
+		
 		return m_output;
 	}
 	
@@ -118,8 +153,16 @@ public:
 		NNAssertEquals(input.size(0), m_output.size(0), "Sequencer::forward must be called first!");
 		m_inGrad.resize(input.shape());
 		
-		for(int i = input.size(0) - 1; i >= 0; --i)
-			stepBackward(input.select(0, i), outGrad.select(0, i), i);
+		if(m_reverse)
+		{
+			for(size_t i = 0, len = input.size(0); i < len; ++i)
+				stepBackward(input.select(0, i), outGrad.select(0, i), i);
+		}
+		else
+		{
+			for(size_t i = input.size(0); i > 0; --i)
+				stepBackward(input.select(0, i - 1), outGrad.select(0, i - 1), i - 1);
+		}
 		
 		return m_inGrad;
 	}
@@ -143,6 +186,7 @@ protected:
 private:
 	Module<T> *m_module;
 	Tensor<T> m_states;
+	bool m_reverse;
 };
 
 }

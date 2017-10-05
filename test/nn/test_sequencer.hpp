@@ -66,11 +66,25 @@ void TestSequencer()
 		0.96590, 0.96347, -0.00642
 	}).resize(3, 1, 3);
 	
+	// Reversed output, fixed given input and weights
+	Tensor<> rOut = Tensor<>({
+		0.99347, 0.98614, 0.70684,
+		0.95272, 0.90196, 0.95457,
+		0.73827, 0.74884, 0.75822
+	}).resize(3, 1, 3);
+	
 	// Input gradient, fixed given input and output gradient
 	Tensor<> ing = Tensor<>({
 		-0.03112, -0.00071,
 		0.04170, 0.02960,
 		-0.02195, -0.04333
+	}).resize(3, 1, 2);
+	
+	// Reversed input gradient, fixed given input and output gradient
+	Tensor<> rIng = Tensor<>({
+		0.00002, 0.00001,
+		0.02605, 0.03943,
+		-0.00803, -0.01839
 	}).resize(3, 1, 2);
 	
 	// Parameter gradient, fixed given the input and output gradient
@@ -98,11 +112,16 @@ void TestSequencer()
 	NNAssertLessThan(module.inGrad().add(ing, -1).square().sum(), 1e-9, "Sequencer::backward failed; wrong inGrad!");
 	NNAssertLessThan(module.grad().addV(prg, -1).square().sum(), 1e-9, "Sequencer::backward failed; wrong grad!");
 	
-	lstm->gradClip(0.03);
 	module.forget();
+	module.reverse(true);
 	module.forward(inp);
 	module.backward(inp, grd);
-	NNAssertLessThan(module.inGrad().add(ing.clip(-0.03, 0.03), -1).square().sum(), 1e-6, "Sequencer::gradClip failed!");
+	
+	std::cout << rIng.select(1, 0) << std::endl;
+	std::cout << module.inGrad().select(1, 0) << std::endl;
+	
+	NNAssertLessThan(module.output().add(rOut, -1).square().sum(), 1e-9, "Sequencer::forward (reversed) failed!");
+	NNAssertLessThan(module.inGrad().add(rIng, -1).square().sum(), 1e-9, "Sequencer::backward (reversed) failed; wrong inGrad!");
 	
 	{
 		BatchNorm<> *b = new BatchNorm<>(10);
