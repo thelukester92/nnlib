@@ -109,7 +109,7 @@ public:
 		for(size_t i = 1; i < len; ++i)
 		{
 			m_fModule->stepForward(input.select(0, i), i);
-			m_bModule->stepForward(input.select(0, len - 1 - i), i);
+			m_bModule->stepForward(input.select(0, len - 1 - i), len - 1 - i);
 		}
 		
 		Storage<Tensor<T> *> outputs = { &m_fModule->output(), &m_bModule->output() };
