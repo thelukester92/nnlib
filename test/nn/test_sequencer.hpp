@@ -117,9 +117,6 @@ void TestSequencer()
 	module.forward(inp);
 	module.backward(inp, grd);
 	
-	std::cout << rIng.select(1, 0) << std::endl;
-	std::cout << module.inGrad().select(1, 0) << std::endl;
-	
 	NNAssertLessThan(module.output().add(rOut, -1).square().sum(), 1e-9, "Sequencer::forward (reversed) failed!");
 	NNAssertLessThan(module.inGrad().add(rIng, -1).square().sum(), 1e-9, "Sequencer::backward (reversed) failed; wrong inGrad!");
 	
