@@ -4,38 +4,38 @@
 	#undef OPTIMIZE
 #endif
 
-#include "core/test_error.h"
-#include "core/test_storage.h"
-#include "core/test_tensor.h"
-#include "critics/test_criticsequencer.h"
-#include "critics/test_mse.h"
-#include "critics/test_nll.h"
-#include "math/test_math_base.h"
-#include "math/test_math_blas.h"
-#include "nn/test_batchnorm.h"
-#include "nn/test_concat.h"
-#include "nn/test_dropconnect.h"
-#include "nn/test_dropout.h"
-#include "nn/test_identity.h"
-#include "nn/test_linear.h"
-#include "nn/test_logistic.h"
-#include "nn/test_logsoftmax.h"
-#include "nn/test_lstm.h"
-#include "nn/test_recurrent.h"
-#include "nn/test_relu.h"
-#include "nn/test_sequencer.h"
-#include "nn/test_sequential.h"
-#include "nn/test_tanh.h"
-#include "opt/test_adam.h"
-#include "opt/test_nadam.h"
-#include "opt/test_rmsprop.h"
-#include "opt/test_sgd.h"
-#include "serialization/test_csvserializer.h"
-#include "serialization/test_jsonserializer.h"
-#include "serialization/test_serialized.h"
-#include "util/test_args.h"
-#include "util/test_batcher.h"
-#include "util/test_random.h"
+#include "core/test_error.hpp"
+#include "core/test_storage.hpp"
+#include "core/test_tensor.hpp"
+#include "critics/test_criticsequencer.hpp"
+#include "critics/test_mse.hpp"
+#include "critics/test_nll.hpp"
+#include "math/test_math_base.hpp"
+#include "math/test_math_blas.hpp"
+#include "nn/test_batchnorm.hpp"
+#include "nn/test_concat.hpp"
+#include "nn/test_dropconnect.hpp"
+#include "nn/test_dropout.hpp"
+#include "nn/test_identity.hpp"
+#include "nn/test_linear.hpp"
+#include "nn/test_logistic.hpp"
+#include "nn/test_logsoftmax.hpp"
+#include "nn/test_lstm.hpp"
+#include "nn/test_relu.hpp"
+#include "nn/test_sequencer.hpp"
+#include "nn/test_sequential.hpp"
+#include "nn/test_sparselinear.hpp"
+#include "nn/test_tanh.hpp"
+#include "opt/test_adam.hpp"
+#include "opt/test_nadam.hpp"
+#include "opt/test_rmsprop.hpp"
+#include "opt/test_sgd.hpp"
+#include "serialization/test_csvserializer.hpp"
+#include "serialization/test_jsonserializer.hpp"
+#include "serialization/test_serialized.hpp"
+#include "util/test_args.hpp"
+#include "util/test_batcher.hpp"
+#include "util/test_random.hpp"
 using namespace nnlib;
 
 #include <iostream>
@@ -45,50 +45,66 @@ using namespace nnlib;
 #include <functional>
 using namespace std;
 
-#define TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
+#include "toy_problems/classification.hpp"
+#include "toy_problems/timeseries.hpp"
+
+#define UNIT_TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
+#define TOY_PROBLEM(Name) { string("Running toy problem: ") + #Name, Toy##Name }
 
 int main()
 {
 	int ret = 0;
 	
-	initializer_list<pair<string, function<void()>>> tests = {
-		TEST("core/", Error),
-		TEST("core/", Storage),
-		TEST("core/", Tensor),
-		TEST("critics/", CriticSequencer),
-		TEST("critics/", MSE),
-		TEST("critics/", NLL),
-		TEST("math/", MathBase),
-		TEST("math/", MathBLAS),
-		TEST("nn/", BatchNorm),
-		TEST("nn/", Concat),
-		TEST("nn/", DropConnect),
-		TEST("nn/", Dropout),
-		TEST("nn/", Identity),
-		TEST("nn/", Linear),
-		TEST("nn/", Logistic),
-		TEST("nn/", LogSoftMax),
-		TEST("nn/", LSTM),
-		TEST("nn/", Recurrent),
-		TEST("nn/", ReLU),
-		TEST("nn/", Sequencer),
-		TEST("nn/", Sequential),
-		TEST("nn/", TanH),
-		TEST("opt/", Adam),
-		TEST("opt/", Nadam),
-		TEST("opt/", RMSProp),
-		TEST("opt/", SGD),
-		TEST("serialization/", CSVSerializer),
-		TEST("serialization/", JSONSerializer),
-		TEST("serialization/", Serialized),
-		TEST("util/", Args),
-		TEST("util/", Batcher),
-		TEST("util/", Random)
+	initializer_list<pair<string, function<void()>>> unit_tests = {
+		UNIT_TEST("core/", Error),
+		UNIT_TEST("core/", Storage),
+		UNIT_TEST("core/", Tensor),
+		UNIT_TEST("critics/", CriticSequencer),
+		UNIT_TEST("critics/", MSE),
+		UNIT_TEST("critics/", NLL),
+		UNIT_TEST("math/", MathBase),
+		UNIT_TEST("math/", MathBLAS),
+		UNIT_TEST("nn/", BatchNorm),
+		UNIT_TEST("nn/", Concat),
+		UNIT_TEST("nn/", DropConnect),
+		UNIT_TEST("nn/", Dropout),
+		UNIT_TEST("nn/", Identity),
+		UNIT_TEST("nn/", Linear),
+		UNIT_TEST("nn/", Logistic),
+		UNIT_TEST("nn/", LogSoftMax),
+		UNIT_TEST("nn/", LSTM),
+		UNIT_TEST("nn/", ReLU),
+		UNIT_TEST("nn/", Sequencer),
+		UNIT_TEST("nn/", Sequential),
+		UNIT_TEST("nn/", SparseLinear),
+		UNIT_TEST("nn/", TanH),
+		UNIT_TEST("opt/", Adam),
+		UNIT_TEST("opt/", Nadam),
+		UNIT_TEST("opt/", RMSProp),
+		UNIT_TEST("opt/", SGD),
+		UNIT_TEST("serialization/", CSVSerializer),
+		UNIT_TEST("serialization/", JSONSerializer),
+		UNIT_TEST("serialization/", Serialized),
+		UNIT_TEST("util/", Args),
+		UNIT_TEST("util/", Batcher),
+		UNIT_TEST("util/", Random)
+	};
+	
+	initializer_list<pair<string, function<void()>>> toy_problems = {
+		TOY_PROBLEM(Classification),
+		TOY_PROBLEM(TimeSeries)
 	};
 	
 	try
 	{
-		for(auto test : tests)
+		for(auto test : unit_tests)
+		{
+			cout << test.first << "..." << flush;
+			test.second();
+			cout << " Passed!" << endl;
+		}
+		
+		for(auto test : toy_problems)
 		{
 			cout << test.first << "..." << flush;
 			test.second();
