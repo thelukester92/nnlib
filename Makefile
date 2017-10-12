@@ -27,7 +27,7 @@ override OUT := nnlib_test
 override CFLAGS += -std=c++11 -I$(INC) --coverage
 
 override INSTALL_FILES := $(shell find $(INC) -type f)
-override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.h=$(PREFIX)/%.h)
+override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.hpp=$(PREFIX)/%.hpp)
 
 override CPP_FILES := $(wildcard $(TST)/*.cpp) $(wildcard $(TST)/**/*.cpp)
 override DEP_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.d)
@@ -72,7 +72,7 @@ $(OBJ)/%.o: $(TST)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
 
-$(PREFIX)/%.h: $(INC)/%.h
+$(PREFIX)/%.hpp: $(INC)/%.hpp
 	mkdir -p $(dir $@)
 	cp $< $@
 

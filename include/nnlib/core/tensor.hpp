@@ -1108,6 +1108,67 @@ public:
 		return pointwiseProduct(*this);
 	}
 	
+	/// \brief Sparsify the current dense tensor, dropping values with magnitude less than epsilon.
+	///
+	/// The output will be a matrix. The number of rows will be the number of non-zero elements;
+	/// the number of columns will be D + 1 where D is the number of dimensions in the dense tensor.
+	/// The first D columns in a row are the indices and the last is the value in that slot.
+	/// The first row in the output will be the sizes of each dimension with one unused column.
+	///
+	/// For example, a truncated identity matrix of size 3x5 could be represented like this:
+	///
+	///     3 5 0.0   <-- size
+	///     0 0 1.0
+	///     1 1 1.0
+	///     2 2 1.0
+	Tensor sparsify(T epsilon = 1e-12)
+	{
+		size_t count = 0;
+		for(auto x : *this)
+			if(std::abs(x) > epsilon)
+				++count;
+		
+		Tensor<T> sparse(count, m_dims.size() + 1);
+		
+		size_t idx = 0;
+		for(auto i = begin(), iend = end(); i != iend; ++i)
+		{
+			if(std::abs(*i) > epsilon)
+			{
+				for(size_t j = 0, jend = i.indices().size(); j != jend; ++j)
+					sparse(idx, j) = i.indices()(j);
+				sparse(idx, i.indices().size()) = *i;
+				++idx;
+			}
+		}
+		
+		return sparse;
+	}
+
+	/// \brief Unsparsify the current sparse tensor.
+	///
+	/// See sparsify for an explanation of sparse tensors.
+	Tensor unsparsify()
+	{
+		NNAssertEquals(m_dims.size(), 2, "Sparse tensors must be represented by matrices!");
+		
+		Storage<size_t> dims(m_dims[1] - 1);
+		for(size_t i = 0, end = dims.size(); i != end; ++i)
+			dims[i] = (*this)(0, i);
+		
+		Tensor<T> dense(dims, true);
+		dense.fill(0);
+		
+		for(size_t i = 1, end = m_dims[0], jend = m_dims[1] - 1; i != end; ++i)
+		{
+			for(size_t j = 0; j != jend; ++j)
+				dims[j] = (*this)(i, j);
+			dense(dims) = (*this)(i, jend);
+		}
+		
+		return dense;
+	}
+	
 	// MARK: Functional
 	
 	/// \brief Apply the given function to each element in this tensor.
