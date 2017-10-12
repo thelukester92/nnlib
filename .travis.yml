@@ -15,7 +15,7 @@ before_install:
     - sudo apt-get install -y gfortran
     - sudo apt-get install -y lcov
     - mkdir -p cache
-    - git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS cache/openblas
+    - git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS cache/openblas || true
     - cd cache/openblas
     - |
       if ! make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install; then
