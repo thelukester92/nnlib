@@ -6,17 +6,24 @@ compiler:
 dist:
     - trusty
 group: edge
+cache:
+    directories:
+    - cache
 before_install:
     - cd $TRAVIS_BUILD_DIR
     - sudo apt-get update -qq -y
     - sudo apt-get install -y gfortran
     - sudo apt-get install -y lcov
-    - git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS openblas || true
-    - cd openblas
-    - make && make PREFIX=$TRAVIS_BUILD_DIR/openblas-build install
+    - |
+      if [ ! -d cache ]; then
+        mkdir -p cache
+        git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS cache/openblas
+        cd cache/openblas
+        make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
+      fi
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/openblas-build/lib" test
+    - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - lcov -c -d obj -o obj/lcov.info
