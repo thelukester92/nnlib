@@ -115,6 +115,7 @@ public:
 	
 	virtual void forget() override
 	{
+		Module<T>::forget();
 		m_module->forget();
 	}
 	
@@ -177,6 +178,11 @@ public:
 	virtual Storage<Tensor<T> *> gradList() override
 	{
 		return m_module->gradList();
+	}
+	
+	virtual Storage<Tensor<T> *> stateList() override
+	{
+		return m_module->stateList().push_back(&m_states);
 	}
 	
 protected:

@@ -11,11 +11,12 @@ template <typename T = double>
 class Linear : public Module<T>
 {
 public:
-	Linear(size_t inps, size_t outs) :
+	Linear(size_t inps, size_t outs, bool bias = true) :
 		m_weights(inps, outs),
 		m_weightsGrad(inps, outs),
 		m_bias(outs),
-		m_biasGrad(outs)
+		m_biasGrad(outs),
+		m_useBias(bias)
 	{
 		reset();
 	}
@@ -24,14 +25,16 @@ public:
 		m_weights(module.m_weights.copy()),
 		m_weightsGrad(m_weights.shape(), true),
 		m_bias(module.m_bias.copy()),
-		m_biasGrad(m_bias.shape(), true)
+		m_biasGrad(m_bias.shape(), true),
+		m_useBias(module.m_useBias)
 	{}
 	
 	Linear(const Serialized &node) :
 		m_weights(node.get<Tensor<T>>("weights")),
 		m_weightsGrad(m_weights.shape(), true),
 		m_bias(node.get<Tensor<T>>("bias")),
-		m_biasGrad(m_bias.shape(), true)
+		m_biasGrad(m_bias.shape(), true),
+		m_useBias(node.get<bool>("useBias"))
 	{
 		NNAssertEquals(m_weights.dims(), 2, "Expected matrix weights!");
 		NNAssertEquals(m_bias.dims(), 1, "Expected vector bias!");
@@ -51,6 +54,17 @@ public:
 		swap(a.m_weightsGrad, b.m_weightsGrad);
 		swap(a.m_bias, b.m_bias);
 		swap(a.m_biasGrad, b.m_biasGrad);
+	}
+	
+	Linear &useBias(bool bias = true)
+	{
+		m_useBias = bias;
+		return *this;
+	}
+	
+	bool usesBias() const
+	{
+		return m_useBias;
 	}
 	
 	Linear &reset()
@@ -80,6 +94,7 @@ public:
 	{
 		node.set("weights", m_weights);
 		node.set("bias", m_bias);
+		node.set("useBias", m_useBias);
 	}
 	
 	// MARK: Computation
@@ -89,13 +104,17 @@ public:
 		if(input.dims() == 1)
 		{
 			m_output.resize(m_weights.size(1));
-			m_output.copy(m_bias).assignMTV(m_weights, input, 1, 1);
+			if(m_useBias)
+				m_output.copy(m_bias).assignMTV(m_weights, input, 1, 1);
+			else
+				m_output.assignMTV(m_weights, input);
 		}
 		else if(input.dims() == 2)
 		{
 			m_output.resize(input.size(0), m_weights.size(1));
 			m_output.assignMM(input, m_weights);
-			m_output.assignVV(m_ones.resize(input.size(0)).fill(1), m_bias, 1, 1);
+			if(m_useBias)
+				m_output.assignVV(m_ones.resize(input.size(0)).fill(1), m_bias, 1, 1);
 		}
 		else
 		{
@@ -111,7 +130,8 @@ public:
 		if(input.dims() == 1)
 		{
 			m_weightsGrad.assignVV(input, outGrad, 1, 1);
-			m_biasGrad.addV(outGrad);
+			if(m_useBias)
+				m_biasGrad.addV(outGrad);
 			
 			m_inGrad.resize(m_weights.size(0));
 			m_inGrad.assignMV(m_weights, outGrad);
@@ -119,7 +139,8 @@ public:
 		else if(input.dims() == 2)
 		{
 			m_weightsGrad.assignMTM(input, outGrad, 1, 1);
-			m_biasGrad.assignMTV(outGrad, m_ones.resize(input.size(0)).fill(1), 1, 1);
+			if(m_useBias)
+				m_biasGrad.assignMTV(outGrad, m_ones.resize(input.size(0)).fill(1), 1, 1);
 			
 			m_inGrad.resize(input.size(0), m_weights.size(0));
 			m_inGrad.assignMMT(outGrad, m_weights);
@@ -154,6 +175,7 @@ protected:
 	Tensor<T> m_biasGrad;
 	
 	Tensor<T> m_ones;
+	bool m_useBias;
 };
 
 }

@@ -32,7 +32,6 @@ public:
 		m_outGateH(new Linear<T>(outs, outs)),
 		m_outGate(new Logistic<T>()),
 		m_outMod(new TanH<T>()),
-		m_resetGrad(true),
 		m_clip(0),
 		m_outs(outs)
 	{
@@ -56,7 +55,6 @@ public:
 		m_outGateH(module.m_outGateH->copy()),
 		m_outGate(module.m_outGate->copy()),
 		m_outMod(module.m_outMod->copy()),
-		m_resetGrad(module.m_resetGrad),
 		m_clip(module.m_clip),
 		m_outs(module.m_outs)
 	{}
@@ -78,7 +76,6 @@ public:
 		m_outGateH(node.get<Module<T> *>("outGateH")),
 		m_outGate(node.get<Module<T> *>("outGate")),
 		m_outMod(node.get<Module<T> *>("outMod")),
-		m_resetGrad(node.get<bool>("resetGrad")),
 		m_clip(node.get<T>("clip")),
 		m_outs(node.get<size_t>("outs"))
 	{}
@@ -128,7 +125,6 @@ public:
 		swap(a.m_outGateH, b.m_outGateH);
 		swap(a.m_outGate, b.m_outGate);
 		swap(a.m_outMod, b.m_outMod);
-		swap(a.m_resetGrad, b.m_resetGrad);
 		swap(a.m_clip, b.m_clip);
 		swap(a.m_outs, b.m_outs);
 	}
@@ -148,7 +144,8 @@ public:
 	{
 		Module<T>::forget();
 		m_outMod->output().fill(0);
-		m_resetGrad = true;
+		m_outGrad.fill(0);
+		m_stateGrad.fill(0);
 	}
 	
 	// MARK: Serialization
@@ -171,7 +168,6 @@ public:
 		node.set("outGateH", m_outGateH);
 		node.set("outGate", m_outGate);
 		node.set("outMod", m_outMod);
-		node.set("resetGrad", m_resetGrad);
 		node.set("clip", m_clip);
 		node.set("outs", m_outs);
 	}
@@ -232,13 +228,6 @@ public:
 		m_curStateGrad.resize(input.size(0), m_outs);
 		m_gradBuffer.resize(input.size(0), m_outs);
 		m_inGrad.resize(input.shape());
-		
-		if(m_resetGrad)
-		{
-			m_resetGrad = false;
-			m_outGrad.fill(0);
-			m_stateGrad.fill(0);
-		}
 		
 		// update output gradient
 		m_outGrad.addM(outGrad);
@@ -387,7 +376,6 @@ private:
 	Tensor<T> m_curStateGrad;
 	Tensor<T> m_gradBuffer;
 	
-	bool m_resetGrad;
 	T m_clip;
 	size_t m_outs;
 };

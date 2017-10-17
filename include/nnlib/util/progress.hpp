@@ -15,7 +15,7 @@ class Progress
 public:
 	Progress() = delete;
 	
-	static void display(size_t current, size_t total, char end = '\0', size_t length = 50, std::ostream &out = std::cout)
+	static void display(size_t current, size_t total, std::ostream &out = std::cout, size_t length = 50)
 	{
 		static Timer timer;
 		
@@ -26,7 +26,7 @@ public:
 		size_t leading			= (length - middle) / 2;
 		size_t trailing			= length - middle - leading;
 		
-		if(current == 0)
+		if(current <= 1)
 			timer.reset();
 		
 		out << "\r\33[2K[";
@@ -44,9 +44,9 @@ public:
 				out << " / " << ftime(timer.elapsed() / current * total);
 		}
 		else
-			out << " Done in " << ftime(timer.elapsed()) << "! ^_^";
+			out << " Done in " << ftime(timer.elapsed()) << "! ^_^\n";
 		
-		out << end << std::flush;
+		out << std::flush;
 	}
 	
 private:
