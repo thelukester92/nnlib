@@ -290,9 +290,9 @@ public:
 	
 	/// \brief Resize this tensor in place and, if necessary, resize its underlying storage.
 	///
-	/// If this tensor shares data (i.e. it is a view) and the new size is greater than the current,
+	/// If this shares data and the new size is greater or this is not contiguous,
 	/// this method will break the connction and allocate a new buffer.
-	/// This method will pad with 0s when resizing bigger.
+	/// When resizing bigger, the new values will be set to 0s.
 	/// \param dims The new shape for the tensor.
 	///
 	/// \return The tensor, for chaining.
@@ -312,9 +312,9 @@ public:
 		
 		size_t size = strides[0] * dims[0];
 		
-		// Resize underlying storage. If not unique and we are resizing larger, break shared connection.
+		// Resize underlying storage. If not unique and this is smaller or not contiguous, break shared connection.
 		
-		if(shared() && size > m_size)
+		if(shared() && (size > m_size || !m_contiguous))
 			*this = Tensor(*m_data).resize(dims);
 		else
 		{
@@ -339,13 +339,6 @@ public:
 		return resize(Storage<size_t>{ dim1, static_cast<size_t>(dims)... });
 	}
 	
-	/// Resize this tensor in place, possibly invalidating any other tensors that share data with it.
-	template <typename ... Ts>
-	Tensor &resizeAndInvalidateShared(size_t dim1, Ts... dims)
-	{
-		return resize(Storage<size_t>{ dim1, static_cast<size_t>(dims)... }, true);
-	}
-	
 	/// \brief Resize one dimension of this tensor in place and, if necessary, resize its underlying storage.
 	///
 	/// \param dim Which dimension to resize.
@@ -364,16 +357,25 @@ public:
 	
 	/// \brief Creates a new tensor with a view of this tensor's storage but (perhaps) a new shape.
 	///
+	/// This must be contiguous and the view must be less than or equal to the current tensor's size.
 	/// \param dims A Storage containing the new shape.
 	/// \return A tensor that views the same storage as this tensor.
 	Tensor view(const Storage<size_t> &dims)
 	{
+		NNHardAssert(m_contiguous, "Expected a contiguous tensor!");
+		
+		size_t size = 1;
+		for(size_t d : dims)
+			size *= d;
+		NNHardAssertLessThanOrEquals(size, m_size, "Expected view to be smaller than the original tensor!");
+		
 		Tensor t = *this;
 		return t.resize(dims);
 	}
 	
 	/// \brief Creates a new tensor with a view of this tensor's storage but (perhaps) a new shape.
 	///
+	/// This must be contiguous and the view must be less than or equal to the current tensor's size.
 	/// \param dims A parameter pack containing the new shape.
 	/// \return A tensor that views the same storage as this tensor.
 	template <typename ... Ts>
@@ -384,16 +386,25 @@ public:
 	
 	/// \brief Creates a new constant tensor with a view of this tensor's storage but (perhaps) a new shape.
 	///
+	/// This must be contiguous and the view must be less than or equal to the current tensor's size.
 	/// \param dims A Storage containing the new shape.
 	/// \return A constant tensor that views the same storage as this tensor.
 	const Tensor view(const Storage<size_t> &dims) const
 	{
+		NNHardAssert(m_contiguous, "Expected a contiguous tensor!");
+		
+		size_t size = 1;
+		for(size_t d : dims)
+			size *= d;
+		NNHardAssertLessThanOrEquals(size, m_size, "Expected view to be smaller than the original tensor!");
+		
 		Tensor t = *const_cast<Tensor *>(this);
 		return t.resize(dims);
 	}
 	
 	/// \brief Creates a new constant tensor with a view of this tensor's storage but (perhaps) a new shape.
 	///
+	/// This must be contiguous and the view must be less than or equal to the current tensor's size.
 	/// \param dims A parameter pack containing the new shape.
 	/// \return A constant tensor that views the same storage as this tensor.
 	template <typename ... Ts>
