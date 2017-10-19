@@ -45,7 +45,7 @@ public:
 			NNAssertEquals(input(0, 1), m_weights.size(0), "Incompatible size indicated by sparse tensor!");
 			
 			// sparse matrix input
-			m_output.resize(input(0, 0), m_weights.size(1));
+			m_output.resize(input(0, 0), m_weights.size(1)).fill(0);
 			
 			// sparse matrix/matrix multiplication
 			for(size_t i = 1, end = input.size(0); i != end; ++i)
