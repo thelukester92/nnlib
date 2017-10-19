@@ -439,10 +439,24 @@ public:
 	
 	/// Get a serializable value (as a pointer).
 	template <typename T>
-	typename std::enable_if<std::is_pointer<T>::value, T>::type as() const
+	typename std::enable_if<std::is_pointer<T>::value && std::is_abstract<typename std::remove_pointer<T>::type>::value, T>::type as() const
 	{
-		NNHardAssert(m_type == Object && m_object.has("polymorphic"), "Cannot deserialize a pointer to a non-polymorphic type!");
+		if(m_type == Null)
+			return nullptr;
+		NNHardAssert(m_type == Object && m_object.has("polymorphic"), "Expected a polymorphic type!");
 		return static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"), *get<Serialized *>("data")));
+	}
+	
+	/// Get a serializable value (as a pointer).
+	template <typename T>
+	typename std::enable_if<std::is_pointer<T>::value && !std::is_abstract<typename std::remove_pointer<T>::type>::value, T>::type as() const
+	{
+		if(m_type == Null)
+			return nullptr;
+		else if(m_type == Object && m_object.has("polymorphic"))
+			return static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"), *get<Serialized *>("data")));
+		else
+			return new typename std::remove_pointer<T>::type (*this);
 	}
 	
 // MARK: Setters
@@ -524,7 +538,10 @@ public:
 	template <typename T>
 	typename std::enable_if<traits::HasSave<T>::value>::type set(const T *value)
 	{
-		set(*value);
+		if(value == nullptr)
+			type(Null);
+		else
+			set(*value);
 	}
 	
 	/// Assignment.
