@@ -487,7 +487,7 @@ public:
 	
 	/// Set a string value.
 	template <typename T>
-	typename std::enable_if<std::is_convertible<T, std::string>::value>::type set(const T &value)
+	typename std::enable_if<std::is_convertible<T, std::string>::value && !std::is_same<T, std::nullptr_t>::value>::type set(const T &value)
 	{
 		type(String);
 		m_string = value;
@@ -536,12 +536,18 @@ public:
 	
 	/// Set a serializable value (from a pointer).
 	template <typename T>
-	typename std::enable_if<traits::HasSave<T>::value>::type set(const T *value)
+	typename std::enable_if<std::is_pointer<T>::value && !std::is_convertible<T, std::string>::value>::type set(const T value)
 	{
 		if(value == nullptr)
 			type(Null);
 		else
 			set(*value);
+	}
+	
+	/// Set a null pointer.
+	void set(std::nullptr_t value)
+	{
+		type(Null);
 	}
 	
 	/// Assignment.

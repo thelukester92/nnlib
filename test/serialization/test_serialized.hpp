@@ -1,6 +1,7 @@
 #ifndef TEST_SERIALIZED_H
 #define TEST_SERIALIZED_H
 
+#include "nnlib/core/tensor.hpp"
 #include "nnlib/serialization/serialized.hpp"
 #include <vector>
 using namespace nnlib;
@@ -19,6 +20,7 @@ void TestSerialized()
 	
 	{
 		NNAssertEquals(Serialized().type(), Serialized::Null, "Serialized::Serialized) failed!");
+		NNAssertEquals(Serialized(nullptr).type(), Serialized::Null, "Serialized::Serialized) failed!");
 		NNAssertEquals(Serialized(true).type(), Serialized::Boolean, "Serialized::Serialized(bool) failed!");
 		NNAssertEquals(Serialized(42).type(), Serialized::Integer, "Serialized::Serialized(int) failed!");
 		NNAssertEquals(Serialized(3.14).type(), Serialized::Float, "Serialized::Serialized(double) failed!");
@@ -54,14 +56,17 @@ void TestSerialized()
 		s.add(42);
 		s.add("hello");
 		s.add(Serialized::Array);
+		s.add(nullptr);
 		
 		NNAssertEquals(s.type(0), Serialized::Integer, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.type(1), Serialized::String, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.type(2), Serialized::Array, "Serialized::type(size_t) failed!");
+		NNAssertEquals(s.type(3), Serialized::Null, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.get<int>(0), 42, "Serialized::get<int>(int) failed!");
 		NNAssertEquals(s.get<std::string>(1), "hello", "Serialized::get<std::string>(int) failed!");
 		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
 		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
+		NNAssertEquals(s.get<Tensor<> *>(3), nullptr, "Serialized::get<Tensor<> *>(int) failed!");
 		
 		s.set(0, 365);
 		NNAssertEquals(s.get<int>(0), 365, "Serialized::set<int>(int) failed!");
@@ -75,16 +80,19 @@ void TestSerialized()
 		t.add(42);
 		t.add("hello");
 		t.add(Serialized::Array);
+		t.add(nullptr);
 		
 		const Serialized &s = t;
 		
 		NNAssertEquals(s.type(0), Serialized::Integer, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.type(1), Serialized::String, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.type(2), Serialized::Array, "Serialized::type(size_t) failed!");
+		NNAssertEquals(s.type(3), Serialized::Null, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.get<int>(0), 42, "Serialized::get<int>(int) failed!");
 		NNAssertEquals(s.get<std::string>(1), "hello", "Serialized::get<std::string>(int) failed!");
 		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
 		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
+		NNAssertEquals(s.get<Tensor<> *>(3), nullptr, "Serialized::get<Tensor<> *>(int) failed!");
 	}
 	
 	{
@@ -96,9 +104,10 @@ void TestSerialized()
 		obj.set("stng", "hello");
 		obj.set("arry", Serialized::Array);
 		obj.set("objt", Serialized::Object);
+		obj.set("nptr", nullptr);
 		
 		NNAssertEquals(obj.get<Serialized *>("null")->size(), 1, "Serialized::size() failed!");
-		NNAssertEquals(obj.size(), 7, "Serialized::size() failed!");
+		NNAssertEquals(obj.size(), 8, "Serialized::size() failed!");
 		NNAssert(obj.has("null"), "Serialized::has(string) failed!");
 		NNAssert(!obj.has("bull"), "Serialized::has(string) failed!");
 		
@@ -122,6 +131,9 @@ void TestSerialized()
 		s = *obj.get<Serialized *>("objt");
 		NNAssertEquals(s.type(), Serialized::Object, "Serialized::operator=(const Serialized &other) failed!");
 		
+		s = *obj.get<Serialized *>("nptr");
+		NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(const Serialzied &other) failed!");
+		
 		s = std::move(*obj.get<Serialized *>("null"));
 		NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(Serialized &&other) failed!");
 		
@@ -139,6 +151,9 @@ void TestSerialized()
 		
 		s = std::move(*obj.get<Serialized *>("objt"));
 		NNAssertEquals(s.type(), Serialized::Object, "Serialized::operator=(Serialized &&other) failed!");
+		
+		s = std::move(*obj.get<Serialized *>("nptr"));
+		NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(Serialized &&other) failed!");
 	}
 	
 	{
