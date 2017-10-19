@@ -69,12 +69,9 @@ public:
 	
 	Linear &reset()
 	{
-		if(m_weights.size() > 0)
-		{
-			T dev = 1.0 / sqrt(m_weights.size(1));
-			m_weights.rand(-dev, dev);
-			m_bias.rand(-dev, dev);
-		}
+		T dev = 1.0 / sqrt(m_weights.size(1));
+		m_weights.rand(-dev, dev);
+		m_bias.rand(-dev, dev);
 		return *this;
 	}
 	
