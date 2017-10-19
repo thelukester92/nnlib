@@ -42,12 +42,14 @@ void TestLinear()
 	NNAssertLessThan(module.output().copy().add(out.select(0, 0), -1).square().sum(), 1e-9, "Linear::forward failed for a vector; wrong output!");
 	NNAssertLessThan(module.inGrad().copy().add(ing.select(0, 0), -1).square().sum(), 1e-9, "Linear::backward failed for a vector; wrong input gradient!");
 	
-	module.useBias(false);
-	module.forward(inp.select(0, 0));
-	module.backward(inp.select(0, 0), grd.select(0, 0));
+	Linear<> unbiased(2, 3, false);
+	unbiased.weights().copy(module.weights());
 	
-	NNAssertLessThan(module.output().copy().add(module.bias()).add(out.select(0, 0), -1).square().sum(), 1e-9, "Linear::forward failed without bias; wrong output!");
-	NNAssertLessThan(module.inGrad().copy().add(ing.select(0, 0), -1).square().sum(), 1e-9, "Linear::backward failed without bias; wrong input gradient!");
+	unbiased.forward(inp.select(0, 0));
+	unbiased.backward(inp.select(0, 0), grd.select(0, 0));
+	
+	NNAssertLessThan(unbiased.output().copy().add(module.bias()).add(out.select(0, 0), -1).square().sum(), 1e-9, "Linear::forward failed without bias; wrong output!");
+	NNAssertLessThan(unbiased.inGrad().copy().add(ing.select(0, 0), -1).square().sum(), 1e-9, "Linear::backward failed without bias; wrong input gradient!");
 	
 	bool ok = true;
 	try

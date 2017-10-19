@@ -58,6 +58,15 @@ void TestSparseLinear()
 	NNAssertLessThan(module.output().copy().add(linear.output(), -1).square().sum(), 1e-9, "SparseLinear::forward failed for a vector; wrong output!");
 	NNAssertLessThan(module.inGrad().copy().add(linear.inGrad(), -1).square().sum(), 1e-9, "SparseLinear::backward failed for a vector; wrong input gradient!");
 	
+	SparseLinear<> unbiased(2, 3, false);
+	unbiased.weights().copy(module.weights());
+	
+	unbiased.forward(inp);
+	unbiased.backward(inp, grd);
+	
+	NNAssertLessThan(unbiased.output().copy().add(module.bias()).add(linear.output(), -1).square().sum(), 1e-9, "SparseLinear::forward failed without bias; wrong output!");
+	NNAssertLessThan(unbiased.inGrad().copy().add(linear.inGrad(), -1).square().sum(), 1e-9, "SparseLinear::backward failed without bias; wrong input gradient!");
+	
 	bool ok = true;
 	try
 	{
