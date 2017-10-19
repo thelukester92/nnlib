@@ -659,7 +659,7 @@ public:
 	
 	/// Get a numeric value from an object.
 	template <typename T>
-	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type get(const std::string &key) const
+	typename std::enable_if<(std::is_arithmetic<T>::value || traits::HasLoadAndSave<T>::value) && !std::is_pointer<T>::value, T>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
 		return m_object[key]->as<T>();
