@@ -568,7 +568,7 @@ public:
 	
 	/// Get a numeric value from an array.
 	template <typename T>
-	typename std::enable_if<std::is_arithmetic<T>::value || traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value, T>::type get(size_t i) const
+	typename std::enable_if<(std::is_arithmetic<T>::value || traits::HasLoadAndSave<T>::value) && !std::is_pointer<T>::value, T>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		return m_array[i]->as<T>();
@@ -576,7 +576,7 @@ public:
 	
 	/// Get a non-numeric value from an array.
 	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && !std::is_same<T, Serialized *>::value, const T &>::type get(size_t i) const
+	typename std::enable_if<!std::is_arithmetic<T>::value && !std::is_pointer<T>::value && !traits::HasLoadAndSave<T>::value, const T &>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		return m_array[i]->as<T>();
@@ -584,7 +584,15 @@ public:
 	
 	/// Get a non-numeric value from an array.
 	template <typename T>
-	typename std::enable_if<!std::is_arithmetic<T>::value && !traits::HasLoadAndSave<typename std::remove_pointer<T>::type>::value && !std::is_same<T, Serialized *>::value, T &>::type get(size_t i)
+	typename std::enable_if<!std::is_arithmetic<T>::value && !std::is_pointer<T>::value && !traits::HasLoadAndSave<T>::value, T &>::type get(size_t i)
+	{
+		NNHardAssertEquals(m_type, Array, "Invalid type!");
+		return m_array[i]->as<T>();
+	}
+	
+	/// Get a pointer value from an array.
+	template <typename T>
+	typename std::enable_if<std::is_pointer<T>::value && !std::is_same<T, Serialized *>::value, T>::type get(size_t i) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
 		return m_array[i]->as<T>();

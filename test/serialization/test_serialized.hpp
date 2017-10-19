@@ -2,6 +2,7 @@
 #define TEST_SERIALIZED_H
 
 #include "nnlib/core/tensor.hpp"
+#include "nnlib/nn/module.hpp"
 #include "nnlib/serialization/serialized.hpp"
 #include <vector>
 using namespace nnlib;
@@ -67,6 +68,7 @@ void TestSerialized()
 		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
 		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
 		NNAssertEquals(s.get<Tensor<> *>(3), nullptr, "Serialized::get<Tensor<> *>(int) failed!");
+		NNAssertEquals(s.get<Module<> *>(3), nullptr, "Serialized::get<Module<> *>(int) failed!");
 		
 		s.set(0, 365);
 		NNAssertEquals(s.get<int>(0), 365, "Serialized::set<int>(int) failed!");
@@ -93,6 +95,7 @@ void TestSerialized()
 		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
 		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
 		NNAssertEquals(s.get<Tensor<> *>(3), nullptr, "Serialized::get<Tensor<> *>(int) failed!");
+		NNAssertEquals(s.get<Module<> *>(3), nullptr, "Serialized::get<Module<> *>(int) failed!");
 	}
 	
 	{
