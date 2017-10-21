@@ -322,7 +322,7 @@ public:
 	
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		Storage<Tensor<T> *> list;
+		Storage<Tensor<T> *> list = Module<T>::stateList();
 		list.append(m_inpGateX->stateList());
 		list.append(m_inpGateY->stateList());
 		list.append(m_inpGateH->stateList());
