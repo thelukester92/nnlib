@@ -12,6 +12,7 @@ public:
 	static void run(const std::string &name, M<T> &module, const Tensor<T> &sampleInput, bool randomizeInput = true)
 	{
 		testDeterministic(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
+		testState(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
 		testCopyConstructor(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
 		testAssignment(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
 		testSerialization(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
@@ -73,6 +74,20 @@ private:
 		
 		for(auto x = o1.begin(), y = o2.begin(), end = o1.end(); x != end; ++x, ++y)
 			NNAssertAlmostEquals(*x, *y, 1e-12, name + "::forward() failed! Different outputs for the same input and random seed!");
+	}
+	
+	static void testState(const std::string &name, M<T> &module, const Tensor<T> &input)
+	{
+		RandomEngine::seed(0);
+		auto s = module.state().copy();
+		auto o1 = module.forward(input).copy();
+		
+		RandomEngine::seed(0);
+		module.state().copy(s);
+		auto o2 = module.forward(input);
+		
+		for(auto x = o1.begin(), y = o2.begin(), end = o1.end(); x != end; ++x, ++y)
+			NNAssertAlmostEquals(*x, *y, 1e-12, name + "::state() failed! Different outputs for the same state and random seed!");
 	}
 	
 	static void testCopyConstructor(const std::string &name, M<T> &module, const Tensor<T> &input)
