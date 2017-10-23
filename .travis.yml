@@ -17,10 +17,7 @@ before_install:
     - mkdir -p cache
     - git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS cache/openblas || true
     - cd cache/openblas
-    - |
-      if ! make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install; then
-        make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
-      fi
+    - make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
 script:
     - cd $TRAVIS_BUILD_DIR
     - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
