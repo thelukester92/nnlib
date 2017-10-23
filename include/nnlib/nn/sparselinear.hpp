@@ -98,7 +98,7 @@ public:
 			
 			// bias gradient
 			if(m_bias)
-				m_biasGrad->assignMTV(outGrad, m_ones.resize(input.size(0)).fill(1), 1, 1);
+				m_biasGrad->assignMTV(outGrad, m_ones.resize(input(0, 0)).fill(1), 1, 1);
 			
 			// input gradient
 			m_inGrad.resize(input(0, 0), m_weights.size(0));

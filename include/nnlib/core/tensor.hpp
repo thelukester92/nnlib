@@ -895,6 +895,7 @@ public:
 		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
 		NNAssertEquals(x.dims(), 1, "x must be a vector!");
 		NNAssertEquals(dims(), 1, "This must be a vector!");
+		NNAssertEquals(x.size(0), A.size(1), "Incompatible operands!");
 		NNAssertEquals(size(0), A.size(0), "Incompatible operands!");
 		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
 		
@@ -923,6 +924,7 @@ public:
 		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
 		NNAssertEquals(x.dims(), 1, "x must be a vector!");
 		NNAssertEquals(dims(), 1, "This must be a vector!");
+		NNAssertEquals(x.size(0), A.size(0), "Incompatible operands!");
 		NNAssertEquals(size(0), A.size(1), "Incompatible operands!");
 		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
 		
