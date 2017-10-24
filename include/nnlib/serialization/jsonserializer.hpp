@@ -137,7 +137,7 @@ private:
 		}
 		
 		if(floatPart.length() == 0)
-			node.set(std::stoi(intPart));
+			node.set(std::stol(intPart));
 		else
 			node.set(std::stod(intPart + '.' + floatPart));
 	}

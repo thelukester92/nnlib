@@ -147,7 +147,7 @@ private:
 		if(couldBeNumber && foundDecimal)
 			return new Serialized(std::stod(value));
 		else if(couldBeNumber)
-			return new Serialized(std::stoi(value));
+			return new Serialized(std::stol(value));
 		else
 			return new Serialized(value);
 	}
