@@ -144,10 +144,12 @@ private:
 			value.push_back(p.get());
 		}
 		
+		couldBeNumber = couldBeNumber && value.length() <= 10;
+		
 		if(couldBeNumber && foundDecimal)
 			return new Serialized(std::stod(value));
 		else if(couldBeNumber)
-			return new Serialized(std::stol(value));
+			return new Serialized(std::stoi(value));
 		else
 			return new Serialized(value);
 	}

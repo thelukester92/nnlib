@@ -136,8 +136,8 @@ private:
 			floatPart += p.consumeDigits();
 		}
 		
-		if(floatPart.length() == 0)
-			node.set(std::stol(intPart));
+		if(floatPart.length() == 0 && intPart.length() <= 10)
+			node.set(std::stoi(intPart));
 		else
 			node.set(std::stod(intPart + '.' + floatPart));
 	}
