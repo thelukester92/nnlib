@@ -12,8 +12,8 @@ class ContainerTests : public ModuleTests<M, T>
 public:
 	static void run(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
 	{
-		testBuffers(name, module);
 		ModuleTests<M, T>::run(name, module, sampleInput);
+		testBuffers(name, module);
 		testSerialization(name, module, sampleInput);
 	}
 	

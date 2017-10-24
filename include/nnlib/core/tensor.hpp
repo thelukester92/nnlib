@@ -32,7 +32,7 @@ public:
 	/// Otherwise, all shared connections are broken and a new vector is created.
 	/// \param tensors A list of tensors to vectorize.
 	/// \return The vectorized data (shared by the original tensors).
-	static Tensor flatten(const Storage<Tensor *> &tensors)
+	static Tensor vectorize(const Storage<Tensor *> &tensors)
 	{
 		size_t size = 0;
 		for(Tensor *t : tensors)
