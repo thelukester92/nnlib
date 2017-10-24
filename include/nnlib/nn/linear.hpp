@@ -151,7 +151,7 @@ public:
 		if(m_bias)
 			return { &m_weights, m_bias };
 		else
-		 	return { &m_weights };
+			return { &m_weights };
 	}
 	
 	virtual Storage<Tensor<T> *> gradList() override
