@@ -123,7 +123,6 @@ protected:
 	Tensor<T> m_output;
 	Tensor<T> m_inGrad;
 	
-private:
 	Tensor<T> m_params;
 	Tensor<T> m_grad;
 	Tensor<T> m_state;

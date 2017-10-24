@@ -12,6 +12,7 @@ class ContainerTests : public ModuleTests<M, T>
 public:
 	static void run(const std::string &name, M<T> &module, const Tensor<T> &sampleInput)
 	{
+		testBuffers(name, module);
 		ModuleTests<M, T>::run(name, module, sampleInput);
 		testSerialization(name, module, sampleInput);
 	}
@@ -21,6 +22,45 @@ protected:
 	using ModuleTests<M, T>::testEqualOutput;
 	
 private:
+	static void testBuffers(const std::string &name, Container<T> &module)
+	{
+		// make sure these have been flattened
+		module.params();
+		module.grad();
+		module.state();
+		
+		// make sure they are shared
+		for(size_t i = 0; i < module.components(); ++i)
+		{
+			NNAssert(module.component(i)->params().sharedWith(module.params()), name + "::params failed! Not shared correctly!");
+			NNAssert(module.component(i)->grad().sharedWith(module.grad()), name + "::grad failed! Not shared correctly!");
+			NNAssert(module.component(i)->state().sharedWith(module.state()), name + "::state failed! Not shared correctly!");
+		}
+		
+		// make sure they are equal; this makes an assumption on the order of flattening
+		auto x = module.params().begin(), y = module.grad().begin(), z = module.state().begin();
+		for(size_t i = 0; i < module.components(); ++i)
+		{
+			for(auto xx : module.component(i)->params())
+			{
+				NNAssertEquals(*x, xx, name + "::params failed! Wrong value!");
+				++x;
+			}
+			
+			for(auto yy : module.component(i)->grad())
+			{
+				NNAssertEquals(*y, yy, name + "::grad failed! Wrong value!");
+				++y;
+			}
+			
+			for(auto zz : module.component(i)->state())
+			{
+				NNAssertEquals(*z, zz, name + "::state failed! Wrong value!");
+				++z;
+			}
+		}
+	}
+	
 	static void testSerialization(const std::string &name, Container<T> &module, const Tensor<T> &sampleInput)
 	{
 		Container<T> *s1 = Serialized(module).as<Container<T> *>();

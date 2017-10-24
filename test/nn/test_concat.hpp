@@ -80,8 +80,7 @@ void TestConcat()
 	NNAssert(module.gradList() == linear->gradList(), "Concat::gradList failed!");
 	NNAssert(module.stateList() == linear->stateList(), "Concat::stateList failed!");
 	
-	Concat<> module2(new Linear<>(5, 2), new Linear<>(5, 3));
-	TestContainer("Concat", module2, Tensor<>(100, 5).rand());
+	TestContainer("Concat", module, inp);
 }
 
 #endif
