@@ -28,17 +28,17 @@ void ToyTimeSeries()
 	
 	MSE<> critic;
 	SGD<> opt(nn, critic);
-	opt.learningRate(1e-3);
+	opt.learningRate(1e-2);
 	
 	SequenceBatcher<> batcher(train.narrow(0, 0, 49), train.narrow(0, 1, 49), 25, 10);
-	for(size_t presentation = 0; presentation < 500; ++presentation)
+	for(size_t presentation = 0; presentation < 50; ++presentation)
 	{
 		batcher.reset();
 		nn.forget();
 		opt.step(batcher.features(), batcher.labels());
 	}
 	
-	// this amount of training should be plenty to fit testing data within 1.0 error
+	// this amount of training should be plenty to fit testing data within 0.6 error
 	
 	Tensor<> preds(50, 1);
 	nn.forget();
@@ -48,7 +48,7 @@ void ToyTimeSeries()
 		preds(i, 0) = nn.output()(nn.output().size(0) - 1, 0, 0);
 		nn.forward(preds.select(0, i).view(1, 1, 1));
 	}
-	NNAssertLessThan(critic.forward(preds, test), 1.0, "Too much error!");
+	NNAssertLessThan(critic.forward(preds, test), 0.6, "Too much error!");
 }
 
 #endif

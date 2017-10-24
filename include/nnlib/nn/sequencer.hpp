@@ -182,7 +182,7 @@ public:
 	
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		return m_module->stateList().push_back(&m_states);
+		return Module<T>::stateList().append(m_module->stateList()).push_back(&m_states);
 	}
 	
 protected:

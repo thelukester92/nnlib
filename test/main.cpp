@@ -53,6 +53,8 @@ using namespace std;
 
 int main()
 {
+	RandomEngine::seed(0);
+	
 	int ret = 0;
 	
 	initializer_list<pair<string, function<void()>>> unit_tests = {

@@ -19,6 +19,7 @@
 #include "nnlib/nn/container.hpp"
 #include "nnlib/nn/dropconnect.hpp"
 #include "nnlib/nn/dropout.hpp"
+#include "nnlib/nn/identity.hpp"
 #include "nnlib/nn/linear.hpp"
 #include "nnlib/nn/logistic.hpp"
 #include "nnlib/nn/logsoftmax.hpp"
@@ -28,6 +29,7 @@
 #include "nnlib/nn/relu.hpp"
 #include "nnlib/nn/sequencer.hpp"
 #include "nnlib/nn/sequential.hpp"
+#include "nnlib/nn/sparselinear.hpp"
 #include "nnlib/nn/tanh.hpp"
 
 /// Optimization

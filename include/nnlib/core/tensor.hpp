@@ -25,17 +25,27 @@ template <typename T = double>
 class Tensor
 {
 public:
-	/// \brief Flattens a number of tensors into a vector.
+	/// \brief Vectorizes a list of tensors.
 	///
-	/// Each tensor in the parameter becomes a subview into a single shared Storage.
-	/// If any of the tensors shared data, the old links are broken and are no longer shared.
-	/// \param tensors A list of tensors to flatten.
-	/// \return The flattened tensor.
-	static Tensor flatten(const Storage<Tensor *> &tensors)
+	/// Each tensor in the parameter becomes a subview into a single, contiguous vector.
+	/// If the tensors are already vectorized, this returns a vector viewing the entire list.
+	/// Otherwise, all shared connections are broken and a new vector is created.
+	/// \param tensors A list of tensors to vectorize.
+	/// \return The vectorized data (shared by the original tensors).
+	static Tensor vectorize(const Storage<Tensor *> &tensors)
 	{
 		size_t size = 0;
 		for(Tensor *t : tensors)
 			size += t->size();
+		
+		if(isVectorized(tensors))
+		{
+			Tensor flattened = *tensors[0];
+			flattened.m_dims = { size };
+			flattened.m_strides = { 1 };
+			flattened.m_size = size;
+			return flattened;
+		}
 		
 		Tensor flattened(size);
 		
@@ -895,6 +905,7 @@ public:
 		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
 		NNAssertEquals(x.dims(), 1, "x must be a vector!");
 		NNAssertEquals(dims(), 1, "This must be a vector!");
+		NNAssertEquals(x.size(0), A.size(1), "Incompatible operands!");
 		NNAssertEquals(size(0), A.size(0), "Incompatible operands!");
 		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
 		
@@ -923,6 +934,7 @@ public:
 		NNAssertEquals(A.dims(), 2, "A must be a matrix!");
 		NNAssertEquals(x.dims(), 1, "x must be a vector!");
 		NNAssertEquals(dims(), 1, "This must be a vector!");
+		NNAssertEquals(x.size(0), A.size(0), "Incompatible operands!");
 		NNAssertEquals(size(0), A.size(1), "Incompatible operands!");
 		NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
 		
@@ -1397,6 +1409,19 @@ private:
 	std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
 	size_t m_size;							///< The total number of elements.
 	bool m_contiguous;						///< Whether this tensor is contiguous (i.e. can be vectorized).
+	
+	/// Check whether the given list of tensors is already vectorized.
+	static bool isVectorized(const Storage<Tensor *> &tensors)
+	{
+		Tensor<T> *prev = nullptr;
+		for(Tensor<T> *t : tensors)
+		{
+			if(!t->m_contiguous || (prev != nullptr && (!t->sharedWith(*prev) || prev->ptr() + prev->size() != t->ptr())))
+				return false;
+			prev = t;
+		}
+		return true;
+	}
 	
 	/// Get the appropriate contiguous index given the multidimensional index.
 	size_t indexOf(const std::initializer_list<size_t> &indices) const

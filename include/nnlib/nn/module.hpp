@@ -77,7 +77,7 @@ public:
 	{
 		auto list = paramsList();
 		if(!m_params.sharedWith(list))
-			m_params = Tensor<T>::flatten(list);
+			m_params = Tensor<T>::vectorize(list);
 		return m_params;
 	}
 	
@@ -85,7 +85,7 @@ public:
 	{
 		auto list = gradList();
 		if(!m_grad.sharedWith(list))
-			m_grad = Tensor<T>::flatten(list);
+			m_grad = Tensor<T>::vectorize(list);
 		return m_grad;
 	}
 	
@@ -93,7 +93,7 @@ public:
 	{
 		auto list = stateList();
 		if(!m_state.sharedWith(list))
-			m_state = Tensor<T>::flatten(list);
+			m_state = Tensor<T>::vectorize(list);
 		return m_state;
 	}
 	
@@ -123,7 +123,6 @@ protected:
 	Tensor<T> m_output;
 	Tensor<T> m_inGrad;
 	
-private:
 	Tensor<T> m_params;
 	Tensor<T> m_grad;
 	Tensor<T> m_state;

@@ -16,20 +16,20 @@ class LSTM : public Module<T>
 {
 public:
 	LSTM(size_t inps, size_t outs) :
-		m_inpGateX(new Linear<T>(inps, outs)),
+		m_inpGateX(new Linear<T>(inps, outs, false)),
 		m_inpGateY(new Linear<T>(outs, outs, false)),
-		m_inpGateH(new Linear<T>(outs, outs, false)),
+		m_inpGateH(new Linear<T>(outs, outs)),
 		m_inpGate(new Logistic<T>()),
-		m_fgtGateX(new Linear<T>(inps, outs)),
+		m_fgtGateX(new Linear<T>(inps, outs, false)),
 		m_fgtGateY(new Linear<T>(outs, outs, false)),
-		m_fgtGateH(new Linear<T>(outs, outs, false)),
+		m_fgtGateH(new Linear<T>(outs, outs)),
 		m_fgtGate(new Logistic<T>()),
-		m_inpModX(new Linear<T>(inps, outs)),
-		m_inpModY(new Linear<T>(outs, outs, false)),
+		m_inpModX(new Linear<T>(inps, outs, false)),
+		m_inpModY(new Linear<T>(outs, outs)),
 		m_inpMod(new TanH<T>()),
-		m_outGateX(new Linear<T>(inps, outs)),
+		m_outGateX(new Linear<T>(inps, outs, false)),
 		m_outGateY(new Linear<T>(outs, outs, false)),
-		m_outGateH(new Linear<T>(outs, outs, false)),
+		m_outGateH(new Linear<T>(outs, outs)),
 		m_outGate(new Logistic<T>()),
 		m_outMod(new TanH<T>()),
 		m_clip(0),
@@ -143,7 +143,7 @@ public:
 	virtual void forget() override
 	{
 		Module<T>::forget();
-		m_outMod->output().fill(0);
+		m_output.fill(0);
 		m_outGrad.fill(0);
 		m_stateGrad.fill(0);
 	}
@@ -180,9 +180,9 @@ public:
 		m_prevState.resize(input.size(0), m_outs);
 		m_prevState.copy(m_state);
 		
-		m_outMod->output().resize(input.size(0), m_outs);
+		m_output.resize(input.size(0), m_outs);
 		m_prevOutput.resize(input.size(0), m_outs);
-		m_prevOutput.copy(m_outMod->output());
+		m_prevOutput.copy(m_output);
 		
 		// input gate
 		m_inpGateX->forward(input);
@@ -205,19 +205,18 @@ public:
 		m_inpAdd.resize(m_inpGate->output().shape());
 		m_inpAdd.copy(m_inpGate->output()).pointwiseProduct(m_inpMod->output());
 		m_fgtAdd.resize(m_fgtGate->output().shape());
-		m_fgtAdd.copy(m_fgtGate->output()).pointwiseProduct(m_state);
+		m_fgtAdd.copy(m_fgtGate->output()).pointwiseProduct(m_prevState);
 		m_state.copy(m_inpAdd).addM(m_fgtAdd);
+		m_outMod->forward(m_state);
 		
 		// output gate
 		m_outGateX->forward(input);
 		m_outGateX->output().addM(m_outGateY->forward(m_prevOutput));
 		m_outGateX->output().addM(m_outGateH->forward(m_state));
 		m_outGate->forward(m_outGateX->output());
-		m_outAdd.resize(m_outGate->output().shape());
-		m_outAdd.copy(m_outGate->output()).pointwiseProduct(m_state);
 		
 		// final output
-		return m_output = m_outMod->forward(m_outAdd);
+		return m_output.copy(m_outGate->output()).pointwiseProduct(m_outMod->output());
 	}
 	
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
@@ -231,17 +230,18 @@ public:
 		
 		// update output gradient
 		m_outGrad.addM(outGrad);
-		m_outMod->backward(m_outAdd, m_outGrad);
 		
 		// backprop to hidden state
-		m_curStateGrad.copy(m_outMod->inGrad()).pointwiseProduct(m_outGate->output());
+		m_curStateGrad.copy(m_outGrad).pointwiseProduct(m_outGate->output());
+		m_curStateGrad.copy(m_outMod->backward(m_state, m_curStateGrad));
 		m_curStateGrad.addM(m_stateGrad);
 		
 		// backprop through output gate
-		m_gradBuffer.copy(m_outMod->inGrad()).pointwiseProduct(m_state);
+		m_gradBuffer.copy(m_outGrad).pointwiseProduct(m_outMod->output());
 		m_outGate->backward(m_outGateX->output(), m_gradBuffer);
 		m_inGrad.copy(m_outGateX->backward(input, m_outGate->inGrad()));
 		m_outGrad.copy(m_outGateY->backward(m_prevOutput, m_outGate->inGrad()));
+		m_curStateGrad.addM(m_outGateH->backward(m_state, m_outGate->inGrad()));
 		
 		// backprop through input value
 		m_gradBuffer.copy(m_curStateGrad).pointwiseProduct(m_inpGate->output());
@@ -322,7 +322,7 @@ public:
 	
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		Storage<Tensor<T> *> list;
+		Storage<Tensor<T> *> list = Module<T>::stateList();
 		list.append(m_inpGateX->stateList());
 		list.append(m_inpGateY->stateList());
 		list.append(m_inpGateH->stateList());
@@ -339,7 +339,7 @@ public:
 		list.append(m_outGateH->stateList());
 		list.append(m_outGate->stateList());
 		list.append(m_outMod->stateList());
-		return list.append({ &m_state, &m_prevState, &m_prevOutput, &m_outAdd });
+		return list.append({ &m_state, &m_prevState, &m_prevOutput });
 	}
 	
 protected:
@@ -366,7 +366,6 @@ private:
 	
 	Tensor<T> m_inpAdd;
 	Tensor<T> m_fgtAdd;
-	Tensor<T> m_outAdd;
 	Tensor<T> m_outGrad;
 	
 	Tensor<T> m_state;
