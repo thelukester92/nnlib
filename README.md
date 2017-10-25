@@ -34,6 +34,8 @@ It is highly recommended that you do *not* use this flag until you are certain y
 
 # Examples
 
+Check out the [examples repository](https://github.com/thelukester92/nnlib-examples) for complete examples!
+
 ## Simple Neural Network
 
 A standard neural network can be built as a `Sequential` module.
@@ -55,10 +57,10 @@ We will also randomly batch the data into batches of size 25 using `Batcher`.
 	Tensor<> data(rows.size(), rows.get(0)->size());
 	for(size_t i = 0; i < rows.size(); ++i)
 	{
-		Serialized &row = \*rows.get(i);
+		Serialized &row = *rows.get(i);
 		for(size_t j = 0; j < row.size(); ++j)
 		{
-			row.get(j, data(i, j));
+			data(i, j) = row.get<double>(j);
 		}
 	}
 	
