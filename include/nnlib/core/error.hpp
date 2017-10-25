@@ -77,43 +77,43 @@ public:
 
 #define NNHardAssertEquals(x, y, ...)								\
 	NNHardAssert(													\
-		(x) == (y), Error::stringify(__VA_ARGS__),					\
+		(x) == (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
 		" Expected ", #x, " == ", #y, ", but ", x, " != ", y, "."	\
 	)
 
-#define NNHardAssertAlmostEquals(x, y, eps, ...)					\
-	NNHardAssert(													\
-		std::fabs((x) - (y)) < eps, Error::stringify(__VA_ARGS__),	\
-		" Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."	\
+#define NNHardAssertAlmostEquals(x, y, eps, ...)							\
+	NNHardAssert(															\
+		std::fabs((x) - (y)) < eps, ::nnlib::Error::stringify(__VA_ARGS__),	\
+		" Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."			\
 	)
 
 #define NNHardAssertNotEquals(x, y, ...)							\
 	NNHardAssert(													\
-		(x) != (y), Error::stringify(__VA_ARGS__),					\
+		(x) != (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
 		" Expected ", #x, " != ", #y, ", but ", x, " == ", y, "."	\
 	)
 
 #define NNHardAssertLessThan(x, y, ...)								\
 	NNHardAssert(													\
-		(x) < (y), Error::stringify(__VA_ARGS__),					\
+		(x) < (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
 		" Expected ", #x, " < ", #y, ", but ", x, " >= ", y, "."	\
 	)
 
 #define NNHardAssertLessThanOrEquals(x, y, ...)						\
 	NNHardAssert(													\
-		(x) <= (y), Error::stringify(__VA_ARGS__),					\
+		(x) <= (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
 		" Expected ", #x, " <= ", #y, ", but ", x, " > ", y, "."	\
 	)
 
 #define NNHardAssertGreaterThan(x, y, ...)							\
 	NNHardAssert(													\
-		(x) > (y), Error::stringify(__VA_ARGS__),					\
+		(x) > (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
 		" Expected ", #x, " > ", #y, ", but ", x, " <= ", y, "."	\
 	)
 
 #define NNHardAssertGreaterThanOrEquals(x, y, ...)					\
 	NNHardAssert(													\
-		(x) >= (y), Error::stringify(__VA_ARGS__),					\
+		(x) >= (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
 		" Expected ", #x, " >= ", #y, ", but ", x, " < ", y, "."	\
 	)
 
