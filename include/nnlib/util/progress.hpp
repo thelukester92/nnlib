@@ -26,7 +26,7 @@ public:
 		size_t leading			= (length - middle) / 2;
 		size_t trailing			= length - middle - leading;
 		
-		if(current <= 1)
+		if(current == 0)
 			timer.reset();
 		
 		out << "\r\33[2K[";

@@ -103,6 +103,17 @@ public:
 		return concatenated;
 	}
 	
+	/// Generate a vector containing a random permutation of integers in [0, n)
+	static Tensor randPermutation(size_t n)
+	{
+		Tensor t(n);
+		for(size_t i = 0; i < n; ++i)
+			t(i) = i;
+		for(size_t i = 1; i < n; ++i)
+			std::swap(t(i), t(Random<size_t>::uniform(i)));
+		return t;
+	}
+	
 	/// Create a zero-length, one-dimensional tensor.
 	Tensor() :
 		m_dims({ 0 }),
