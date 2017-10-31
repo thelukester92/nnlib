@@ -136,7 +136,7 @@ public:
 	/// A vector of tensors filled with (views of) each sub-module's internal state.
 	virtual Storage<Tensor<T> *> stateList() override
 	{
-		Storage<Tensor<T> *> states;
+		Storage<Tensor<T> *> states = Module<T>::stateList();
 		for(Module<T> *comp : m_components)
 			states.append(comp->stateList());
 		return states;
