@@ -61,6 +61,7 @@ public:
 	
 	virtual void forget() override
 	{
+		Module<T>::forget();
 		for(Module<T> *comp : m_components)
 			comp->forget();
 	}
