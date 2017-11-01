@@ -88,6 +88,17 @@ private:
 		
 		for(auto x = o1.begin(), y = o2.begin(), end = o1.end(); x != end; ++x, ++y)
 			NNAssertAlmostEquals(*x, *y, 1e-12, name + "::state() failed! Different outputs for the same state and random seed!");
+		
+		// intentionally break shared connection
+		*module.stateList()[0] = module.stateList()[0]->copy();
+		
+		// forward to make unvectorized state
+		module.forward(input);
+		
+		// try to clear state
+		module.forget();
+		for(auto x : module.output())
+			NNAssertAlmostEquals(x, 0, 1e-12, name + "::forget() failed! Non-zero output!");
 	}
 	
 	static void testCopyConstructor(const std::string &name, M<T> &module, const Tensor<T> &input)
@@ -110,8 +121,6 @@ private:
 		NNAssert(testEqualParams(module, copy), name + "::operator=(const " + name + " &) failed! Parameters are not equal!");
 		NNAssert(testNotShared(module, copy), name + "::operator=(const " + name + " &) failed! Sharing parameters; not a deep copy!");
 		NNAssert(testEqualOutput(module, copy, input), name + "::operator=(const " + name + " &) failed! Different outputs for the same input!");
-		
-		// delete copy;
 	}
 	
 	static void testSerialization(const std::string &name, M<T> &module, const Tensor<T> &input)

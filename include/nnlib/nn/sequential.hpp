@@ -20,7 +20,7 @@ public:
 		Tensor<T> *inp = const_cast<Tensor<T> *>(&input);
 		for(Module<T> *component : m_components)
 			inp = &component->forward(*inp);
-		return m_output = *inp;
+		return *inp;
 	}
 	
 	/// Backward propagate input and output gradient, returning input gradient.
@@ -29,12 +29,20 @@ public:
 		const Tensor<T> *grad = &outGrad;
 		for(size_t i = components() - 1; i > 0; --i)
 			grad = &m_components[i]->backward(m_components[i - 1]->output(), *grad);
-		return m_inGrad = m_components[0]->backward(input, *grad);
+		return m_components[0]->backward(input, *grad);
+	}
+	
+	virtual Tensor<T> &output() override
+	{
+		return m_components.back()->output();
+	}
+	
+	virtual Tensor<T> &inGrad() override
+	{
+		return m_components[0]->inGrad();
 	}
 	
 protected:
-	using Module<T>::m_output;
-	using Module<T>::m_inGrad;
 	using Container<T>::m_components;
 };
 

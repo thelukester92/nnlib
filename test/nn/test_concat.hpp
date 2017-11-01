@@ -78,7 +78,6 @@ void TestConcat()
 	module.add(linear);
 	NNAssert(module.paramsList() == linear->paramsList(), "Concat::paramsList failed!");
 	NNAssert(module.gradList() == linear->gradList(), "Concat::gradList failed!");
-	NNAssert(module.stateList() == linear->stateList(), "Concat::stateList failed!");
 	
 	TestContainer("Concat", module, inp);
 }

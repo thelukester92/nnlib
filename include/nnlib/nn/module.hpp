@@ -99,24 +99,24 @@ public:
 	
 	// MARK: Getters
 	
-	Tensor<T> &output()
+	virtual Tensor<T> &output()
 	{
 		return m_output;
 	}
 	
 	const Tensor<T> &output() const
 	{
-		return m_output;
+		return const_cast<Tensor<T> *>(this)->output();
 	}
 	
-	Tensor<T> &inGrad()
+	virtual Tensor<T> &inGrad()
 	{
 		return m_inGrad;
 	}
 	
 	const Tensor<T> &inGrad() const
 	{
-		return m_inGrad;
+		return const_cast<Tensor<T> *>(this)->inGrad();
 	}
 	
 protected:

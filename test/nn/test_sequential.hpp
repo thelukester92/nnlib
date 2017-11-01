@@ -80,7 +80,6 @@ void TestSequential()
 	module.add(linear);
 	NNAssert(module.paramsList() == linear->paramsList(), "Sequential::paramsList failed!");
 	NNAssert(module.gradList() == linear->gradList(), "Sequential::gradList failed!");
-	NNAssert(module.stateList() == linear->stateList(), "Sequential::stateList failed!");
 	
 	{
 		BatchNorm<> *b = new BatchNorm<>(10);
