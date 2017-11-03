@@ -24,6 +24,7 @@
 #include "nn/test_relu.hpp"
 #include "nn/test_sequencer.hpp"
 #include "nn/test_sequential.hpp"
+#include "nn/test_sin.hpp"
 #include "nn/test_softmax.hpp"
 #include "nn/test_sparselinear.hpp"
 #include "nn/test_tanh.hpp"
@@ -79,6 +80,7 @@ int main()
 		UNIT_TEST("nn/", ReLU),
 		UNIT_TEST("nn/", Sequencer),
 		UNIT_TEST("nn/", Sequential),
+		UNIT_TEST("nn/", Sin),
 		UNIT_TEST("nn/", SoftMax),
 		UNIT_TEST("nn/", SparseLinear),
 		UNIT_TEST("nn/", TanH),

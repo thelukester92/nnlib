@@ -29,6 +29,8 @@
 #include "nnlib/nn/relu.hpp"
 #include "nnlib/nn/sequencer.hpp"
 #include "nnlib/nn/sequential.hpp"
+#include "nnlib/nn/sin.hpp"
+#include "nnlib/nn/softmax.hpp"
 #include "nnlib/nn/sparselinear.hpp"
 #include "nnlib/nn/tanh.hpp"
 
