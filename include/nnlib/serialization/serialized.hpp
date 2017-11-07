@@ -459,6 +459,84 @@ public:
 			return new typename std::remove_pointer<T>::type (*this);
 	}
 	
+	/// Convert to a boolean value.
+	template <typename T>
+	typename std::enable_if<std::is_same<T, bool>::value, T>::type convertTo() const
+	{
+		switch(m_type)
+		{
+		case Null:
+			return false;
+		case Boolean:
+			return m_bool;
+		case Integer:
+			return m_int;
+		case Float:
+			return m_float;
+		default:
+			throw Error("Invalid type!");
+		}
+	}
+	
+	/// Convert to an integer value.
+	template <typename T>
+	typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value, T>::type convertTo() const
+	{
+		switch(m_type)
+		{
+		case Null:
+			return 0;
+		case Boolean:
+			return m_bool;
+		case Integer:
+			return m_int;
+		case Float:
+			return m_float;
+		default:
+			throw Error("Invalid type!");
+		}
+	}
+	
+	/// Convert to a floating point value.
+	template <typename T>
+	typename std::enable_if<std::is_floating_point<T>::value, T>::type convertTo() const
+	{
+		switch(m_type)
+		{
+		case Null:
+			return 0;
+		case Boolean:
+			return m_bool;
+		case Integer:
+			return m_int;
+		case Float:
+			return m_float;
+		default:
+			throw Error("Invalid type!");
+		}
+	}
+	
+	/// Convert to a string value.
+	template <typename T>
+	typename std::enable_if<std::is_same<T, std::string>::value, T>::type convertTo() const
+	{
+		switch(m_type)
+		{
+		case Null:
+			return "null";
+		case Boolean:
+			return m_bool ? "true" : "false";
+		case Integer:
+			return std::to_string(m_int);
+		case Float:
+			return std::to_string(m_float);
+		case String:
+			return m_string;
+		default:
+			throw Error("Invalid type!");
+		}
+	}
+	
 // MARK: Setters
 	
 	/// Set a boolean value.

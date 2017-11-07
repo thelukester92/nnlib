@@ -114,6 +114,27 @@ void TestSerialized()
 		NNAssert(obj.has("null"), "Serialized::has(string) failed!");
 		NNAssert(!obj.has("bull"), "Serialized::has(string) failed!");
 		
+		NNAssertEquals(obj.get("null")->convertTo<bool>(), false, "Serialized::convertTo<bool>() failed for a null value!");
+		NNAssertEquals(obj.get("bool")->convertTo<bool>(), true, "Serialized::convertTo<bool>() failed for a bool value!");
+		NNAssertEquals(obj.get("itgr")->convertTo<bool>(), true, "Serialized::convertTo<bool>() failed for an integer value!");
+		NNAssertEquals(obj.get("flot")->convertTo<bool>(), true, "Serialized::convertTo<bool>() failed for a floating point value!");
+		
+		NNAssertEquals(obj.get("null")->convertTo<int>(), 0, "Serialized::convertTo<int>() failed for a null value!");
+		NNAssertEquals(obj.get("bool")->convertTo<int>(), 1, "Serialized::convertTo<int>() failed for a bool value!");
+		NNAssertEquals(obj.get("itgr")->convertTo<int>(), 42, "Serialized::convertTo<int>() failed for an integer value!");
+		NNAssertEquals(obj.get("flot")->convertTo<int>(), 3, "Serialized::convertTo<int>() failed for a floating point value!");
+		
+		NNAssertEquals(obj.get("null")->convertTo<double>(), 0, "Serialized::convertTo<double>() failed for a null value!");
+		NNAssertEquals(obj.get("bool")->convertTo<double>(), 1, "Serialized::convertTo<double>() failed for a bool value!");
+		NNAssertEquals(obj.get("itgr")->convertTo<double>(), 42, "Serialized::convertTo<double>() failed for an integer value!");
+		NNAssertAlmostEquals(obj.get("flot")->convertTo<double>(), 3.14, 1e-12, "Serialized::convertTo<double>() failed for a floating point value!");
+		
+		NNAssertEquals(obj.get("null")->convertTo<string>(), "null", "Serialized::convertTo<string>() failed for a null value!");
+		NNAssertEquals(obj.get("bool")->convertTo<string>(), "true", "Serialized::convertTo<string>() failed for a bool value!");
+		NNAssertEquals(obj.get("itgr")->convertTo<string>(), "42", "Serialized::convertTo<string>() failed for an integer value!");
+		NNAssertAlmostEquals(std::atof(obj.get("flot")->convertTo<string>().c_str()), 3.14, 1e-12, "Serialized::convertTo<string>() failed for a floating point value!");
+		NNAssertEquals(obj.get("stng")->convertTo<string>(), "hello", "Serialized::convertTo<string>() failed for a string value!");
+		
 		Serialized s;
 		
 		s = *obj.get<Serialized *>("null");
