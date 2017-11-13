@@ -103,6 +103,16 @@ public:
 		return m_labBatch;
 	}
 	
+	Tensor<T> &allFeatures()
+	{
+		return m_feat;
+	}
+	
+	Tensor<T> &allLabels()
+	{
+		return m_lab;
+	}
+	
 private:
 	Tensor<T> m_feat;
 	Tensor<T> m_lab;
