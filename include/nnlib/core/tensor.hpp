@@ -1282,7 +1282,7 @@ public:
 	}
 	
 	/// Calculate the variance of the elements of this tensor.
-	T variance() const
+	T variance(bool normalizeAsSample = false) const
 	{
 		T avg = mean();
 		T sum = 0;
@@ -1291,7 +1291,7 @@ public:
 			T diff = v - avg;
 			sum += diff * diff;
 		}
-		return sum / size();
+		return sum / (size() + (normalizeAsSample ? 1 : 0));
 	}
 	
 	/// Find the minimum element of this tensor.
