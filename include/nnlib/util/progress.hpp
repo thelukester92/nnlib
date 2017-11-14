@@ -21,7 +21,7 @@ public:
 		static Timer timer;
 		static std::list<double> times;
 		
-		const size_t WINDOW = 10;
+		size_t WINDOW = total / 10;
 		double windowSum = 0;
 		double last = 0;
 		
