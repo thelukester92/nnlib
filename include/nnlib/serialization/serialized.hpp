@@ -697,7 +697,7 @@ public:
 	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type get(T i, const T &end) const
 	{
 		NNHardAssertEquals(m_type, Array, "Invalid type!");
-		NNHardAssertEquals(m_array.size(), std::distance(i, end), "Invalid range!");
+		NNHardAssertEquals(m_array.size(), (size_t) std::distance(i, end), "Invalid range!");
 		size_t idx = 0;
 		while(i != end)
 			*(i++) = m_array[idx++]->as<typename std::remove_reference<decltype(*i)>::type>();
