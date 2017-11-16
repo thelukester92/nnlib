@@ -5,7 +5,6 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include <list>
 #include "timer.hpp"
 
 namespace nnlib
@@ -19,11 +18,6 @@ public:
 	static void display(size_t current, size_t total, std::ostream &out = std::cout, size_t length = 50)
 	{
 		static Timer timer;
-		static std::list<double> times;
-		
-		size_t WINDOW = total / 10;
-		double windowSum = 0;
-		double last = 0;
 		
 		size_t degreeCurrent	= current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));
 		size_t degreeTotal		= (size_t) ceil(log(total) / log(10)) + 1;
@@ -33,12 +27,7 @@ public:
 		size_t trailing			= length - middle - leading;
 		
 		if(current == 0)
-		{
 			timer.reset();
-			times.clear();
-			windowSum = 0;
-			last = 0;
-		}
 		
 		out << "\r\33[2K[";
 		for(size_t i = 1; i < leading; ++i)
@@ -52,23 +41,11 @@ public:
 		{
 			out << " " << ftime(timer.elapsed());
 			if(current > 0)
-			{
-				if(times.size() == WINDOW)
-				{
-					windowSum -= times.front();
-					times.pop_front();
-				}
-				
-				times.push_back(timer.elapsed() - last);
-				windowSum += times.back();
-				
-				out << " / " << ftime(windowSum / times.size() * total);
-			}
+				out << " / " << ftime(timer.elapsed() / current * total);
 		}
 		else
 			out << " Done in " << ftime(timer.elapsed()) << "! ^_^\n";
 		
-		last = timer.elapsed();
 		out << std::flush;
 	}
 	
