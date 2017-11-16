@@ -114,6 +114,20 @@ public:
 		return t;
 	}
 	
+	/// Generate a tensor where each dimension contains a random permutation of integers in [0, d)
+	static Tensor randPermutation(const Storage<size_t> &dims)
+	{
+		Tensor t(dims, true);
+		for(size_t d = 0; d < dims.size(); ++d)
+		{
+			for(size_t i = 0; i < t.size(d); ++i)
+				t(d, i) = i;
+			for(size_t i = 1; i < t.size(d); ++i)
+				std::swap(t(d, i), t(d, Random<size_t>::uniform(i)));
+		}
+		return t;
+	}
+	
 	/// Create a zero-length, one-dimensional tensor.
 	Tensor() :
 		m_dims({ 0 }),
