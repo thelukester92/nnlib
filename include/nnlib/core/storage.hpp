@@ -102,20 +102,20 @@ public:
 	
 	Storage &resize(size_t n, const T &defaultValue = T())
 	{
-		reserve(n, defaultValue);
+		reserve(n);
+		for(size_t i = m_size; i < n; ++i)
+			m_ptr[i] = defaultValue;
 		m_size = n;
 		return *this;
 	}
 	
-	Storage &reserve(size_t n, const T &defaultValue = T())
+	Storage &reserve(size_t n)
 	{
 		if(n > m_capacity)
 		{
 			T *ptr = new T[n];
 			for(size_t i = 0; i < m_size; ++i)
 				ptr[i] = m_ptr[i];
-			for(size_t i = m_size; i < n; ++i)
-				ptr[i] = defaultValue;
 			delete[] m_ptr;
 			m_ptr = ptr;
 			m_capacity = n;
