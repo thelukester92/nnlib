@@ -12,7 +12,7 @@ template <typename T = double>
 class ReLU : public Map<T>
 {
 public:
-	ReLU(double leak = 0.1) :
+	ReLU(T leak = 0.1) :
 		m_leak(leak)
 	{}
 	
