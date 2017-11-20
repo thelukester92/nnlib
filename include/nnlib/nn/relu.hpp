@@ -14,7 +14,10 @@ class ReLU : public Map<T>
 public:
 	ReLU(T leak = 0.1) :
 		m_leak(leak)
-	{}
+	{
+		NNAssertGreaterThanOrEquals(leak, 0, "Expected positive leak!");
+		NNAssertLessThan(leak, 1, "Expected leak to be a percentage!");
+	}
 	
 	ReLU(const ReLU &module) :
 		m_leak(module.m_leak)
