@@ -12,12 +12,12 @@
 #   CXX    - compiler to use; defaults to g++ (which is clang++ on OS X)
 #   CFLAGS - compile flags for test; -DACCELERATE_BLAS to test BLAS
 #   LFLAGS - linker flags for test
-#   PREFIX - where to install headers; defaults to /usr/local/include
+#   PREFIX - where to install headers; defaults to /usr/local
 
 CXX    ?= g++
 CFLAGS := -Wall -DACCELERATE_BLAS
 LFLAGS :=
-PREFIX := /usr/local/include
+PREFIX := /usr/local
 
 override BIN := bin
 override OBJ := obj
@@ -27,15 +27,21 @@ override OUT := nnlib_test
 override CFLAGS += -std=c++11 -I$(INC) --coverage
 
 override INSTALL_FILES := $(shell find $(INC) -type f)
-override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.hpp=$(PREFIX)/%.hpp)
+override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.hpp=$(PREFIX)/include/%.hpp)
 
 override CPP_FILES := $(wildcard $(TST)/*.cpp) $(wildcard $(TST)/**/*.cpp)
 override DEP_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.d)
 override OBJ_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.o)
 
-override UNAME := $(shell uname -s)
-override GNU   := $(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
-override BLAS  := $(findstring -DACCELERATE_BLAS,$(CFLAGS))
+override UNAME  := $(shell uname -s)
+override GNU    := $(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
+override BLAS   := $(findstring -DACCELERATE_BLAS,$(CFLAGS))
+override NVBLAS := $(findstring -DACCELERATE_NVBLAS,$(CFLAGS))
+
+# Link NVBLAS if applicable
+ifneq ($(NVBLAS),)
+	override LFLAGS += -lnvblas
+endif
 
 # Link BLAS if applicable
 ifneq ($(BLAS),)
@@ -72,7 +78,7 @@ $(OBJ)/%.o: $(TST)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
 
-$(PREFIX)/%.hpp: $(INC)/%.hpp
+$(PREFIX)/include/%.hpp: $(INC)/%.hpp
 	mkdir -p $(dir $@)
 	cp $< $@
 
