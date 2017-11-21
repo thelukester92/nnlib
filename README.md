@@ -11,9 +11,12 @@ nnlib has no dependencies, but is compatible with OpenBLAS (Linux) or the Accele
 This library is stable, tested, and used in a number of private projects.
 Feel free to use it in your own projects, submit issues, or fork it and play with it yourself!
 
-# Get Started
+# Installing on OS X
 
-Run the following commands to clone the repo and install the headers.
+	brew tap thelukester92/nnlib
+	brew install nnlib
+
+# Installing on Linux
 
 	git clone https://github.com/thelukester92/nnlib.git
 	cd nnlib
@@ -22,6 +25,8 @@ Run the following commands to clone the repo and install the headers.
 The default installation directory is `/usr/local/include`.
 For a different install directory, use `make install PREFIX=/path/to/dir`.
 To run unit tests, use `make test`.
+
+# Getting Started
 
 To use nnlib in your code, you can include individual files (i.e. `#include <nnlib/nn/linear.hpp>`) or you can include everything by using `#include <nnlib.hpp>`.
 You must compile with C++11 (`-std=c++11` in most compilers).
