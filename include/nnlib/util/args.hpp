@@ -104,6 +104,11 @@ public:
 		return *this;
 	}
 	
+	ArgsParser &addFlag(std::string longOpt)
+	{
+		return addFlag(++m_nextUnnamedOpt, longOpt);
+	}
+	
 	ArgsParser &addInt(char opt, std::string longOpt = "")
 	{
 		addOpt(opt, longOpt);
