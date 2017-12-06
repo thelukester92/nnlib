@@ -110,7 +110,7 @@ public:
 		for(size_t i = 0; i < n; ++i)
 			t(i) = i;
 		for(size_t i = 1; i < n; ++i)
-			std::swap(t(i), t(Random<size_t>::uniform(i)));
+			std::swap(t(i), t(Random<size_t>::uniform(i + 1)));
 		return t;
 	}
 	
