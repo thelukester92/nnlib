@@ -40,8 +40,6 @@ public:
 	
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssertEquals(input.shape(), target.shape(), "Incompatible input and target!");
-		
 		T output = 0;
 		for(size_t i = 0, seqLen = input.size(0); i < seqLen; ++i)
 			output += m_critic->forward(input.select(0, i), target.select(0, i));
@@ -50,8 +48,6 @@ public:
 	
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
 	{
-		NNAssertEquals(input.shape(), target.shape(), "Incompatible input and target!");
-		
 		m_inGrad.resize(input.shape());
 		for(size_t i = 0, seqLen = input.size(0); i < seqLen; ++i)
 			m_inGrad.select(0, i).copy(m_critic->backward(input.select(0, i), target.select(0, i)));
