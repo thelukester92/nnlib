@@ -1333,38 +1333,6 @@ public:
 	
 	// MARK: Element/data access methods.
 	
-	T &rawAt(size_t index)
-	{
-		return (*m_data)[index];
-	}
-	
-	const T &rawAt(size_t index) const
-	{
-		return (*m_data)[index];
-	}
-	
-	T &at(const Storage<size_t> &indices)
-	{
-		return (*m_data)[indexOf(indices)];
-	}
-	
-	const T &at(const Storage<size_t> &indices) const
-	{
-		return (*m_data)[indexOf(indices)];
-	}
-	
-	template <typename ... Ts>
-	T &at(Ts... indices)
-	{
-		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
-	}
-	
-	template <typename ... Ts>
-	const T &at(Ts... indices) const
-	{
-		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
-	}
-	
 	/// Element access given a multidimensional index.
 	T &operator()(const Storage<size_t> &indices)
 	{
@@ -1589,8 +1557,10 @@ public:
 		return !(*this != other);
 	}
 	
-	bool operator !=(const TensorIterator &other)
+	bool operator!=(const TensorIterator &other)
 	{
+		if(m_tensor->contiguous())
+			return m_tensor != other.m_tensor || m_ptr != other.m_ptr;
 		return m_tensor != other.m_tensor || m_indices != other.m_indices;
 	}
 	
