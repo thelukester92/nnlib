@@ -1487,6 +1487,7 @@ class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::p
 using TT = typename std::remove_const<T>::type;
 public:
 	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
+		adv(std::mem_fn(tensor->contiguous() ? &TensorIterator::adv1 : &TensorIterator::adv2)),
 		m_tensor(const_cast<Tensor<TT> *>(tensor)),
 		m_indices(tensor->dims(), 0),
 		m_ptr(m_tensor->ptr())
@@ -1499,12 +1500,14 @@ public:
 	}
 	
 	TensorIterator(const TensorIterator &it) :
+		adv(it.adv),
 		m_tensor(it.m_tensor),
 		m_indices(it.m_indices),
 		m_ptr(it.m_ptr)
 	{}
 	
 	TensorIterator(TensorIterator &&it) :
+		adv(it.adv),
 		m_tensor(it.m_tensor),
 		m_indices(std::move(it.m_indices)),
 		m_ptr(it.m_ptr)
@@ -1515,14 +1518,13 @@ public:
 		return m_indices;
 	}
 	
-	TensorIterator &operator++()
+	void adv1()
 	{
-		if(m_tensor->contiguous())
-		{
-			++m_ptr;
-			return *this;
-		}
-		
+		++m_ptr;
+	}
+	
+	void adv2()
+	{
 		size_t dim = m_indices.size() - 1;
 		++m_indices[dim];
 		m_ptr += m_tensor->stride(dim);
@@ -1536,7 +1538,11 @@ public:
 			++m_indices[dim];
 			m_ptr += m_tensor->stride(dim);
 		}
-		
+	}
+	
+	TensorIterator &operator++()
+	{
+		adv(*this);
 		return *this;
 	}
 	
@@ -1565,6 +1571,7 @@ public:
 	}
 	
 private:
+	decltype(std::mem_fn(&TensorIterator::adv1)) adv;
 	Tensor<TT> *m_tensor;
 	Storage<size_t> m_indices;
 	TT *m_ptr;
