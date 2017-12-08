@@ -62,7 +62,7 @@ void ToyClassification()
 	NNAssertGreaterThan(critic.misclassifications(nn.forward(test.narrow(1, 0, 4)), test.narrow(1, 4)), 0, "Untrained model already perfect!");
 	
 	Batcher<> batcher(train.narrow(1, 0, 4), train.narrow(1, 4), 10);
-	for(size_t epoch = 0; epoch < 500; ++epoch)
+	for(size_t epoch = 0; epoch < 10000; ++epoch)
 	{
 		batcher.reset();
 		do

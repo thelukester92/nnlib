@@ -31,7 +31,7 @@ void ToyTimeSeries()
 	opt.learningRate(1e-2);
 	
 	SequenceBatcher<> batcher(train.narrow(0, 0, 49), train.narrow(0, 1, 49), 25, 10);
-	for(size_t presentation = 0; presentation < 50; ++presentation)
+	for(size_t presentation = 0; presentation < 100; ++presentation)
 	{
 		batcher.reset();
 		nn.forget();
