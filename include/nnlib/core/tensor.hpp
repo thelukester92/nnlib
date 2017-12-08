@@ -17,6 +17,9 @@ namespace nnlib
 template <typename T>
 class TensorIterator;
 
+template <typename T>
+class ContiguousTensorIterator;
+
 /// \brief The standard input and output type in nnlib.
 ///
 /// A tensor can be a vector (one dimension), a matrix (two dimensions), or a higher-order tensor.
@@ -1387,22 +1390,22 @@ public:
 	
 	TensorIterator<T> begin()
 	{
-		return TensorIterator<T>(this);
+		return m_contiguous ? ContiguousTensorIterator<T>(this) : TensorIterator<T>(this);
 	}
 	
 	TensorIterator<T> end()
 	{
-		return TensorIterator<T>(this, true);
+		return m_contiguous ? ContiguousTensorIterator<T>(this, true) : TensorIterator<T>(this, true);
 	}
 	
 	TensorIterator<const T> begin() const
 	{
-		return TensorIterator<const T>(this);
+		return m_contiguous ? ContiguousTensorIterator<const T>(this) : TensorIterator<const T>(this);
 	}
 	
 	TensorIterator<const T> end() const
 	{
-		return TensorIterator<const T>(this, true);
+		return m_contiguous ? ContiguousTensorIterator<const T>(this, true) : TensorIterator<const T>(this, true);
 	}
 	
 	/// Save to a serialized node.
@@ -1515,14 +1518,8 @@ public:
 		return m_indices;
 	}
 	
-	TensorIterator &operator++()
+	virtual TensorIterator &operator++()
 	{
-		if(m_tensor->contiguous())
-		{
-			++m_ptr;
-			return *this;
-		}
-		
 		size_t dim = m_indices.size() - 1;
 		++m_indices[dim];
 		m_ptr += m_tensor->stride(dim);
@@ -1557,16 +1554,34 @@ public:
 		return !(*this != other);
 	}
 	
-	bool operator !=(const TensorIterator &other)
+	bool operator!=(const TensorIterator &other)
 	{
-		if(m_tensor->contiguous())
-			return m_tensor != other.m_tensor || m_ptr != other.m_ptr;
 		return m_tensor != other.m_tensor || m_indices != other.m_indices;
 	}
-private:
+	
+protected:
 	Tensor<TT> *m_tensor;
 	Storage<size_t> m_indices;
 	TT *m_ptr;
+};
+
+template <typename T>
+class ContiguousTensorIterator : public TensorIterator<T>
+{
+public:
+	using TensorIterator<T>::TensorIterator;
+	using TensorIterator<T>::operator++;
+	
+	virtual ContiguousTensorIterator &operator++() override
+	{
+		++this->m_ptr;
+		return *this;
+	}
+	
+	bool operator!=(const ContiguousTensorIterator<T> &other)
+	{
+		return this->m_tensor != other.m_tensor || this->m_ptr != other.m_ptr;
+	}
 };
 
 }
