@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <memory>
 #include <functional>
-#include <utility>
 
 #include "error.hpp"
 #include "storage.hpp"
@@ -1334,6 +1333,38 @@ public:
 	
 	// MARK: Element/data access methods.
 	
+	T &rawAt(size_t index)
+	{
+		return (*m_data)[index];
+	}
+	
+	const T &rawAt(size_t index) const
+	{
+		return (*m_data)[index];
+	}
+	
+	T &at(const Storage<size_t> &indices)
+	{
+		return (*m_data)[indexOf(indices)];
+	}
+	
+	const T &at(const Storage<size_t> &indices) const
+	{
+		return (*m_data)[indexOf(indices)];
+	}
+	
+	template <typename ... Ts>
+	T &at(Ts... indices)
+	{
+		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
+	template <typename ... Ts>
+	const T &at(Ts... indices) const
+	{
+		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
 	/// Element access given a multidimensional index.
 	T &operator()(const Storage<size_t> &indices)
 	{
@@ -1488,8 +1519,6 @@ class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::p
 using TT = typename std::remove_const<T>::type;
 public:
 	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
-		m_advance(std::mem_fn(tensor->contiguous() ? &TensorIterator::cAdv : &TensorIterator::dAdv)),
-		m_notEquals(std::mem_fn(tensor->contiguous() ? &TensorIterator::cNeq : &TensorIterator::dNeq)),
 		m_tensor(const_cast<Tensor<TT> *>(tensor)),
 		m_indices(tensor->dims(), 0),
 		m_ptr(m_tensor->ptr())
@@ -1502,16 +1531,12 @@ public:
 	}
 	
 	TensorIterator(const TensorIterator &it) :
-		m_advance(it.m_advance),
-		m_notEquals(it.m_notEquals),
 		m_tensor(it.m_tensor),
 		m_indices(it.m_indices),
 		m_ptr(it.m_ptr)
 	{}
 	
 	TensorIterator(TensorIterator &&it) :
-		m_advance(it.m_advance),
-		m_notEquals(it.m_notEquals),
 		m_tensor(it.m_tensor),
 		m_indices(std::move(it.m_indices)),
 		m_ptr(it.m_ptr)
@@ -1524,7 +1549,26 @@ public:
 	
 	TensorIterator &operator++()
 	{
-		m_advance(*this);
+		if(m_tensor->contiguous())
+		{
+			++m_ptr;
+			return *this;
+		}
+		
+		size_t dim = m_indices.size() - 1;
+		++m_indices[dim];
+		m_ptr += m_tensor->stride(dim);
+		
+		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
+		{
+			m_ptr -= m_tensor->stride(dim) * m_indices[dim];
+			m_indices[dim] = 0;
+			
+			--dim;
+			++m_indices[dim];
+			m_ptr += m_tensor->stride(dim);
+		}
+		
 		return *this;
 	}
 	
@@ -1545,48 +1589,12 @@ public:
 		return !(*this != other);
 	}
 	
-	bool operator!=(const TensorIterator &other)
-	{
-		return m_notEquals(*this, other);
-	}
-	
-private:
-	
-	void cAdv()
-	{
-		++m_ptr;
-	}
-	
-	void dAdv()
-	{
-		size_t dim = m_indices.size() - 1;
-		++m_indices[dim];
-		m_ptr += m_tensor->stride(dim);
-		
-		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
-		{
-			m_ptr -= m_tensor->stride(dim) * m_indices[dim];
-			m_indices[dim] = 0;
-			
-			--dim;
-			++m_indices[dim];
-			m_ptr += m_tensor->stride(dim);
-		}
-	}
-	
-	bool cNeq(const TensorIterator &other)
-	{
-		return !other.m_tensor->contiguous() || m_tensor != other.m_tensor || m_ptr != other.m_ptr;
-	}
-	
-	bool dNeq(const TensorIterator &other)
+	bool operator !=(const TensorIterator &other)
 	{
 		return m_tensor != other.m_tensor || m_indices != other.m_indices;
 	}
 	
-	decltype(std::mem_fn(&TensorIterator::cAdv)) m_advance;
-	decltype(std::mem_fn(&TensorIterator::cNeq)) m_notEquals;
-	
+private:
 	Tensor<TT> *m_tensor;
 	Storage<size_t> m_indices;
 	TT *m_ptr;
