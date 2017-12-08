@@ -3,8 +3,6 @@
 
 #include <math.h>
 #include <iostream>
-#include <iomanip>
-#include <sstream>
 #include "timer.hpp"
 
 namespace nnlib
@@ -39,40 +37,14 @@ public:
 		
 		if(current < total)
 		{
-			out << " " << ftime(timer.elapsed());
+			out << " " << timer.ftime();
 			if(current > 0)
-				out << " / " << ftime(timer.elapsed() / current * total);
+				out << " / " << timer.ftime(timer.elapsed() / current * total);
 		}
 		else
-			out << " Done in " << ftime(timer.elapsed()) << "! ^_^\n";
+			out << " Done in " << timer.ftime() << "! ^_^\n";
 		
 		out << std::flush;
-	}
-	
-private:
-	static std::string ftime(double t)
-	{
-		std::ostringstream out;
-		out << std::setprecision(1) << std::fixed;
-		
-		size_t m = t / 60;
-		t -= m * 60;
-		
-		size_t h = m / 60;
-		m -= h * 60;
-		
-		size_t d = h / 24;
-		h -= d * 24;
-		
-		if(d > 0)
-			out << d << "d ";
-		if(d > 0 || h > 0)
-			out << h << "h ";
-		if(d > 0 || h > 0 || m > 0)
-			out << m << "m ";
-		out << t << "s";
-		
-		return out.str();
 	}
 };
 

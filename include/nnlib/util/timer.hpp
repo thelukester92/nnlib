@@ -2,6 +2,8 @@
 #define UTIL_TIMER_HPP
 
 #include <chrono>
+#include <iomanip>
+#include <sstream>
 
 namespace nnlib
 {
@@ -26,6 +28,35 @@ public:
 			reset();
 		return span;
 	}
+	
+	std::string ftime(double t = -1)
+	{
+		if(t < 0)
+			t = elapsed();
+		
+		std::ostringstream out;
+		out << std::setprecision(1) << std::fixed;
+		
+		size_t m = t / 60;
+		t -= m * 60;
+		
+		size_t h = m / 60;
+		m -= h * 60;
+		
+		size_t d = h / 24;
+		h -= d * 24;
+		
+		if(d > 0)
+			out << d << "d ";
+		if(d > 0 || h > 0)
+			out << h << "h ";
+		if(d > 0 || h > 0 || m > 0)
+			out << m << "m ";
+		out << t << "s";
+		
+		return out.str();
+	}
+	
 private:
 	std::chrono::time_point<clock> m_start;
 };

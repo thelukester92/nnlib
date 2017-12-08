@@ -4,6 +4,8 @@
 	#undef OPTIMIZE
 #endif
 
+#include "nnlib/util/timer.hpp"
+
 #include "core/test_error.hpp"
 #include "core/test_storage.hpp"
 #include "core/test_tensor.hpp"
@@ -113,8 +115,9 @@ int main()
 		for(auto test : toy_problems)
 		{
 			cout << test.first << "..." << flush;
+			Timer t;
 			test.second();
-			cout << " Passed!" << endl;
+			cout << " Done in " << t.ftime() << "!" << endl;
 		}
 		
 		cout << "All tests passed!" << endl;
