@@ -21,7 +21,8 @@ before_install:
     - make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - travis_wait make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
+    - travis_wait 30 sleep 1800 &
+    - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - lcov -c -d obj -o obj/lcov.info
