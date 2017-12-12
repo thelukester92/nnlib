@@ -35,12 +35,12 @@ public:
 		
 		auto tar = target.begin();
 		T diff, sum = 0;
-		for(const T &inp : input)
+		forEach([&](const T &inp)
 		{
 			diff = inp - *tar;
 			sum += diff * diff;
 			++tar;
-		}
+		}, input);
 		
 		if(m_average)
 			sum /= input.size();
@@ -59,12 +59,12 @@ public:
 			norm /= input.size();
 		
 		auto inp = input.begin(), tar = target.begin();
-		for(T &g : m_inGrad)
+		forEach([&](T &g)
 		{
 			g = norm * (*inp - *tar);
 			++inp;
 			++tar;
-		}
+		}, m_inGrad);
 		
 		return m_inGrad;
 	}

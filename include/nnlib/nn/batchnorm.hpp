@@ -183,10 +183,10 @@ public:
 		}
 		
 		// Turn variance into inverted standard deviation
-		for(T &invStd : invStds)
+		forEach([&](T &invStd)
 		{
 			invStd = 1.0 / sqrt(invStd + 1e-12);
-		}
+		}, invStds);
 		
 		// Use the statistics to normalize the data row-by-row
 		for(size_t i = 0; i < n; ++i)
@@ -231,8 +231,10 @@ public:
 			invStds = m_runningVars.copy();
 			
 			// Turn variance into inverted standard deviation
-			for(T &invStd : invStds)
+			forEach([&](T &invStd)
+			{
 				invStd = 1.0 / sqrt(invStd + 1e-12);
+			}, invStds);
 		}
 		
 		for(size_t i = 0; i < inps; ++i)
