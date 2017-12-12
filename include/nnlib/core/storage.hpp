@@ -203,6 +203,18 @@ public:
 	
 	// MARK: Element access
 	
+	T &at(size_t i)
+	{
+		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
+		return m_ptr[i];
+	}
+	
+	const T &at(size_t i) const
+	{
+		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
+		return m_ptr[i];
+	}
+	
 	T &operator[](size_t i)
 	{
 		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");

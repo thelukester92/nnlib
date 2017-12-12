@@ -744,6 +744,12 @@ public:
 		return m_dims;
 	}
 	
+	/// Gets the list of dimension strides.
+	const Storage<size_t> &strides() const
+	{
+		return m_strides;
+	}
+	
 	/// Gets the number of dimensions in this tensor.
 	size_t dims() const
 	{
@@ -1487,54 +1493,40 @@ class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::p
 using TT = typename std::remove_const<T>::type;
 public:
 	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
-		m_tensor(const_cast<Tensor<TT> *>(tensor)),
-		m_indices(tensor->dims(), 0),
-		m_ptr(m_tensor->ptr())
+		m_contiguous(tensor->contiguous()),
+		m_shape(tensor->shape()),
+		m_stride(tensor->strides()),
+		m_indices(m_contiguous ? 1 : tensor->dims(), 0),
+		m_ptr(const_cast<Tensor<TT> *>(tensor)->ptr())
 	{
-		if(end || m_tensor->size() == 0)
+		if(end || tensor->size() == 0)
 		{
-			m_indices[0] = m_tensor->size(0);
-			m_ptr += m_tensor->size(0) * m_tensor->stride(0);
+			m_indices[0] = m_shape[0];
+			m_ptr += m_stride[0] * m_indices[0];
 		}
-	}
-	
-	TensorIterator(const TensorIterator &it) :
-		m_tensor(it.m_tensor),
-		m_indices(it.m_indices),
-		m_ptr(it.m_ptr)
-	{}
-	
-	TensorIterator(TensorIterator &&it) :
-		m_tensor(it.m_tensor),
-		m_indices(std::move(it.m_indices)),
-		m_ptr(it.m_ptr)
-	{}
-	
-	const Storage<size_t> &indices() const
-	{
-		return m_indices;
 	}
 	
 	TensorIterator &operator++()
 	{
-		if(m_tensor->contiguous())
+		if(m_contiguous)
 		{
 			++m_ptr;
 			return *this;
 		}
 		
-		size_t dim = m_indices.size() - 1;
-		++m_indices[dim];
-		m_ptr += m_tensor->stride(dim);
+		size_t d = m_indices.size() - 1;
+		++m_indices[d];
+		m_ptr += m_stride[d];
 		
-		while(m_indices[dim] >= m_tensor->size(dim) && dim > 0)
+		while(m_indices[d] >= m_shape[d] && d > 0)
 		{
-			m_ptr -= m_tensor->stride(dim) * m_indices[dim];
-			m_indices[dim] = 0;
+			m_ptr -= m_stride[d] * m_indices[d];
+			m_indices[d] = 0;
 			
-			--dim;
-			++m_indices[dim];
-			m_ptr += m_tensor->stride(dim);
+			--d;
+			
+			++m_indices[d];
+			m_ptr += m_stride[d];
 		}
 		
 		return *this;
@@ -1559,12 +1551,16 @@ public:
 	
 	bool operator!=(const TensorIterator &other)
 	{
-		if(m_tensor->contiguous())
-			return m_tensor != other.m_tensor || m_ptr != other.m_ptr;
-		return m_tensor != other.m_tensor || m_indices != other.m_indices;
+		if(m_contiguous)
+			return m_ptr != other.m_ptr;
+		else
+			return m_indices != other.m_indices;
 	}
+	
 private:
-	Tensor<TT> *m_tensor;
+	bool m_contiguous;
+	const Storage<size_t> &m_shape;
+	const Storage<size_t> &m_stride;
 	Storage<size_t> m_indices;
 	TT *m_ptr;
 };
