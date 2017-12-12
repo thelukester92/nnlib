@@ -446,11 +446,11 @@ public:
 		Tensor t(dims, true);
 		NNAssertEquals(t.size(), size(), "Incompatible dimensions for reshaping!");
 		auto k = t.begin();
-		for(const T &value : *this)
+		forEach([&](const T &value)
 		{
 			*k = value;
 			++k;
-		}
+		}, *this);
 		return t;
 	}
 	
@@ -665,11 +665,11 @@ public:
 	{
 		NNAssertEquals(size(), other.size(), "Incompatible tensor for copying!");
 		auto i = other.begin();
-		for(T &value : *this)
+		forEach([&](T &value)
 		{
 			value = *i;
 			++i;
-		}
+		}, *this);
 		return *this;
 	}
 	
@@ -682,13 +682,13 @@ public:
 	{
 		NNAssertEquals(shape(), other.shape(), "Incompatible tensors for swapping!");
 		auto i = other.begin();
-		for(T &v : *this)
+		forEach([&](T &v)
 		{
 			T t = v;
 			v = *i;
 			*i = t;
 			++i;
-		}
+		}, *this);
 		return *this;
 	}
 	
@@ -702,13 +702,13 @@ public:
 	{
 		NNAssertEquals(shape(), other.shape(), "Incompatible tensors for swapping!");
 		auto i = other.begin();
-		for(T &v : *this)
+		forEach([&](T &v)
 		{
 			T t = v;
 			v = *i;
 			*i = t;
 			++i;
-		}
+		}, *this);
 		return *this;
 	}
 	
@@ -801,8 +801,10 @@ public:
 	/// Sets every element in this tensor to the given value.
 	Tensor &fill(const T &value)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v = value;
+		}, *this);
 		return *this;
 	}
 	
@@ -825,8 +827,10 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &rand(const T &from = -1, const T &to = 1)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v = Random<T>::uniform(from, to);
+		}, *this);
 		return *this;
 	}
 	
@@ -837,8 +841,10 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &randn(const T &mean = 0, const T &stddev = 1)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v = Random<T>::normal(mean, stddev);
+		}, *this);
 		return *this;
 	}
 	
@@ -848,8 +854,10 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &bernoulli(const T &p = 0.5)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v = Random<T>::bernoulli(p);
+		}, *this);
 		return *this;
 	}
 	
@@ -863,8 +871,10 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &randn(const T &mean, const T &stddev, const T &cap)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v = Random<T>::normal(mean, stddev, cap);
+		}, *this);
 		return *this;
 	}
 	
@@ -874,8 +884,10 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &scale(T alpha)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v *= alpha;
+		}, *this);
 		return *this;
 	}
 	
@@ -885,8 +897,10 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &add(T alpha)
 	{
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v += alpha;
+		}, *this);
 		return *this;
 	}
 	
@@ -1111,11 +1125,11 @@ public:
 	{
 		NNAssertEquals(shape(), x.shape(), "Incompatible operands!");
 		auto i = x.begin();
-		for(T &el : *this)
+		forEach([&](T &el)
 		{
 			el *= *i;
 			++i;
-		}
+		}, *this);
 		return *this;
 	}
 	
@@ -1133,11 +1147,11 @@ public:
 		else
 		{
 			auto i = x.begin();
-			for(T &el : *this)
+			forEach([&](T &el)
 			{
 				el += *i * alpha;
 				++i;
-			}
+			}, *this);
 			return *this;
 		}
 	}
@@ -1164,9 +1178,11 @@ public:
 	Tensor sparsify(T epsilon = 1e-12)
 	{
 		size_t count = 0;
-		for(auto x : *this)
+		forEach([&](const T &x)
+		{
 			if(std::abs(x) > epsilon)
 				++count;
+		}, *this);
 		
 		Tensor<T> sparse(count, m_dims.size() + 1);
 		
@@ -1216,8 +1232,10 @@ public:
 	/// \note We may eventually split to apply(V|M) (see the add method) for acceleration.
 	Tensor &apply(const std::function<void(T&)> &f)
 	{
-		for(T &val : *this)
+		forEach([&](T &val)
+		{
 			f(val);
+		}, *this);
 		return *this;
 	}
 	
@@ -1226,8 +1244,10 @@ public:
 	/// \note We may eventually split to apply(V|M) (see the add method) for acceleration.
 	const Tensor &apply(const std::function<void(const T&)> &f) const
 	{
-		for(const T &val : *this)
+		forEach([&](const T &val)
+		{
 			f(val);
+		}, *this);
 		return *this;
 	}
 	
@@ -1237,8 +1257,10 @@ public:
 	T sum() const
 	{
 		T result = 0;
-		for(const T &v : *this)
+		forEach([&](const T &v)
+		{
 			result += v;
+		}, *this);
 		return result;
 	}
 	
@@ -1292,11 +1314,11 @@ public:
 	{
 		T avg = mean();
 		T sum = 0;
-		for(const T &v : *this)
+		forEach([&](const T &v)
 		{
 			T diff = v - avg;
 			sum += diff * diff;
-		}
+		}, *this);
 		return sum / (size() + (normalizeAsSample ? 1 : 0));
 	}
 	
@@ -1304,9 +1326,11 @@ public:
 	T min() const
 	{
 		T result = *ptr();
-		for(const T &v : *this)
+		forEach([&](const T &v)
+		{
 			if(v < result)
 				result = v;
+		}, *this);
 		return result;
 	}
 	
@@ -1314,9 +1338,11 @@ public:
 	T max() const
 	{
 		T result = *ptr();
-		for(const T &v : *this)
+		forEach([&](const T &v)
+		{
 			if(v > result)
 				result = v;
+		}, *this);
 		return result;
 	}
 	
@@ -1332,8 +1358,10 @@ public:
 	Tensor &clip(T smallest, T largest)
 	{
 		NNAssertGreaterThan(largest, smallest, "Invalid clipping range!");
-		for(T &v : *this)
+		forEach([&](T &v)
+		{
 			v = std::min(std::max(v, smallest), largest);
+		}, *this);
 		return *this;
 	}
 	
