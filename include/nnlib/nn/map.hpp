@@ -27,9 +27,10 @@ public:
 	virtual Tensor<T> &forward(const Tensor<T> &input) override
 	{
 		m_output.resize(input.shape());
-		auto i = input.begin(), j = input.end();
-		for(auto k = m_output.begin(); i != j; ++i, ++k)
-			*k = forwardOne(*i);
+		forEach([&](const T &x, T &y)
+		{
+			y = forwardOne(x);
+		}, input, m_output);
 		return m_output;
 	}
 	
@@ -37,9 +38,10 @@ public:
 	{
 		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
 		m_inGrad.resize(input.shape());
-		auto i = input.begin(), j = input.end(), b = outGrad.begin();
-		for(auto k = m_output.begin(), l = m_inGrad.begin(); i != j; ++i, ++b, ++k, ++l)
-			*l = *b * backwardOne(*i, *k);
+		forEach([&](const T &x, const T &y, const T &w, T &z)
+		{
+			z = w * backwardOne(x, y);
+		}, input, m_output, outGrad, m_inGrad);
 		return m_inGrad;
 	}
 	
