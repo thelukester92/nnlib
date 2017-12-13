@@ -29,7 +29,7 @@ public:
 	
 	LSTM &operator=(LSTM module);
 	
-	friend void swap(LSTM &a, LSTM &b);
+	friend void swap <> (LSTM &a, LSTM &b);
 	
 	LSTM &gradClip(T clip);
 	T gradClip() const;
