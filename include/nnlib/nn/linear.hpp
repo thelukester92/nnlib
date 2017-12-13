@@ -23,7 +23,7 @@ public:
 	
 	Linear &operator=(Linear module);
 	
-	friend void swap(Linear &a, Linear &b);
+	friend void swap <> (Linear &a, Linear &b);
 	
 	bool biased() const;
 	
