@@ -1,5 +1,5 @@
-#ifndef DROPOUT_HPP
-#define DROPOUT_HPP
+#ifndef NN_DROPOUT_HPP
+#define NN_DROPOUT_HPP
 
 #include "module.hpp"
 
@@ -10,96 +10,23 @@ template <typename T = double>
 class Dropout : public Module<T>
 {
 public:
-	Dropout(T dropProbability = 0.1) :
-		m_dropProbability(dropProbability),
-		m_training(true)
-	{
-		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
-		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
-	}
+	Dropout(T dropProbability = 0.1);
+	Dropout(const Dropout &module);
+	Dropout(const Serialized &node);
+	Dropout &operator=(const Dropout &module);
 	
-	Dropout(const Dropout &module) :
-		m_dropProbability(module.m_dropProbability),
-		m_training(module.m_training)
-	{}
+	T dropProbability() const;
+	Dropout &dropProbability(T dropProbability);
 	
-	Dropout(const Serialized &node) :
-		m_dropProbability(node.get<T>("dropProbability")),
-		m_training(node.get<bool>("training"))
-	{}
+	bool isTraining() const;
+	virtual void training(bool training = true) override;
 	
-	Dropout &operator=(const Dropout &module)
-	{
-		m_dropProbability	= module.m_dropProbability;
-		m_training			= module.m_training;
-		return *this;
-	}
+	virtual void save(Serialized &node) const override;
 	
-	/// Get the probability that an output is not dropped.
-	T dropProbability() const
-	{
-		return m_dropProbability;
-	}
+	virtual Tensor<T> &forward(const Tensor<T> &input) override;
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
 	
-	/// Set the probability that an output is not dropped.
-	Dropout &dropProbability(T dropProbability)
-	{
-		NNAssertGreaterThanOrEquals(dropProbability, 0, "Expected a probability!");
-		NNAssertLessThan(dropProbability, 1, "Expected a probability!");
-		m_dropProbability = dropProbability;
-		return *this;
-	}
-	
-	bool isTraining() const
-	{
-		return m_training;
-	}
-	
-	virtual void training(bool training = true) override
-	{
-		m_training = training;
-	}
-	
-	// MARK: Serialization
-	
-	virtual void save(Serialized &node) const override
-	{
-		node.set("dropProbability", m_dropProbability);
-		node.set("training", m_training);
-	}
-	
-	// MARK: Computation
-	
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
-	{
-		m_mask.resize(input.shape());
-		m_output.resize(input.shape());
-		
-		if(m_training)
-			return m_output.copy(input).pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
-		else
-			return m_output.copy(input).scale(1 - m_dropProbability);
-	}
-	
-	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
-	{
-		NNAssertEquals(input.shape(), m_mask.shape(), "Dropout::forward must be called first!");
-		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
-		m_inGrad.resize(input.shape());
-		
-		if(m_training)
-			return m_inGrad.copy(outGrad).pointwiseProduct(m_mask);
-		else
-			return m_inGrad.copy(outGrad).scale(1 - m_dropProbability);
-	}
-	
-	// MARK: Buffers
-	
-	virtual Storage<Tensor<T> *> stateList() override
-	{
-		return Module<T>::stateList().push_back(&m_mask);
-	}
+	virtual Storage<Tensor<T> *> stateList() override;
 	
 protected:
 	using Module<T>::m_output;
@@ -114,5 +41,6 @@ private:
 }
 
 NNRegisterType(Dropout, Module);
+NNTemplateDefinition(Dropout, "detail/dropout.tpp");
 
 #endif
