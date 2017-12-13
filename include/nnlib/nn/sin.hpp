@@ -12,10 +12,10 @@ template <typename T = double>
 class Sin : public Map<T>
 {
 public:
-	Sin()
-	Sin(const Serialized &)
-	Sin(const Sin &)
-	Sin &operator=(const Sin &)
+	Sin();
+	Sin(const Serialized &);
+	Sin(const Sin &);
+	Sin &operator=(const Sin &);
 	
 	virtual T forwardOne(const T &x) override;
 	virtual T backwardOne(const T &x, const T &y) override;
