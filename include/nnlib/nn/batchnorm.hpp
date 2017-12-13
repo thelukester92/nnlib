@@ -75,7 +75,6 @@ private:
 }
 
 NNRegisterType(BatchNorm, Module);
-
-#include "detail/batchnorm.tpp"
+NNTemplateDefinition(BatchNorm, "detail/batchnorm.tpp");
 
 #endif

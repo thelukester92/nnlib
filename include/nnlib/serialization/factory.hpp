@@ -138,4 +138,11 @@ namespace nnlib { namespace traits { \
 /// The call to this macro must be placed outside namespace nnlib.
 #define NNRegisterType(Derived, Base) NNRegisterType_Helper(Derived, Base, float) NNRegisterType_Helper(Derived, Base, double)
 
+/// Register a template definition file and either include or skip it.
+#ifdef NN_REAL_T
+	#define NNTemplateDefinition(Class, File) extern template class nnlib::Class<NN_REAL_T>;
+#else
+	#define NNTemplateDefinition(Class, File) #include File
+#endif
+
 #endif

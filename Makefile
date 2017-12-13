@@ -15,7 +15,7 @@
 #   PREFIX - where to install headers; defaults to /usr/local
 
 CXX    ?= g++
-CFLAGS := -Wall -DACCELERATE_BLAS
+CFLAGS := -Wall -DACCELERATE_BLAS -DNN_REAL_T=double
 LFLAGS :=
 PREFIX := /usr/local
 
@@ -29,9 +29,11 @@ override CFLAGS += -std=c++11 -I$(INC) --coverage
 override INSTALL_FILES := $(shell find $(INC) -type f)
 override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.hpp=$(PREFIX)/include/%.hpp)
 
+SRC_FILES := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
+
 override CPP_FILES := $(wildcard $(TST)/*.cpp) $(wildcard $(TST)/**/*.cpp)
-override DEP_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.d)
-override OBJ_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.o)
+override DEP_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.d) $(SRC_FILES:src/%.cpp=$(OBJ)/src/%.d)
+override OBJ_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.o) $(SRC_FILES:src/%.cpp=$(OBJ)/src/%.o)
 
 override UNAME  := $(shell uname -s)
 override GNU    := $(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
@@ -75,6 +77,10 @@ $(BIN)/$(OUT): $(BIN) $(OBJ_FILES)
 	$(CXX) $(OBJ_FILES) $(CFLAGS) $(LFLAGS) -o $@
 
 $(OBJ)/%.o: $(TST)/%.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
+
+$(OBJ)/src/%.o: src/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
 
