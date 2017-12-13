@@ -1,5 +1,5 @@
-#ifndef NN_DETAIL_BATCHNORM_HPP
-#define NN_DETAIL_BATCHNORM_HPP
+#ifndef NN_BATCHNORM_TPP
+#define NN_BATCHNORM_TPP
 
 #include "../batchnorm.hpp"
 

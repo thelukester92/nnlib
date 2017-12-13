@@ -34,84 +34,23 @@ public:
 	using Container<T>::components;
 	
 	template <typename ... Ms>
-	Concat(Module<T> *first, Ms... rest) :
-		Container<T>(first, rest...),
-		m_concatDim((size_t) -1)
-	{}
+	Concat(Module<T> *first, Ms... rest);
 	
 	template <typename ... Ms>
-	Concat(size_t concatDim, Ms... components) :
-		Container<T>(components...),
-		m_concatDim(concatDim)
-	{}
+	Concat(size_t concatDim, Ms... components);
 	
-	Concat(const Concat &module) :
-		Container<T>(static_cast<const Container<T> &>(module)),
-		m_concatDim(module.m_concatDim)
-	{}
+	Concat(const Concat &module);
+	Concat(const Serialized &node);
 	
-	Concat(const Serialized &node) :
-		Container<T>(node),
-		m_concatDim(node.get<size_t>("concatDim"))
-	{}
+	Concat &operator=(const Concat &module);
 	
-	Concat &operator=(const Concat &module)
-	{
-		Container<T>::operator=(module);
-		m_concatDim = module.m_concatDim;
-		return *this;
-	}
+	size_t concatDim() const;
+	Concat &concatDim(size_t dim);
 	
-	size_t concatDim() const
-	{
-		return m_concatDim;
-	}
+	virtual void save(Serialized &node) const override;
 	
-	Concat &concatDim(size_t dim)
-	{
-		m_concatDim = dim;
-		return *this;
-	}
-	
-	virtual void save(Serialized &node) const override
-	{
-		Container<T>::save(node);
-		node.set("concatDim", m_concatDim);
-	}
-	
-	/// Forward propagate input, returning output.
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
-	{
-		Storage<Tensor<T> *> outputs(components());
-		for(size_t i = 0, count = components(); i < count; ++i)
-			outputs[i] = &m_components[i]->forward(input);
-		
-		if(!m_output.sharedWith(outputs))
-		{
-			m_concatDim = std::min(m_concatDim, outputs[0]->dims() - 1);
-			m_output = Tensor<T>::concatenate(outputs, m_concatDim);
-		}
-		
-		return m_output;
-	}
-	
-	/// Backward propagate input and output gradient, returning input gradient.
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
-	{
-		size_t offset = 0, stride;
-		for(size_t i = 0, count = components(); i < count; ++i)
-		{
-			stride = m_components[i]->output().size(m_concatDim);
-			m_components[i]->backward(input, outGrad.narrow(m_concatDim, offset, stride));
-			offset += stride;
-		}
-		
-		m_inGrad.resize(m_components[0]->inGrad().shape());
-		for(size_t i = 0, count = components(); i < count; ++i)
-			m_inGrad.add(m_components[i]->inGrad());
-		
-		return m_inGrad;
-	}
+	virtual Tensor<T> &forward(const Tensor<T> &input) override;
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
 	
 protected:
 	using Module<T>::m_output;
@@ -125,5 +64,7 @@ private:
 }
 
 NNRegisterType(Concat, Module);
+
+#include "detail/concat.tpp"
 
 #endif
