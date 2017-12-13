@@ -12,26 +12,18 @@ template <typename T = double>
 class TanH : public Map<T>
 {
 public:
-	TanH() {}
-	TanH(const Serialized &) {}
-	TanH(const TanH &) {}
-	TanH &operator=(const TanH &) { return *this; }
+	TanH();
+	TanH(const Serialized &);
+	TanH(const TanH &);
+	TanH &operator=(const TanH &);
 	
-	/// Single element forward.
-	virtual T forwardOne(const T &x) override
-	{
-		return tanh(x);
-	}
-	
-	/// Single element backward.
-	virtual T backwardOne(const T &x, const T &y) override
-	{
-		return 1.0 - y * y;
-	}
+	virtual T forwardOne(const T &x) override;
+	virtual T backwardOne(const T &x, const T &y) override;
 };
 
 }
 
 NNRegisterType(TanH, Module);
+NNTemplateDefinition(TanH, "detail/tanh.tpp");
 
 #endif
