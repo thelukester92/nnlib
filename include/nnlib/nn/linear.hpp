@@ -38,6 +38,12 @@ public:
 		NNAssert(!m_bias || m_weights.size(1) == m_bias->size(), "Incompatible weights and bias!");
 	}
 	
+	~Linear()
+	{
+		delete m_bias;
+		delete m_biasGrad;
+	}
+	
 	Linear &operator=(Linear module)
 	{
 		swap(*this, module);
