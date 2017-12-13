@@ -136,7 +136,7 @@ namespace nnlib { namespace traits { \
 /// \brief Register a derived type for serialization and copy-construction.
 ///
 /// The call to this macro must be placed outside namespace nnlib.
-#define NNRegisterType(Derived, Base) NNRegisterType_Helper(Derived, Base, float) NNRegisterType_Helper(Derived, Base, double)
+#define NNRegisterType(Derived, Base) NNRegisterType_Helper(Derived, Base, double)
 
 /// Register a template definition file and either include or skip it.
 #ifdef NN_REAL_T
