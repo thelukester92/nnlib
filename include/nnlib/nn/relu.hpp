@@ -12,60 +12,19 @@ template <typename T = double>
 class ReLU : public Map<T>
 {
 public:
-	ReLU(T leak = 0.1) :
-		m_leak(leak)
-	{
-		NNAssertGreaterThanOrEquals(leak, 0, "Expected positive leak!");
-		NNAssertLessThan(leak, 1, "Expected leak to be a percentage!");
-	}
+	ReLU(T leak = 0.1);
+	ReLU(const ReLU &module);
+	ReLU(const Serialized &node);
 	
-	ReLU(const ReLU &module) :
-		m_leak(module.m_leak)
-	{}
+	ReLU &operator=(const ReLU &module);
 	
-	ReLU(const Serialized &node) :
-		m_leak(node.get<T>("leak"))
-	{}
+	virtual void save(Serialized &node) const override;
 	
-	ReLU &operator=(const ReLU &module)
-	{
-		m_leak = module.m_leak;
-		return *this;
-	}
+	T leak() const;
+	ReLU &leak(T leak);
 	
-	/// Save to a serialized node.
-	virtual void save(Serialized &node) const override
-	{
-		Map<T>::save(node);
-		node.set("leak", m_leak);
-	}
-	
-	/// Get the "leak" for this ReLU. 0 if non-leaky.
-	T leak() const
-	{
-		return m_leak;
-	}
-	
-	/// Set the "leak" for this ReLU. 0 <= leak < 1.
-	ReLU &leak(T leak)
-	{
-		NNAssertGreaterThanOrEquals(leak, 0, "Expected positive leak!");
-		NNAssertLessThan(leak, 1, "Expected leak to be a percentage!");
-		m_leak = leak;
-		return *this;
-	}
-	
-	/// Single element forward.
-	virtual T forwardOne(const T &x) override
-	{
-		return x > 0 ? x : m_leak * x;
-	}
-	
-	/// Single element backward.
-	virtual T backwardOne(const T &x, const T &y) override
-	{
-		return x > 0 ? 1 : m_leak;
-	}
+	virtual T forwardOne(const T &x) override;
+	virtual T backwardOne(const T &x, const T &y) override;
 	
 private:
 	T m_leak;
@@ -74,5 +33,6 @@ private:
 }
 
 NNRegisterType(ReLU, Module);
+NNTemplateDefinition(ReLU, "detail/relu.tpp");
 
 #endif
