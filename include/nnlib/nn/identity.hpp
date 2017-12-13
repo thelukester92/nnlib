@@ -14,28 +14,14 @@ template <typename T = double>
 class Identity : public Module<T>
 {
 public:
-	Identity() {}
-	Identity(const Serialized &) {}
-	Identity(const Identity &) {}
-	Identity &operator=(const Identity &) { return *this; }
+	Identity();
+	Identity(const Serialized &);
+	Identity(const Identity &);
+	Identity &operator=(const Identity &);
 	
-	// MARK: Serialization
-	
-	virtual void save(Serialized &node) const override
-	{}
-	
-	// MARK: Computation
-	
-	virtual Tensor<T> &forward(const Tensor<T> &input) override
-	{
-		return m_output.resize(input.shape()).copy(input);
-	}
-	
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override
-	{
-		NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
-		return m_inGrad.resize(outGrad.shape()).copy(outGrad);
-	}
+	virtual void save(Serialized &node) const override;
+	virtual Tensor<T> &forward(const Tensor<T> &input) override;
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
 	
 protected:
 	using Module<T>::m_output;
@@ -45,5 +31,6 @@ protected:
 }
 
 NNRegisterType(Identity, Module);
+NNTemplateDefinition(Identity, "detail/identity.tpp");
 
 #endif
