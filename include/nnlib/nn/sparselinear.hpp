@@ -31,8 +31,8 @@ public:
 			m_output.resize(m_weights.size(1));
 			
 			// bias
-			if(m_bias)
-				m_output.copy(*m_bias);
+			if(m_useBias)
+				m_output.copy(m_bias);
 			else
 				m_output.zeros();
 			
@@ -52,8 +52,8 @@ public:
 				m_output.select(0, input(i, 0)).addV(m_weights.select(0, input(i, 1)), input(i, 2));
 			
 			// bias
-			if(m_bias)
-				m_output.assignVV(m_ones.resize(input(0, 0)).fill(1), *m_bias, 1, 1);
+			if(m_useBias)
+				m_output.assignVV(m_ones.resize(input(0, 0)).fill(1), m_bias, 1, 1);
 		}
 		else
 		{
@@ -78,8 +78,8 @@ public:
 				m_weightsGrad.select(0, input(i, 0)).addV(outGrad, input(i, 1));
 			
 			// bias gradient
-			if(m_bias)
-				m_biasGrad->addV(outGrad);
+			if(m_useBias)
+				m_biasGrad.addV(outGrad);
 			
 			// input gradient
 			m_inGrad.resize(m_weights.size(0));
@@ -97,8 +97,8 @@ public:
 				m_weightsGrad.select(0, input(i, 1)).addV(outGrad.select(0, input(i, 0)), input(i, 2));
 			
 			// bias gradient
-			if(m_bias)
-				m_biasGrad->assignMTV(outGrad, m_ones.resize(input(0, 0)).fill(1), 1, 1);
+			if(m_useBias)
+				m_biasGrad.assignMTV(outGrad, m_ones.resize(input(0, 0)).fill(1), 1, 1);
 			
 			// input gradient
 			m_inGrad.resize(input(0, 0), m_weights.size(0));
@@ -118,6 +118,8 @@ protected:
 	
 	using Linear<T>::m_weights;
 	using Linear<T>::m_weightsGrad;
+	
+	using Linear<T>::m_useBias;
 	using Linear<T>::m_bias;
 	using Linear<T>::m_biasGrad;
 	
