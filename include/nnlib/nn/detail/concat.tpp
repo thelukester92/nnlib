@@ -7,20 +7,6 @@ namespace nnlib
 {
 
 template <typename T>
-template <typename ... Ms>
-Concat<T>::Concat(Module<T> *first, Ms... rest) :
-	Container<T>(first, rest...),
-	m_concatDim((size_t) -1)
-{}
-
-template <typename T>
-template <typename ... Ms>
-Concat<T>::Concat(size_t concatDim, Ms... components) :
-	Container<T>(components...),
-	m_concatDim(concatDim)
-{}
-
-template <typename T>
 Concat<T>::Concat(const Concat<T> &module) :
 	Container<T>(static_cast<const Container<T> &>(module)),
 	m_concatDim(module.m_concatDim)

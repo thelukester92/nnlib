@@ -34,10 +34,16 @@ public:
 	using Container<T>::components;
 	
 	template <typename ... Ms>
-	Concat(Module<T> *first, Ms... rest);
-	
+	Concat(Module<T> *first, Ms... rest) :
+		Container<T>(first, rest...),
+		m_concatDim((size_t) -1)
+	{}
+
 	template <typename ... Ms>
-	Concat(size_t concatDim, Ms... components);
+	Concat(size_t concatDim, Ms... components) :
+		Container<T>(components...),
+		m_concatDim(concatDim)
+	{}
 	
 	Concat(const Concat &module);
 	Concat(const Serialized &node);
@@ -64,7 +70,6 @@ private:
 }
 
 NNRegisterType(Concat, Module);
-
-#include "detail/concat.tpp"
+NNTemplateDefinition(Concat, "detail/concat.tpp");
 
 #endif
