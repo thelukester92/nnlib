@@ -1,5 +1,5 @@
-#ifndef NN_SOFT_MAX_HPP
-#define NN_SOFT_MAX_HPP
+#ifndef NN_SOFT_MAX_TPP
+#define NN_SOFT_MAX_TPP
 
 #include "../softmax.hpp"
 
