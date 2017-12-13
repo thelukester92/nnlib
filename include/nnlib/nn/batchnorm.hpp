@@ -6,6 +6,12 @@
 namespace nnlib
 {
 
+template <typename T>
+class BatchNorm;
+
+template <typename T>
+void swap(BatchNorm<T> &, BatchNorm<T> &);
+
 /// \brief Batch normalization.
 ///
 /// Works only on 2D tensors.
@@ -18,7 +24,7 @@ public:
 	BatchNorm(const Serialized &node);
 	BatchNorm &operator=(BatchNorm module);
 	
-	friend void swap(BatchNorm &a, BatchNorm &b);
+	friend void swap <> (BatchNorm &a, BatchNorm &b);
 	
 	BatchNorm &reset();
 	
