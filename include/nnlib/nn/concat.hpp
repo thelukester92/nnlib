@@ -70,6 +70,11 @@ private:
 }
 
 NNRegisterType(Concat, Module);
-NNTemplateDefinition(Concat, "detail/concat.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Concat<NN_REAL_T>;
+#else
+	#include "detail/concat.tpp"
+#endif
 
 #endif

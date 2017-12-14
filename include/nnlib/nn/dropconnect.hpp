@@ -74,6 +74,11 @@ private:
 }
 
 NNRegisterType(DropConnect, Module);
-NNTemplateDefinition(DropConnect, "detail/dropconnect.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::DropConnect<NN_REAL_T>;
+#else
+	#include "detail/dropconnect.tpp"
+#endif
 
 #endif

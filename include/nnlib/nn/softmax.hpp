@@ -31,6 +31,11 @@ protected:
 }
 
 NNRegisterType(SoftMax, Module);
-NNTemplateDefinition(SoftMax, "detail/softmax.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::SoftMax<NN_REAL_T>;
+#else
+	#include "detail/softmax.tpp"
+#endif
 
 #endif

@@ -24,6 +24,11 @@ public:
 }
 
 NNRegisterType(Sin, Module);
-NNTemplateDefinition(Sin, "detail/sin.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Sin<NN_REAL_T>;
+#else
+	#include "detail/sin.tpp"
+#endif
 
 #endif

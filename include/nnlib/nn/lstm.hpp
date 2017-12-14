@@ -84,6 +84,11 @@ private:
 }
 
 NNRegisterType(LSTM, Module);
-NNTemplateDefinition(LSTM, "detail/lstm.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::LSTM<NN_REAL_T>;
+#else
+	#include "detail/lstm.tpp"
+#endif
 
 #endif

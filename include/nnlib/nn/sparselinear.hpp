@@ -37,6 +37,11 @@ protected:
 }
 
 NNRegisterType(SparseLinear, Module);
-NNTemplateDefinition(SparseLinear, "detail/sparselinear.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::SparseLinear<NN_REAL_T>;
+#else
+	#include "detail/sparselinear.tpp"
+#endif
 
 #endif

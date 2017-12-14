@@ -66,6 +66,11 @@ protected:
 }
 
 NNRegisterType(Container, Module);
-NNTemplateDefinition(Container, "detail/container.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Container<NN_REAL_T>;
+#else
+	#include "detail/container.tpp"
+#endif
 
 #endif

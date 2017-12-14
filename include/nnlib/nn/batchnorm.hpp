@@ -75,6 +75,11 @@ private:
 }
 
 NNRegisterType(BatchNorm, Module);
-NNTemplateDefinition(BatchNorm, "detail/batchnorm.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::BatchNorm<NN_REAL_T>;
+#else
+	#include "detail/batchnorm.tpp"
+#endif
 
 #endif

@@ -31,6 +31,11 @@ protected:
 }
 
 NNRegisterType(Identity, Module);
-NNTemplateDefinition(Identity, "detail/identity.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Identity<NN_REAL_T>;
+#else
+	#include "detail/identity.tpp"
+#endif
 
 #endif

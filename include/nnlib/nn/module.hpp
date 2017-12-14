@@ -64,6 +64,11 @@ protected:
 
 }
 
-NNTemplateDefinition(Module, "detail/module.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Module<NN_REAL_T>;
+#else
+	#include "detail/module.tpp"
+#endif
 
 #endif

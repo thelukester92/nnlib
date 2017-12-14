@@ -41,6 +41,11 @@ private:
 }
 
 NNRegisterType(Dropout, Module);
-NNTemplateDefinition(Dropout, "detail/dropout.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Dropout<NN_REAL_T>;
+#else
+	#include "detail/dropout.tpp"
+#endif
 
 #endif

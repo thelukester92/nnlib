@@ -33,6 +33,11 @@ private:
 }
 
 NNRegisterType(ReLU, Module);
-NNTemplateDefinition(ReLU, "detail/relu.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::ReLU<NN_REAL_T>;
+#else
+	#include "detail/relu.tpp"
+#endif
 
 #endif

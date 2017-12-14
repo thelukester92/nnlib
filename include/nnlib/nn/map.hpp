@@ -27,6 +27,11 @@ protected:
 }
 
 NNRegisterType(Map, Module);
-NNTemplateDefinition(Map, "detail/map.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Map<NN_REAL_T>;
+#else
+	#include "detail/map.tpp"
+#endif
 
 #endif

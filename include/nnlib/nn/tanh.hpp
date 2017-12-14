@@ -24,6 +24,11 @@ public:
 }
 
 NNRegisterType(TanH, Module);
-NNTemplateDefinition(TanH, "detail/tanh.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::TanH<NN_REAL_T>;
+#else
+	#include "detail/tanh.tpp"
+#endif
 
 #endif

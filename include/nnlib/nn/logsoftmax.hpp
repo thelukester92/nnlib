@@ -30,6 +30,11 @@ protected:
 }
 
 NNRegisterType(LogSoftMax, Module);
-NNTemplateDefinition(LogSoftMax, "detail/logsoftmax.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::LogSoftMax<NN_REAL_T>;
+#else
+	#include "detail/logsoftmax.tpp"
+#endif
 
 #endif

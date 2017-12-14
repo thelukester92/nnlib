@@ -26,6 +26,11 @@ protected:
 }
 
 NNRegisterType(Sequential, Module);
-NNTemplateDefinition(Sequential, "detail/sequential.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Sequential<NN_REAL_T>;
+#else
+	#include "detail/sequential.tpp"
+#endif
 
 #endif

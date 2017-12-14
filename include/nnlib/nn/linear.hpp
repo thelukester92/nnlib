@@ -57,6 +57,11 @@ protected:
 }
 
 NNRegisterType(Linear, Module);
-NNTemplateDefinition(Linear, "detail/linear.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Linear<NN_REAL_T>;
+#else
+	#include "detail/linear.tpp"
+#endif
 
 #endif

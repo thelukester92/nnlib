@@ -70,6 +70,11 @@ private:
 }
 
 NNRegisterType(Sequencer, Module);
-NNTemplateDefinition(Sequencer, "detail/sequencer.tpp");
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Sequencer<NN_REAL_T>;
+#else
+	#include "detail/sequencer.tpp"
+#endif
 
 #endif
