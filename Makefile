@@ -43,7 +43,6 @@ override OPTFILES := $(CXXFILES:src/%.cpp=obj/%.o)
 override DBGFILES := $(CXXFILES:src/%.cpp=obj/dbg/%.o)
 override DEPFILES := $(OPTFILES:%.o=%.d) $(DBGFILES:%.o=%.d)
 override CXXFLAGS += -std=c++11 -Iinclude
-override LDFLAGS  += -fPIC
 
 ifeq ($(ACCEL)$(shell uname -s),autoDarwin)
     override CXXFLAGS += -DNN_ACCEL
@@ -79,7 +78,7 @@ all: opt dbg test
 opt: lib/$(OPTLIB)
 lib/$(OPTLIB): $(OPTFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(OPTFILES) $(LDFLAGS) -o $@
+	$(CXX) -fPIC $(OPTFILES) $(LDFLAGS) -o $@
 obj/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(OPTFLAGS) -MMD -c -o $@
@@ -87,7 +86,7 @@ obj/%.o: src/%.cpp
 dbg: lib/$(DBGLIB)
 lib/$(DBGLIB): $(DBGFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(DBGFILES) $(LDFLAGS) -o $@
+	$(CXX) -fPIC $(DBGFILES) $(LDFLAGS) -o $@
 obj/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
@@ -118,3 +117,5 @@ uninstall:
 	rm -f $(PREFIX)/lib/$(OPTLIB) $(PREFIX)/lib/$(DBGLIB)
 
 .PHONY: all opt dbg test install headers clean uninstall
+
+-include $(DEPFILES)
