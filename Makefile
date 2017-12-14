@@ -95,7 +95,7 @@ test: dbg bin/$(TST)
 	./bin/$(TST)
 bin/$(TST): $(TSTFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(TSTFILES) -Llib -l$(DBG) -o $@
+	$(CXX) $(TSTFILES) -Wl,-rpath,lib -Llib -l$(DBG) -o $@
 obj/test/%.o: test/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
