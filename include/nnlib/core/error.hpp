@@ -128,7 +128,7 @@ public:
 	#define NNAssertLessThanOrEquals(x, y, ...)		NNHardAssertLessThanOrEquals(x, y, ##__VA_ARGS__)
 	#define NNAssertGreaterThan(x, y, ...)			NNHardAssertGreaterThan(x, y, ##__VA_ARGS__)
 	#define NNAssertGreaterThanOrEquals(x, y, ...)	NNHardAssertGreaterThanOrEquals(x, y, ##__VA_ARGS__)
-#else
+#elif !defined NN_IMPL
 	#define NNAssert(...)						(void) 0
 	#define NNAssertEquals(...)					(void) 0
 	#define NNAssertAlmostEquals(...)			(void) 0

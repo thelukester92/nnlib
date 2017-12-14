@@ -34,9 +34,9 @@ private:
 
 NNRegisterType(ReLU, Module);
 
-#ifdef NN_REAL_T
+#if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::ReLU<NN_REAL_T>;
-#else
+#elif !defined NN_IMPL
 	#include "detail/relu.tpp"
 #endif
 

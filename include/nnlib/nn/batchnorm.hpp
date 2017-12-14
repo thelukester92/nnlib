@@ -76,9 +76,9 @@ private:
 
 NNRegisterType(BatchNorm, Module);
 
-#ifdef NN_REAL_T
+#if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::BatchNorm<NN_REAL_T>;
-#else
+#elif !defined NN_IMPL
 	#include "detail/batchnorm.tpp"
 #endif
 

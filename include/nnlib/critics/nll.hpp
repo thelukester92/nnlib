@@ -36,9 +36,9 @@ private:
 
 }
 
-#ifdef NN_REAL_T
+#if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::NLL<NN_REAL_T>;
-#else
+#elif !defined NN_IMPL
 	#include "detail/nll.tpp"
 #endif
 

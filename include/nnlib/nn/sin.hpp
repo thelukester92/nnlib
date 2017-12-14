@@ -25,9 +25,9 @@ public:
 
 NNRegisterType(Sin, Module);
 
-#ifdef NN_REAL_T
+#if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::Sin<NN_REAL_T>;
-#else
+#elif !defined NN_IMPL
 	#include "detail/sin.tpp"
 #endif
 

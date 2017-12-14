@@ -12,8 +12,7 @@
 #include "critics/test_criticsequencer.hpp"
 #include "critics/test_mse.hpp"
 #include "critics/test_nll.hpp"
-#include "math/test_math_base.hpp"
-#include "math/test_math_blas.hpp"
+#include "math/test_math.hpp"
 #include "nn/test_batchnorm.hpp"
 #include "nn/test_concat.hpp"
 #include "nn/test_dropconnect.hpp"
@@ -68,8 +67,7 @@ int main()
 		UNIT_TEST("critics/", CriticSequencer),
 		UNIT_TEST("critics/", MSE),
 		UNIT_TEST("critics/", NLL),
-		UNIT_TEST("math/", MathBase),
-		UNIT_TEST("math/", MathBLAS),
+		UNIT_TEST("math/", Math),
 		UNIT_TEST("nn/", BatchNorm),
 		UNIT_TEST("nn/", Concat),
 		UNIT_TEST("nn/", DropConnect),

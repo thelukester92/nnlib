@@ -1,4 +1,5 @@
 #ifdef NN_REAL_T
+#define NN_IMPL
 
 #include "nnlib/nn/sparselinear.hpp"
 #include "nnlib/nn/detail/sparselinear.tpp"

@@ -25,9 +25,9 @@ public:
 
 NNRegisterType(Logistic, Module);
 
-#ifdef NN_REAL_T
+#if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::Logistic<NN_REAL_T>;
-#else
+#elif !defined NN_IMPL
 	#include "detail/logistic.tpp"
 #endif
 
