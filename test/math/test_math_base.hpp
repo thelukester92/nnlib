@@ -200,8 +200,14 @@ void TestMath(std::string name)
 
 void TestMathBase()
 {
+#ifdef NN_REAL_T
+#define NN_STR(s) #s
+	TestMath<MathBase, NN_REAL_T>(std::string("MathBase<") + NN_STR(NN_REAL_T) + ">");
+#undef NN_STR
+#else
 	TestMath<MathBase, double>("MathBase<double>");
 	TestMath<MathBase, float>("MathBase<float>");
+#endif
 }
 
 #endif

@@ -1,10 +1,12 @@
 #ifndef MATH_MATH_BLAS_HPP
 #define MATH_MATH_BLAS_HPP
 
-#ifdef __APPLE__
-	#include <Accelerate/Accelerate.h>
-#else
-	#include <cblas.h>
+#ifdef NN_ACCEL
+	#ifdef __APPLE__
+		#include <Accelerate/Accelerate.h>
+	#else
+		#include <cblas.h>
+	#endif
 #endif
 
 #include "math_base.hpp"
@@ -16,6 +18,8 @@ namespace nnlib
 template <typename T>
 class MathBLAS : public MathBase<T>
 {};
+
+#ifdef NN_ACCEL
 
 /// Single-precision BLAS-accelerated math.
 template <>
@@ -358,6 +362,8 @@ public:
 		);
 	}
 };
+
+#endif
 
 }
 
