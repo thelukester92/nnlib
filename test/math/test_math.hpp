@@ -29,7 +29,7 @@ bool almostEqual(T a, T b)
 	return fabs(a - b) < 1e-9;
 }
 
-template <NN_REAL_T>
+template <>
 bool almostEqual<float>(float a, float b)
 {
 	return fabs(a - b) < 1e-2;
