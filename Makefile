@@ -44,12 +44,17 @@ override DBGFILES := $(CXXFILES:src/%.cpp=obj/dbg/%.o)
 override DEPFILES := $(OPTFILES:%.o=%.d) $(DBGFILES:%.o=%.d)
 override CXXFLAGS += -std=c++11 -Iinclude
 
+ifneq ($(shell which nvcc),)
+    override CXXFLAGS += -DNN_ACCEL_GPU
+    override LDFLAGS += -lnvblas
+endif
+
 ifeq ($(ACCEL)$(shell uname -s),autoDarwin)
-    override CXXFLAGS += -DNN_ACCEL
+    override CXXFLAGS += -DNN_ACCEL_CPU
     override LDFLAGS += -framework Accelerate
 else
 ifneq ($(ACCEL),none)
-    override CXXFLAGS += -DNN_ACCEL
+    override CXXFLAGS += -DNN_ACCEL_CPU
     override LDFLAGS += -lopenblas
 endif
 endif

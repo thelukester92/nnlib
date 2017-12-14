@@ -1,5 +1,5 @@
-#ifndef NN_ACCEL
-	#warning "You are not using any acceleration! Define NN_ACCEL to use BLAS."
+#ifndef NN_ACCEL_CPU
+	#warning "You are not using any CPU acceleration! Define NN_ACCEL to use BLAS."
 #else
 #ifdef NN_REAL_T
 #ifndef BLAS_TPP

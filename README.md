@@ -33,7 +33,7 @@ To use nnlib in your code, you can include individual files (i.e. `#include <nnl
 You must compile with C++11 (`-std=c++11` in most compilers).
 If you use the shared libraries, link to the installed optimized or debugging library to use nnlib.
 
-When using the header-only version, you *must* compile with `NN_HEADER_ONLY` defined and, optionally, the `NN_ACCEL` flag to enable linear algebra acceleration.
+When using the header-only version, you *must* compile with `NN_HEADER_ONLY` defined and, optionally, the `NN_ACCEL_CPU` and `NN_ACCEL_GPU` flags to enable linear algebra acceleration.
 You may optimize out some runtime asserts with the `-DNN_OPT` flag.
 It is highly recommended that you do *not* use this flag until you are certain your code works.
 
