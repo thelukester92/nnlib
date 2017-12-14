@@ -9,6 +9,7 @@ group: edge
 cache:
     directories:
     - cache
+    - obj
 before_install:
     - cd $TRAVIS_BUILD_DIR
     - sudo apt-get update -qq -y || true
@@ -21,7 +22,6 @@ before_install:
     - make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - travis_wait 30 sleep 1800 &
     - make CFLAGS="-Wall -DACCELERATE_BLAS -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" test
 after_success:
     - cd $TRAVIS_BUILD_DIR
