@@ -18,10 +18,13 @@ DBG := $(OPT)_dbg
 # Name of test executable
 TST := $(OPT)_test
 
-# Which linear algebra acceleration library to use
+# Which linear algebra acceleration library to use on CPU
 ACCEL := auto
 # ACCEL := openblas
 # ACCEL := none
+
+# Location of the linear algebra library to use on CPU (required for GPU)
+CPU_BLAS := /usr/local/lib/libopenblas.so
 
 # Which real type to use when precompiling shared libraries
 REAL_T := double
@@ -96,14 +99,19 @@ obj/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@
 
-test: dbg bin/$(TST)
-	./bin/$(TST)
+test: dbg bin/$(TST) bin/nvblas.conf
+	cd bin && ./$(TST)
 bin/$(TST): $(TSTFILES)
 	@mkdir -p $(dir $@)
 	$(CXX) $(TSTFILES) -Wl,-rpath,lib -Llib -l$(DBG) -o $@
 obj/test/%.o: test/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
+bin/nvblas.conf:
+	echo "NVBLAS_CPU_BLAS_LIB" $(CPU_BLAS) > $@
+	echo "NVBLAS_GPU_LIST ALL" >> $@
+	echo "NVBLAS_TILE_DIM 2048" >> $@
+	echo "NVBLAS_AUTOPIN_MEM_ENABLED" >> $@
 
 install: opt dbg headers
 	cp lib/$(OPTLIB) $(PREFIX)/lib/
