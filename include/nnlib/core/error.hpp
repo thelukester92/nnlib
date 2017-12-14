@@ -68,6 +68,12 @@ public:
 	#error C++11 is required! Use -std=c++11 if available.
 #endif
 
+/// Check for a predefined real type.
+/// This is here because this file is included everywhere.
+#if !defined NN_REAL_T && !defined NN_HEADER_ONLY
+	#define NN_REAL_T double
+#endif
+
 /// Asserts that should never be optimized out.
 /// These should be reserved for things that are
 ///   1) outside of our control (i.e. a non-existant file) and

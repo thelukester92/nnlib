@@ -1,99 +1,120 @@
-# This Makefile is used to:
-#   A) Test nnlib.
-#   B) Install nnlib headers.
-#
-# Targets:
-#   test      - build and run all unit tests
-#   clean     - remove test executable
-#   install   - install all headers
-#   uninstall - uninstall all headers
-#
-# Variables that can be modified:
-#   CXX    - compiler to use; defaults to g++ (which is clang++ on OS X)
-#   CFLAGS - compile flags for test; -DACCELERATE_BLAS to test BLAS
-#   LFLAGS - linker flags for test
-#   PREFIX - where to install headers; defaults to /usr/local
+# all       - make opt, dbg, and test
+# opt       - build optimized shared library using REAL_T as the real type
+# dbg       - build debugging shared library using REAL_T as the real type
+# test      - build and run unit tests
+# install   - install headers and shared libraries
+# headers   - install headers only; you must define NN_HEADER_ONLY when compiling
+# clean     - clean folders used by opt, dbg, and test
+# uninstall - remove installed headers and shared libraries
 
-CXX    ?= g++
-CFLAGS := -Wall -DACCELERATE_BLAS -DNN_REAL_T=double
-LFLAGS :=
+# BEGIN VARIABLES
+
+# Name of optimized lib
+OPT := nnlib
+
+# Name of debugging lib
+DBG := $(OPT)_dbg
+
+# Name of test executable
+TST := $(OPT)_test
+
+# Which linear algebra acceleration library to use
+ACCEL := auto
+# ACCEL := openblas
+# ACCEL := none
+
+# Which real type to use when precompiling shared libraries
+REAL_T := double
+
+# Prefix of where to install headers and shared libraries
 PREFIX := /usr/local
 
-override BIN := bin
-override OBJ := obj
-override INC := include
-override TST := test
-override OUT := nnlib_test
-override CFLAGS += -std=c++11 -I$(INC) --coverage
+# Compiler flags
+CXXFLAGS := -Wall
 
-override INSTALL_FILES := $(shell find $(INC) -type f)
-override INSTALL_FILES := $(INSTALL_FILES:$(INC)/%.hpp=$(PREFIX)/include/%.hpp)
+# END VARIABLES
 
-SRC_FILES := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
-
-override CPP_FILES := $(wildcard $(TST)/*.cpp) $(wildcard $(TST)/**/*.cpp)
-override DEP_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.d) $(SRC_FILES:src/%.cpp=$(OBJ)/src/%.d)
-override OBJ_FILES := $(CPP_FILES:$(TST)/%.cpp=$(OBJ)/%.o) $(SRC_FILES:src/%.cpp=$(OBJ)/src/%.o)
-
-override UNAME  := $(shell uname -s)
-override GNU    := $(shell $(CXX) --version 2>/dev/null | grep ^g++ | sed 's/^.* //g')
-override BLAS   := $(findstring -DACCELERATE_BLAS,$(CFLAGS))
-override NVBLAS := $(findstring -DACCELERATE_NVBLAS,$(CFLAGS))
-
-# Link NVBLAS if applicable
-ifneq ($(NVBLAS),)
-	override LFLAGS += -lnvblas
+ifneq ($(REAL_T),none)
+    override CXXFLAGS += -DNN_REAL_T=$(REAL_T)
 endif
 
-# Link BLAS if applicable
-ifneq ($(BLAS),)
-ifeq ($(UNAME),Darwin)
-	# OSX uses the Accelerate framework
-	override LFLAGS += -framework Accelerate
-ifneq ($(GNU),)
-	# gcc on OS X requires this flag for the Accelerate framework to work
-	override CFLAGS += -flax-vector-conversions
-endif
+override CXXFILES := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
+override OPTFILES := $(CXXFILES:src/%.cpp=obj/%.o)
+override DBGFILES := $(CXXFILES:src/%.cpp=obj/dbg/%.o)
+override DEPFILES := $(OPTFILES:%.o=%.d) $(DBGFILES:%.o=%.d)
+override CXXFLAGS += -std=c++11 -Iinclude
+override LDFLAGS  += -fPIC
+
+ifeq ($(ACCEL)$(shell uname -s),autoDarwin)
+    override CXXFLAGS += -DNN_ACCEL
+    override LDFLAGS += -framework Accelerate
 else
-	# Other systems use OpenBLAS
-	override LFLAGS += -L/usr/local/lib -lopenblas -lpthread
+ifneq ($(ACCEL),none)
+    override CXXFLAGS += -DNN_ACCEL
+    override LDFLAGS += -lopenblas
 endif
 endif
 
-# Targets follow
+ifeq ($(shell uname -s),Darwin)
+    override LDFLAGS += -dynamiclib
+    override OPTLIB := lib$(OPT).dylib
+    override DBGLIB := lib$(DBG).dylib
+else
+    override LDFLAGS += -shared
+    override OPTLIB := lib$(OPT).so
+    override DBGLIB := lib$(DBG).so
+endif
 
-test: clean-gcda $(BIN)/$(OUT)
-	$(BIN)/$(OUT)
-clean:
-	rm -rf $(BIN)/*
-	rm -rf $(OBJ)/*
-install: $(INSTALL_FILES)
-uninstall:
-	rm -f $(INSTALL_FILES)
-clean-gcda: $(OBJ)
-	find $(OBJ) -name "*.gcda" -print0 | xargs -0 rm -f
+override OPTFLAGS := $(CXXFLAGS) -DNN_OPT -O3
+override DBGFLAGS := $(CXXFLAGS) -g
 
-$(BIN)/$(OUT): $(BIN) $(OBJ_FILES)
-	$(CXX) $(OBJ_FILES) $(CFLAGS) $(LFLAGS) -o $@
+override TSTFILES := $(wildcard test/*.cpp) $(wildcard test/**/*.cpp)
+override TSTFILES := $(TSTFILES:test/%.cpp=obj/test/%.o)
 
-$(OBJ)/%.o: $(TST)/%.cpp
-	mkdir -p $(dir $@)
-	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
+override HXXFILES := $(shell find include -type f)
+override HXXFILES := $(HXXFILES:%=$(PREFIX)/%)
 
-$(OBJ)/src/%.o: src/%.cpp
-	mkdir -p $(dir $@)
-	$(CXX) $< $(CFLAGS) -c -o $@ -MMD
+all: opt dbg test
 
-$(PREFIX)/include/%.hpp: $(INC)/%.hpp
-	mkdir -p $(dir $@)
+opt: lib/$(OPTLIB)
+lib/$(OPTLIB): $(OPTFILES)
+	@mkdir -p $(dir $@)
+	$(CXX) $(OPTFILES) $(LDFLAGS) -o $@
+obj/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $< $(OPTFLAGS) -MMD -c -o $@
+
+dbg: lib/$(DBGLIB)
+lib/$(DBGLIB): $(DBGFILES)
+	@mkdir -p $(dir $@)
+	$(CXX) $(DBGFILES) $(LDFLAGS) -o $@
+obj/dbg/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
+
+test: dbg bin/$(TST)
+	./bin/$(TST)
+bin/$(TST): $(TSTFILES)
+	@mkdir -p $(dir $@)
+	$(CXX) $(TSTFILES) -Llib -l$(DBG) -o $@
+obj/test/%.o: test/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
+
+install: opt dbg headers
+	cp lib/$(OPTLIB) $(PREFIX)/lib/
+	cp lib/$(DBGLIB) $(PREFIX)/lib/
+
+headers: $(HXXFILES)
+$(PREFIX)/%: %
+	@mkdir -p $(dir $@)
 	cp $< $@
 
-$(BIN):
-	mkdir -p $@
+clean:
+	rm -rf bin lib obj
 
-$(OBJ):
-	mkdir -p $@
+uninstall:
+	rm -rf $(PREFIX)/include/nnlib*
+	rm -f $(PREFIX)/lib/$(OPTLIB) $(PREFIX)/lib/$(DBGLIB)
 
-.PHONY: test clean install uninstall clean-gcda
-
--include $(DEP_FILES)
+.PHONY: all opt dbg test install headers clean uninstall

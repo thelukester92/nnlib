@@ -4,9 +4,9 @@
 [![codecov](https://codecov.io/gh/thelukester92/nnlib/branch/master/graph/badge.svg)](https://codecov.io/gh/thelukester92/nnlib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-nnlib is an all-header library for building, training, and using neural networks.
-It is designed to be both easy-to-use and efficient, using BLAS to accelerate math calculations.
-nnlib has no dependencies, but is compatible with OpenBLAS (Linux) or the Accelerate framework (OS X).
+nnlib is an C++ library for building, training, and using neural networks.
+It can be used header-only for flexibility or precompiled for rapid development.
+nnlib is compatible with the [Accelerate framework](https://developer.apple.com/documentation/accelerate) and [OpenBLAS](https://github.com/xianyi/openblas) for accelerating matrix and vector operations, but can also be used without any dependencies.
 
 This library is stable, tested, and used in a number of private projects.
 Feel free to use it in your own projects, submit issues, or fork it and play with it yourself!
@@ -20,22 +20,24 @@ Feel free to use it in your own projects, submit issues, or fork it and play wit
 
 	git clone https://github.com/thelukester92/nnlib.git
 	cd nnlib
-	make install
+	make && sudo make install
 
-The default installation directory is `/usr/local/include`.
+The default installation directory is `/usr/local`.
 For a different install directory, use `make install PREFIX=/path/to/dir`.
+To install headers only, use `make headers`.
 To run unit tests, use `make test`.
 
 # Getting Started
 
 To use nnlib in your code, you can include individual files (i.e. `#include <nnlib/nn/linear.hpp>`) or you can include everything by using `#include <nnlib.hpp>`.
 You must compile with C++11 (`-std=c++11` in most compilers).
-To enable acceleration, add the `-DACCELERATE_BLAS` flag and either `-lopenblas` on Linux or `-framework Accelerate` on OS X.
+If you use the shared libraries, link to the installed optimized or debugging library to use nnlib.
+
+When using the header-only version, you *must* compile with `NN_HEADER_ONLY` defined and, optionally, the `NN_ACCEL` flag to enable linear algebra acceleration.
+You may optimize out some runtime asserts with the `-DNN_OPT` flag.
+It is highly recommended that you do *not* use this flag until you are certain your code works.
 
 > Note: If you're using gcc (instead of clang) on OS X, you may also need to use the `-flax-vector-conversions` flag.
-
-Some runtime checks can be optimized out with the `-DOPTIMIZE` flag.
-It is highly recommended that you do *not* use this flag until you are certain your code works.
 
 # Examples
 

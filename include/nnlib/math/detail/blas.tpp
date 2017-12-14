@@ -1,3 +1,6 @@
+#ifndef NN_ACCEL
+	#warning "You are not using any acceleration! Define NN_ACCEL to use BLAS."
+#else
 #ifdef NN_REAL_T
 #ifndef BLAS_TPP
 #define BLAS_TPP
@@ -149,5 +152,6 @@ void Math<double>::mAdd_mmt(size_t M, size_t N, size_t K, const double *A, size_
 
 }
 
+#endif
 #endif
 #endif
