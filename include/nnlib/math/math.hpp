@@ -61,6 +61,7 @@ public:
 #elif !defined NN_IMPL
 	#include "detail/math.tpp"
 	#include "detail/blas.tpp"
+	#include "detail/nvblas.tpp"
 #endif
 
 #endif
