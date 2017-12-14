@@ -12,63 +12,15 @@ class SGD : public Optimizer<T>
 using Optimizer<T>::m_model;
 using Optimizer<T>::m_critic;
 public:
-	SGD(Module<T> &model, Critic<T> &critic) :
-		Optimizer<T>(model, critic),
-		m_parameters(model.params()),
-		m_grads(model.grad()),
-		m_velocity(m_grads.size(0)),
-		m_learningRate(0.001),
-		m_momentum(0)
-	{
-		m_velocity.fill(0.0);
-	}
+	SGD(Module<T> &model, Critic<T> &critic);
 	
-	SGD &learningRate(T learningRate)
-	{
-		m_learningRate = learningRate;
-		return *this;
-	}
+	SGD &learningRate(T learningRate);
+	T learningRate() const;
 	
-	T learningRate() const
-	{
-		return m_learningRate;
-	}
+	SGD &momentum(T momentum);
+	T momentum() const;
 	
-	SGD &momentum(T momentum)
-	{
-		m_momentum = momentum;
-		return *this;
-	}
-	
-	T momentum() const
-	{
-		return m_momentum;
-	}
-	
-	// MARK: Critic methods
-	
-	/// Perform a single step of training given an input and a target.
-	virtual SGD &step(const Tensor<T> &input, const Tensor<T> &target) override
-	{
-		// calculate gradient
-		m_grads.fill(0);
-		m_model.backward(input, m_critic.backward(m_model.forward(input), target));
-		
-		if(m_momentum)
-		{
-			// apply momentum
-			m_velocity.scale(m_momentum);
-			m_velocity.addV(m_grads);
-			
-			// Nesterov step
-			m_grads.addV(m_velocity, m_momentum);
-		}
-		
-		// update parameters
-		m_parameters.addV(m_grads, -m_learningRate);
-		
-		return *this;
-	}
+	virtual SGD &step(const Tensor<T> &input, const Tensor<T> &target) override;
 	
 private:
 	Tensor<T> &m_parameters;
@@ -79,5 +31,11 @@ private:
 };
 
 }
+
+#ifdef NN_REAL_T
+	extern template class nnlib::SGD<NN_REAL_T>;
+#else
+	#include "detail/sgd.tpp"
+#endif
 
 #endif

@@ -1,39 +1,21 @@
 #ifndef OPT_OPTIMIZER_HPP
 #define OPT_OPTIMIZER_HPP
 
-#include "../core/tensor.hpp"
+#include "../critics/critic.hpp"
+#include "../nn/module.hpp"
 
 namespace nnlib
 {
-
-template <typename T>
-class Module;
-
-template <typename T>
-class Critic;
 
 template <typename T = double>
 class Optimizer
 {
 public:
-	Optimizer(Module<T> &model, Critic<T> &critic) :
-		m_model(model),
-		m_critic(critic)
-	{}
+	Optimizer(Module<T> &model, Critic<T> &critic);
+	virtual ~Optimizer();
 	
-	virtual ~Optimizer() {}
-	
-	/// Get the model.
-	Module<T> &model()
-	{
-		return m_model;
-	}
-	
-	/// Get the critic.
-	Critic<T> &critic()
-	{
-		return m_critic;
-	}
+	Module<T> &model();
+	Critic<T> &critic();
 	
 	/// Perform a single step of training given an input and a target.
 	virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
@@ -44,5 +26,11 @@ protected:
 };
 
 }
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Optimizer<NN_REAL_T>;
+#else
+	#include "detail/optimizer.tpp"
+#endif
 
 #endif
