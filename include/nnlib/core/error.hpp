@@ -119,7 +119,7 @@ public:
 
 /// General asserts that can be optimized out after testing.
 
-#ifndef OPTIMIZE
+#ifndef NN_OPT
 	#define NNAssert(x, ...)						NNHardAssert(x, ##__VA_ARGS__)
 	#define NNAssertEquals(x, y, ...)				NNHardAssertEquals(x, y, ##__VA_ARGS__)
 	#define NNAssertAlmostEquals(x, y, eps, ...)	NNHardAssertAlmostEquals(x, y, eps, ##__VA_ARGS__)
@@ -128,7 +128,7 @@ public:
 	#define NNAssertLessThanOrEquals(x, y, ...)		NNHardAssertLessThanOrEquals(x, y, ##__VA_ARGS__)
 	#define NNAssertGreaterThan(x, y, ...)			NNHardAssertGreaterThan(x, y, ##__VA_ARGS__)
 	#define NNAssertGreaterThanOrEquals(x, y, ...)	NNHardAssertGreaterThanOrEquals(x, y, ##__VA_ARGS__)
-#elif !defined NN_IMPL
+#else
 	#define NNAssert(...)						(void) 0
 	#define NNAssertEquals(...)					(void) 0
 	#define NNAssertAlmostEquals(...)			(void) 0
