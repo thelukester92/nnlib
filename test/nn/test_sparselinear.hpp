@@ -2,7 +2,6 @@
 #define TEST_SPARSE_LINEAR_H
 
 #include "nnlib/nn/sparselinear.hpp"
-#include "nnlib/util/tensor_util.hpp"
 #include "test_module.hpp"
 using namespace nnlib;
 

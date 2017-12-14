@@ -2,7 +2,6 @@
 #define TEST_TENSOR_H
 
 #include "nnlib/core/tensor.hpp"
-#include "nnlib/util/tensor_util.hpp"
 using namespace nnlib;
 
 void TestTensor()

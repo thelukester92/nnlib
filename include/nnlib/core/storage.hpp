@@ -14,270 +14,49 @@ template <typename T>
 class Storage
 {
 public:
-	Storage(size_t n = 0, const T &defaultValue = T()) :
-		m_ptr(new T[n]),
-		m_size(n),
-		m_capacity(n)
-	{
-		for(size_t i = 0; i < n; ++i)
-			m_ptr[i] = defaultValue;
-	}
+	Storage(size_t n = 0, const T &defaultValue = T());
+	Storage(const Storage &copy);
+	Storage(Storage &&rhs);
+	Storage(const std::initializer_list<T> &values);
+	Storage(const Serialized &node);
+	~Storage();
 	
-	Storage(const Storage &copy) :
-		m_ptr(new T[copy.size()]),
-		m_size(copy.size()),
-		m_capacity(copy.size())
-	{
-		size_t index = 0;
-		for(const T &value : copy)
-		{
-			m_ptr[index] = value;
-			++index;
-		}
-	}
+	Storage &operator=(const Storage &copy);
+	Storage &operator=(const std::initializer_list<T> &values);
 	
-	Storage(Storage &&rhs) :
-		m_ptr(rhs.m_ptr),
-		m_size(rhs.m_size),
-		m_capacity(rhs.m_capacity)
-	{
-		rhs.m_ptr		= nullptr;
-		rhs.m_size		= 0;
-		rhs.m_capacity	= 0;
-	}
+	Storage &resize(size_t n, const T &defaultValue = T());
+	Storage &reserve(size_t n);
 	
-	Storage(const std::initializer_list<T> &values) :
-		m_ptr(new T[values.size()]),
-		m_size(values.size()),
-		m_capacity(values.size())
-	{
-		size_t index = 0;
-		for(const T &value : values)
-		{
-			m_ptr[index] = value;
-			++index;
-		}
-	}
+	Storage &push_back(const T &value);
+	Storage &pop_back();
+	Storage &append(const Storage &other);
+	Storage &erase(size_t index);
+	Storage &clear();
 	
-	/// Load from a serialized node.
-	Storage(const Serialized &node) :
-		m_ptr(new T[node.size()]),
-		m_size(node.size()),
-		m_capacity(node.size())
-	{
-		node.get(begin(), end());
-	}
+	T *ptr();
+	const T *ptr() const;
 	
-	~Storage()
-	{
-		delete[] m_ptr;
-	}
+	size_t size() const;
 	
-	Storage &operator=(const Storage &copy)
-	{
-		if(this != &copy)
-		{
-			resize(copy.size());
-			size_t index = 0;
-			for(const T &value : copy)
-			{
-				m_ptr[index] = value;
-				++index;
-			}
-		}
-		return *this;
-	}
+	bool operator==(const Storage &other) const;
+	bool operator!=(const Storage &other) const;
 	
-	Storage &operator=(const std::initializer_list<T> &values)
-	{
-		resize(values.size());
-		size_t index = 0;
-		for(const T &value : values)
-		{
-			m_ptr[index] = value;
-			++index;
-		}
-		return *this;
-	}
+	T &at(size_t i);
+	const T &at(size_t i) const;
+	T &operator[](size_t i);
+	const T &operator[](size_t i) const;
 	
-	Storage &resize(size_t n, const T &defaultValue = T())
-	{
-		reserve(n);
-		for(size_t i = m_size; i < n; ++i)
-			m_ptr[i] = defaultValue;
-		m_size = n;
-		return *this;
-	}
+	T &front();
+	const T &front() const;
+	T &back();
+	const T &back() const;
 	
-	Storage &reserve(size_t n)
-	{
-		if(n > m_capacity)
-		{
-			T *ptr = new T[n];
-			for(size_t i = 0; i < m_size; ++i)
-				ptr[i] = m_ptr[i];
-			delete[] m_ptr;
-			m_ptr = ptr;
-			m_capacity = n;
-		}
-		return *this;
-	}
+	T *begin();
+	const T *begin() const;
+	T *end();
+	const T *end() const;
 	
-	Storage &push_back(const T &value)
-	{
-		resize(m_size + 1);
-		m_ptr[m_size - 1] = value;
-		return *this;
-	}
-	
-	Storage &pop_back()
-	{
-		--m_size;
-		return *this;
-	}
-	
-	Storage &append(const Storage &other)
-	{
-		reserve(m_size + other.m_size);
-		for(const T &value : other)
-			push_back(value);
-		return *this;
-	}
-	
-	Storage &erase(size_t index)
-	{
-		NNAssertLessThan(index, m_size, "Attempted to erase an index that is out of bounds!");
-		for(size_t i = index + 1; i < m_size; ++i)
-		{
-			m_ptr[i - 1] = m_ptr[i];
-		}
-		--m_size;
-		return *this;
-	}
-	
-	Storage &clear()
-	{
-		m_size = 0;
-		return *this;
-	}
-	
-	T *ptr()
-	{
-		return m_ptr;
-	}
-	
-	const T *ptr() const
-	{
-		return m_ptr;
-	}
-	
-	size_t size() const
-	{
-		return m_size;
-	}
-	
-	bool operator==(const Storage &other) const
-	{
-		if(this == &other)
-		{
-			return true;
-		}
-		if(m_size != other.m_size)
-		{
-			return false;
-		}
-		for(size_t i = 0; i < other.m_size; ++i)
-		{
-			if(m_ptr[i] != other.m_ptr[i])
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	bool operator!=(const Storage &other) const
-	{
-		return !(*this == other);
-	}
-	
-	// MARK: Element access
-	
-	T &at(size_t i)
-	{
-		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
-		return m_ptr[i];
-	}
-	
-	const T &at(size_t i) const
-	{
-		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
-		return m_ptr[i];
-	}
-	
-	T &operator[](size_t i)
-	{
-		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
-		return m_ptr[i];
-	}
-	
-	const T &operator[](size_t i) const
-	{
-		NNAssertLessThan(i, m_size, "Attempted to access an index that is out of bounds!");
-		return m_ptr[i];
-	}
-	
-	T &front()
-	{
-		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
-		return *m_ptr;
-	}
-	
-	const T &front() const
-	{
-		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
-		return *m_ptr;
-	}
-	
-	T &back()
-	{
-		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
-		return m_ptr[m_size - 1];
-	}
-	
-	const T &back() const
-	{
-		NNAssertGreaterThan(m_size, 0, "Attempted to access an index that is out of bounds!");
-		return m_ptr[m_size - 1];
-	}
-	
-	// MARK: Iterators
-	
-	T *begin()
-	{
-		return m_ptr;
-	}
-	
-	const T *begin() const
-	{
-		return m_ptr;
-	}
-	
-	T *end()
-	{
-		return m_ptr + m_size;
-	}
-	
-	const T *end() const
-	{
-		return m_ptr + m_size;
-	}
-	
-	/// Save to a serialized node.
-	void save(Serialized &node) const
-	{
-		node.set(begin(), end());
-	}
+	void save(Serialized &node) const;
 	
 private:
 	T *m_ptr;			///< The data itself.
@@ -286,5 +65,7 @@ private:
 };
 
 }
+
+#include "detail/storage.tpp"
 
 #endif
