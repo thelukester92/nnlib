@@ -114,41 +114,43 @@ void Math<double>::vAdd_mtv(const double *A, size_t ra, size_t ca, size_t lda, c
 	cblas_dgemv(CblasRowMajor, CblasTrans, ra, ca, alpha, A, lda, x, sx, beta, y, sy);
 }
 
-template <>
-void Math<float>::mAdd_mm(size_t M, size_t N, size_t K, const float *A, size_t lda, const float *B, size_t ldb, float *C, size_t ldc, float alpha, float beta)
-{
-	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, const_cast<float *>(A), lda, const_cast<float *>(B), ldb, beta, C, ldc);
-}
+#ifndef NN_ACCEL_GPU
+	template <>
+	void Math<float>::mAdd_mm(size_t M, size_t N, size_t K, const float *A, size_t lda, const float *B, size_t ldb, float *C, size_t ldc, float alpha, float beta)
+	{
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, const_cast<float *>(A), lda, const_cast<float *>(B), ldb, beta, C, ldc);
+	}
 
-template <>
-void Math<double>::mAdd_mm(size_t M, size_t N, size_t K, const double *A, size_t lda, const double *B, size_t ldb, double *C, size_t ldc, double alpha, double beta)
-{
-	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, const_cast<double *>(A), lda, const_cast<double *>(B), ldb, beta, C, ldc);
-}
+	template <>
+	void Math<double>::mAdd_mm(size_t M, size_t N, size_t K, const double *A, size_t lda, const double *B, size_t ldb, double *C, size_t ldc, double alpha, double beta)
+	{
+		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, const_cast<double *>(A), lda, const_cast<double *>(B), ldb, beta, C, ldc);
+	}
 
-template <>
-void Math<float>::mAdd_mtm(size_t M, size_t N, size_t K, const float *A, size_t lda, const float *B, size_t ldb, float *C, size_t ldc, float alpha, float beta)
-{
-	cblas_sgemm(CblasRowMajor, CblasTrans, CblasNoTrans, M, N, K, alpha, const_cast<float *>(A), lda, const_cast<float *>(B), ldb, beta, C, ldc);
-}
+	template <>
+	void Math<float>::mAdd_mtm(size_t M, size_t N, size_t K, const float *A, size_t lda, const float *B, size_t ldb, float *C, size_t ldc, float alpha, float beta)
+	{
+		cblas_sgemm(CblasRowMajor, CblasTrans, CblasNoTrans, M, N, K, alpha, const_cast<float *>(A), lda, const_cast<float *>(B), ldb, beta, C, ldc);
+	}
 
-template <>
-void Math<double>::mAdd_mtm(size_t M, size_t N, size_t K, const double *A, size_t lda, const double *B, size_t ldb, double *C, size_t ldc, double alpha, double beta)
-{
-	cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, M, N, K, alpha, const_cast<double *>(A), lda, const_cast<double *>(B), ldb, beta, C, ldc);
-}
+	template <>
+	void Math<double>::mAdd_mtm(size_t M, size_t N, size_t K, const double *A, size_t lda, const double *B, size_t ldb, double *C, size_t ldc, double alpha, double beta)
+	{
+		cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, M, N, K, alpha, const_cast<double *>(A), lda, const_cast<double *>(B), ldb, beta, C, ldc);
+	}
 
-template <>
-void Math<float>::mAdd_mmt(size_t M, size_t N, size_t K, const float *A, size_t lda, const float *B, size_t ldb, float *C, size_t ldc, float alpha, float beta)
-{
-	cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasTrans, M, N, K, alpha, const_cast<float *>(A), lda, const_cast<float *>(B), ldb, beta, C, ldc);
-}
+	template <>
+	void Math<float>::mAdd_mmt(size_t M, size_t N, size_t K, const float *A, size_t lda, const float *B, size_t ldb, float *C, size_t ldc, float alpha, float beta)
+	{
+		cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasTrans, M, N, K, alpha, const_cast<float *>(A), lda, const_cast<float *>(B), ldb, beta, C, ldc);
+	}
 
-template <>
-void Math<double>::mAdd_mmt(size_t M, size_t N, size_t K, const double *A, size_t lda, const double *B, size_t ldb, double *C, size_t ldc, double alpha, double beta)
-{
-	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, M, N, K, alpha, const_cast<double *>(A), lda, const_cast<double *>(B), ldb, beta, C, ldc);
-}
+	template <>
+	void Math<double>::mAdd_mmt(size_t M, size_t N, size_t K, const double *A, size_t lda, const double *B, size_t ldb, double *C, size_t ldc, double alpha, double beta)
+	{
+		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, M, N, K, alpha, const_cast<double *>(A), lda, const_cast<double *>(B), ldb, beta, C, ldc);
+	}
+#endif
 
 }
 
