@@ -6,7 +6,12 @@
 
 nnlib is an C++ library for building, training, and using neural networks.
 It can be used header-only for flexibility or precompiled for rapid development.
-nnlib is compatible with the [Accelerate framework](https://developer.apple.com/documentation/accelerate) and [OpenBLAS](https://github.com/xianyi/openblas) for accelerating matrix and vector operations, but can also be used without any dependencies.
+While nnlib can be used on its own, we recommend using compatible CPU and GPU libraries for accelerating matrix and vector operations.
+nnlib is compatible with the following libraries:
+
+* The [Accelerate framework](https://developer.apple.com/documentation/accelerate) - CPU BLAS on OS X.
+* [OpenBLAS](https://github.com/xianyi/openblas) - CPU BLAS on multiple platforms.
+* [NVBlas](http://docs.nvidia.com/cuda/nvblas) - GPU BLAS on NVIDIA GPUs.
 
 This library is stable, tested, and used in a number of private projects.
 Feel free to use it in your own projects, submit issues, or fork it and play with it yourself!
