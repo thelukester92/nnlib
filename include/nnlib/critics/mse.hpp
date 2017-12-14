@@ -9,7 +9,7 @@ namespace nnlib
 /// \brief Mean squared error critic.
 ///
 /// When average = false, this is sum squared error.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class MSE : public Critic<T>
 {
 public:

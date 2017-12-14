@@ -15,7 +15,7 @@ void swap(BatchNorm<T> &, BatchNorm<T> &);
 /// \brief Batch normalization.
 ///
 /// Works only on 2D tensors.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class BatchNorm : public Module<T>
 {
 public:

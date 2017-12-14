@@ -6,10 +6,10 @@ using namespace nnlib;
 
 void TestBatcher()
 {
-	Tensor<> feat(4, 3), lab(4, 2);
+	Tensor<NN_REAL_T> feat(4, 3), lab(4, 2);
 	
 	{
-		Batcher<> batcher(feat, lab);
+		Batcher<NN_REAL_T> batcher(feat, lab);
 		batcher.batch(2);
 		NNAssertEquals(batcher.batch(), 2, "Batcher::batch failed!");
 		NNAssertEquals(batcher.batches(), 2, "Batcher::batches is incorrect!");
@@ -21,7 +21,7 @@ void TestBatcher()
 	}
 	
 	{
-		Batcher<> batcher(feat, lab, 1, true);
+		Batcher<NN_REAL_T> batcher(feat, lab, 1, true);
 		batcher.batch(2);
 		NNAssertEquals(batcher.batch(), 2, "Batcher::batch with copy failed!");
 		NNAssertEquals(batcher.batches(), 2, "Batcher::batches with copy is incorrect!");
@@ -34,7 +34,7 @@ void TestBatcher()
 	}
 	
 	{
-		SequenceBatcher<> batcher(feat, lab);
+		SequenceBatcher<NN_REAL_T> batcher(feat, lab);
 		batcher.sequenceLength(2);
 		NNAssertEquals(batcher.sequenceLength(), 2, "SequenceBatcher::sequenceLength failed!");
 		batcher.batch(2);

@@ -21,7 +21,7 @@ class TensorIterator;
 ///
 /// A tensor can be a vector (one dimension), a matrix (two dimensions), or a higher-order tensor.
 /// Tensors provide views into Storage objects, and multiple tensors can share the same Storage.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Tensor
 {
 public:

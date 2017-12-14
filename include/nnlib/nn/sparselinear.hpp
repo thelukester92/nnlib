@@ -11,7 +11,7 @@ namespace nnlib
 /// See nnlib/util/tensor_util.hpp for an explanation of sparse tensors.
 /// Like a Linear layer, a SparseLinear layer expects either vector or matrix input,
 /// so the input must be a matrix that encodes a vector or matrix.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class SparseLinear : public Linear<T>
 {
 public:

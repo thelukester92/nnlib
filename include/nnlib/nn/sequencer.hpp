@@ -16,7 +16,7 @@ void swap(Sequencer<T> &, Sequencer<T> &);
 ///
 /// Inputs will be passed through to the inner module one at a time and backpropagated
 /// in reverse order, essentially abstracting away BPTT.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Sequencer : public Module<T>
 {
 public:

@@ -7,7 +7,7 @@ namespace nnlib
 {
 
 /// Abstract base class for pointwise functions on inputs, also known as activation functions.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Map : public Module<T>
 {
 public:

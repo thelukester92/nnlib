@@ -9,7 +9,7 @@ namespace nnlib
 /// \brief Negative log loss critic.
 ///
 /// This critic requires matrix input and single-column matrix output.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class NLL : public Critic<T>
 {
 public:

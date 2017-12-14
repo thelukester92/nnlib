@@ -7,30 +7,30 @@ using namespace nnlib;
 
 void TestBatchNorm()
 {
-	Tensor<> inp = Tensor<>({
+	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
 		 3,  6,  9,
 		-1,  5,  4,
 		12,  5, 11
 	}).resize(3, 3);
 	
-	Tensor<> grad = Tensor<>({
+	Tensor<NN_REAL_T> grad = Tensor<NN_REAL_T>({
 		 2,  3,  4,
 		-2,  0,  4,
 		10,  2,  4
 	}).resize(3, 3);
 	
-	Tensor<> inGrad = Tensor<>({
+	Tensor<NN_REAL_T> inGrad = Tensor<NN_REAL_T>({
 		 0.03596,  0.00000,  0,
 		-0.02489, -2.12132,  0,
 		-0.01106,  2.12132,  0
 	}).resize(3, 3);
 	
-	Tensor<> paramGrad = Tensor<>({
+	Tensor<NN_REAL_T> paramGrad = Tensor<NN_REAL_T>({
 		14.9606, 2.82843, 0,
 		10, 5, 12
 	});
 	
-	BatchNorm<> bn(3);
+	BatchNorm<NN_REAL_T> bn(3);
 	bn.weights().ones();
 	bn.bias().zeros();
 	bn.momentum(1.0);
@@ -73,7 +73,7 @@ void TestBatchNorm()
 	NNAssertLessThan(bn.grad().add(paramGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (inference) failed! Wrong parameter gradient!");
 	NNAssertLessThan(bn.inGrad().add(inGrad, -1).square().sum(), 1e-9, "BatchNorm::backward (inference) failed! Wrong input gradient!");
 	
-	Tensor<> state = bn.state();
+	Tensor<NN_REAL_T> state = bn.state();
 	state.fill(0);
 	NNAssertAlmostEquals(bn.output().sum(), 0, 1e-12, "BatchNorm::state failed!");
 	

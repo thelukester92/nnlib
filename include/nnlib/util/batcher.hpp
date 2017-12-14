@@ -10,7 +10,7 @@ namespace nnlib
 /// Takes two tensors and returns random slices along the major dimensions, one slice at at time.
 /// This is useful for optimization.
 /// Batcher requires non-const inputs and will shuffle them unless the copy flag is true.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Batcher
 {
 public:
@@ -125,7 +125,7 @@ private:
 /// This variation of Batcher yields sequences of batches (for sequential data).
 /// Unlike the regular Batcher, the SequenceBatcher only yields one sequence per reset,
 /// so there is no "next" method.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class SequenceBatcher
 {
 public:

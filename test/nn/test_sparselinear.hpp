@@ -8,17 +8,17 @@ using namespace nnlib;
 void TestSparseLinear()
 {
 	// Sparse linear layer with arbitrary parameters
-	SparseLinear<> module(2, 3);
+	SparseLinear<NN_REAL_T> module(2, 3);
 	module.weights().copy({ -3, -2, 2, 3, 4, 5 });
 	module.bias().copy({ -5, 7, 8862.37 });
 	
 	// Linear layer with the same parameters for comparison
-	Linear<> linear(2, 3);
+	Linear<NN_REAL_T> linear(2, 3);
 	linear.weights().copy(module.weights());
 	linear.bias().copy(module.bias());
 	
 	// Arbitrary sparse input (batch)
-	Tensor<> inp = Tensor<>({
+	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
 		3, 2, 0.0,
 		0, 0, 3.14,
 		0, 1, -5.9,
@@ -27,10 +27,10 @@ void TestSparseLinear()
 	}).resize(5, 3);
 	
 	// Dense representation of inp
-	Tensor<> dense = inp.unsparsify();
+	Tensor<NN_REAL_T> dense = inp.unsparsify();
 	
 	// Arbitrary output gradient (batch)
-	Tensor<> grd = Tensor<>({ 1, 2, 3, -4, -3, 2, 5, 1, 5 }).resize(3, 3);
+	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 1, 2, 3, -4, -3, 2, 5, 1, 5 }).resize(3, 3);
 	
 	// Test forward and backward using the parameters above
 	
@@ -44,7 +44,7 @@ void TestSparseLinear()
 	NNAssertLessThan(module.inGrad().copy().addM(linear.inGrad(), -1).square().sum(), 1e-9, "SparseLinear::backward failed; wrong input gradient!");
 	NNAssertLessThan(module.grad().addV(linear.grad(), -1).square().sum(), 1e-9, "SparseLinear::backward failed; wrong parameter gradient!");
 	
-	inp = Tensor<>({ 2, 0.0, 0, 3.14 }).resize(2, 2);
+	inp = Tensor<NN_REAL_T>({ 2, 0.0, 0, 3.14 }).resize(2, 2);
 	dense = inp.unsparsify();
 	grd = { 1, 2, 3 };
 	
@@ -57,7 +57,7 @@ void TestSparseLinear()
 	NNAssertLessThan(module.output().copy().add(linear.output(), -1).square().sum(), 1e-9, "SparseLinear::forward failed for a vector; wrong output!");
 	NNAssertLessThan(module.inGrad().copy().add(linear.inGrad(), -1).square().sum(), 1e-9, "SparseLinear::backward failed for a vector; wrong input gradient!");
 	
-	SparseLinear<> unbiased(2, 3, false);
+	SparseLinear<NN_REAL_T> unbiased(2, 3, false);
 	unbiased.weights().copy(module.weights());
 	
 	unbiased.forward(inp);
@@ -69,7 +69,7 @@ void TestSparseLinear()
 	bool ok = true;
 	try
 	{
-		module.forward(Tensor<>(1, 1));
+		module.forward(Tensor<NN_REAL_T>(1, 1));
 		ok = false;
 	}
 	catch(const Error &e) {}
@@ -78,7 +78,7 @@ void TestSparseLinear()
 	ok = true;
 	try
 	{
-		module.backward(Tensor<>(1, 1), Tensor<>(1, 1));
+		module.backward(Tensor<NN_REAL_T>(1, 1), Tensor<NN_REAL_T>(1, 1));
 		ok = false;
 	}
 	catch(const Error &e) {}

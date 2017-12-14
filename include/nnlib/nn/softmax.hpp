@@ -9,7 +9,7 @@ namespace nnlib
 /// \brief Softmax for classification problems.
 ///
 /// When using NLL, LogSoftMax is preferred.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class SoftMax : public Module<T>
 {
 public:

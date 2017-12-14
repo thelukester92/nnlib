@@ -13,11 +13,11 @@ void TestDropout()
 {
 	RandomEngine::seed(0);
 	
-	Tensor<> ones = Tensor<>(4, 25).ones();
+	Tensor<NN_REAL_T> ones = Tensor<NN_REAL_T>(4, 25).ones();
 	double p = 0.75, sum1 = 0, sum2 = 0;
 	size_t c = 100;
 	
-	Dropout<> module(p);
+	Dropout<NN_REAL_T> module(p);
 	NNAssertEquals(module.dropProbability(), p, "Dropout::Dropout failed!");
 	
 	for(size_t i = 0; i < c; ++i)

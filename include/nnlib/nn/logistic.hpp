@@ -8,7 +8,7 @@ namespace nnlib
 {
 
 /// Sigmoidal logistic activation function.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Logistic : public Map<T>
 {
 public:

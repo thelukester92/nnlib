@@ -15,7 +15,7 @@ void ToyClassification()
 	// Iris dataset taken from the UCI Machine Learning Repository.
 	// http://archive.ics.uci.edu/ml/datasets/Iris
 	
-	Tensor<> train = Tensor<>({
+	Tensor<NN_REAL_T> train = Tensor<NN_REAL_T>({
 		5.1,3.5,1.4,0.2,0,4.9,3.0,1.4,0.2,0,4.7,3.2,1.3,0.2,0,4.6,3.1,1.5,0.2,0,5.0,3.6,1.4,0.2,0,
 		5.4,3.9,1.7,0.4,0,4.6,3.4,1.4,0.3,0,5.0,3.4,1.5,0.2,0,4.4,2.9,1.4,0.2,0,4.9,3.1,1.5,0.1,0,
 		5.4,3.7,1.5,0.2,0,4.8,3.4,1.6,0.2,0,4.8,3.0,1.4,0.1,0,4.3,3.0,1.1,0.1,0,5.8,4.0,1.2,0.2,0,
@@ -42,7 +42,7 @@ void ToyClassification()
 		7.7,3.0,6.1,2.3,2,6.3,3.4,5.6,2.4,2,6.4,3.1,5.5,1.8,2,6.0,3.0,4.8,1.8,2,6.9,3.1,5.4,2.1,2
 	}).resize(120, 5);
 	
-	Tensor<> test = Tensor<>({
+	Tensor<NN_REAL_T> test = Tensor<NN_REAL_T>({
 		5.0,3.5,1.3,0.3,0,4.5,2.3,1.3,0.3,0,4.4,3.2,1.3,0.2,0,5.0,3.5,1.6,0.6,0,5.1,3.8,1.9,0.4,0,
 		4.8,3.0,1.4,0.3,0,5.1,3.8,1.6,0.2,0,4.6,3.2,1.4,0.2,0,5.3,3.7,1.5,0.2,0,5.0,3.3,1.4,0.2,0,
 		5.5,2.6,4.4,1.2,1,6.1,3.0,4.6,1.4,1,5.8,2.6,4.0,1.2,1,5.0,2.3,3.3,1.0,1,5.6,2.7,4.2,1.3,1,
@@ -51,17 +51,17 @@ void ToyClassification()
 		6.7,3.0,5.2,2.3,2,6.3,2.5,5.0,1.9,2,6.5,3.0,5.2,2.0,2,6.2,3.4,5.4,2.3,2,5.9,3.0,5.1,1.8,2
 	}).resize(30, 5);
 	
-	Sequential<> nn(
-		new Linear<>(4, 20), new TanH<>(),
-		new Linear<>(20, 3), new LogSoftMax<>()
+	Sequential<NN_REAL_T> nn(
+		new Linear<NN_REAL_T>(4, 20), new TanH<NN_REAL_T>(),
+		new Linear<NN_REAL_T>(20, 3), new LogSoftMax<NN_REAL_T>()
 	);
 	
-	NLL<> critic;
-	SGD<> opt(nn, critic);
+	NLL<NN_REAL_T> critic;
+	SGD<NN_REAL_T> opt(nn, critic);
 	
 	NNAssertGreaterThan(critic.misclassifications(nn.forward(test.narrow(1, 0, 4)), test.narrow(1, 4)), 0, "Untrained model already perfect!");
 	
-	Batcher<> batcher(train.narrow(1, 0, 4), train.narrow(1, 4), 10);
+	Batcher<NN_REAL_T> batcher(train.narrow(1, 0, 4), train.narrow(1, 4), 10);
 	for(size_t epoch = 0; epoch < 10000; ++epoch)
 	{
 		batcher.reset();

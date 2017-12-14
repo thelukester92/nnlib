@@ -8,20 +8,20 @@ using namespace nnlib;
 void TestReLU()
 {
 	// Input, arbitrary
-	Tensor<> inp = Tensor<>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
 	
 	// Output gradient, arbitrary
-	Tensor<> grd = Tensor<>({ 2, -3, 1 }).resize(1, 3);
+	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
 	
 	// Output, fixed given input
-	Tensor<> out = inp.copy();
+	Tensor<NN_REAL_T> out = inp.copy();
 	out(0, 0) *= 0.5;
 	
 	// Input gradient, fixed given input and output gradient
-	Tensor<> ing = grd.copy();
+	Tensor<NN_REAL_T> ing = grd.copy();
 	ing(0, 0) *= 0.5;
 	
-	ReLU<> map(0.5);
+	ReLU<NN_REAL_T> map(0.5);
 	map.forward(inp);
 	map.backward(inp, grd);
 	

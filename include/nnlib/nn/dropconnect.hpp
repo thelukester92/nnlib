@@ -13,7 +13,7 @@ template <typename T>
 void swap(DropConnect<T> &, DropConnect<T> &);
 
 /// A module decorator that randomly drops parameters with a given probability.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class DropConnect : public Module<T>
 {
 public:

@@ -8,7 +8,7 @@ namespace nnlib
 {
 
 /// Hyperbolic tangent activation function.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class TanH : public Map<T>
 {
 public:

@@ -7,12 +7,12 @@
 void TestIdentity()
 {
 	// Input, arbitrary
-	Tensor<> inp = Tensor<>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
 	
 	// Output gradient, arbitrary
-	Tensor<> grd = Tensor<>({ 2, -3, 1 }).resize(1, 3);
+	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
 	
-	Identity<> map;
+	Identity<NN_REAL_T> map;
 	map.forward(inp);
 	map.backward(inp, grd);
 	

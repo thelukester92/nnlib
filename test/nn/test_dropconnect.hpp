@@ -14,16 +14,16 @@ void TestDropConnect()
 {
 	RandomEngine::seed(0);
 	
-	Tensor<> inp = Tensor<>(4, 25).ones();
-	Tensor<> grd = Tensor<>(4, 1).ones();
+	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>(4, 25).ones();
+	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>(4, 1).ones();
 	double p = 0.75, sum1 = 0, sum2 = 0;
 	size_t c = 100;
 	
-	Linear<> *linear = new Linear<>(25, 1);
+	Linear<NN_REAL_T> *linear = new Linear<NN_REAL_T>(25, 1);
 	linear->weights().ones();
 	linear->bias().zeros();
 	
-	DropConnect<> module(linear, p);
+	DropConnect<NN_REAL_T> module(linear, p);
 	NNAssertEquals(module.dropProbability(), p, "DropConnect::DropConnect failed!");
 	
 	for(size_t i = 0; i < c; ++i)

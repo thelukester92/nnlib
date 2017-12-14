@@ -7,7 +7,7 @@ namespace nnlib
 {
 
 /// A standard feed-forward neural network module.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Sequential : public Container<T>
 {
 public:

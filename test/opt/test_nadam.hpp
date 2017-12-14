@@ -10,15 +10,15 @@ void TestNadam()
 {
 	RandomEngine::seed();
 	
-	Tensor<> feat = Tensor<>(10, 2).rand();
-	Tensor<> lab = Tensor<>(10, 3).rand();
+	Tensor<NN_REAL_T> feat = Tensor<NN_REAL_T>(10, 2).rand();
+	Tensor<NN_REAL_T> lab = Tensor<NN_REAL_T>(10, 3).rand();
 	
-	Linear<> nn(2, 3);
-	MSE<> critic;
+	Linear<NN_REAL_T> nn(2, 3);
+	MSE<NN_REAL_T> critic;
 	
 	double errBefore = critic.forward(nn.forward(feat), lab);
 	
-	Nadam<> opt(nn, critic);
+	Nadam<NN_REAL_T> opt(nn, critic);
 	opt.step(feat.narrow(0, 0), lab.narrow(0, 0));
 	opt.step(feat, lab);
 	

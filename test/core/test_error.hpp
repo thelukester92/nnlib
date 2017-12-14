@@ -7,7 +7,7 @@ using namespace nnlib;
 
 void TestError()
 {
-	Tensor<> tensor(3, 6, 9);
+	Tensor<NN_REAL_T> tensor(3, 6, 9);
 	
 	Error e("file", "func", 123, tensor(0, 1, 2), tensor, std::string("failure"), nullptr);
 	try { throw e; }

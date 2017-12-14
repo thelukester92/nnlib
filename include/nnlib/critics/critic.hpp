@@ -6,7 +6,7 @@
 namespace nnlib
 {
 
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Critic
 {
 public:

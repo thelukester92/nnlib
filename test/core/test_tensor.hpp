@@ -9,47 +9,47 @@ void TestTensor()
 	// test empty concat
 	
 	{
-		Tensor<> empty = Tensor<>::concatenate({});
+		Tensor<NN_REAL_T> empty = Tensor<NN_REAL_T>::concatenate({});
 		NNAssertEquals(empty.size(), 0, "Tensor::concatenate on an empty list failed!");
 	}
 	
 	// test resizing to the same size
 	
 	{
-		Tensor<> t(3);
+		Tensor<NN_REAL_T> t(3);
 		t.resizeDim(0, 3);
 		NNAssertEquals(t.size(0), 3, "Tensor::resizeDim to the same size failed!");
 	}
 	
 	// test constructors
 	
-	Tensor<> empty;
+	Tensor<NN_REAL_T> empty;
 	NNAssertEquals(empty.size(), 0, "Tensor::Tensor() failed!");
 	
-	Tensor<> vector(3, 4);
+	Tensor<NN_REAL_T> vector(3, 4);
 	NNAssertEquals(vector.dims(), 2, "Tensor::Tensor(size_t, size_t) failed! Wrong dimensionality!");
 	NNAssertEquals(vector.size(), 12, "Tensor::Tensor(size_t, size_t) failed! Wrong size!");
 	NNAssertEquals(*vector.ptr(), 0.0, "Tensor::Tensor(size_t, size_t) failed! Wrong value!");
 	
-	Tensor<> initFromStorage(Storage<double>({ 3.14, 42.0 }));
+	Tensor<NN_REAL_T> initFromStorage(Storage<double>({ 3.14, 42.0 }));
 	NNAssertEquals(initFromStorage.dims(), 1, "Tensor::Tensor(Storage) failed! Wrong dimensionality!");
 	NNAssertEquals(initFromStorage.size(), 2, "Tensor::Tensor(Storage) failed! Wrong size!");
 	NNAssertEquals(*initFromStorage.ptr(), 3.14, "Tensor::Tensor(Storage) failed! Wrong value!");
 	
-	Tensor<> initFromList({ 1.0, 2.0, 3.0, 4.0 });
+	Tensor<NN_REAL_T> initFromList({ 1.0, 2.0, 3.0, 4.0 });
 	NNAssertEquals(initFromList.dims(), 1, "Tensor::Tensor(initializer_list) failed! Wrong dimensionality!");
 	NNAssertEquals(initFromList.size(), 4, "Tensor::Tensor(initializer_list) failed! Wrong size!");
 	NNAssertEquals(*initFromList.ptr(), 1.0, "Tensor::Tensor(initializer_list) failed! Wrong value!");
 	
-	Tensor<> initWithDims({ 4, 2, 3 }, true);
+	Tensor<NN_REAL_T> initWithDims({ 4, 2, 3 }, true);
 	NNAssertEquals(initWithDims.dims(), 3, "Tensor::Tensor(Storage, bool) failed! Wrong dimensionality!");
 	NNAssertEquals(initWithDims.size(), 24, "Tensor::Tensor(Storage, bool) failed! Wrong size!");
 	
-	Tensor<> view(vector);
+	Tensor<NN_REAL_T> view(vector);
 	NNAssertEquals(view.shape(), vector.shape(), "Tensor::Tensor(Tensor &) failed! Wrong shape!");
 	NNAssertEquals(view.ptr(), vector.ptr(), "Tensor::Tensor(Tensor &) failed! Wrong data!");
 	
-	Tensor<> viewOfMoved(std::move(initWithDims));
+	Tensor<NN_REAL_T> viewOfMoved(std::move(initWithDims));
 	NNAssertEquals(viewOfMoved.shape(), initWithDims.shape(), "Tensor::Tensor(Tensor &&) failed! Wrong shape!");
 	NNAssertEquals(viewOfMoved.ptr(), initWithDims.ptr(), "Tensor::Tensor(Tensor &&) failed! Wrong data!");
 	
@@ -153,8 +153,8 @@ void TestTensor()
 		NNAssertNotEquals(&*x, &*y, "Tensor::copy(Tensor &) failed! Wrong data!");
 	}
 	
-	empty = Tensor<>(3, 4).fill(1.0);
-	view = Tensor<>(3, 4).fill(2.0);
+	empty = Tensor<NN_REAL_T>(3, 4).fill(1.0);
+	view = Tensor<NN_REAL_T>(3, 4).fill(2.0);
 	
 	empty.swap(view);
 	for(auto x = empty.begin(), y = view.begin(); x != empty.end(); ++x, ++y)
@@ -218,10 +218,10 @@ void TestTensor()
 	
 	// test tensor math
 	
-	view = Tensor<>(3, 100).rand();
-	vector = Tensor<>(100).rand();
-	viewOfMoved = Tensor<>(view.size(0));
-	empty = Tensor<>(view.size(0));
+	view = Tensor<NN_REAL_T>(3, 100).rand();
+	vector = Tensor<NN_REAL_T>(100).rand();
+	viewOfMoved = Tensor<NN_REAL_T>(view.size(0));
+	empty = Tensor<NN_REAL_T>(view.size(0));
 	
 	empty.assignMV(view, vector);
 	for(size_t i = 0; i < view.size(0); ++i)
@@ -338,34 +338,34 @@ void TestTensor()
 	
 	view.resize(10, 10);
 	
-	const Tensor<> &constant = view;
+	const Tensor<NN_REAL_T> &constant = view;
 	
 	{
-		const Tensor<> &constView = constant.view(Storage<size_t>({ 3, 3 }));
+		const Tensor<NN_REAL_T> &constView = constant.view(Storage<size_t>({ 3, 3 }));
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 3, 3 }), "const Tensor::view(Storage) failed! Wrong shape!");
 		NNAssertEquals(&constView(0, 0), &constant(0, 0), "const Tensor::view(Storage) failed! Wrong data!");
 	}
 	
 	{
-		const Tensor<> &constView = constant.view(3, 3);
+		const Tensor<NN_REAL_T> &constView = constant.view(3, 3);
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 3, 3 }), "const Tensor::view(size_t, size_t) failed! Wrong shape!");
 		NNAssertEquals(&constView(0, 0), &constant(0, 0), "const Tensor::view(size_t, size_t) failed! Wrong data!");
 	}
 	
 	{
-		const Tensor<> &constView = constant.select(1, 1);
+		const Tensor<NN_REAL_T> &constView = constant.select(1, 1);
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 10 }), "const Tensor::select failed! Wrong shape!");
 		NNAssertEquals(&constView(2), &constant(2, 1), "const Tensor::select failed! Wrong data!");
 	}
 	
 	{
-		const Tensor<> &constView = constant.narrow(1, 2, 2);
+		const Tensor<NN_REAL_T> &constView = constant.narrow(1, 2, 2);
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 10, 2 }), "const Tensor::narrow failed! Wrong shape!");
 		NNAssertEquals(&constView(2, 1), &constant(2, 3), "const Tensor::narrow failed! Wrong data!");
 	}
 	
 	{
-		const Tensor<> &constView = constant.narrow(1, 2, 2);
+		const Tensor<NN_REAL_T> &constView = constant.narrow(1, 2, 2);
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 10, 2 }), "const Tensor::narrow failed! Wrong shape!");
 		NNAssertEquals(&constView(2, 1), &constant(2, 3), "const Tensor::narrow failed! Wrong data!");
 	}
@@ -373,15 +373,15 @@ void TestTensor()
 	view.resize(10, 1, 10);
 	
 	{
-		const Tensor<> &constant = view;
-		const Tensor<> &constView = constant.expand(1, 50);
+		const Tensor<NN_REAL_T> &constant = view;
+		const Tensor<NN_REAL_T> &constView = constant.expand(1, 50);
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 10, 50, 10 }), "const Tensor::expand failed! Wrong shape!");
 		NNAssertEquals(&constView(7, 29, 3), &constant(7, 0, 3), "const Tensor::expand failed! Wrong data!");
 	}
 	
 	{
-		const Tensor<> &constant = view;
-		const Tensor<> &constView = constant.sub({ { 2, 4 }, { 0 }, { 7, 2 } });
+		const Tensor<NN_REAL_T> &constant = view;
+		const Tensor<NN_REAL_T> &constView = constant.sub({ { 2, 4 }, { 0 }, { 7, 2 } });
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 4, 1, 2 }), "const Tensor::sub failed! Wrong shape!");
 		NNAssertEquals(&constView(2, 0, 1), &constant(4, 0, 8), "const Tensor::sub failed! Wrong data!");
 	}
@@ -390,7 +390,7 @@ void TestTensor()
 		view.randn();
 		empty = view.copy();
 		
-		const Tensor<> &constant = view;
+		const Tensor<NN_REAL_T> &constant = view;
 		double sum = 0.0;
 		constant.apply([&sum](const double &v) { sum += v; });
 		NNAssertEquals(sum, constant.sum(), "const Tensor::apply failed!");
@@ -434,12 +434,12 @@ void TestTensor()
 	
 	// test serialization
 	
-	Tensor<> serializable = Tensor<>(3, 4, 5, 6).rand();
-	Tensor<> serialized;
+	Tensor<NN_REAL_T> serializable = Tensor<NN_REAL_T>(3, 4, 5, 6).rand();
+	Tensor<NN_REAL_T> serialized;
 	
 	Serialized node;
 	serializable.save(node);
-	serialized = Tensor<>(node);
+	serialized = Tensor<NN_REAL_T>(node);
 	
 	for(auto x = serializable.begin(), y = serialized.begin(); x != serializable.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");

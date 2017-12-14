@@ -9,7 +9,7 @@ namespace nnlib
 /// \brief Log softmax for classification problems.
 ///
 /// Best combined with NLL critic. Works only on 2D tensors.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class LogSoftMax : public Module<T>
 {
 public:

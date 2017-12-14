@@ -24,7 +24,7 @@ public:
 	}
 };
 
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Random
 {
 public:

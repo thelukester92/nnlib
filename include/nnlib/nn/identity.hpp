@@ -10,7 +10,7 @@ namespace nnlib
 ///
 /// A residual connection can be modeled for an arbitrary module m like this:
 ///     residual = new Concat<T>(new Identity<T>(), m);
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Identity : public Module<T>
 {
 public:

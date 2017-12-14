@@ -106,17 +106,17 @@ void TestJSONSerializer()
 	// neural network serialization
 	
 	{
-		Sequential<> nn(
-			new Linear<>(10, 5),
-			new TanH<>(),
-			new Linear<>(5, 10),
-			new TanH<>()
+		Sequential<NN_REAL_T> nn(
+			new Linear<NN_REAL_T>(10, 5),
+			new TanH<NN_REAL_T>(),
+			new Linear<NN_REAL_T>(5, 10),
+			new TanH<NN_REAL_T>()
 		);
 		
 		std::stringstream ss;
 		JSONSerializer::write(nn, ss);
 		
-		Sequential<> *deserialized = JSONSerializer::read(ss).as<Sequential<> *>();
+		Sequential<NN_REAL_T> *deserialized = JSONSerializer::read(ss).as<Sequential<NN_REAL_T> *>();
 		
 		auto &p1 = nn.params();
 		auto &p2 = deserialized->params();

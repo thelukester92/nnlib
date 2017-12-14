@@ -13,7 +13,7 @@ template <typename T>
 void swap(Linear<T> &, Linear<T> &);
 
 /// A standard feed-forward layer that returns a linear combination of inputs.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Linear : public Module<T>
 {
 public:

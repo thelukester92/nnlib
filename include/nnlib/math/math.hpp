@@ -7,7 +7,7 @@ namespace nnlib
 {
 
 /// Utility class for linear algebra and other math operations.
-template <typename T>
+template <typename T = NN_REAL_T>
 class Math
 {
 public:

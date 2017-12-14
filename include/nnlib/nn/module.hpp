@@ -9,7 +9,7 @@ namespace nnlib
 {
 
 /// The abtract base class for all neural network modules.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Module
 {
 public:

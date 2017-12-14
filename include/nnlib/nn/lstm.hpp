@@ -17,7 +17,7 @@ void swap(LSTM<T> &, LSTM<T> &);
 /// \brief Long short-term memory recurrent module.
 ///
 /// This implementation makes a strong assumption that inputs and outputs are matrices.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class LSTM : public Module<T>
 {
 public:

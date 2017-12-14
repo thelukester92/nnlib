@@ -8,7 +8,7 @@ namespace nnlib
 {
 
 /// Rectified linear activation function.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class ReLU : public Map<T>
 {
 public:

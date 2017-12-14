@@ -10,7 +10,7 @@ namespace nnlib
 ///
 /// This not needed for shape-agnostic critics like MSE, but is needed for shape-dependent
 /// critics like NLL.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class CriticSequencer : public Critic<T>
 {
 public:

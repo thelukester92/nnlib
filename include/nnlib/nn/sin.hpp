@@ -8,7 +8,7 @@ namespace nnlib
 {
 
 /// Sinusoid activation function.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Sin : public Map<T>
 {
 public:

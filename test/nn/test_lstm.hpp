@@ -8,13 +8,13 @@ using namespace nnlib;
 void TestLSTM()
 {
 	// Input, arbitrary
-	Tensor<> inp = Tensor<>({ 8, 6, 0 }).resize(3, 1, 1);
+	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ 8, 6, 0 }).resize(3, 1, 1);
 	
 	// Output gradient, arbitrary
-	Tensor<> grd = Tensor<>({ 1, 0, -1 }).resize(3, 1, 1);
+	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 1, 0, -1 }).resize(3, 1, 1);
 	
 	// LSTM layer with specific weights and bias, arbitrary
-	LSTM<> module(1, 1);
+	LSTM<NN_REAL_T> module(1, 1);
 	module.params().copy({
 		// inpGate (x, y, h, b)
 		-0.2, 0.5, 0.1, 0.0,
@@ -30,13 +30,13 @@ void TestLSTM()
 	});
 	
 	// Output, fixed given input and weights
-	Tensor<> out = Tensor<>({ 0.15089258930, 0.32260369939, 0.03848645247 }).resize(3, 1, 1);
+	Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({ 0.15089258930, 0.32260369939, 0.03848645247 }).resize(3, 1, 1);
 	
 	// Input gradient, fixed given input and output gradient
-	Tensor<> ing = Tensor<>({ -0.01712796895, 0.00743178473, -0.30729831287 }).resize(3, 1, 1);
+	Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({ -0.01712796895, 0.00743178473, -0.30729831287 }).resize(3, 1, 1);
 	
 	// Parameter gradient, fixed given the input and output gradient
-	Tensor<> prg = Tensor<>({
+	Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({
 		 0.73850659626,  0.00585685005,  0.00801518653,  0.11462669318,
 		-0.00117516696, -0.01646944995, -0.02114722491, -0.05115589662,
 		-0.00000416626, -0.08323296026, -0.25800409062,
@@ -45,10 +45,10 @@ void TestLSTM()
 	
 	// Test forward and backward using the parameters and targets above
 	
-	Tensor<> states(inp.size(0), 0);
+	Tensor<NN_REAL_T> states(inp.size(0), 0);
 	
-	Tensor<> outputs(3, 1, 1);
-	Tensor<> inGrads(3, 1, 1);
+	Tensor<NN_REAL_T> outputs(3, 1, 1);
+	Tensor<NN_REAL_T> inGrads(3, 1, 1);
 	
 	for(size_t i = 0; i < inp.size(0); ++i)
 	{

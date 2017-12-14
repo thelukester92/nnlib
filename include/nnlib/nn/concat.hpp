@@ -27,7 +27,7 @@ namespace nnlib
 ///     | g h i p q r |.
 /// Modules may not produce square outputs, so often only one dimension will actually work.
 /// By default, the last dimension will be used at the concatenation dimension.
-template <typename T = double>
+template <typename T = NN_REAL_T>
 class Concat : public Container<T>
 {
 public:
