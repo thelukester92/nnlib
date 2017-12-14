@@ -14,45 +14,14 @@ template <typename T = double>
 class CriticSequencer : public Critic<T>
 {
 public:
-	CriticSequencer(Critic<T> *critic) :
-		m_critic(critic)
-	{}
+	CriticSequencer(Critic<T> *critic);
+	virtual ~CriticSequencer();
 	
-	virtual ~CriticSequencer()
-	{
-		delete m_critic;
-	}
+	Critic<T> &critic();
+	CriticSequencer &critic(Critic<T> *critic);
 	
-	/// Get the inner critic.
-	Critic<T> &critic()
-	{
-		return *m_critic;
-	}
-	
-	/// Set the inner critic.
-	CriticSequencer &critic(Critic<T> *critic)
-	{
-		m_critic = critic;
-		return *this;
-	}
-	
-	/// MARK: Computation
-	
-	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override
-	{
-		T output = 0;
-		for(size_t i = 0, seqLen = input.size(0); i < seqLen; ++i)
-			output += m_critic->forward(input.select(0, i), target.select(0, i));
-		return output;
-	}
-	
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override
-	{
-		m_inGrad.resize(input.shape());
-		for(size_t i = 0, seqLen = input.size(0); i < seqLen; ++i)
-			m_inGrad.select(0, i).copy(m_critic->backward(input.select(0, i), target.select(0, i)));
-		return m_inGrad;
-	}
+	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override;
+	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override;
 	
 protected:
 	using Critic<T>::m_inGrad;
@@ -62,5 +31,11 @@ private:
 };
 
 }
+
+#ifdef NN_REAL_T
+	extern template class nnlib::CriticSequencer<NN_REAL_T>;
+#else
+	#include "detail/criticsequencer.tpp"
+#endif
 
 #endif
