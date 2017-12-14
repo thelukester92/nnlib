@@ -81,7 +81,7 @@ lib/$(OPTLIB): $(OPTFILES)
 	$(CXX) -fPIC $(OPTFILES) $(LDFLAGS) -o $@
 obj/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $< $(OPTFLAGS) -MMD -c -o $@
+	$(CXX) -fPIC $< $(OPTFLAGS) -MMD -c -o $@
 
 dbg: lib/$(DBGLIB)
 lib/$(DBGLIB): $(DBGFILES)
@@ -89,7 +89,7 @@ lib/$(DBGLIB): $(DBGFILES)
 	$(CXX) -fPIC $(DBGFILES) $(LDFLAGS) -o $@
 obj/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
+	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@
 
 test: dbg bin/$(TST)
 	./bin/$(TST)
