@@ -39,7 +39,7 @@ private:
 #ifdef NN_REAL_T
 	extern template class nnlib::NLL<NN_REAL_T>;
 #else
-	#include "detail/nnl.tpp"
+	#include "detail/nll.tpp"
 #endif
 
 #endif
