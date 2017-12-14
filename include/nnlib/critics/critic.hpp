@@ -10,7 +10,7 @@ template <typename T = double>
 class Critic
 {
 public:
-	virtual ~Critic() {}
+	virtual ~Critic();
 	
 	/// Calculate the loss (how far input is from target).
 	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) = 0;
@@ -19,21 +19,19 @@ public:
 	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) = 0;
 	
 	/// Get cached input gradient.
-	Tensor<T> &inGrad()
-	{
-		return m_inGrad;
-	}
-	
-	/// Get cached input gradient.
-	const Tensor<T> &inGrad() const
-	{
-		return m_inGrad;
-	}
+	Tensor<T> &inGrad();
+	const Tensor<T> &inGrad() const;
 	
 protected:
 	Tensor<T> m_inGrad;
 };
 
 }
+
+#ifdef NN_REAL_T
+	extern template class nnlib::Critic<NN_REAL_T>;
+#else
+	#include "detail/critic.tpp"
+#endif
 
 #endif
