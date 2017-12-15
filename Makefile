@@ -114,7 +114,7 @@ test: dbg $(BIN)/$(TST) $(BIN)/nvblas.conf
 	NVBLAS_CONFIG_FILE=$(BIN)/nvblas.conf ./$(BIN)/$(TST)
 $(BIN)/$(TST): $(TSTFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(TSTFILES) -Wl,-rpath,lib -L$(LIB) -l$(DBG) -o $@
+	$(CXX) $(TSTFILES) -Wl,-rpath,$(LIB) -L$(LIB) -l$(DBG) -o $@
 $(OBJ)/test/%.o: test/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
