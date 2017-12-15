@@ -9,6 +9,11 @@
 
 # BEGIN VARIABLES
 
+# Temporary directories; BE CAREFUL as these are directories that will be forcibly removed in a clean
+BIN := bin
+LIB := lib
+OBJ := obj
+
 # Name of optimized lib
 OUT := nnlib
 
@@ -46,8 +51,8 @@ ifneq ($(REAL_T),none)
 endif
 
 override CXXFILES := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
-override OPTFILES := $(CXXFILES:src/%.cpp=obj/%.o)
-override DBGFILES := $(CXXFILES:src/%.cpp=obj/dbg/%.o)
+override OPTFILES := $(CXXFILES:src/%.cpp=$(OBJ)/%.o)
+override DBGFILES := $(CXXFILES:src/%.cpp=$(OBJ)/dbg/%.o)
 override DEPFILES := $(OPTFILES:%.o=%.d) $(DBGFILES:%.o=%.d)
 override CXXFLAGS += -std=c++11 -Iinclude
 
@@ -82,46 +87,46 @@ override OPTFLAGS := $(CXXFLAGS) -DNN_OPT -O3
 override DBGFLAGS := $(CXXFLAGS) -g
 
 override TSTFILES := $(wildcard test/*.cpp) $(wildcard test/**/*.cpp)
-override TSTFILES := $(TSTFILES:test/%.cpp=obj/test/%.o)
+override TSTFILES := $(TSTFILES:test/%.cpp=$(OBJ)/test/%.o)
 
 override HXXFILES := $(shell find include -type f)
 override HXXFILES := $(HXXFILES:%=$(PREFIX)/%)
 
 all: opt dbg test
 
-opt: lib/$(OPTLIB)
-lib/$(OPTLIB): $(OPTFILES)
+opt: $(LIB)/$(OPTLIB)
+$(LIB)/$(OPTLIB): $(OPTFILES)
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $(OPTFILES) $(LDFLAGS) -o $@
-obj/%.o: src/%.cpp
+$(OBJ)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(OPTFLAGS) -MMD -c -o $@
 
-dbg: lib/$(DBGLIB)
-lib/$(DBGLIB): $(DBGFILES)
+dbg: $(LIB)/$(DBGLIB)
+$(LIB)/$(DBGLIB): $(DBGFILES)
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $(DBGFILES) $(LDFLAGS) -o $@
-obj/dbg/%.o: src/%.cpp
+$(OBJ)/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@
 
-test: dbg bin/$(TST) bin/nvblas.conf
-	NVBLAS_CONFIG_FILE=bin/nvblas.conf ./bin/$(TST)
-bin/$(TST): $(TSTFILES)
+test: dbg $(BIN)/$(TST) $(BIN)/nvblas.conf
+	NVBLAS_CONFIG_FILE=$(BIN)/nvblas.conf ./$(BIN)/$(TST)
+$(BIN)/$(TST): $(TSTFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(TSTFILES) -Wl,-rpath,lib -Llib -l$(DBG) -o $@
-obj/test/%.o: test/%.cpp
+	$(CXX) $(TSTFILES) -Wl,-rpath,lib -L$(LIB) -l$(DBG) -o $@
+$(OBJ)/test/%.o: test/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
-bin/nvblas.conf:
+$(BIN)/nvblas.conf:
 	@echo "NVBLAS_CPU_BLAS_LIB" $(CPU_BLAS) > $@
 	@echo "NVBLAS_GPU_LIST ALL" >> $@
 	@echo "NVBLAS_TILE_DIM 2048" >> $@
 	@echo "NVBLAS_AUTOPIN_MEM_ENABLED" >> $@
 
 install: opt dbg headers
-	cp lib/$(OPTLIB) $(PREFIX)/lib/
-	cp lib/$(DBGLIB) $(PREFIX)/lib/
+	cp $(LIB)/$(OPTLIB) $(PREFIX)/lib/
+	cp $(LIB)/$(DBGLIB) $(PREFIX)/lib/
 
 headers: $(HXXFILES)
 $(PREFIX)/%: %
@@ -129,7 +134,7 @@ $(PREFIX)/%: %
 	cp $< $@
 
 clean:
-	rm -rf bin lib obj
+	rm -rf $(BIN) $(LIB) $(OBJ)
 
 uninstall:
 	rm -rf $(PREFIX)/include/nnlib*
