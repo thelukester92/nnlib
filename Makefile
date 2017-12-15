@@ -124,7 +124,7 @@ $(BIN)/nvblas.conf:
 	@echo "NVBLAS_TILE_DIM 2048" >> $@
 	@echo "NVBLAS_AUTOPIN_MEM_ENABLED" >> $@
 
-install: opt dbg headers
+install: opt dbg headers $(PREFIX)/lib/$(OPTLIB) $(PREFIX)/lib/$(DBGLIB)
 	cp $(LIB)/$(OPTLIB) $(PREFIX)/lib/
 	cp $(LIB)/$(DBGLIB) $(PREFIX)/lib/
 
