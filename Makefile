@@ -19,7 +19,7 @@ DBG := $(OUT)_dbg
 TST := $(OUT)_test
 
 # Temporary directories; BE CAREFUL as these are directories that will be forcibly removed in a clean
-BIN := bin/$(OUT)
+BIN := bin
 LIB := lib/$(OUT)
 OBJ := obj/$(OUT)
 
