@@ -9,11 +9,6 @@
 
 # BEGIN VARIABLES
 
-# Temporary directories; BE CAREFUL as these are directories that will be forcibly removed in a clean
-BIN := bin
-LIB := lib
-OBJ := obj
-
 # Name of optimized lib
 OUT := nnlib
 
@@ -22,6 +17,11 @@ DBG := $(OUT)_dbg
 
 # Name of test executable
 TST := $(OUT)_test
+
+# Temporary directories; BE CAREFUL as these are directories that will be forcibly removed in a clean
+BIN := bin/$(OUT)
+LIB := lib/$(OUT)
+OBJ := obj/$(OUT)
 
 # Which linear algebra acceleration library to use on CPU
 ACCEL_CPU := auto
