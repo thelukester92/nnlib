@@ -19,9 +19,13 @@ DBG := $(OPT)_dbg
 TST := $(OPT)_test
 
 # Which linear algebra acceleration library to use on CPU
-ACCEL := auto
-# ACCEL := openblas
-# ACCEL := none
+ACCEL_CPU := auto
+# ACCEL_CPU := openblas
+# ACCEL_CPU := none
+
+# Whether to use a linear algebra library on GPU
+ACCEL_GPU := auto
+# ACCEL_GPU := none
 
 # Location of the linear algebra library to use on CPU (required for GPU)
 CPU_BLAS := /usr/local/lib/libopenblas.so
@@ -47,18 +51,20 @@ override DBGFILES := $(CXXFILES:src/%.cpp=obj/dbg/%.o)
 override DEPFILES := $(OPTFILES:%.o=%.d) $(DBGFILES:%.o=%.d)
 override CXXFLAGS += -std=c++11 -Iinclude
 
-ifneq ($(shell which nvcc),)
-    override CXXFLAGS += -DNN_ACCEL_GPU
-    override LDFLAGS += -lnvblas
-endif
-
-ifeq ($(ACCEL)$(shell uname -s),autoDarwin)
+ifeq ($(ACCEL_CPU)$(shell uname -s),autoDarwin)
     override CXXFLAGS += -DNN_ACCEL_CPU
     override LDFLAGS += -framework Accelerate
 else
-ifneq ($(ACCEL),none)
+ifneq ($(ACCEL_CPU),none)
     override CXXFLAGS += -DNN_ACCEL_CPU
     override LDFLAGS += -lopenblas
+endif
+endif
+
+ifneq ($(ACCEL_GPU),none)
+ifneq ($(shell which nvcc),)
+    override CXXFLAGS += -DNN_ACCEL_GPU
+    override LDFLAGS += -lnvblas
 endif
 endif
 
