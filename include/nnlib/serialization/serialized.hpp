@@ -156,7 +156,8 @@ public:
 		
 		Serialized *&operator[](const std::string &key)
 		{
-			NNHardAssertNotEquals(m_values.find(key), m_values.end(), "No such key '" + key + "'!");
+			if(m_values.find(key) == m_values.end())
+				m_values.emplace(key, nullptr);
 			return m_values[key];
 		}
 		
