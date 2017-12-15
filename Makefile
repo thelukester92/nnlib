@@ -125,8 +125,10 @@ $(BIN)/nvblas.conf:
 	@echo "NVBLAS_AUTOPIN_MEM_ENABLED" >> $@
 
 install: opt dbg headers $(PREFIX)/lib/$(OPTLIB) $(PREFIX)/lib/$(DBGLIB)
-	cp $(LIB)/$(OPTLIB) $(PREFIX)/lib/
-	cp $(LIB)/$(DBGLIB) $(PREFIX)/lib/
+$(PREFIX)/lib/$(OPTLIB): $(LIB)/$(OPTLIB)
+	cp $< $@
+$(PREFIX)/lib/$(DBGLIB): $(LIB)/$(DBGLIB)
+	cp $< $@
 
 headers: $(HXXFILES)
 $(PREFIX)/%: %
