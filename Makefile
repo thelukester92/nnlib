@@ -10,13 +10,13 @@
 # BEGIN VARIABLES
 
 # Name of optimized lib
-OPT := nnlib
+OUT := nnlib
 
 # Name of debugging lib
-DBG := $(OPT)_dbg
+DBG := $(OUT)_dbg
 
 # Name of test executable
-TST := $(OPT)_test
+TST := $(OUT)_test
 
 # Which linear algebra acceleration library to use on CPU
 ACCEL_CPU := auto
@@ -70,11 +70,11 @@ endif
 
 ifeq ($(shell uname -s),Darwin)
     override LDFLAGS += -dynamiclib
-    override OPTLIB := lib$(OPT).dylib
+    override OPTLIB := lib$(OUT).dylib
     override DBGLIB := lib$(DBG).dylib
 else
     override LDFLAGS += -shared
-    override OPTLIB := lib$(OPT).so
+    override OPTLIB := lib$(OUT).so
     override DBGLIB := lib$(DBG).so
 endif
 
