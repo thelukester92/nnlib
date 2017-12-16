@@ -4,8 +4,6 @@
 	#undef OPTIMIZE
 #endif
 
-#include "nnlib/util/timer.hpp"
-
 #include "core/test_error.hpp"
 #include "core/test_storage.hpp"
 #include "core/test_tensor.hpp"
@@ -36,9 +34,15 @@
 #include "serialization/test_csvserializer.hpp"
 #include "serialization/test_jsonserializer.hpp"
 #include "serialization/test_serialized.hpp"
+#include "toy_problems/classification.hpp"
+#include "toy_problems/timeseries.hpp"
 #include "util/test_args.hpp"
 #include "util/test_batcher.hpp"
 #include "util/test_random.hpp"
+
+#include "nnlib/core/error.hpp"
+#include "nnlib/util/random.hpp"
+#include "nnlib/util/timer.hpp"
 using namespace nnlib;
 
 #include <iostream>
@@ -47,9 +51,6 @@ using namespace nnlib;
 #include <tuple>
 #include <functional>
 using namespace std;
-
-#include "toy_problems/classification.hpp"
-#include "toy_problems/timeseries.hpp"
 
 #define UNIT_TEST(Prefix, Class) { string("Testing ") + Prefix + #Class, Test##Class }
 #define TOY_PROBLEM(Name) { string("Running toy problem: ") + #Name, Toy##Name }

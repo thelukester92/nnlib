@@ -1,12 +1,12 @@
-#ifndef TEST_CONTAINER_H
-#define TEST_CONTAINER_H
+#ifndef TEST_CONTAINER_HPP
+#define TEST_CONTAINER_HPP
 
 #include "nnlib/nn/container.hpp"
 #include "test_module.hpp"
 using namespace std;
 using namespace nnlib;
 
-template <template <typename> class M, typename T = double>
+template <template <typename> class M, typename T = NN_REAL_T>
 class ContainerTests : public ModuleTests<M, T>
 {
 public:

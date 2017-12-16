@@ -1,11 +1,11 @@
-#ifndef TEST_MODULE_H
-#define TEST_MODULE_H
+#ifndef TEST_MODULE_HPP
+#define TEST_MODULE_HPP
 
 #include "nnlib/nn/module.hpp"
 using namespace std;
 using namespace nnlib;
 
-template <template <typename> class M, typename T = double>
+template <template <typename> class M, typename T = NN_REAL_T>
 class ModuleTests
 {
 public:

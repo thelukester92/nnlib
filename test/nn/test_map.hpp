@@ -1,12 +1,12 @@
-#ifndef TEST_MAP_H
-#define TEST_MAP_H
+#ifndef TEST_MAP_HPP
+#define TEST_MAP_HPP
 
 #include "nnlib/nn/map.hpp"
 #include "test_module.hpp"
 using namespace std;
 using namespace nnlib;
 
-template <template <typename> class M, typename T = double>
+template <template <typename> class M, typename T = NN_REAL_T>
 class MapTests : public ModuleTests<M, T>
 {
 public:
