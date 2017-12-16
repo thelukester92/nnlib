@@ -2,10 +2,11 @@
 #define CORE_STORAGE_HPP
 
 #include <initializer_list>
-#include "../serialization/serialized.hpp"
 
 namespace nnlib
 {
+
+class Serialized;
 
 /// Unique, contigious storage that manages its own memory.
 /// May be shared across multiple objects.
@@ -65,6 +66,10 @@ private:
 };
 
 }
+
+#if defined NN_REAL_T && !defined NN_IMPL
+	extern template class nnlib::Storage<NN_REAL_T>;
+#endif
 
 #include "detail/storage.tpp"
 

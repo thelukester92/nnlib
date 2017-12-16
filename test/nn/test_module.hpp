@@ -44,11 +44,11 @@ protected:
 	
 	static bool testEqualOutput(Module<T> &m1, Module<T> &m2, const Tensor<T> &input)
 	{
-		RandomEngine::seed(0);
+		RandomEngine::sharedEngine().seed(0);
 		m1.forget();
 		auto &o1 = m1.forward(input);
 		
-		RandomEngine::seed(0);
+		RandomEngine::sharedEngine().seed(0);
 		m2.forget();
 		auto &o2 = m2.forward(input);
 		
@@ -64,11 +64,11 @@ protected:
 private:
 	static void testDeterministic(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
-		RandomEngine::seed(0);
+		RandomEngine::sharedEngine().seed(0);
 		module.forget();
 		auto o1 = module.forward(input).copy();
 		
-		RandomEngine::seed(0);
+		RandomEngine::sharedEngine().seed(0);
 		module.forget();
 		auto o2 = module.forward(input).copy();
 		
@@ -78,11 +78,11 @@ private:
 	
 	static void testState(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
-		RandomEngine::seed(0);
+		RandomEngine::sharedEngine().seed(0);
 		auto s = module.state().copy();
 		auto o1 = module.forward(input).copy();
 		
-		RandomEngine::seed(0);
+		RandomEngine::sharedEngine().seed(0);
 		module.state().copy(s);
 		auto o2 = module.forward(input);
 		

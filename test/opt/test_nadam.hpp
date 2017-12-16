@@ -8,7 +8,7 @@ using namespace nnlib;
 
 void TestNadam()
 {
-	RandomEngine::seed();
+	RandomEngine::sharedEngine().seed(0);
 	
 	Tensor<NN_REAL_T> feat = Tensor<NN_REAL_T>(10, 2).rand();
 	Tensor<NN_REAL_T> lab = Tensor<NN_REAL_T>(10, 3).rand();

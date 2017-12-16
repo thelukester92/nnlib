@@ -12,7 +12,7 @@ using namespace nnlib;
 /// We test by running it several times and making sure the statistics are approximately right.
 void TestDropConnect()
 {
-	RandomEngine::seed(0);
+	RandomEngine::sharedEngine().seed(0);
 	
 	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>(4, 25).ones();
 	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>(4, 1).ones();

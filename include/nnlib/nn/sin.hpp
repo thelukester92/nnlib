@@ -2,7 +2,7 @@
 #define NN_SIN_HPP
 
 #include <math.h>
-#include <nnlib/nn/map.hpp>
+#include "map.hpp"
 
 namespace nnlib
 {

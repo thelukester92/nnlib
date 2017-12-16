@@ -61,7 +61,7 @@ public:
 		m_offset = 0;
 		for(size_t i = 0, end = m_feat.size(0); i < end; ++i)
 		{
-			size_t j = Random<size_t>::uniform(end);
+			size_t j = Random<size_t>::sharedRandom().uniform(end);
 			m_feat.select(0, i).swap(m_feat.select(0, j));
 			m_lab.select(0, i).swap(m_lab.select(0, j));
 		}
@@ -196,7 +196,7 @@ public:
 		Storage<size_t> indices(m_batch);
 		for(size_t &index : indices)
 		{
-			index = Random<size_t>::uniform(m_feat.size(0) - m_sequenceLength + 1);
+			index = Random<size_t>::sharedRandom().uniform(m_feat.size(0) - m_sequenceLength + 1);
 		}
 		
 		for(size_t i = 0; i < m_sequenceLength; ++i)

@@ -11,7 +11,7 @@ using namespace nnlib;
 /// We test by running it several times and making sure the statistics are approximately right.
 void TestDropout()
 {
-	RandomEngine::seed(0);
+	RandomEngine::sharedEngine().seed(0);
 	
 	Tensor<NN_REAL_T> ones = Tensor<NN_REAL_T>(4, 25).ones();
 	double p = 0.75, sum1 = 0, sum2 = 0;

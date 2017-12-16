@@ -2,6 +2,7 @@
 #define CORE_STORAGE_TPP
 
 #include "../storage.hpp"
+#include "nnlib/serialization/serialized.hpp"
 
 namespace nnlib
 {

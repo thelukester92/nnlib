@@ -5,11 +5,7 @@
 #include <iomanip>
 #include <memory>
 #include <functional>
-
-#include "error.hpp"
 #include "storage.hpp"
-#include "../math/math.hpp"
-#include "../util/random.hpp"
 
 namespace nnlib
 {
@@ -670,6 +666,10 @@ private:
 };
 
 }
+
+#if defined NN_REAL_T && !defined NN_IMPL
+	extern template class nnlib::Tensor<NN_REAL_T>;
+#endif
 
 #include "detail/tensor.tpp"
 #include "detail/tensor_iterator.tpp"

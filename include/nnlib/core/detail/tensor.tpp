@@ -2,6 +2,8 @@
 #define CORE_TENSOR_TPP
 
 #include "../tensor.hpp"
+#include "nnlib/math/math.hpp"
+#include "nnlib/util/random.hpp"
 
 namespace nnlib
 {
@@ -78,7 +80,7 @@ Tensor<T> Tensor<T>::randPermutation(size_t n)
 	for(size_t i = 0; i < n; ++i)
 		t(i) = i;
 	for(size_t i = 1; i < n; ++i)
-		std::swap(t(i), t(Random<size_t>::uniform(i + 1)));
+		std::swap(t(i), t(Random<size_t>::sharedRandom().uniform(i + 1)));
 	return t;
 }
 
@@ -570,7 +572,7 @@ Tensor<T> &Tensor<T>::rand(const T &from, const T &to)
 {
 	forEach([&](T &v)
 	{
-		v = Random<T>::uniform(from, to);
+		v = Random<T>::sharedRandom().uniform(from, to);
 	}, *this);
 	return *this;
 }
@@ -580,7 +582,7 @@ Tensor<T> &Tensor<T>::randn(const T &mean, const T &stddev)
 {
 	forEach([&](T &v)
 	{
-		v = Random<T>::normal(mean, stddev);
+		v = Random<T>::sharedRandom().normal(mean, stddev);
 	}, *this);
 	return *this;
 }
@@ -590,7 +592,7 @@ Tensor<T> &Tensor<T>::bernoulli(const T &p)
 {
 	forEach([&](T &v)
 	{
-		v = Random<T>::bernoulli(p);
+		v = Random<T>::sharedRandom().bernoulli(p);
 	}, *this);
 	return *this;
 }
@@ -600,7 +602,7 @@ Tensor<T> &Tensor<T>::randn(const T &mean, const T &stddev, const T &cap)
 {
 	forEach([&](T &v)
 	{
-		v = Random<T>::normal(mean, stddev, cap);
+		v = Random<T>::sharedRandom().normal(mean, stddev, cap);
 	}, *this);
 	return *this;
 }
@@ -830,16 +832,29 @@ Tensor<T> Tensor<T>::sparsify(T epsilon)
 	}, *this);
 	
 	Tensor<T> sparse(count, m_dims.size() + 1);
-	
+	Storage<size_t> indices(m_dims.size());
 	size_t idx = 0;
-	for(auto i = begin(), iend = end(); i != iend; ++i)
+	
+	while(indices.front() < m_dims[0])
 	{
-		if(std::abs(*i) > epsilon)
+		T &x = (*this)(indices);
+		
+		if(std::abs(x) > epsilon)
 		{
-			for(size_t j = 0, jend = i.indices().size(); j != jend; ++j)
-				sparse(idx, j) = i.indices()(j);
-			sparse(idx, i.indices().size()) = *i;
+			for(size_t j = 0, jend = indices.size(); j != jend; ++j)
+				sparse(idx, j) = indices[j];
+			sparse(idx, indices.size()) = x;
 			++idx;
+		}
+		
+		size_t d = indices.size() - 1;
+		++indices[d];
+		
+		while(indices[d] > m_dims[d] && d > 0)
+		{
+			indices[d] = 0;
+			--d;
+			++indices[d];
 		}
 	}
 	

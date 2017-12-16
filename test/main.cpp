@@ -56,7 +56,7 @@ using namespace std;
 
 int main()
 {
-	RandomEngine::seed(0);
+	RandomEngine::sharedEngine().seed(0);
 	
 	int ret = 0;
 	
