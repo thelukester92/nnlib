@@ -441,4 +441,21 @@ void TestTensor()
 	
 	for(auto x = serializable.begin(), y = serialized.begin(); x != serializable.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::save and/or Tensor::load failed!");
+	
+	// test boundary case of forEach for high-dimensional tensors
+	
+	{
+		Storage<size_t> highDims(NN_MAX_NUM_DIMENSIONS);
+		for(size_t &x : highDims)
+			x = 1;
+		
+		Tensor<NN_REAL_T> highDimensional(highDims, true);
+		size_t highCount = 0;
+		forEach([&](NN_REAL_T &x)
+		{
+			++highCount;
+		}, highDimensional);
+		
+		NNAssertEquals(highCount, 1, "forEach(F, Tensor<T>) failed for a high dimensional tensor!");
+	}
 }

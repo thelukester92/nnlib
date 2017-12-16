@@ -73,6 +73,10 @@ void TestSerialized()
 		
 		s.set(1, new Serialized());
 		NNAssertEquals(s.type(1), Serialized::Null, "Serialized::set<Serialized *>(int) failed!");
+		
+		Module<NN_REAL_T> *m = nullptr;
+		s.set(2, m);
+		NNAssertEquals(s.type(2), Serialized::Null, "Serialized::set<Module<T> *>(int) failed!");
 	}
 	
 	{
