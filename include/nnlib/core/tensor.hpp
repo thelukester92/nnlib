@@ -611,6 +611,21 @@ public:
 	/// Clip the elements of this tensor such that all elements lie in [smallest, largest]
 	Tensor &clip(T smallest, T largest);
 	
+	T &at(const Storage<size_t> &indices);
+	const T &at(const Storage<size_t> &indices) const;
+	
+	template <typename ... Ts>
+	T &at(Ts... indices)
+	{
+		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
+	template <typename ... Ts>
+	const T &at(Ts... indices) const
+	{
+		return (*m_data)[indexOf({ static_cast<size_t>(indices)... })];
+	}
+	
 	T &operator()(const Storage<size_t> &indices);
 	const T &operator()(const Storage<size_t> &indices) const;
 	

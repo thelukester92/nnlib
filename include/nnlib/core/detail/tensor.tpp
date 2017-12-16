@@ -997,6 +997,18 @@ Tensor<T> &Tensor<T>::clip(T smallest, T largest)
 }
 
 template <typename T>
+T &Tensor<T>::at(const Storage<size_t> &indices)
+{
+	return (*m_data)[indexOf(indices)];
+}
+
+template <typename T>
+const T &Tensor<T>::at(const Storage<size_t> &indices) const
+{
+	return (*m_data)[indexOf(indices)];
+}
+
+template <typename T>
 T &Tensor<T>::operator()(const Storage<size_t> &indices)
 {
 	return (*m_data)[indexOf(indices)];

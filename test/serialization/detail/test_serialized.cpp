@@ -81,6 +81,7 @@ void TestSerialized()
 		t.add("hello");
 		t.add(Serialized::Array);
 		t.add(nullptr);
+		t.add(Tensor<NN_REAL_T>(5).fill(3.14));
 		
 		const Serialized &s = t;
 		
@@ -93,6 +94,7 @@ void TestSerialized()
 		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
 		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
 		NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(3), nullptr, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
+		NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(4)->at(0), 3.14, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
 		NNAssertEquals(s.get<Module<NN_REAL_T> *>(3), nullptr, "Serialized::get<Module<NN_REAL_T> *>(int) failed!");
 	}
 	
@@ -117,21 +119,65 @@ void TestSerialized()
 		NNAssertEquals(obj.get("itgr")->convertTo<bool>(), true, "Serialized::convertTo<bool>() failed for an integer value!");
 		NNAssertEquals(obj.get("flot")->convertTo<bool>(), true, "Serialized::convertTo<bool>() failed for a floating point value!");
 		
+		bool ok = false;
+		try
+		{
+			obj.get("stng")->convertTo<bool>();
+		}
+		catch(const Error &)
+		{
+			ok = true;
+		}
+		NNAssert(ok, "Serialized::convertTo<bool> did not throw an error for an unexpected type!");
+		
 		NNAssertEquals(obj.get("null")->convertTo<int>(), 0, "Serialized::convertTo<int>() failed for a null value!");
 		NNAssertEquals(obj.get("bool")->convertTo<int>(), 1, "Serialized::convertTo<int>() failed for a bool value!");
 		NNAssertEquals(obj.get("itgr")->convertTo<int>(), 42, "Serialized::convertTo<int>() failed for an integer value!");
 		NNAssertEquals(obj.get("flot")->convertTo<int>(), 3, "Serialized::convertTo<int>() failed for a floating point value!");
+		
+		ok = false;
+		try
+		{
+			obj.get("stng")->convertTo<int>();
+		}
+		catch(const Error &)
+		{
+			ok = true;
+		}
+		NNAssert(ok, "Serialized::convertTo<int> did not throw an error for an unexpected type!");
 		
 		NNAssertEquals(obj.get("null")->convertTo<double>(), 0, "Serialized::convertTo<double>() failed for a null value!");
 		NNAssertEquals(obj.get("bool")->convertTo<double>(), 1, "Serialized::convertTo<double>() failed for a bool value!");
 		NNAssertEquals(obj.get("itgr")->convertTo<double>(), 42, "Serialized::convertTo<double>() failed for an integer value!");
 		NNAssertAlmostEquals(obj.get("flot")->convertTo<double>(), 3.14, 1e-12, "Serialized::convertTo<double>() failed for a floating point value!");
 		
+		ok = false;
+		try
+		{
+			obj.get("stng")->convertTo<double>();
+		}
+		catch(const Error &)
+		{
+			ok = true;
+		}
+		NNAssert(ok, "Serialized::convertTo<double> did not throw an error for an unexpected type!");
+		
 		NNAssertEquals(obj.get("null")->convertTo<std::string>(), "null", "Serialized::convertTo<string>() failed for a null value!");
 		NNAssertEquals(obj.get("bool")->convertTo<std::string>(), "true", "Serialized::convertTo<string>() failed for a bool value!");
 		NNAssertEquals(obj.get("itgr")->convertTo<std::string>(), "42", "Serialized::convertTo<string>() failed for an integer value!");
 		NNAssertAlmostEquals(std::atof(obj.get("flot")->convertTo<std::string>().c_str()), 3.14, 1e-12, "Serialized::convertTo<string>() failed for a floating point value!");
 		NNAssertEquals(obj.get("stng")->convertTo<std::string>(), "hello", "Serialized::convertTo<string>() failed for a string value!");
+		
+		ok = false;
+		try
+		{
+			obj.get("arry")->convertTo<std::string>();
+		}
+		catch(const Error &)
+		{
+			ok = true;
+		}
+		NNAssert(ok, "Serialized::convertTo<string> did not throw an error for an unexpected type!");
 		
 		Serialized s;
 		
