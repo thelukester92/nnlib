@@ -50,7 +50,7 @@ ifneq ($(REAL_T),none)
     override CXXFLAGS += -DNN_REAL_T=$(REAL_T)
 endif
 
-override CXXFILES := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
+override CXXFILES := $(shell find src -name *.cpp)
 override OPTFILES := $(CXXFILES:src/%.cpp=$(OBJ)/%.o)
 override DBGFILES := $(CXXFILES:src/%.cpp=$(OBJ)/dbg/%.o)
 override DEPFILES := $(OPTFILES:%.o=%.d) $(DBGFILES:%.o=%.d)
@@ -86,8 +86,9 @@ endif
 override OPTFLAGS := $(CXXFLAGS) -DNN_OPT -O3
 override DBGFLAGS := $(CXXFLAGS) -g
 
-override TSTFILES := $(wildcard test/*.cpp) $(wildcard test/**/*.cpp)
+override TSTFILES := $(shell find test -name *.cpp)
 override TSTFILES := $(TSTFILES:test/%.cpp=$(OBJ)/test/%.o)
+override DEPFILES := $(DEPFILES) $(TSTFILES:%.o=%.d)
 
 override HXXFILES := $(shell find include -type f)
 override HXXFILES := $(HXXFILES:%=$(PREFIX)/%)
