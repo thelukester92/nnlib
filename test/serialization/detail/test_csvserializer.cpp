@@ -1,4 +1,5 @@
 #include "../test_csvserializer.hpp"
+#include "nnlib/core/tensor.hpp"
 #include "nnlib/serialization/csvserializer.hpp"
 #include "nnlib/serialization/serialized.hpp"
 using namespace nnlib;
@@ -79,5 +80,12 @@ void TestCSVSerializer()
 			ok = true;
 		}
 		NNAssert(ok, "CSVSerializer failed! Accepted an object instead of a number or string!");
+	}
+	
+	{
+		Tensor<NN_REAL_T> t = CSVSerializer::readString("1,2,3\n4,5,6");
+		NNAssertEquals(t.dims(), 2, "CSVSerializer failed to load a matrix!");
+		NNAssertEquals(t(0, 0), 1, "CSVSerializer failed to load a matrix!");
+		NNAssertEquals(t(1, 1), 5, "CSVSerializer failed to load a matrix!");
 	}
 }

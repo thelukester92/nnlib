@@ -150,9 +150,22 @@ Tensor<T>::Tensor(Tensor<T> &&other) :
 
 template <typename T>
 Tensor<T>::Tensor(const Serialized &node) :
-	Tensor(node.get<Storage<size_t>>("dims"), true)
+	m_offset(0),
+	m_data(new Storage<T>()),
+	m_shared(m_data)
 {
-	node.get("data", begin(), end());
+	if(node.type() == Serialized::Object)
+	{
+		resize(node.get<Storage<size_t>>("dims"));
+		node.get("data", begin(), end());
+	}
+	else
+	{
+		resize(node.size(), node.get(0)->size());
+		for(size_t i = 0; i < node.size(); ++i)
+			for(size_t j = 0; j < node.get(0)->size(); ++j)
+				at(i, j) = node.get(i)->get<T>(j);
+	}
 }
 
 template <typename T>
