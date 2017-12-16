@@ -34,8 +34,7 @@ public:
 	
 	bool ifPop(const std::string &s)
 	{
-		NNHardAssert(hasNext(), "Attempted to pop from an empty argument stack!");
-		if(s == m_argv[m_argi])
+		if(hasNext() && s == m_argv[m_argi])
 		{
 			++m_argi;
 			return true;
@@ -45,7 +44,9 @@ public:
 	
 	bool nextIsNumber() const
 	{
-		NNHardAssert(hasNext(), "Attempted to use empty argument stack!");
+		if(!hasNext())
+			return false;
+		
 		try
 		{
 			std::stod(m_argv[m_argi]);
