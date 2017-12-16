@@ -2,6 +2,7 @@
 #define CORE_STORAGE_HPP
 
 #include <initializer_list>
+#include <cstddef>
 
 namespace nnlib
 {
