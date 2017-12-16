@@ -39,6 +39,11 @@ void TestCSVSerializer()
 		NNAssertEquals(d.get<Serialized *>(1)->get<std::string>(1), "this, is, a, string", "CSVSerializer failed!");
 		NNAssertEquals(d.get<Serialized *>(1)->get<std::string>(2), "123.456.789", "CSVSerializer failed!");
 		
+		{
+			Serialized t = CSVSerializer::readString("this\nis\na\nstring", 1);
+			NNAssertEquals(t.get(0)->get<std::string>(0), "is", "CSVSerializer failed to skip lines!");
+		}
+		
 		bool ok = false;
 		Serialized notCompatibleWithCSV(Serialized::Object);
 		try

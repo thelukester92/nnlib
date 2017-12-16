@@ -19,9 +19,11 @@ public:
 	CSVSerializer(const CSVSerializer &) = delete;
 	CSVSerializer &operator=(const CSVSerializer &) = delete;
 	
-	static Serialized read(std::istream &in, char delim = ',')
+	static Serialized read(std::istream &in, size_t skipLines = 0, char delim = ',')
 	{
 		Parser p(in);
+		for(size_t i = 0; i < skipLines; ++i)
+			p.skipLine();
 		
 		Serialized rows(Serialized::Array);
 		Serialized *row = readRow(p, delim);
@@ -35,16 +37,16 @@ public:
 		return rows;
 	}
 	
-	static Serialized readString(const std::string &s)
+	static Serialized readString(const std::string &s, size_t skipLines = 0, char delim = ',')
 	{
 		std::istringstream iss(s);
-		return read(iss);
+		return read(iss, skipLines, delim);
 	}
 	
-	static Serialized readFile(const std::string &filename)
+	static Serialized readFile(const std::string &filename, size_t skipLines = 0, char delim = ',')
 	{
 		std::ifstream fin(filename);
-		Serialized result = read(fin);
+		Serialized result = read(fin, skipLines, delim);
 		fin.close();
 		return result;
 	}

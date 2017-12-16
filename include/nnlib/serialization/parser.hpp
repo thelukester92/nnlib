@@ -37,6 +37,14 @@ public:
 		m_in.ignore();
 	}
 	
+	void skipLine()
+	{
+		while(!eof() && peek() != '\n')
+			ignore();
+		if(!eof())
+			ignore();
+	}
+	
 	bool consume(char c)
 	{
 		if(m_in.peek() == c)
