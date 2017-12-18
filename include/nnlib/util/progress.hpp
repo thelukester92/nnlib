@@ -11,7 +11,7 @@ namespace nnlib
 class Progress
 {
 public:
-	Progress(size_t total, size_t length = 50, std::ostream &out = std::cout) :
+	Progress(size_t total, std::ostream &out = std::cout, size_t length = 50) :
 		m_total(total),
 		m_degreeTotal((size_t) ceil(log(total) / log(10)) + 1),
 		m_length(length),
