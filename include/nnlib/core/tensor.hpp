@@ -644,8 +644,8 @@ public:
 	T *ptr();
 	const T *ptr() const;
 	
-	Storage<T> &storage();
-	const Storage<T> &storage() const;
+	Storage<T> &data();
+	const Storage<T> &data() const;
 	
 	TensorIterator<T> begin();
 	TensorIterator<T> end();
