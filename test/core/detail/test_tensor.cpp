@@ -131,17 +131,17 @@ void TestTensor()
 	
 	vector.resize(6, 9);
 	vector.sub(view, { { 2, 3 }, { 3, 3 } });
-	NNAssertEquals(&view.storage(), &vector.storage(), "Tensor::sub(Tensor, initializer_list) failed! Wrong data!");
+	NNAssertEquals(&view.data(), &vector.data(), "Tensor::sub(Tensor, initializer_list) failed! Wrong data!");
 	NNAssertEquals(&view(1, 1), &vector(3, 4), "Tensor::sub(Tensor, initializer_list) failed! Wrong data!");
 	
 	viewOfMoved = vector.sub({ { 1, 3 }, { 4, 3 } });
-	NNAssertEquals(&viewOfMoved.storage(), &vector.storage(), "Tensor::sub(initializer_list) failed! Wrong data!");
+	NNAssertEquals(&viewOfMoved.data(), &vector.data(), "Tensor::sub(initializer_list) failed! Wrong data!");
 	NNAssertEquals(&viewOfMoved(1, 1), &vector(2, 5), "Tensor::sub(initializer_list) failed! Wrong data!");
 	NNAssertEquals(&viewOfMoved(1, 1), &view(0, 2), "Tensor::sub(initializer_list) failed! Wrong data!");
 	
 	empty = view.copy();
 	NNAssertEquals(empty.shape(), view.shape(), "Tensor::copy() failed! Wrong shape!");
-	NNAssertNotEquals(&empty.storage(), &view.storage(), "Tensor::copy() failed! Wrong data!");
+	NNAssertNotEquals(&empty.data(), &view.data(), "Tensor::copy() failed! Wrong data!");
 	
 	empty.copy(viewOfMoved);
 	NNAssertEquals(empty.shape(), viewOfMoved.shape(), "Tensor::copy(Tensor &) failed! Wrong shape!");
