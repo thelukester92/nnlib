@@ -1054,18 +1054,6 @@ Storage<T> &Tensor<T>::data()
 template <typename T>
 const Storage<T> &Tensor<T>::data() const
 {
-	return m_data;
-}
-
-template <typename T>
-Storage<T> &Tensor<T>::storage()
-{
-	return *m_data;
-}
-
-template <typename T>
-const Storage<T> &Tensor<T>::storage() const
-{
 	return *m_data;
 }
 

@@ -644,9 +644,6 @@ public:
 	T *ptr();
 	const T *ptr() const;
 	
-	Storage<T> &data();
-	const Storage<T> &data() const;
-	
 	Storage<T> &storage();
 	const Storage<T> &storage() const;
 	
