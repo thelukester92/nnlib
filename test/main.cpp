@@ -32,6 +32,7 @@
 #include "opt/test_nadam.hpp"
 #include "opt/test_rmsprop.hpp"
 #include "opt/test_sgd.hpp"
+#include "serialization/test_binaryserializer.hpp"
 #include "serialization/test_csvserializer.hpp"
 #include "serialization/test_jsonserializer.hpp"
 #include "serialization/test_serialized.hpp"
@@ -91,6 +92,7 @@ int main()
 		UNIT_TEST("opt/", Nadam),
 		UNIT_TEST("opt/", RMSProp),
 		UNIT_TEST("opt/", SGD),
+		UNIT_TEST("serialization/", BinarySerializer),
 		UNIT_TEST("serialization/", CSVSerializer),
 		UNIT_TEST("serialization/", JSONSerializer),
 		UNIT_TEST("serialization/", Serialized),
