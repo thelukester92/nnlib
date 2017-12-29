@@ -25,6 +25,9 @@ public:
 	
 	void display(size_t current)
 	{
+		if(m_total == 0)
+			return;
+		
 		size_t degreeCurrent	= current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));
 		size_t middle			= degreeCurrent + m_degreeTotal + 5;
 		size_t head				= current == m_total ? m_length + 1 : m_length * current / double(m_total);
