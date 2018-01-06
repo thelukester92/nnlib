@@ -227,42 +227,4 @@ void TestSerialized()
 		s = std::move(*obj.get<Serialized *>("nptr"));
 		NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(Serialized &&other) failed!");
 	}
-	
-	{
-		SerializedArray arr1;
-		arr1.add(new Serialized());
-		
-		SerializedArray arr2 = arr1;
-		NNAssertEquals(arr2.size(), 1, "SerializedArray::SerializedArray(const SerializedArray &) failed!");
-		
-		SerializedArray arr3 = std::move(arr1);
-		NNAssertEquals(arr3.size(), 1, "SerializedArray::SerializedArray(SerializedArray &&) failed!");
-		
-		arr3.add(new Serialized());
-		
-		arr1 = arr3;
-		NNAssertEquals(arr1.size(), 2, "SerializedArray::operator=(const SerializedArray &) failed!");
-		
-		arr2 = std::move(arr3);
-		NNAssertEquals(arr2.size(), 2, "SerializedArray::operator=(SerializedArray &&) failed!");
-	}
-	
-	{
-		SerializedObject obj1;
-		obj1.set("key", new Serialized());
-		
-		SerializedObject obj2 = obj1;
-		NNAssert(obj2.has("key"), "SerializedObject::SerializedObject(const SerializedObject &) failed!");
-		
-		SerializedObject obj3 = std::move(obj1);
-		NNAssert(obj3.has("key"), "SerializedObject::SerializedObject(SerializedObject &&) failed!");
-		
-		obj3.set("other", new Serialized());
-		
-		obj1 = obj3;
-		NNAssert(obj1.has("other"), "SerializedObject::operator=(const SerializedObject &) failed!");
-		
-		obj2 = std::move(obj3);
-		NNAssert(obj2.has("other"), "SerializedObject::operator=(SerializedObejct &&) failed!");
-	}
 }

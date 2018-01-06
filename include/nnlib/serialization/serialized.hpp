@@ -2,7 +2,6 @@
 #define SERIALIZATION_SERIALIZED_HPP
 
 #include <string>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 #include "factory.hpp"
@@ -21,8 +20,8 @@ namespace nnlib
 class Serialized
 {
 public:
-	using SerializedArray = std::vector<Serialized>;
-	using SerializedObject = std::pair<std::unordered_map<std::string, Serialized>, std::vector<std::string>>;
+	using SerializedArray = std::vector<Serialized *>;
+	using SerializedObject = std::unordered_map<std::string, Serialized *>;
 
 	/// A tag indicating a node's data type.
 	enum Type
@@ -255,7 +254,7 @@ public:
 	template <typename T>
 	typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type as() const
 	{
-		if(m_type == Object && m_object.has("polymorphic"))
+		if(m_type == Object && has("polymorphic"))
 			return T(*get<Serialized *>("data"));
 		else
 			return T(*this);
@@ -267,7 +266,7 @@ public:
 	{
 		if(m_type == Null)
 			return nullptr;
-		NNHardAssert(m_type == Object && m_object.has("polymorphic"), "Expected a polymorphic type!");
+		NNHardAssert(m_type == Object && has("polymorphic"), "Expected a polymorphic type!");
 		return static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"), *get<Serialized *>("data")));
 	}
 
@@ -277,7 +276,7 @@ public:
 	{
 		if(m_type == Null)
 			return nullptr;
-		else if(m_type == Object && m_object.has("polymorphic"))
+		else if(m_type == Object && has("polymorphic"))
 			return static_cast<T>(Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(get<std::string>("type"), *get<Serialized *>("data")));
 		else
 			return new typename std::remove_pointer<T>::type (*this);
@@ -409,8 +408,12 @@ public:
 	{
 		type(Array);
 		m_array.clear();
+		m_array.reserve(std::distance(i, end));
 		while(i != end)
-			m_array.add(new Serialized(*(i++)));
+		{
+			m_array.push_back(new Serialized(*i));
+			++i;
+		}
 	}
 
 	/// Set an object value.
@@ -430,7 +433,7 @@ public:
 			set("polymorphic", true);
 			set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(value)));
 			set("data", new Serialized());
-			value.save(*m_object["data"]);
+			value.save(*m_object.at("data"));
 		}
 		else
 			value.save(*this);
@@ -547,14 +550,14 @@ public:
 	void add(Ts && ...values)
 	{
 		type(Array);
-		m_array.add(new Serialized(std::forward<Ts>(values)...));
+		m_array.push_back(new Serialized(std::forward<Ts>(values)...));
 	}
 
 	/// Add a node to an array.
 	void add(Serialized *value)
 	{
 		type(Array);
-		m_array.add(value);
+		m_array.push_back(value);
 	}
 
 // MARK: Object methods
@@ -563,14 +566,14 @@ public:
 	bool has(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object.has(key);
+		return m_object.count(key) == 1;
 	}
 
 	/// Get the type of an element in an object.
 	Type type(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key]->type();
+		return m_object.at(key)->type();
 	}
 
 	/// Get a numeric value from an object.
@@ -578,7 +581,7 @@ public:
 	typename std::enable_if<(std::is_arithmetic<T>::value || traits::HasLoadAndSave<T>::value) && !std::is_pointer<T>::value, T>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key]->as<T>();
+		return m_object.at(key)->as<T>();
 	}
 
 	/// Get a non-numeric value from an object.
@@ -586,7 +589,7 @@ public:
 	typename std::enable_if<!std::is_arithmetic<T>::value && !std::is_pointer<T>::value && !traits::HasLoadAndSave<T>::value, const T &>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key]->as<T>();
+		return m_object.at(key)->as<T>();
 	}
 
 	/// Get a non-numeric value from an object.
@@ -594,7 +597,7 @@ public:
 	typename std::enable_if<!std::is_arithmetic<T>::value && !std::is_pointer<T>::value && !traits::HasLoadAndSave<T>::value, T &>::type get(const std::string &key)
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key]->as<T>();
+		return m_object.at(key)->as<T>();
 	}
 
 	/// Get a pointer value from an object.
@@ -602,7 +605,7 @@ public:
 	typename std::enable_if<std::is_pointer<T>::value && !std::is_same<T, Serialized *>::value, T>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key]->as<T>();
+		return m_object.at(key)->as<T>();
 	}
 
 	/// Get a node from an object.
@@ -610,7 +613,7 @@ public:
 	typename std::enable_if<std::is_same<T, Serialized *>::value, const Serialized *>::type get(const std::string &key) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key];
+		return m_object.at(key);
 	}
 
 	/// Get a node from an object.
@@ -618,7 +621,7 @@ public:
 	typename std::enable_if<std::is_same<T, Serialized *>::value, Serialized *>::type get(const std::string &key)
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		return m_object[key];
+		return m_object.at(key);
 	}
 
 	/// Load a value into a variable from an object.
@@ -626,7 +629,7 @@ public:
 	void get(const std::string &key, T &value) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		value = m_object[key]->as<T>();
+		value = m_object.at(key)->as<T>();
 	}
 
 	/// Load an entire array into a pair of iterators.
@@ -634,22 +637,23 @@ public:
 	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type get(const std::string &key, T i, const T &end) const
 	{
 		NNHardAssertEquals(m_type, Object, "Invalid type!");
-		m_object[key]->get(i, end);
+		m_object.at(key)->get(i, end);
 	}
 
 	/// Set a value in an object.
 	template <typename T, typename ... Ts>
 	void set(const std::string &key, T && value, Ts && ...values)
 	{
-		type(Object);
-		m_object.set(key, new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
+		set(key, new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
 	}
 
 	/// Set a node in an object.
 	void set(const std::string &key, Serialized *value)
 	{
 		type(Object);
-		m_object.set(key, value);
+		if(has(key))
+			delete m_object.at(key);
+		m_object[key] = value;
 	}
 
 private:

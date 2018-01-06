@@ -316,18 +316,18 @@ private:
 		out << '{';
 		
 		size_t i = 0;
-		for(const std::string &key : obj)
+		for(const auto &pair : obj)
 		{
 			if(i > 0)
 				out << ',';
 			
 			newline(out, level);
 			indent(out, level >= 0 ? level + 1 : level);
-			write(key, out);
+			write(pair.first, out);
 			out << ':';
 			if(level >= 0)
 				out << ' ';
-			write(*obj[key], out, level >= 0 ? level + 1 : level);
+			write(*pair.second, out, level >= 0 ? level + 1 : level);
 			
 			++i;
 		}

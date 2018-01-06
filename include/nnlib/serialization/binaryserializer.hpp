@@ -242,10 +242,10 @@ private:
 	{
 		size_t size = obj.size();
 		out.write((const char *) &size, sizeof(size_t));
-		for(const std::string &key : obj)
+		for(const auto &pair : obj)
 		{
-			write(key, out);
-			write(*obj[key], out);
+			write(pair.first, out);
+			write(*pair.second, out);
 		}
 	}
 };
