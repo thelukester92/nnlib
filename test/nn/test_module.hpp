@@ -125,20 +125,20 @@ private:
 	
 	static void testSerialization(const std::string &name, M<T> &module, const Tensor<T> &input)
 	{
-		M<T> s1 = Serialized(module).as<M<T>>();
+		M<T> s1 = Serialized(module).get<M<T>>();
 		NNAssert(testEqualParams(module, s1), "Serialization through reference failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, s1, input), "Serialization through reference failed! Different outputs for the same input!");
 		
-		M<T> s2 = Serialized(&module).as<M<T>>();
+		M<T> s2 = Serialized(&module).get<M<T>>();
 		NNAssert(testEqualParams(module, s2), "Serialization through pointer failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, s2, input), "Serialization through pointer failed! Different outputs for the same input!");
 		
-		Module<T> *s3 = Serialized(module).as<Module<T> *>();
+		Module<T> *s3 = Serialized(module).get<Module<T> *>();
 		NNAssert(testEqualParams(module, *s3), "Generic serialization through reference failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, *s3, input), "Generic serialization through reference failed! Different outputs for the same input!");
 		delete s3;
 		
-		Module<T> *s4 = Serialized(&module).as<Module<T> *>();
+		Module<T> *s4 = Serialized(&module).get<Module<T> *>();
 		NNAssert(testEqualParams(module, *s4), "Generic serialization through pointer failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, *s4, input), "Generic serialization through pointer failed! Different outputs for the same input!");
 		delete s4;

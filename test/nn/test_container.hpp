@@ -63,12 +63,12 @@ private:
 	
 	static void testSerialization(const std::string &name, Container<T> &module, const Tensor<T> &sampleInput)
 	{
-		Container<T> *s1 = Serialized(module).as<Container<T> *>();
+		Container<T> *s1 = Serialized(module).get<Container<T> *>();
 		NNAssert(testEqualParams(module, *s1), "Serialization through Container reference failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, *s1, sampleInput), "Serialization through Container reference failed! Different outputs for the same input!");
 		delete s1;
 		
-		Container<T> *s2 = Serialized(&module).as<Container<T> *>();
+		Container<T> *s2 = Serialized(&module).get<Container<T> *>();
 		NNAssert(testEqualParams(module, *s2), "Serialization through Container pointer failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, *s2, sampleInput), "Serialization through Container pointer failed! Different outputs for the same input!");
 		delete s2;

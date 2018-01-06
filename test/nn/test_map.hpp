@@ -23,12 +23,12 @@ protected:
 private:
 	static void testSerialization(const std::string &name, Map<T> &module, const Tensor<T> &sampleInput)
 	{
-		Map<T> *s1 = Serialized(module).as<Map<T> *>();
+		Map<T> *s1 = Serialized(module).get<Map<T> *>();
 		NNAssert(testEqualParams(module, *s1), "Serialization through Map reference failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, *s1, sampleInput), "Serialization through Map reference failed! Different outputs for the same input!");
 		delete s1;
 		
-		Map<T> *s2 = Serialized(&module).as<Map<T> *>();
+		Map<T> *s2 = Serialized(&module).get<Map<T> *>();
 		NNAssert(testEqualParams(module, *s2), "Serialization through Map pointer failed! Parameters are not equal!");
 		NNAssert(testEqualOutput(module, *s2, sampleInput), "Serialization through Map pointer failed! Different outputs for the same input!");
 		delete s2;

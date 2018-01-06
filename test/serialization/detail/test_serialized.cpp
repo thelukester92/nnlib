@@ -24,8 +24,6 @@ void TestSerialized()
 		NNAssertEquals(Serialized(42).type(), Serialized::Integer, "Serialized::Serialized(int) failed!");
 		NNAssertEquals(Serialized(3.14).type(), Serialized::Float, "Serialized::Serialized(double) failed!");
 		NNAssertEquals(Serialized("hello").type(), Serialized::String, "Serialized::Serialized(std::string) failed!");
-		NNAssertEquals(Serialized(SerializedArray()).type(), Serialized::Array, "Serialized::Serialized(SerializedArray) failed!");
-		NNAssertEquals(Serialized(SerializedObject()).type(), Serialized::Object, "Serialized::Serialized(SerializedObject) failed!");
 		
 		std::vector<int> v(10);
 		v[0] = 5;
@@ -42,12 +40,10 @@ void TestSerialized()
 	}
 	
 	{
-		NNAssertEquals(Serialized(true).as<bool>(), true, "Serialized::as<bool>() failed!");
-		NNAssertEquals(Serialized(42).as<int>(), 42, "Serialized::as<int>() failed!");
-		NNAssertAlmostEquals(Serialized(3.14).as<double>(), 3.14, 1e-12, "Serialized::as<double>() failed!");
-		NNAssertEquals(Serialized("hello").as<std::string>(), "hello", "Serialized::as<std::string>() failed!");
-		NNAssertEquals(Serialized(Serialized::Array).as<SerializedArray>().size(), 0, "Serialized::as<SerializedArray>() failed!");
-		NNAssertEquals(Serialized(Serialized::Object).as<SerializedObject>().size(), 0, "Serialized::as<SerializedObject>() failed!");
+		NNAssertEquals(Serialized(true).get<bool>(), true, "Serialized::as<bool>() failed!");
+		NNAssertEquals(Serialized(42).get<int>(), 42, "Serialized::as<int>() failed!");
+		NNAssertAlmostEquals(Serialized(3.14).get<double>(), 3.14, 1e-12, "Serialized::as<double>() failed!");
+		NNAssertEquals(Serialized("hello").get<std::string>(), "hello", "Serialized::as<std::string>() failed!");
 	}
 	
 	{
@@ -63,8 +59,8 @@ void TestSerialized()
 		NNAssertEquals(s.type(3), Serialized::Null, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.get<int>(0), 42, "Serialized::get<int>(int) failed!");
 		NNAssertEquals(s.get<std::string>(1), "hello", "Serialized::get<std::string>(int) failed!");
-		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
-		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
+		NNAssertEquals(s.size(2), 0, "Serialized::size(int) failed!");
+		NNAssertEquals(s.get(2)->type(), Serialized::Array, "Serialized::get(int) failed!");
 		NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(3), nullptr, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
 		NNAssertEquals(s.get<Module<NN_REAL_T> *>(3), nullptr, "Serialized::get<Module<NN_REAL_T> *>(int) failed!");
 		
@@ -95,7 +91,7 @@ void TestSerialized()
 		NNAssertEquals(s.type(3), Serialized::Null, "Serialized::type(size_t) failed!");
 		NNAssertEquals(s.get<int>(0), 42, "Serialized::get<int>(int) failed!");
 		NNAssertEquals(s.get<std::string>(1), "hello", "Serialized::get<std::string>(int) failed!");
-		NNAssertEquals(s.get<SerializedArray>(2).size(), 0, "Serialized::get<SerializedArray>(int) failed!");
+		NNAssertEquals(s.size(2), 0, "Serialized::size(int) failed!");
 		NNAssertEquals(s.get<Serialized *>(2)->type(), Serialized::Array, "Serialized::get<Serialized *>(int) failed!");
 		NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(3), nullptr, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
 		NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(4)->at(0), 3.14, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");

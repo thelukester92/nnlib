@@ -59,25 +59,25 @@ public:
 		case Serialized::Null:
 			break;
 		case Serialized::Boolean:
-			c = root.as<bool>() ? 1 : 0;
+			c = root.get<bool>() ? 1 : 0;
 			out.write(&c, 1);
 			break;
 		case Serialized::Integer:
-			i = root.as<int>();
+			i = root.get<long long>();
 			out.write((const char *) &i, sizeof(long long));
 			break;
 		case Serialized::Float:
-			d = root.as<double>();
+			d = root.get<double>();
 			out.write((const char *) &d, sizeof(double));
 			break;
 		case Serialized::String:
-			write(root.as<std::string>(), out);
+			write(root.get<std::string>(), out);
 			break;
 		case Serialized::Array:
-			write(root.as<SerializedArray>(), out);
+			writeArray(root, out);
 			break;
 		case Serialized::Object:
-			write(root.as<SerializedObject>(), out);
+			writeObject(root, out);
 			break;
 		}
 	}
@@ -181,7 +181,7 @@ private:
 			
 			Serialized *value = new Serialized();
 			read(*value, in);
-			node.set(key.as<std::string>(), value);
+			node.set(key.get<std::string>(), value);
 		}
 	}
 	
@@ -230,22 +230,22 @@ private:
 		out.write(s.c_str(), size);
 	}
 	
-	static void write(const SerializedArray &arr, std::ostream &out)
+	static void writeArray(const Serialized &node, std::ostream &out)
 	{
-		size_t size = arr.size();
+		size_t size = node.size();
 		out.write((const char *) &size, sizeof(size_t));
-		for(Serialized *node : arr)
-			write(*node, out);
+		for(size_t i = 0; i < size; ++i)
+			write(*node.get(i), out);
 	}
 	
-	static void write(const SerializedObject &obj, std::ostream &out)
+	static void writeObject(const Serialized &node, std::ostream &out)
 	{
-		size_t size = obj.size();
+		size_t size = node.size();
 		out.write((const char *) &size, sizeof(size_t));
-		for(const auto &pair : obj)
+		for(const auto &key : obj.keys())
 		{
-			write(pair.first, out);
-			write(*pair.second, out);
+			write(key, out);
+			write(*obj.get(key), out);
 		}
 	}
 };
