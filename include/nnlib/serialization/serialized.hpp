@@ -91,6 +91,10 @@ public:
 
 	// MARK: Array access.
 
+	template <typename ... Ts>
+	void add(Ts && ...values);
+	inline void add(Serialized *value);
+
 	inline Type type(size_t i) const;
 	inline void type(size_t i, Type type);
 	inline size_t size(size_t i) const;

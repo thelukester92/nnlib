@@ -307,6 +307,19 @@ typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::
 	}
 }
 
+template <typename ... Ts>
+void Serialized::add(Ts && ...values)
+{
+	type(Array);
+	m_array.push_back(new Serialized(std::forward<Ts>(values)...));
+}
+
+void Serialized::add(Serialized *value)
+{
+	type(Array);
+	m_array.push_back(value);
+}
+
 Serialized::Type Serialized::type(size_t i) const
 {
 	NNHardAssertEquals(m_type, Array, "Invalid type!");
