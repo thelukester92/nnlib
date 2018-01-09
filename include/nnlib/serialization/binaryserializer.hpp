@@ -18,20 +18,20 @@ public:
 	BinarySerializer() = delete;
 	BinarySerializer(const BinarySerializer &) = delete;
 	BinarySerializer &operator=(const BinarySerializer &) = delete;
-	
+
 	static Serialized read(std::istream &in)
 	{
 		Serialized root;
 		read(root, in);
 		return root;
 	}
-	
+
 	static Serialized readString(const std::string &s)
 	{
 		std::istringstream iss(s);
 		return read(iss);
 	}
-	
+
 	static Serialized readFile(const std::string &filename)
 	{
 		std::ifstream fin(filename);
@@ -39,21 +39,21 @@ public:
 		fin.close();
 		return result;
 	}
-	
+
 	template <typename T>
 	static void write(const T &value, std::ostream &out)
 	{
 		write(Serialized(value), out);
 	}
-	
+
 	static void write(const Serialized &root, std::ostream &out)
 	{
 		write(root.type(), out);
-		
+
 		char c;
 		long long i;
 		double d;
-		
+
 		switch(root.type())
 		{
 		case Serialized::Null:
@@ -81,23 +81,23 @@ public:
 			break;
 		}
 	}
-	
+
 	template <typename T>
 	static void write(const T &value, const std::string &filename)
 	{
 		writeFile(Serialized(value), filename);
 	}
-	
+
 	static void writeFile(const Serialized &root, const std::string &filename)
 	{
 		std::ofstream fout(filename, std::ofstream::binary);
 		write(root, fout);
 		fout.close();
 	}
-	
+
 private:
 	// MARK: Reading
-	
+
 	static void read(Serialized &node, std::istream &in)
 	{
 		static const char TAG_NULL    = 0;
@@ -107,14 +107,14 @@ private:
 		static const char TAG_STRING  = 4;
 		static const char TAG_ARRAY   = 5;
 		static const char TAG_OBJECT  = 6;
-		
+
 		char tag;
 		in.read(&tag, 1);
-		
+
 		char c;
 		long long i;
 		double d;
-		
+
 		switch(tag)
 		{
 		case TAG_NULL:
@@ -142,23 +142,27 @@ private:
 			readObject(node, in);
 			break;
 		}
+
+		NNHardAssert(in, "Unexpected end-of-stream!");
 	}
-	
+
 	static void readString(Serialized &node, std::istream &in)
 	{
 		size_t size;
 		in.read((char *) &size, sizeof(size_t));
-		
+		NNHardAssert(in, "Unexpected end-of-stream!");
+
 		std::string s(size, '\0');
 		in.read(&s[0], size);
 		node.set(s);
 	}
-	
+
 	static void readArray(Serialized &node, std::istream &in)
 	{
 		size_t size;
 		in.read((char *) &size, sizeof(size_t));
-		
+		NNHardAssert(in, "Unexpected end-of-stream!");
+
 		node.type(Serialized::Array);
 		for(size_t i = 0; i < size; ++i)
 		{
@@ -167,26 +171,27 @@ private:
 			node.add(value);
 		}
 	}
-	
+
 	static void readObject(Serialized &node, std::istream &in)
 	{
 		size_t size;
 		in.read((char *) &size, sizeof(size_t));
-		
+		NNHardAssert(in, "Unexpected end-of-stream!");
+
 		node.type(Serialized::Object);
 		for(size_t i = 0; i < size; ++i)
 		{
 			Serialized key;
 			readString(key, in);
-			
+
 			Serialized *value = new Serialized();
 			read(*value, in);
 			node.set(key.get<std::string>(), value);
 		}
 	}
-	
+
 	// MARK: Writing
-	
+
 	static void write(Serialized::Type type, std::ostream &out)
 	{
 		static const char TAG_NULL    = 0;
@@ -196,7 +201,7 @@ private:
 		static const char TAG_STRING  = 4;
 		static const char TAG_ARRAY   = 5;
 		static const char TAG_OBJECT  = 6;
-		
+
 		switch(type)
 		{
 		case Serialized::Null:
@@ -222,14 +227,14 @@ private:
 			break;
 		}
 	}
-	
+
 	static void write(const std::string &s, std::ostream &out)
 	{
 		size_t size = s.size();
 		out.write((const char *) &size, sizeof(size_t));
 		out.write(s.c_str(), size);
 	}
-	
+
 	static void writeArray(const Serialized &node, std::ostream &out)
 	{
 		size_t size = node.size();
@@ -237,15 +242,15 @@ private:
 		for(size_t i = 0; i < size; ++i)
 			write(*node.get(i), out);
 	}
-	
+
 	static void writeObject(const Serialized &node, std::ostream &out)
 	{
 		size_t size = node.size();
 		out.write((const char *) &size, sizeof(size_t));
-		for(const auto &key : obj.keys())
+		for(const auto &key : node.keys())
 		{
 			write(key, out);
-			write(*obj.get(key), out);
+			write(*node.get(key), out);
 		}
 	}
 };

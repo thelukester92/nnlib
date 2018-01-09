@@ -22,14 +22,14 @@ namespace traits
 	{
 		static const std::string value;
 	};
-	
+
 	/// A struct containing the base type of the given class.
 	template <typename T>
 	struct BaseOf
 	{
 		using type = T;
 	};
-	
+
 	/// Check whether the given type has the load and save methods. Default is false.
 	template <typename, typename = int>
 	struct HasSave : std::false_type
@@ -39,7 +39,7 @@ namespace traits
 	template <typename T>
 	struct HasSave<T, decltype(std::declval<T>().save(std::declval<Serialized &>()), 0)> : std::true_type
 	{};
-	
+
 	/// Check whether the given type has the load and save methods. Default is false.
 	template <typename, typename = int, typename = int>
 	struct HasLoadAndSave : std::false_type

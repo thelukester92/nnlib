@@ -194,6 +194,18 @@ typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type Serialized::g
 }
 
 template <typename T>
+typename std::enable_if<std::is_same<T, const Serialized *>::value, T>::type Serialized::get() const
+{
+	return this;
+}
+
+template <typename T>
+typename std::enable_if<std::is_same<T, Serialized *>::value, T>::type Serialized::get()
+{
+	return this;
+}
+
+template <typename T>
 typename std::enable_if<std::is_pointer<T>::value && std::is_abstract<typename std::remove_pointer<T>::type>::value, T>::type Serialized::get() const
 {
 	if(m_type == Null)
@@ -208,7 +220,10 @@ typename std::enable_if<std::is_pointer<T>::value && std::is_abstract<typename s
 }
 
 template <typename T>
-typename std::enable_if<std::is_pointer<T>::value && !std::is_abstract<typename std::remove_pointer<T>::type>::value, T>::type Serialized::get() const
+typename std::enable_if<
+	std::is_pointer<T>::value && !std::is_abstract<typename std::remove_pointer<T>::type>::value &&
+	!std::is_same<typename std::remove_const<typename std::remove_pointer<T>::type>::type, Serialized>::value, T
+>::type Serialized::get() const
 {
 	if(m_type == Null)
 		return nullptr;
@@ -224,7 +239,7 @@ typename std::enable_if<std::is_pointer<T>::value && !std::is_abstract<typename 
 }
 
 template <typename T>
-	typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type Serialized::get(T itr, const T &end) const
+typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::string>::value>::type Serialized::get(T itr, const T &end) const
 {
 	NNHardAssertEquals(m_type, Array, "Invalid type!");
 	NNHardAssertEquals(m_array.size(), (size_t) std::distance(itr, end), "Invalid range!");
@@ -235,6 +250,12 @@ template <typename T>
 		++itr;
 		++idx;
 	}
+}
+
+template <typename T>
+typename std::enable_if<std::is_same<T, Serialized::Type>::value>::type Serialized::set(T type)
+{
+	this->type(type);
 }
 
 template <typename T>
@@ -280,12 +301,18 @@ typename std::enable_if<traits::HasSave<T>::value>::type Serialized::set(const T
 }
 
 template <typename T>
-typename std::enable_if<std::is_pointer<T>::value && (std::is_same<T, std::nullptr_t>::value || !std::is_convertible<T, std::string>::value)>::type Serialized::set(const T &value)
+typename std::enable_if<std::is_pointer<T>::value && !std::is_convertible<T, std::string>::value>::type Serialized::set(const T &value)
 {
 	if(value == nullptr)
 		type(Null);
 	else
 		set(*value);
+}
+
+template <typename T>
+typename std::enable_if<std::is_same<T, std::nullptr_t>::value>::type Serialized::set(T value)
+{
+	type(Null);
 }
 
 template <typename T>
@@ -307,11 +334,11 @@ typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::
 	}
 }
 
-template <typename ... Ts>
-void Serialized::add(Ts && ...values)
+template <typename T, typename ... Ts>
+void Serialized::add(T && value, Ts && ...values)
 {
 	type(Array);
-	m_array.push_back(new Serialized(std::forward<Ts>(values)...));
+	m_array.push_back(new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
 }
 
 void Serialized::add(Serialized *value)
@@ -346,7 +373,15 @@ T Serialized::get(size_t i) const
 {
 	NNHardAssertEquals(m_type, Array, "Invalid type!");
 	NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-	return m_array[i]->get<T>(i);
+	return m_array[i]->get<T>();
+}
+
+template <typename T>
+T Serialized::get(size_t i)
+{
+	NNHardAssertEquals(m_type, Array, "Invalid type!");
+	NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
+	return m_array[i]->get<T>();
 }
 
 template <typename T>
@@ -407,6 +442,14 @@ T Serialized::get(const std::string &key) const
 }
 
 template <typename T>
+T Serialized::get(const std::string &key)
+{
+	NNHardAssertEquals(m_type, Object, "Invalid type!");
+	NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+	return m_object.map.at(key)->get<T>();
+}
+
+template <typename T>
 void Serialized::get(const std::string &key, T itr, const T &end) const
 {
 	NNHardAssertEquals(m_type, Object, "Invalid type!");
@@ -417,9 +460,14 @@ void Serialized::get(const std::string &key, T itr, const T &end) const
 template <typename T, typename ... Ts>
 void Serialized::set(const std::string &key, T && first, Ts && ...values)
 {
-	NNHardAssertEquals(m_type, Object, "Invalid type!");
-	NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
-	m_object.map.at(key)->set(std::forward<T>(first), std::forward<Ts>(values)...);
+	type(Object);
+	if(m_object.map.count(key) == 0)
+	{
+		m_object.map.emplace(key, new Serialized(std::forward<T>(first), std::forward<Ts>(values)...));
+		m_object.keys.push_back(key);
+	}
+	else
+		m_object.map.at(key)->set(std::forward<T>(first), std::forward<Ts>(values)...);
 }
 
 }
