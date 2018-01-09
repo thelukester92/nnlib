@@ -27,11 +27,11 @@ public:
 	};
 
 	/// Create a node with the given type; default is Null.
-	explicit inline Serialized(Type t = Null);
+	inline Serialized(Type t = Null);
 
 	/// Create a node with the given value.
 	template <typename ... Ts>
-	explicit inline Serialized(Ts && ...values);
+	inline Serialized(Ts && ...values);
 
 	inline Serialized(const Serialized &other);
 	inline Serialized(Serialized &other);

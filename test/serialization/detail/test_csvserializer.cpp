@@ -41,7 +41,10 @@ void TestCSVSerializer()
 		NNAssertEquals(d.get(1)->get<std::string>(2), "123.456.789", "CSVSerializer failed!");
 
 		{
-			Serialized t = CSVSerializer::readString("this\nis\na\nstring", 1);
+			std::stringstream ss;
+			ss << "this\nis\na\nstring";
+
+			Serialized t = CSVSerializer::read(ss, 1);
 			NNAssertEquals(t.get(0)->get<std::string>(0), "is", "CSVSerializer failed to skip lines!");
 		}
 
@@ -83,7 +86,10 @@ void TestCSVSerializer()
 	}
 
 	{
-		Tensor<NN_REAL_T> t = CSVSerializer::readString("1,2,3\n4,5,6");
+		std::stringstream ss;
+		ss << "1,2,3\n4,5,6";
+
+		Tensor<NN_REAL_T> t = CSVSerializer::read(ss);
 		NNAssertEquals(t.dims(), 2, "CSVSerializer failed to load a matrix!");
 		NNAssertEquals(t(0, 0), 1, "CSVSerializer failed to load a matrix!");
 		NNAssertEquals(t(1, 1), 5, "CSVSerializer failed to load a matrix!");
