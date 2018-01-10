@@ -19,8 +19,7 @@ public:
 	BinarySerializer &operator=(const BinarySerializer &) = delete;
 
 	static Serialized read(std::istream &in);
-	static Serialized readString(const std::string &s);
-	static Serialized readFile(const std::string &filename);
+	static Serialized read(const std::string &filename);
 
 	static void write(const Serialized &root, std::ostream &out);
 	static void write(const Serialized &root, const std::string &filename);

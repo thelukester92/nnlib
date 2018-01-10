@@ -13,13 +13,7 @@ Serialized BinarySerializer::read(std::istream &in)
 	return root;
 }
 
-Serialized BinarySerializer::readString(const std::string &s)
-{
-	std::istringstream iss(s);
-	return read(iss);
-}
-
-Serialized BinarySerializer::readFile(const std::string &filename)
+Serialized BinarySerializer::read(const std::string &filename)
 {
 	std::ifstream fin(filename);
 	Serialized result = read(fin);
