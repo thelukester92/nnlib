@@ -22,7 +22,6 @@ void TestJSONSerializer()
 		s.set("emptyArray", Serialized::Array);
 		s.set("emptyObject", Serialized::Object);
 		s.set("nested", Serialized::Object);
-
 		s.get("nested")->set("indented", true);
 		s.get("nested")->set("powerLevel", "> 9000");
 
@@ -42,7 +41,6 @@ void TestJSONSerializer()
 			NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyObject"), 0, "JSONSerializer failed!");
-
 			NNAssertEquals(d.get("nested")->get<bool>("indented"), true, "JSONSerializer failed!");
 			NNAssertEquals(d.get("nested")->get<std::string>("powerLevel"), "> 9000", "JSONSerializer failed!");
 		}
@@ -62,7 +60,6 @@ void TestJSONSerializer()
 			NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyObject"), 0, "JSONSerializer failed!");
-
 			NNAssertEquals(d.get("nested")->get<bool>("indented"), true, "JSONSerializer failed!");
 			NNAssertEquals(d.get("nested")->get<std::string>("powerLevel"), "> 9000", "JSONSerializer failed!");
 		}
