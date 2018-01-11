@@ -34,6 +34,7 @@
 #include "opt/test_sgd.hpp"
 #include "serialization/test_binaryserializer.hpp"
 #include "serialization/test_csvserializer.hpp"
+#include "serialization/test_fileserializer.hpp"
 #include "serialization/test_jsonserializer.hpp"
 #include "serialization/test_serialized.hpp"
 #include "toy_problems/classification.hpp"
@@ -60,21 +61,20 @@ using namespace std;
 int main()
 {
 	RandomEngine::sharedEngine().seed(0);
-	
+
 	int ret = 0;
-	
+
 	initializer_list<pair<string, function<void()>>> unit_tests = {
 		UNIT_TEST("core/", Error),
 		UNIT_TEST("core/", Storage),
 		UNIT_TEST("core/", Tensor),
-		UNIT_TEST("critics/", CriticSequencer),
+
 		UNIT_TEST("critics/", MSE),
 		UNIT_TEST("critics/", NLL),
+		UNIT_TEST("critics/", CriticSequencer),
+
 		UNIT_TEST("math/", Math),
-		UNIT_TEST("nn/", BatchNorm),
-		UNIT_TEST("nn/", Concat),
-		UNIT_TEST("nn/", DropConnect),
-		UNIT_TEST("nn/", Dropout),
+
 		UNIT_TEST("nn/", ELU),
 		UNIT_TEST("nn/", Identity),
 		UNIT_TEST("nn/", Linear),
@@ -82,30 +82,39 @@ int main()
 		UNIT_TEST("nn/", LogSoftMax),
 		UNIT_TEST("nn/", LSTM),
 		UNIT_TEST("nn/", ReLU),
-		UNIT_TEST("nn/", Sequencer),
-		UNIT_TEST("nn/", Sequential),
 		UNIT_TEST("nn/", Sin),
 		UNIT_TEST("nn/", SoftMax),
 		UNIT_TEST("nn/", SparseLinear),
 		UNIT_TEST("nn/", TanH),
+
+		UNIT_TEST("nn/", BatchNorm),
+		UNIT_TEST("nn/", DropConnect),
+		UNIT_TEST("nn/", Dropout),
+		UNIT_TEST("nn/", Concat),
+		UNIT_TEST("nn/", Sequencer),
+		UNIT_TEST("nn/", Sequential),
+
 		UNIT_TEST("opt/", Adam),
 		UNIT_TEST("opt/", Nadam),
 		UNIT_TEST("opt/", RMSProp),
 		UNIT_TEST("opt/", SGD),
+
+		UNIT_TEST("serialization/", Serialized),
 		UNIT_TEST("serialization/", BinarySerializer),
 		UNIT_TEST("serialization/", CSVSerializer),
 		UNIT_TEST("serialization/", JSONSerializer),
-		UNIT_TEST("serialization/", Serialized),
+		UNIT_TEST("serialization/", FileSerializer),
+
 		UNIT_TEST("util/", Args),
 		UNIT_TEST("util/", Batcher),
 		UNIT_TEST("util/", Random)
 	};
-	
+
 	initializer_list<pair<string, function<void()>>> toy_problems = {
 		TOY_PROBLEM(Classification),
 		TOY_PROBLEM(TimeSeries)
 	};
-	
+
 	try
 	{
 		for(auto test : unit_tests)
@@ -114,7 +123,7 @@ int main()
 			test.second();
 			cout << " Passed!" << endl;
 		}
-		
+
 		for(auto test : toy_problems)
 		{
 			cout << test.first << "..." << flush;
@@ -122,7 +131,7 @@ int main()
 			test.second();
 			cout << " Done in " << t.ftime() << "!" << endl;
 		}
-		
+
 		cout << "All tests passed!" << endl;
 	}
 	catch(const Error &e)
