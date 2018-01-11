@@ -106,9 +106,17 @@ void Serialized::type(Type type)
 	if(m_type == String)
 		m_string.~basic_string<char>();
 	else if(m_type == Array)
+	{
+		for(Serialized *s : m_array)
+			delete s;
 		m_array.~vector<Serialized *>();
+	}
 	else if(m_type == Object)
+	{
+		for(auto p : m_object.map)
+			delete p.second;
 		m_object.~SerializedObject();
+	}
 
 	if(type == Type::String)
 		new (&m_string) std::string;
