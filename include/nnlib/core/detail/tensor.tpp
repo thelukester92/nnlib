@@ -2,7 +2,7 @@
 #define CORE_TENSOR_TPP
 
 #include "../tensor.hpp"
-#include "nnlib/math/math.hpp"
+#include "nnlib/math/algebra.hpp"
 #include "nnlib/util/random.hpp"
 
 namespace nnlib
@@ -643,155 +643,56 @@ Tensor<T> &Tensor<T>::add(T alpha)
 template <typename T>
 Tensor<T> &Tensor<T>::addV(const Tensor<T> &x, T alpha)
 {
-	NNAssertEquals(x.dims(), 1, "Expected vector input to addV!");
-	NNAssertEquals(dims(), 1, "Expected vector input to addV!");
-	NNAssertEquals(x.size(), size(), "Incompatible operands in addV!");
-	Math<T>::vAdd_v(
-		x.ptr(), x.size(), x.stride(0),
-		ptr(), stride(0),
-		alpha
-	);
+	Algebra<T>::vAdd_v(x, *this, alpha);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::assignMV(const Tensor<T> &A, const Tensor<T> &x, T alpha, T beta)
 {
-	NNAssertEquals(A.dims(), 2, "A must be a matrix!");
-	NNAssertEquals(x.dims(), 1, "x must be a vector!");
-	NNAssertEquals(dims(), 1, "This must be a vector!");
-	NNAssertEquals(x.size(0), A.size(1), "Incompatible operands!");
-	NNAssertEquals(size(0), A.size(0), "Incompatible operands!");
-	NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
-
-	Math<T>::vAdd_mv(
-		A.ptr(), A.size(0), A.size(1), A.stride(0),
-		x.ptr(), x.stride(0),
-		ptr(), stride(0),
-		alpha, beta
-	);
+	Algebra<T>::vAdd_mv(A, x, *this, alpha, beta);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::assignMTV(const Tensor<T> &A, const Tensor<T> &x, T alpha, T beta)
 {
-	NNAssertEquals(A.dims(), 2, "A must be a matrix!");
-	NNAssertEquals(x.dims(), 1, "x must be a vector!");
-	NNAssertEquals(dims(), 1, "This must be a vector!");
-	NNAssertEquals(x.size(0), A.size(0), "Incompatible operands!");
-	NNAssertEquals(size(0), A.size(1), "Incompatible operands!");
-	NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
-
-	Math<T>::vAdd_mtv(
-		A.ptr(), A.size(0), A.size(1), A.stride(0),
-		x.ptr(), x.stride(0),
-		ptr(), stride(0),
-		alpha, beta
-	);
+	Algebra<T>::vAdd_mtv(A, x, *this, alpha, beta);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::assignVV(const Tensor<T> &x, const Tensor<T> &y, T alpha, T beta)
 {
-	NNAssertEquals(x.dims(), 1, "x must be a vector!");
-	NNAssertEquals(y.dims(), 1, "y must be a vector!");
-	NNAssertEquals(dims(), 2, "This must be a matrix!");
-	NNAssertEquals(size(0), x.size(0), "Incompatible operands!");
-	NNAssertEquals(size(1), y.size(0), "Incompatible operands!");
-	NNAssertEquals(stride(1), 1, "This must be contiguous!");
-
-	Math<T>::mAdd_vv(
-		x.ptr(), x.size(), x.stride(0),
-		y.ptr(), y.size(), y.stride(0),
-		ptr(), stride(0),
-		alpha, beta
-	);
+	Algebra<T>::mAdd_vv(x, y, *this, alpha, beta);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::addM(const Tensor<T> &A, T alpha)
 {
-	NNAssertEquals(A.dims(), 2, "A must be a matrix!");
-	NNAssertEquals(dims(), 2, "This must be a matrix!");
-	NNAssertEquals(A.shape(), shape(), "Incompatible operands!");
-
-	Math<T>::mAdd_m(
-		A.ptr(), A.size(0), A.size(1), A.stride(0),
-		ptr(), stride(0),
-		alpha
-	);
+	Algebra<T>::mAdd_m(A, *this, alpha);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::assignMM(const Tensor<T> &A, const Tensor<T> &B, T alpha, T beta)
 {
-	NNAssertEquals(A.dims(), 2, "A must be a matrix!");
-	NNAssertEquals(B.dims(), 2, "B must be a matrix!");
-	NNAssertEquals(dims(), 2, "This must be a matrix!");
-	NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
-	NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
-	NNAssertEquals(stride(1), 1, "This must be contiguous!");
-	NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
-	NNAssertEquals(B.size(1), size(1), "Incompatible operands!");
-	NNAssertEquals(A.size(1), B.size(0), "Incompatible operands!");
-
-	Math<T>::mAdd_mm(
-		A.size(0), B.size(1), A.size(1),
-		A.ptr(), A.stride(0),
-		B.ptr(), B.stride(0),
-		ptr(), stride(0),
-		alpha, beta
-	);
+	Algebra<T>::mAdd_mm(A, B, *this, alpha, beta);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::assignMTM(const Tensor<T> &A, const Tensor<T> &B, T alpha, T beta)
 {
-	NNAssertEquals(A.dims(), 2, "A must be a matrix!");
-	NNAssertEquals(B.dims(), 2, "B must be a matrix!");
-	NNAssertEquals(dims(), 2, "This must be a matrix!");
-	NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
-	NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
-	NNAssertEquals(stride(1), 1, "This must be contiguous!");
-	NNAssertEquals(A.size(1), size(0), "Incompatible operands!");
-	NNAssertEquals(B.size(1), size(1), "Incompatible operands!");
-	NNAssertEquals(A.size(0), B.size(0), "Incompatible operands!");
-
-	Math<T>::mAdd_mtm(
-		A.size(1), B.size(1), A.size(0),
-		A.ptr(), A.stride(0),
-		B.ptr(), B.stride(0),
-		ptr(), stride(0),
-		alpha, beta
-	);
+	Algebra<T>::mAdd_mtm(A, B, *this, alpha, beta);
 	return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::assignMMT(const Tensor<T> &A, const Tensor<T> &B, T alpha, T beta)
 {
-	NNAssertEquals(A.dims(), 2, "A must be a matrix!");
-	NNAssertEquals(B.dims(), 2, "B must be a matrix!");
-	NNAssertEquals(dims(), 2, "This must be a matrix!");
-	NNAssertEquals(A.stride(1), 1, "A must be contiguous!");
-	NNAssertEquals(B.stride(1), 1, "B must be contiguous!");
-	NNAssertEquals(stride(1), 1, "This must be contiguous!");
-	NNAssertEquals(A.size(0), size(0), "Incompatible operands!");
-	NNAssertEquals(B.size(0), size(1), "Incompatible operands!");
-	NNAssertEquals(A.size(1), B.size(1), "Incompatible operands!");
-
-	Math<T>::mAdd_mmt(
-		A.size(0), B.size(0), A.size(1),
-		A.ptr(), A.stride(0),
-		B.ptr(), B.stride(0),
-		ptr(), stride(0),
-		alpha, beta
-	);
+	Algebra<T>::mAdd_mmt(A, B, *this, alpha, beta);
 	return *this;
 }
 

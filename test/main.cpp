@@ -10,7 +10,7 @@
 #include "critics/test_criticsequencer.hpp"
 #include "critics/test_mse.hpp"
 #include "critics/test_nll.hpp"
-#include "math/test_math.hpp"
+#include "math/test_algebra.hpp"
 #include "nn/test_batchnorm.hpp"
 #include "nn/test_concat.hpp"
 #include "nn/test_dropconnect.hpp"
@@ -73,7 +73,7 @@ int main()
 		UNIT_TEST("critics/", NLL),
 		UNIT_TEST("critics/", CriticSequencer),
 
-		UNIT_TEST("math/", Math),
+		UNIT_TEST("math/", Algebra),
 
 		UNIT_TEST("nn/", ELU),
 		UNIT_TEST("nn/", Identity),
