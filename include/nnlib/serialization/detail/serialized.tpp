@@ -32,29 +32,9 @@ Serialized::Serialized(Serialized &other) :
 }
 
 Serialized::Serialized(Serialized &&other) :
-	m_type(other.m_type)
+	m_type(Null)
 {
-	switch(m_type)
-	{
-	case Null:
-		break;
-	case Boolean:
-	case Integer:
-		m_int = other.m_int;
-		break;
-	case Float:
-		m_float = other.m_float;
-		break;
-	case String:
-		m_string = std::move(other.m_string);
-		break;
-	case Array:
-		m_array = std::move(other.m_array);
-		break;
-	case Object:
-		m_object = std::move(other.m_object);
-		break;
-	}
+	*this = other;
 }
 
 Serialized::~Serialized()
@@ -84,11 +64,50 @@ Serialized &Serialized::operator=(const Serialized &other)
 			break;
 		case Array:
 			m_array = other.m_array;
+			for(Serialized *&s : m_array)
+				s = new Serialized(*s);
 			break;
 		case Object:
 			m_object = other.m_object;
+			for(auto p : m_object.map)
+				p.second = new Serialized(p.second);
 			break;
 		}
+	}
+	return *this;
+}
+
+Serialized &Serialized::operator=(Serialized &&other)
+{
+	if(this != &other)
+	{
+		type(other.m_type);
+
+		switch(m_type)
+		{
+		case Null:
+			break;
+		case Boolean:
+		case Integer:
+			m_int = other.m_int;
+			break;
+		case Float:
+			m_float = other.m_float;
+			break;
+		case String:
+			m_string = other.m_string;
+			break;
+		case Array:
+			m_array = std::move(other.m_array);
+			other.m_array.clear();
+			break;
+		case Object:
+			m_object = std::move(other.m_object);
+			other.m_object.map.clear();
+			break;
+		}
+
+		other.type(Null);
 	}
 	return *this;
 }

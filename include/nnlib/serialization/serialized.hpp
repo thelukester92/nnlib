@@ -39,6 +39,7 @@ public:
 	inline ~Serialized();
 
 	inline Serialized &operator=(const Serialized &other);
+	inline Serialized &operator=(Serialized &&other);
 
 	inline Type type() const;
 	inline void type(Type type);
