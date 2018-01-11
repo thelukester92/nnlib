@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <sstream>
 #include "../test_fileserializer.hpp"
 #include "nnlib/serialization/fileserializer.hpp"
 #include "nnlib/serialization/jsonserializer.hpp"
@@ -32,10 +31,6 @@ void TestFileSerializer()
 		auto bin = FileSerializer::read("nnlib_test_fileserializer.bin");
 		auto csv = FileSerializer::read("nnlib_test_fileserializer.csv");
 		auto json = FileSerializer::read("nnlib_test_fileserializer.json");
-
-		std::stringstream ss;
-		JSONSerializer::write(s, ss);
-		std::cout << ss.str() << std::endl;
 
 		for(const Serialized &d : { bin, csv, json })
 		{
