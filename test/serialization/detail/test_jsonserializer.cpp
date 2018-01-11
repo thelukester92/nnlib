@@ -31,8 +31,6 @@ void TestJSONSerializer()
 			std::stringstream ss;
 			JSONSerializer::write(s, ss);
 
-			std::cout << ss.str() << std::endl;
-
 			Serialized d = JSONSerializer::read(ss);
 
 			NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
