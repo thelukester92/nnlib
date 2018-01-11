@@ -35,8 +35,8 @@ void TestJSONSerializer()
 			NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("notAwesome"), false, "JSONSerializer failed!");
-			NNAssertEquals(d.get<size_t>("number"), 42, "JSONSerializer failed!");
-			NNAssertEquals(d.get<size_t>("negative"), -42, "JSONSerializer failed!");
+			NNAssertEquals(d.get<int>("number"), 42, "JSONSerializer failed!");
+			NNAssertEquals(d.get<int>("negative"), -42, "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<float>("number"), 42.0, 1e-12, "JSONSerializer failed!");
 			NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
@@ -55,8 +55,8 @@ void TestJSONSerializer()
 			NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("notAwesome"), false, "JSONSerializer failed!");
-			NNAssertEquals(d.get<size_t>("number"), 42, "JSONSerializer failed!");
-			NNAssertEquals(d.get<size_t>("negative"), -42, "JSONSerializer failed!");
+			NNAssertEquals(d.get<int>("number"), 42, "JSONSerializer failed!");
+			NNAssertEquals(d.get<int>("negative"), -42, "JSONSerializer failed!");
 			NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyObject"), 0, "JSONSerializer failed!");
