@@ -2,6 +2,7 @@
 #define NN_TANH_TPP
 
 #include "../tanh.hpp"
+#include <math.h>
 
 namespace nnlib
 {

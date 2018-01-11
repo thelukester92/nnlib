@@ -2,6 +2,7 @@
 #define NN_ELU_TPP
 
 #include "../elu.hpp"
+#include <math.h>
 
 namespace nnlib
 {

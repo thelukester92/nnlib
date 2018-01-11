@@ -2,6 +2,7 @@
 #define NN_MODULE_TPP
 
 #include "../module.hpp"
+#include "nnlib/serialization/factory.hpp"
 
 namespace nnlib
 {

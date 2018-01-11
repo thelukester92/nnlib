@@ -2,6 +2,9 @@
 #define SERIALIZATION_JSON_SERIALIZER_TPP
 
 #include "../jsonserializer.hpp"
+#include <fstream>
+#include <limits>
+#include <sstream>
 
 namespace nnlib
 {

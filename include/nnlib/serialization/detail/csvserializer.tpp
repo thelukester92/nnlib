@@ -2,6 +2,9 @@
 #define SERIALIZATION_CSV_SERIALIZER_TPP
 
 #include "../csvserializer.hpp"
+#include <fstream>
+#include <limits>
+#include <sstream>
 
 namespace nnlib
 {

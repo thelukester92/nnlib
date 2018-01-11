@@ -1,11 +1,8 @@
 #ifndef SERIALIZATION_BINARY_SERIALIZER_HPP
 #define SERIALIZATION_BINARY_SERIALIZER_HPP
 
-#include <fstream>
-#include <iostream>
-#include <limits>
-#include <sstream>
 #include "serialized.hpp"
+#include <iostream>
 
 namespace nnlib
 {

@@ -1,7 +1,6 @@
 #ifndef NN_SIN_HPP
 #define NN_SIN_HPP
 
-#include <math.h>
 #include "map.hpp"
 
 namespace nnlib
@@ -16,7 +15,7 @@ public:
 	Sin(const Serialized &);
 	Sin(const Sin &);
 	Sin &operator=(const Sin &);
-	
+
 	virtual T forwardOne(const T &x) override;
 	virtual T backwardOne(const T &x, const T &y) override;
 };

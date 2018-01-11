@@ -2,6 +2,7 @@
 #define NN_LOGISTIC_TPP
 
 #include "../logistic.hpp"
+#include <math.h>
 
 namespace nnlib
 {

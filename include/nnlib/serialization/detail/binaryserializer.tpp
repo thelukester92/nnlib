@@ -2,6 +2,9 @@
 #define SERIALIZATION_BINARY_SERIALIZER_TPP
 
 #include "../binaryserializer.hpp"
+#include <fstream>
+#include <limits>
+#include <sstream>
 
 namespace nnlib
 {

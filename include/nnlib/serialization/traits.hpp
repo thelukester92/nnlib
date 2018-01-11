@@ -4,6 +4,7 @@
 #include <typeindex>
 #include <type_traits>
 #include <unordered_map>
+#include "../core/type.hpp"
 
 // ignore -Wunused-value for this section; it is unused on purpose for SFINAE
 #pragma GCC diagnostic push

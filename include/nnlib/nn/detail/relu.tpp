@@ -2,6 +2,7 @@
 #define NN_RELU_TPP
 
 #include "../relu.hpp"
+#include <math.h>
 
 namespace nnlib
 {

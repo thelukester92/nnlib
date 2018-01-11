@@ -2,6 +2,7 @@
 #define SERIALIZATION_PARSER_TPP
 
 #include "../parser.hpp"
+#include <sstream>
 
 namespace nnlib
 {

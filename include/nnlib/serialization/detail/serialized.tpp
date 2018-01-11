@@ -1,6 +1,7 @@
 #ifndef SERIALIZATION_SERIALIZED_TPP
 #define SERIALIZATION_SERIALIZED_TPP
 
+#include "../factory.hpp"
 #include "../serialized.hpp"
 
 namespace nnlib

@@ -2,6 +2,7 @@
 #define MATH_TPP
 
 #include "../math.hpp"
+#include "nnlib/core/error.hpp"
 
 namespace nnlib
 {

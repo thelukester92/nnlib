@@ -2,6 +2,7 @@
 #ifndef NVBLAS_TPP
 #define NVBLAS_TPP
 
+#include "../math.hpp"
 #include <nvblas.h>
 
 namespace nnlib

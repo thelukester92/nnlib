@@ -1,8 +1,8 @@
 #ifndef SERIALIZATION_PARSER_HPP
 #define SERIALIZATION_PARSER_HPP
 
+#include "../core/type.hpp"
 #include <iostream>
-#include <sstream>
 
 namespace nnlib
 {

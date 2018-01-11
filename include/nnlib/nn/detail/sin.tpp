@@ -2,6 +2,7 @@
 #define NN_SIN_TPP
 
 #include "../sin.hpp"
+#include <math.h>
 
 namespace nnlib
 {

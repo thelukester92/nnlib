@@ -1,8 +1,7 @@
 #ifndef NN_ELU_HPP
 #define NN_ELU_HPP
 
-#include <math.h>
-#include <nnlib/nn/map.hpp>
+#include "map.hpp"
 
 namespace nnlib
 {
@@ -15,17 +14,17 @@ public:
 	ELU(T alpha = 1.0);
 	ELU(const ELU &module);
 	ELU(const Serialized &node);
-	
+
 	ELU &operator=(const ELU &module);
-	
+
 	virtual void save(Serialized &node) const override;
-	
+
 	T alpha() const;
 	ELU &alpha(T alpha);
-	
+
 	virtual T forwardOne(const T &x) override;
 	virtual T backwardOne(const T &x, const T &y) override;
-	
+
 private:
 	T m_alpha;
 };

@@ -4,7 +4,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "factory.hpp"
 #include "traits.hpp"
 
 namespace nnlib
