@@ -31,7 +31,7 @@ void JSONSerializer::write(const Serialized &root, std::ostream &out, bool prett
 void JSONSerializer::write(const Serialized &root, const std::string &filename, bool pretty)
 {
 	std::ofstream fout(filename);
-	writeValue(root, fout, pretty);
+	writeValue(root, fout, pretty ? 0 : -1);
 	fout.close();
 }
 
@@ -83,12 +83,12 @@ void JSONSerializer::readNumber(Serialized &node, Parser &p)
 		intPart.push_back('-');
 
 	if(!p.consume('0'))
-		intPart = p.consumeDigits();
+		intPart.append(p.consumeDigits());
 	else
 		intPart.push_back('0');
 
 	if(p.consume('.'))
-		floatPart = p.consumeDigits();
+		floatPart.append(p.consumeDigits());
 
 	if(p.consume('e') || p.consume('E'))
 	{
@@ -288,7 +288,7 @@ void JSONSerializer::writeObject(const Serialized &node, std::ostream &out, int 
 		out << ':';
 		if(level >= 0)
 			out << ' ';
-		write(*node.get(key), out, level >= 0 ? level + 1 : level);
+		writeValue(*node.get(key), out, level >= 0 ? level + 1 : level);
 
 		++i;
 	}

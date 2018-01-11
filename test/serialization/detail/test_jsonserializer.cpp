@@ -17,6 +17,7 @@ void TestJSONSerializer()
 		s.set("notAwesome", false);
 		s.set("number", 32);
 		s.set("number", 42);
+		s.set("negative", -42);
 		s.set("nothing", Serialized::Null);
 		s.set("emptyArray", Serialized::Array);
 		s.set("emptyObject", Serialized::Object);
@@ -30,12 +31,15 @@ void TestJSONSerializer()
 			std::stringstream ss;
 			JSONSerializer::write(s, ss);
 
+			std::cout << ss.str() << std::endl;
+
 			Serialized d = JSONSerializer::read(ss);
 
 			NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("notAwesome"), false, "JSONSerializer failed!");
 			NNAssertEquals(d.get<size_t>("number"), 42, "JSONSerializer failed!");
+			NNAssertEquals(d.get<size_t>("negative"), -42, "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<float>("number"), 42.0, 1e-12, "JSONSerializer failed!");
 			NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
@@ -56,6 +60,7 @@ void TestJSONSerializer()
 			NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
 			NNAssertEquals(d.get<bool>("notAwesome"), false, "JSONSerializer failed!");
 			NNAssertEquals(d.get<size_t>("number"), 42, "JSONSerializer failed!");
+			NNAssertEquals(d.get<size_t>("negative"), -42, "JSONSerializer failed!");
 			NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
 			NNAssertEquals(d.size("emptyObject"), 0, "JSONSerializer failed!");
@@ -66,7 +71,7 @@ void TestJSONSerializer()
 
 		// from string
 		{
-			std::string jsonString = "[ \"hello, my name is \\\"bingo\\\"\", 1.22e1, 512e-2 ]";
+			std::string jsonString = "[ \"hello, my name is \\\"bingo\\\"\", 1.22e1, 512e-2, -3.14 ]";
 			std::stringstream ss(jsonString);
 
 			Serialized d = JSONSerializer::read(ss);
@@ -74,6 +79,7 @@ void TestJSONSerializer()
 			NNAssertEquals(d.get<std::string>(0), "hello, my name is \"bingo\"", "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<double>(1), 12.2, 1e-12, "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<double>(2), 5.12, 1e-12, "JSONSerializer failed!");
+			NNAssertAlmostEquals(d.get<double>(3), -3.14, 1e-12, "JSONSerializer failed!");
 
 			std::stringstream ss2;
 			JSONSerializer::write(d, ss2);
@@ -82,6 +88,7 @@ void TestJSONSerializer()
 			NNAssertEquals(d.get<std::string>(0), "hello, my name is \"bingo\"", "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<double>(1), 12.2, 1e-12, "JSONSerializer failed!");
 			NNAssertAlmostEquals(d.get<double>(2), 5.12, 1e-12, "JSONSerializer failed!");
+			NNAssertAlmostEquals(d.get<double>(3), -3.14, 1e-12, "JSONSerializer failed!");
 		}
 
 		// incompatibility
