@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "traits.hpp"
+#include "../util/traits.hpp"
 
 namespace nnlib
 {

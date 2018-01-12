@@ -1,5 +1,5 @@
-#ifndef SERIALIZATION_TRAITS_HPP
-#define SERIALIZATION_TRAITS_HPP
+#ifndef UTIL_TRAITS_HPP
+#define UTIL_TRAITS_HPP
 
 #include <typeindex>
 #include <type_traits>

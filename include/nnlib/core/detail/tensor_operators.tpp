@@ -37,10 +37,14 @@ namespace detail
 		template <typename T>
 		static size_t indexOf(T &&tensor, const Storage<size_t> &indices)
 		{
+			NNAssertEquals(tensor.dims(), indices.size(), "Incompatible tensors in forEach!");
 			const Storage<size_t> &strides = tensor.strides();
 			size_t i = 0;
 			for(size_t j = 0; j < I + 1; ++j)
+			{
+				NNAssertLessThan(indices[j], tensor.size(j), "Incompatible tensors in forEach!");
 				i += indices[j] * strides[j];
+			}
 			return i;
 		}
 	};

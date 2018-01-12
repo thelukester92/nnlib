@@ -2,6 +2,7 @@
 #define MATH_MATH_HPP
 
 #include "../core/tensor.hpp"
+#include "../util/traits.hpp"
 
 namespace nnlib
 {

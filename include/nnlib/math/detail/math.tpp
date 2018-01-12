@@ -61,7 +61,7 @@ T variance(const Tensor<T> &x, bool sample)
 		T diff = x - avg;
 		sum += diff * diff;
 	}, x);
-	return sum / (x.size() + (sample ? 1 : 0));
+	return sum / (x.size() - (sample ? 1 : 0));
 }
 
 template <typename T>

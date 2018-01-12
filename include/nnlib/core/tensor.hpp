@@ -23,6 +23,8 @@ template <typename T = NN_REAL_T>
 class Tensor
 {
 public:
+	using type = T;
+
 	/// \brief Vectorizes a list of tensors.
 	///
 	/// Each tensor in the parameter becomes a subview into a single, contiguous vector.
