@@ -42,7 +42,8 @@ void TestAlgebraImpl(std::string name)
 	Tensor<T> A(10, 10), B(10, 10), C(10, 10), D(10, 10);
 
 	Tensor<T> z = y.view(5, 2).select(1, 0);
-	Tensor<T> E = B.view(5, 10, 2).select(2, 0);
+	Tensor<T> E = B.view(5, 2, 10).select(1, 0);
+	Tensor<T> F = E.narrow(1, 0, 5);
 
 	std::fill(x.begin(), x.end(), 0.5);
 	Algebra<T>::vFill(y, 0.5);
@@ -91,12 +92,12 @@ void TestAlgebraImpl(std::string name)
 	for(size_t i = 0; i < x.size(); ++i)
 		NNHardAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 1 failed!");
 
-	Algebra<T>::vAdd_v(y, y);
+	Algebra<T>::vAdd_v(z, z);
 	for(size_t i = 0; i < x.size(); ++i)
 	{
 		if(i % 2 == 0)
 		{
-			NNHardAssert(almostEqual<T>(x(i) + 0.12345 + x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 2 failed!");
+			NNHardAssert(almostEqual<T>(2 * (x(i) + 0.12345), y(i)), name + "::vAdd_v with stride = 2 failed!");
 		}
 		else
 		{
@@ -120,18 +121,19 @@ void TestAlgebraImpl(std::string name)
 		for(size_t j = 0; j < y.size(); ++j)
 			NNHardAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with stride = 1 failed!");
 
-	Algebra<T>::mAdd_vv(z, z, A);
+	std::fill(B.begin(), B.end(), 0);
+	Algebra<T>::mAdd_vv(z, z, F);
 	for(size_t i = 0; i < y.size(); ++i)
 	{
 		for(size_t j = 0; j < y.size(); ++j)
 		{
-			if(i < y.size() / 2 && j < y.size() / 2)
+			if(i % 2 == 0 && j < y.size() / 2)
 			{
-				NNHardAssert(almostEqual<T>(A(i, j), y(i) * y(j) + y(2*i) * y(2*j)), name + "::mAdd_vv with stride = 2 failed!");
+				NNHardAssert(almostEqual<T>(B(i, j), z(i / 2) * z(j)), name + "::mAdd_vv with stride = 2 failed!");
 			}
 			else
 			{
-				NNHardAssert(almostEqual<T>(A(i, j), y(i) * y(j)), name + "::mAdd_vv with stride = 2 failed!");
+				NNHardAssert(almostEqual<T>(B(i, j), 0), name + "::mAdd_vv with stride = 2 failed!");
 			}
 		}
 	}
@@ -193,7 +195,7 @@ void TestAlgebraImpl(std::string name)
 			NNHardAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
 
 	addMatrixMultiply<true, true, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
-	Algebra<T>::mAdd_mm(A, B, D, 1, 0);
+	Algebra<T>::mAdd_mm(B, A, D, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
 			NNHardAssert(almostEqual<T>(C(i, j), D(j, i)), name + "::mAdd_mm with both matrices transposed failed!");
@@ -202,9 +204,11 @@ void TestAlgebraImpl(std::string name)
 void TestAlgebra()
 {
 #if defined NN_REAL_T && !defined NN_IMPL
-#define NN_STR(s) #s
+#define NN_STR2(s) #s
+#define NN_STR(s) NN_STR2(s)
 	TestAlgebraImpl<NN_REAL_T>(std::string("Algebra<") + NN_STR(NN_REAL_T) + ">");
 #undef NN_STR
+#undef NN_STR2
 #elif !defined NN_IMPL
 	TestAlgebraImpl<double>("Algebra<double>");
 	TestAlgebraImpl<float>("Algebra<float>");
