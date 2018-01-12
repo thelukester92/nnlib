@@ -648,51 +648,9 @@ Tensor<T> &Tensor<T>::addV(const Tensor<T> &x, T alpha)
 }
 
 template <typename T>
-Tensor<T> &Tensor<T>::assignMV(const Tensor<T> &A, const Tensor<T> &x, T alpha, T beta)
-{
-	Algebra<T>::vAdd_mv(A, x, *this, alpha, beta);
-	return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::assignMTV(const Tensor<T> &A, const Tensor<T> &x, T alpha, T beta)
-{
-	Algebra<T>::vAdd_mtv(A, x, *this, alpha, beta);
-	return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::assignVV(const Tensor<T> &x, const Tensor<T> &y, T alpha, T beta)
-{
-	Algebra<T>::mAdd_vv(x, y, *this, alpha, beta);
-	return *this;
-}
-
-template <typename T>
 Tensor<T> &Tensor<T>::addM(const Tensor<T> &A, T alpha)
 {
 	Algebra<T>::mAdd_m(A, *this, alpha);
-	return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::assignMM(const Tensor<T> &A, const Tensor<T> &B, T alpha, T beta)
-{
-	Algebra<T>::mAdd_mm(A, B, *this, alpha, beta);
-	return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::assignMTM(const Tensor<T> &A, const Tensor<T> &B, T alpha, T beta)
-{
-	Algebra<T>::mAdd_mtm(A, B, *this, alpha, beta);
-	return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::assignMMT(const Tensor<T> &A, const Tensor<T> &B, T alpha, T beta)
-{
-	Algebra<T>::mAdd_mmt(A, B, *this, alpha, beta);
 	return *this;
 }
 

@@ -52,13 +52,13 @@ Tensor<T> &Concat<T>::forward(const Tensor<T> &input)
 	Storage<Tensor<T> *> outputs(components());
 	for(size_t i = 0, count = components(); i < count; ++i)
 		outputs[i] = &m_components[i]->forward(input);
-	
+
 	if(!m_output.sharedWith(outputs))
 	{
 		m_concatDim = std::min(m_concatDim, outputs[0]->dims() - 1);
 		m_output = Tensor<T>::concatenate(outputs, m_concatDim);
 	}
-	
+
 	return m_output;
 }
 
@@ -72,11 +72,11 @@ Tensor<T> &Concat<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 		m_components[i]->backward(input, outGrad.narrow(m_concatDim, offset, stride));
 		offset += stride;
 	}
-	
-	m_inGrad.resize(m_components[0]->inGrad().shape());
+
+	m_inGrad.resize(m_components[0]->inGrad().shape()).zeros();
 	for(size_t i = 0, count = components(); i < count; ++i)
 		m_inGrad.add(m_components[i]->inGrad());
-	
+
 	return m_inGrad;
 }
 

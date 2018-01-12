@@ -1,15 +1,13 @@
 #ifndef MATH_MATH_HPP
 #define MATH_MATH_HPP
 
-#include "../core/type.hpp"
+#include "../core/tensor.hpp"
 
 namespace nnlib
 {
 
 namespace math
 {
-
-
 
 }
 

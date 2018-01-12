@@ -445,85 +445,8 @@ public:
 	/// Add another vector to this vector.
 	Tensor &addV(const Tensor &x, T alpha = 1);
 
-	/// \brief Assigns or adds a matrix/vector with no transposition.
-	///
-	/// Adds the scaled product of A and x to this vector, scaled.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using y for this tensor, this method computes `y = alpha * A * x + beta * y`.
-	/// \param A An M x N tensor.
-	/// \param x An N tensor.
-	/// \param alpha How much to scale A * x.
-	/// \param beta How much to scale y.
-	/// \return This tensor, for chaining.
-	Tensor &assignMV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0);
-
-	/// \brief Assigns or adds a matrix/vector with transposition.
-	///
-	/// Adds the scaled product of A and x to this vector, scaled.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using y for this tensor, this method computes `y = alpha * A^T * x + beta * y`.
-	/// \param A An N x M tensor.
-	/// \param x An N tensor.
-	/// \param alpha How much to scale A^T * x.
-	/// \param beta How much to scale y.
-	/// \return This tensor, for chaining.
-	Tensor &assignMTV(const Tensor &A, const Tensor &x, T alpha = 1, T beta = 0);
-
-	/// \brief Assigns or adds a vector/vector outer product.
-	///
-	/// Adds the scaled outer product of x and y to this matrix.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using A for this tensor, this method computes `A = alpha * x^T * y + A`.
-	/// \param x An N tensor.
-	/// \param y An M tensor.
-	/// \param alpha How much to scale x^T * y.
-	/// \return This tensor, for chaining.
-	Tensor &assignVV(const Tensor &x, const Tensor &y, T alpha = 1, T beta = 0);
-
 	/// Add another matrix to this matrix.
 	Tensor &addM(const Tensor &A, T alpha = 1);
-
-	/// \brief Assigns or adds a matrix multiplcation with no transposition.
-	///
-	/// Adds the scaled product of A and B to this matrix, scaled.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using C for this tensor, this method computes `C = alpha * A * B + beta * C`.
-	/// \param A An M x K tensor.
-	/// \param B A K x N tensor.
-	/// \param alpha How much to scale A * B.
-	/// \param beta How much to scale C.
-	/// \return This tensor, for chaining.
-	Tensor &assignMM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0);
-
-	/// \brief Assigns or adds a matrix multiplcation with transposition on the first operand.
-	///
-	/// Adds the scaled product of A and B to this matrix, scaled.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using C for this tensor, this method computes `C = alpha * A^T * B + beta * C`.
-	/// \param A A K x M tensor.
-	/// \param B A K x N tensor.
-	/// \param alpha How much to scale A^T * B.
-	/// \param beta How much to scale C.
-	/// \return This tensor, for chaining.
-	Tensor &assignMTM(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0);
-
-	/// \brief Assigns or adds a matrix multiplcation with transposition on the second operand.
-	///
-	/// Adds the scaled product of A and B to this matrix, scaled.
-	/// Sizes must be compatible.
-	/// This method will use acceleration, if present.
-	/// Effectively, using C for this tensor, this method computes `C = alpha * A * B^T + beta * C`.
-	/// \param A An M x K tensor.
-	/// \param B An N x K tensor.
-	/// \param alpha How much to scale A * B^T.
-	/// \param beta How much to scale C.
-	/// \return This tensor, for chaining.
-	Tensor &assignMMT(const Tensor &A, const Tensor &B, T alpha = 1, T beta = 0);
 
 	/// Hadamard/elementwise/pointwise product.
 	Tensor &pointwiseProduct(const Tensor &x);
