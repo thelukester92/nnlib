@@ -98,7 +98,7 @@ all: opt dbg test
 opt: $(LIB)/$(OPTLIB)
 $(LIB)/$(OPTLIB): $(OPTFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) -fPIC $(OPTFILES) $(LDFLAGS) -o $@
+	$(CXX) -fPIC $(OPTFILES) $(OPTFLAGS) $(LDFLAGS) -o $@
 $(OBJ)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(OPTFLAGS) -MMD -c -o $@
@@ -106,7 +106,7 @@ $(OBJ)/%.o: src/%.cpp
 dbg: clean-gcda $(LIB)/$(DBGLIB)
 $(LIB)/$(DBGLIB): $(DBGFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) -fPIC $(DBGFILES) $(LDFLAGS) -o $@
+	$(CXX) -fPIC $(DBGFILES) $(DBGFLAGS) $(LDFLAGS) -o $@
 $(OBJ)/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@
