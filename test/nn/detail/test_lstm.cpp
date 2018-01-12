@@ -1,5 +1,6 @@
 #include "../test_lstm.hpp"
 #include "../test_module.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/lstm.hpp"
 using namespace nnlib;
 
@@ -62,9 +63,9 @@ void TestLSTM()
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 
-	NNAssertLessThan((outputs - out).square().sum(), 1e-6, "LSTM::forward failed!");
-	NNAssertLessThan((inGrads - ing).square().sum(), 1e-6, "LSTM::backward failed; wrong inGrad!");
-	NNAssertLessThan((module.grad() - prg).square().sum(), 1e-6, "LSTM::backward failed; wrong grad!");
+	NNAssertLessThan(math::sum(math::square(outputs - out)), 1e-6, "LSTM::forward failed!");
+	NNAssertLessThan(math::sum(math::square(inGrads - ing)), 1e-6, "LSTM::backward failed; wrong inGrad!");
+	NNAssertLessThan(math::sum(math::square(module.grad() - prg)), 1e-6, "LSTM::backward failed; wrong grad!");
 
 	module.gradClip(0.03);
 	module.forget();
@@ -81,7 +82,7 @@ void TestLSTM()
 		inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
 	}
 
-	NNAssert(inGrads.add(ing.clip(-0.03, 0.03), -1).square().sum() < 1e-6, "LSTM::gradClip failed!");
+	NNAssert(math::sum(math::square(inGrads - math::clip(ing, -0.03, 0.03))) < 1e-6, "LSTM::gradClip failed!");
 
 	TestModule("LSTM", module, inp.select(0, 0));
 }

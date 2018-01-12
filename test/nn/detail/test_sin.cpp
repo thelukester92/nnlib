@@ -1,5 +1,6 @@
 #include "../test_map.hpp"
 #include "../test_sin.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/sin.hpp"
 using namespace nnlib;
 
@@ -21,8 +22,8 @@ void TestSin()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "Sin::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "Sin::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "Sin::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "Sin::backward failed!");
 
 	TestMap("Sin", map, inp);
 }

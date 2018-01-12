@@ -1,5 +1,6 @@
 #include "../test_module.hpp"
 #include "../test_softmax.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/softmax.hpp"
 using namespace nnlib;
 
@@ -23,8 +24,8 @@ void TestSoftMax()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "SoftMax::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "SoftMax::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "SoftMax::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "SoftMax::backward failed!");
 
 	TestModule("SoftMax", map, inp);
 }

@@ -22,7 +22,7 @@ namespace detail
 				ForEachHelper<D-1, I+1>::apply(indices, shape, strides, func, ts...);
 		}
 	};
-	
+
 	template <size_t I>
 	struct ForEachHelper<1ul, I>
 	{
@@ -32,7 +32,7 @@ namespace detail
 			for(indices[I] = 0; indices[I] < shape[I]; ++indices[I])
 				func(ts.ptr()[indexOf(indices, strides)]...);
 		}
-		
+
 	private:
 		static size_t indexOf(const Storage<size_t> &indices, const Storage<size_t> &strides)
 		{
@@ -42,7 +42,7 @@ namespace detail
 			return i;
 		}
 	};
-	
+
 	template <size_t D>
 	struct ForEach
 	{
@@ -53,7 +53,7 @@ namespace detail
 			ForEachHelper<D, 0>::apply(indices, shape, strides, func, ts...);
 		}
 	};
-	
+
 	template <size_t MIN, size_t MAX, template <size_t> class WORKER>
 	struct TemplateSearch
 	{
@@ -66,7 +66,7 @@ namespace detail
 				TemplateSearch<MIN+1, MAX, WORKER>::apply(v, std::forward<Ts>(ts)...);
 		}
 	};
-	
+
 	template <size_t MAX, template <size_t> class WORKER>
 	struct TemplateSearch<MAX, MAX, WORKER>
 	{
@@ -91,7 +91,7 @@ template <typename T>
 std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 {
 	out << std::left << std::setprecision(5) << std::fixed;
-	
+
 	if(t.dims() == 1)
 	{
 		for(size_t i = 0; i < t.size(0); ++i)
@@ -110,14 +110,14 @@ std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 			out << "\n";
 		}
 	}
-	
+
 	out << "[ Tensor of dimension " << t.size(0);
 	for(size_t i = 1; i < t.dims(); ++i)
 	{
 		out << " x " << t.size(i);
 	}
 	out << " ]";
-	
+
 	return out;
 }
 
@@ -125,7 +125,11 @@ std::ostream &operator<<(std::ostream &out, const Tensor<T> &t)
 template <typename T>
 Tensor<T> &operator+=(Tensor<T> &lhs, const Tensor<T> &rhs)
 {
-	return lhs.add(rhs);
+	forEach([&](T x, T &y)
+	{
+		y += x;
+	}, rhs, lhs);
+	return lhs;
 }
 
 /// Operator overload for addition.
@@ -140,7 +144,11 @@ Tensor<T> operator+(const Tensor<T> &lhs, const Tensor<T> &rhs)
 template <typename T>
 Tensor<T> &operator-=(Tensor<T> &lhs, const Tensor<T> &rhs)
 {
-	return lhs.add(rhs, -1);
+	forEach([&](T x, T &y)
+	{
+		y -= x;
+	}, rhs, lhs);
+	return lhs;
 }
 
 /// Operator overload for subtraction.

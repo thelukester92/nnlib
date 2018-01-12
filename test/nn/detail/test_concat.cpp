@@ -1,5 +1,6 @@
 #include "../test_concat.hpp"
 #include "../test_container.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/concat.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;
@@ -62,9 +63,9 @@ void TestConcat()
 	module.forward(inp);
 	module.backward(inp, grd);
 
-	NNAssert((module.output() - out).square().sum() < 1e-9, "Concat::forward failed!");
-	NNAssert((module.inGrad() - ing).square().sum() < 1e-9, "Concat::backward failed; wrong inGrad!");
-	NNAssert((module.grad() - prg).square().sum() < 1e-9, "Concat::backward failed; wrong grad!");
+	NNAssert(math::sum(math::square(module.output() - out)) < 1e-9, "Concat::forward failed!");
+	NNAssert(math::sum(math::square(module.inGrad() - ing)) < 1e-9, "Concat::backward failed; wrong inGrad!");
+	NNAssert(math::sum(math::square(module.grad() - prg)) < 1e-9, "Concat::backward failed; wrong grad!");
 
 	NNAssertEquals(module.component(0), linear, "Concat::component failed to get the correct component!");
 	NNAssertEquals(module.components(), 2, "Concat::components failed!");

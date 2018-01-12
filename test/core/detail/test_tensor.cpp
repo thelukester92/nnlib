@@ -208,68 +208,6 @@ void TestTensor()
 	for(auto x = view.begin(), y = vector.begin(); x != view.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, 2 + *y, 1e-12, "Tensor::add(T) failed!");
 
-	// test tensor math
-
-	vector = Tensor<NN_REAL_T>(10, 5).rand();
-	empty = Tensor<NN_REAL_T>(10, 5).rand();
-	viewOfMoved = Tensor<NN_REAL_T>(10, 10);
-
-	for(size_t i = 0; i < 10; ++i)
-	{
-		for(size_t j = 0; j < 10; ++j)
-		{
-			viewOfMoved(i, j) = 0;
-			for(size_t k = 0; k < 5; ++k)
-				viewOfMoved(i, j) += empty(i, k) * vector(j, k);
-		}
-	}
-
-	view = empty.copy().pointwiseProduct(vector);
-	for(auto x = view.begin(), y = empty.begin(), z = vector.begin(); x != view.end(); ++x, ++y, ++z)
-		NNAssertAlmostEquals(*x, *y * *z, 1e-12, "Tensor::pointwiseProduct failed!");
-
-	view = empty.copy().add(vector, 0.75);
-	for(auto x = view.begin(), y = empty.begin(), z = vector.begin(); x != view.end(); ++x, ++y, ++z)
-		NNAssertAlmostEquals(*x, *y + 0.75 * *z, 1e-12, "Tensor::add(Tensor, T) failed!");
-
-	view = empty.copy().square();
-	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y * *y, 1e-12, "Tensor::square failed!");
-
-	empty = view.copy();
-	view.apply([](double &v) { v = tanh(v); });
-	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
-		NNAssertEquals(*x, tanh(*y), "Tensor::apply failed!");
-
-	double sum = view.sum();
-	for(auto &v : view)
-		sum -= v;
-	NNAssertAlmostEquals(sum, 0, 1e-12, "Tensor::sum() failed!");
-
-	vector.resize(2, 3).copy({ 2, 1, 3, 4, 6, 5 });
-	vector.sum(view.resize(3), 0);
-	empty.resize(3).copy({ 6, 7, 8 });
-	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::sum(Tensor, size_t) failed!");
-
-	view.resize(2) = vector.sum(1);
-	empty.resize(2).copy({ 6, 15 });
-	for(auto x = view.begin(), y = empty.begin(); x != view.end(); ++x, ++y)
-		NNAssertAlmostEquals(*x, *y, 1e-12, "Tensor::sum(size_t) failed!");
-
-	NNAssertAlmostEquals(vector.mean(), 3.5, 1e-12, "Tensor::mean failed!");
-	NNAssertAlmostEquals(vector.variance(), 2.917, 1e-3, "Tensor::variance failed!");
-	NNAssertEquals(vector.min(), 1, "Tensor::min failed!");
-	NNAssertEquals(vector.max(), 6, "Tensor::max failed!");
-
-	vector.normalize(-1, 20);
-	NNAssertAlmostEquals(vector.min(), -1, 1e-12, "Tensor::normalize failed!");
-	NNAssertAlmostEquals(vector.max(), 20, 1e-12, "Tensor::normalize failed!");
-
-	vector.clip(0, 10);
-	NNAssertAlmostEquals(vector.min(), 0, 1e-12, "Tensor::clip failed!");
-	NNAssertAlmostEquals(vector.max(), 10, 1e-12, "Tensor::clip failed!");
-
 	NNAssertNotEquals(vector.begin(), view.begin(), "TensorIterator::operator== failed!");
 
 	// test const methods
@@ -322,16 +260,6 @@ void TestTensor()
 		const Tensor<NN_REAL_T> &constView = constant.sub({ { 2, 4 }, { 0 }, { 7, 2 } });
 		NNAssertEquals(constView.shape(), Storage<size_t>({ 4, 1, 2 }), "const Tensor::sub failed! Wrong shape!");
 		NNAssertEquals(&constView(2, 0, 1), &constant(4, 0, 8), "const Tensor::sub failed! Wrong data!");
-	}
-
-	{
-		view.randn();
-		empty = view.copy();
-
-		const Tensor<NN_REAL_T> &constant = view;
-		double sum = 0.0;
-		constant.apply([&sum](const double &v) { sum += v; });
-		NNAssertEquals(sum, constant.sum(), "const Tensor::apply failed!");
 	}
 
 	// test tensor util

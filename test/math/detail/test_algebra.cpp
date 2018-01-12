@@ -47,79 +47,79 @@ void TestAlgebraImpl(std::string name)
 
 	std::fill(x.begin(), x.end(), 0.5);
 	Algebra<T>::vFill(y, 0.5);
-	NNHardAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vFill with stride = 1 failed!");
+	NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vFill with stride = 1 failed!");
 
 
 	for(size_t i = 0; i < x.size(); i += 2)
 		x(i) = 3.14;
 	Algebra<T>::vFill(z, 3.14);
-	NNHardAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vFill with stride = 2 failed!");
+	NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vFill with stride = 2 failed!");
 
 	for(size_t i = 0; i < x.size(); ++i)
 		x(i) *= 2;
 	Algebra<T>::vScale(y, 2);
-	NNHardAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vScale with stride = 1 failed!");
+	NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vScale with stride = 1 failed!");
 
 	for(size_t i = 0; i < x.size(); i += 2)
 		x(i) *= 0.75;
 	Algebra<T>::vScale(z, 0.75);
-	NNHardAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vScale with stride = 2 failed!");
+	NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vScale with stride = 2 failed!");
 
 	std::fill(A.begin(), A.end(), 0.5);
 	Algebra<T>::mFill(B, 0.5);
-	NNHardAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mFill with ld == cols failed!");
+	NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mFill with ld == cols failed!");
 
 	for(size_t i = 0; i < 10; i += 2)
 		for(size_t j = 0; j < 10; ++j)
 			A(i, j) = 3.14;
 	Algebra<T>::mFill(E, 3.14);
-	NNHardAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mFill with ld != cols failed!");
+	NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mFill with ld != cols failed!");
 
 	for(size_t i = 0; i < A.size(0); ++i)
 		for(size_t j = 0; j < A.size(1); ++j)
 			A(i, j) *= 2;
 	Algebra<T>::mScale(B, 2);
-	NNHardAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mScale with ld == cols failed!");
+	NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mScale with ld == cols failed!");
 
 	for(size_t i = 0; i < 10; i += 2)
 		for(size_t j = 0; j < 10; ++j)
 			A(i, j) *= 0.75;
 	Algebra<T>::mScale(E, 0.75);
-	NNHardAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mScale with ld != cols failed!");
+	NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mScale with ld != cols failed!");
 
 	std::fill(y.begin(), y.end(), 0.12345);
 	Algebra<T>::vAdd_v(x, y);
 	for(size_t i = 0; i < x.size(); ++i)
-		NNHardAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 1 failed!");
+		NNAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 1 failed!");
 
 	Algebra<T>::vAdd_v(z, z);
 	for(size_t i = 0; i < x.size(); ++i)
 	{
 		if(i % 2 == 0)
 		{
-			NNHardAssert(almostEqual<T>(2 * (x(i) + 0.12345), y(i)), name + "::vAdd_v with stride = 2 failed!");
+			NNAssert(almostEqual<T>(2 * (x(i) + 0.12345), y(i)), name + "::vAdd_v with stride = 2 failed!");
 		}
 		else
 		{
-			NNHardAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 2 failed!");
+			NNAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 2 failed!");
 		}
 	}
 
 	std::fill(y.begin(), y.end(), 0.12345);
 	Algebra<T>::vAdd_v(x, y, 0.5);
 	for(size_t i = 0; i < x.size(); ++i)
-		NNHardAssert(almostEqual<T>(0.5 * x(i) + 0.12345, y(i)), name + "::vAdd_v with alpha != 1 failed!");
+		NNAssert(almostEqual<T>(0.5 * x(i) + 0.12345, y(i)), name + "::vAdd_v with alpha != 1 failed!");
 
 	std::fill(y.begin(), y.end(), 0.12345);
 	Algebra<T>::vAdd_v(x, y, 1, 0.75);
 	for(size_t i = 0; i < x.size(); ++i)
-		NNHardAssert(almostEqual<T>(x(i) + 0.75 * 0.12345, y(i)), name + "::vAdd_v with beta != 1 failed!");
+		NNAssert(almostEqual<T>(x(i) + 0.75 * 0.12345, y(i)), name + "::vAdd_v with beta != 1 failed!");
 
 	std::fill(A.begin(), A.end(), 0);
 	Algebra<T>::mAdd_vv(x, y, A);
 	for(size_t i = 0; i < x.size(); ++i)
 		for(size_t j = 0; j < y.size(); ++j)
-			NNHardAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with stride = 1 failed!");
+			NNAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with stride = 1 failed!");
 
 	std::fill(B.begin(), B.end(), 0);
 	Algebra<T>::mAdd_vv(z, z, F);
@@ -129,11 +129,11 @@ void TestAlgebraImpl(std::string name)
 		{
 			if(i % 2 == 0 && j < y.size() / 2)
 			{
-				NNHardAssert(almostEqual<T>(B(i, j), z(i / 2) * z(j)), name + "::mAdd_vv with stride = 2 failed!");
+				NNAssert(almostEqual<T>(B(i, j), z(i / 2) * z(j)), name + "::mAdd_vv with stride = 2 failed!");
 			}
 			else
 			{
-				NNHardAssert(almostEqual<T>(B(i, j), 0), name + "::mAdd_vv with stride = 2 failed!");
+				NNAssert(almostEqual<T>(B(i, j), 0), name + "::mAdd_vv with stride = 2 failed!");
 			}
 		}
 	}
@@ -141,7 +141,7 @@ void TestAlgebraImpl(std::string name)
 	Algebra<T>::mAdd_vv(x, y, A, 1, 0);
 	for(size_t i = 0; i < x.size(); ++i)
 		for(size_t j = 0; j < y.size(); ++j)
-			NNHardAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with beta != 1 failed!");
+			NNAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with beta != 1 failed!");
 
 	std::fill(y.begin(), y.end(), 0);
 	Algebra<T>::vAdd_mv(A, x, y);
@@ -150,7 +150,7 @@ void TestAlgebraImpl(std::string name)
 		T value = 0.0;
 		for(size_t j = 0; j < 10; ++j)
 			value += A(i, j) * x(j);
-		NNHardAssert(almostEqual<T>(y(i), value), name + "::vAdd_mv failed!");
+		NNAssert(almostEqual<T>(y(i), value), name + "::vAdd_mv failed!");
 	}
 
 	std::fill(y.begin(), y.end(), 0);
@@ -160,45 +160,45 @@ void TestAlgebraImpl(std::string name)
 		T value = 0.0;
 		for(size_t j = 0; j < 10; ++j)
 			value += A(j, i) * x(j);
-		NNHardAssert(almostEqual<T>(y(i), value), name + "::vAdd_mtv failed!");
+		NNAssert(almostEqual<T>(y(i), value), name + "::vAdd_mtv failed!");
 	}
 
 	std::fill(B.begin(), B.end(), 10);
 	Algebra<T>::mAdd_m(A, B);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(almostEqual<T>(B(i, j), A(i, j) + 10), name + "::mAdd_m failed!");
+			NNAssert(almostEqual<T>(B(i, j), A(i, j) + 10), name + "::mAdd_m failed!");
 
 	std::fill(B.begin(), B.end(), 10);
 	Algebra<T>::mAdd_mt(A, B);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(almostEqual<T>(B(i, j), A(j, i) + 10), name + "::mAdd_mt failed!");
+			NNAssert(almostEqual<T>(B(i, j), A(j, i) + 10), name + "::mAdd_mt failed!");
 
 	std::fill(C.begin(), C.end(), 0);
 	addMatrixMultiply<false, false, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
 	Algebra<T>::mAdd_mm(A, B, D, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
+			NNAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
 
 	addMatrixMultiply<true, false, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
 	Algebra<T>::mAdd_mtm(A, B, D, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
+			NNAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
 
 	addMatrixMultiply<false, true, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
 	Algebra<T>::mAdd_mmt(A, B, D, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
+			NNAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
 
 	addMatrixMultiply<true, true, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
 	Algebra<T>::mAdd_mm(B, A, D, 1, 0);
 	for(size_t i = 0; i < 10; ++i)
 		for(size_t j = 0; j < 10; ++j)
-			NNHardAssert(almostEqual<T>(C(i, j), D(j, i)), name + "::mAdd_mm with both matrices transposed failed!");
+			NNAssert(almostEqual<T>(C(i, j), D(j, i)), name + "::mAdd_mm with both matrices transposed failed!");
 }
 
 void TestAlgebra()

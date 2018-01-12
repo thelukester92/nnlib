@@ -1,5 +1,6 @@
 #include "../test_identity.hpp"
 #include "../test_module.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/identity.hpp"
 using namespace nnlib;
 
@@ -15,8 +16,8 @@ void TestIdentity()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - inp).square().sum() < 1e-9, "Identity::forward failed!");
-	NNAssert((map.inGrad() - grd).square().sum() < 1e-9, "Identity::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - inp)) < 1e-9, "Identity::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - grd)) < 1e-9, "Identity::backward failed!");
 
 	TestModule("Identity", map, inp);
 }

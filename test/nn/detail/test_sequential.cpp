@@ -1,5 +1,6 @@
 #include "../test_container.hpp"
 #include "../test_sequential.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/sequential.hpp"
 #include "nnlib/nn/batchnorm.hpp"
 #include "nnlib/nn/linear.hpp"
@@ -65,9 +66,9 @@ void TestSequential()
 	module.forward(inp);
 	module.backward(inp, grd);
 
-	NNAssert((module.output() - out).square().sum() < 1e-9, "Sequential::forward failed!");
-	NNAssert((module.inGrad() - ing).square().sum() < 1e-9, "Sequential::backward failed; wrong inGrad!");
-	NNAssert((module.grad() - prg).square().sum() < 1e-9, "Sequential::backward failed; wrong grad!");
+	NNAssert(math::sum(math::square(module.output() - out)) < 1e-9, "Sequential::forward failed!");
+	NNAssert(math::sum(math::square(module.inGrad() - ing)) < 1e-9, "Sequential::backward failed; wrong inGrad!");
+	NNAssert(math::sum(math::square(module.grad() - prg)) < 1e-9, "Sequential::backward failed; wrong grad!");
 
 	NNAssertEquals(module.component(0), linear, "Sequential::component failed to get the correct component!");
 	NNAssertEquals(module.components(), 2, "Sequential::components failed!");

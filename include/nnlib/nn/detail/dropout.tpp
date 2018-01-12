@@ -2,6 +2,7 @@
 #define NN_DROPOUT_TPP
 
 #include "../dropout.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -74,9 +75,9 @@ Tensor<T> &Dropout<T>::forward(const Tensor<T> &input)
 {
 	m_mask.resize(input.shape());
 	m_output.resize(input.shape());
-	
+
 	if(m_training)
-		return m_output.copy(input).pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
+		return math::pointwiseProduct(input, m_mask.bernoulli(1 - m_dropProbability), m_output);
 	else
 		return m_output.copy(input).scale(1 - m_dropProbability);
 }
@@ -87,9 +88,9 @@ Tensor<T> &Dropout<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad
 	NNAssertEquals(input.shape(), m_mask.shape(), "Dropout<T>::forward must be called first!");
 	NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible input and outGrad!");
 	m_inGrad.resize(input.shape());
-	
+
 	if(m_training)
-		return m_inGrad.copy(outGrad).pointwiseProduct(m_mask);
+		return math::pointwiseProduct(outGrad, m_mask, m_inGrad);
 	else
 		return m_inGrad.copy(outGrad).scale(1 - m_dropProbability);
 }

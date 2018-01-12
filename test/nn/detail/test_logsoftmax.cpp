@@ -1,5 +1,6 @@
 #include "../test_logsoftmax.hpp"
 #include "../test_module.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/logsoftmax.hpp"
 using namespace nnlib;
 
@@ -23,8 +24,8 @@ void TestLogSoftMax()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "LogSoftMax::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "LogSoftMax::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "LogSoftMax::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "LogSoftMax::backward failed!");
 
 	TestModule("LogSoftMax", map, inp);
 }

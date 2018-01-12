@@ -1,5 +1,6 @@
 #include "../test_map.hpp"
 #include "../test_elu.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/elu.hpp"
 #include <math.h>
 using namespace nnlib;
@@ -24,8 +25,8 @@ void TestELU()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "ELU::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "ELU::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "ELU::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "ELU::backward failed!");
 
 	TestMap("ELU", map, inp);
 }

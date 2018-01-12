@@ -2,6 +2,7 @@
 #define NN_BATCHNORM_TPP
 
 #include "../batchnorm.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -155,7 +156,7 @@ Tensor<T> &BatchNorm<T>::forward(const Tensor<T> &input)
 		NNAssertGreaterThan(input.size(0), 1, "Expected a batch in training mode!");
 
 		// Get means
-		input.sum(m_means, 0);
+		math::sum(input, m_means, 0);
 		m_means.scale(norm);
 
 		// Get unnormalized variances (temporarily stored in m_invStds)

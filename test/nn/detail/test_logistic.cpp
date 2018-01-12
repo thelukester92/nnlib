@@ -1,5 +1,6 @@
 #include "../test_logistic.hpp"
 #include "../test_map.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/logistic.hpp"
 using namespace nnlib;
 
@@ -21,8 +22,8 @@ void TestLogistic()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "Logistic::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "Logistic::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "Logistic::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "Logistic::backward failed!");
 
 	TestMap("Logistic", map, inp);
 }

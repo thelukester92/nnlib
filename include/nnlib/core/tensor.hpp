@@ -430,20 +430,11 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &randn(const T &mean, const T &stddev, const T &cap);
 
-	/// \brief Multiply this tensor by a scalar.
+	/// Multiply this tensor by a scalar.
 	Tensor &scale(T alpha);
 
 	/// Add a scalar to each element in this tensor.
 	Tensor &add(T alpha);
-
-	/// Hadamard/elementwise/pointwise product.
-	Tensor &pointwiseProduct(const Tensor &x);
-
-	/// Compute elementwise/pointwise sum.
-	Tensor &add(const Tensor &x, T alpha = 1);
-
-	/// Perform a pointwise product with the current tensor, squaring it.
-	Tensor &square();
 
 	/// \brief Sparsify the current dense tensor, dropping values with magnitude less than epsilon.
 	///
@@ -464,58 +455,6 @@ public:
 	///
 	/// See sparsify for an explanation of sparse tensors.
 	Tensor unsparsify();
-
-	/// Apply the given function to each element in this tensor.
-	Tensor &apply(const std::function<void(T&)> &f);
-
-	/// Apply the given function to each element in this tensor.
-	const Tensor &apply(const std::function<void(const T&)> &f) const;
-
-	/// Calculate the sum of all elements in this tensor.
-	T sum() const;
-
-	/// \brief Calculate the sum along the given dimension.
-	///
-	/// This reduces the number of dimensions by one, and may not be called on a 1D tensor (use sum() instead).
-	/// For example, in this matrix:
-	/// 	1 2 3
-	/// 	4 5 6
-	/// sum(0) will produce the vector `<5 7 9>`, and
-	/// sum(1) will produce the vector `<6 15>`
-	/// \param t The tensor to store the sum in. It must already be the appropriate shape.
-	/// \param dim Which dimension to sum.
-	/// \return The input tensor t, for chaining.
-	Tensor &sum(Tensor &t, size_t dim) const;
-
-	/// \brief Calculate the sum along the given dimension.
-	///
-	/// This reduces the number of dimensions by one, and may not be called on a 1D tensor (use sum() instead).
-	/// For example, in this matrix:
-	/// 	1 2 3
-	/// 	4 5 6
-	/// sum(0) will produce the vector `<5 7 9>`, and
-	/// sum(1) will produce the vector `<6 15>`
-	/// \param dim Which dimension to sum.
-	/// \return The tensor containing the sum.
-	Tensor sum(size_t dim) const;
-
-	/// Calculate the mean of the elements of this tensor.
-	T mean() const;
-
-	/// Calculate the variance of the elements of this tensor.
-	T variance(bool normalizeAsSample = false) const;
-
-	/// Find the minimum element of this tensor.
-	T min() const;
-
-	/// Find the maximum element of this tensor.
-	T max() const;
-
-	/// Normalize the elements of this tensor.
-	Tensor &normalize(T from = 0.0, T to = 1.0);
-
-	/// Clip the elements of this tensor such that all elements lie in [smallest, largest]
-	Tensor &clip(T smallest, T largest);
 
 	T &at(const Storage<size_t> &indices);
 	const T &at(const Storage<size_t> &indices) const;

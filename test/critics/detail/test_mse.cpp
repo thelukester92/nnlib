@@ -1,5 +1,6 @@
 #include "../test_mse.hpp"
 #include "nnlib/critics/mse.hpp"
+#include "nnlib/math/math.hpp"
 using namespace nnlib;
 
 void TestMSE()
@@ -12,17 +13,17 @@ void TestMSE()
 	MSE<NN_REAL_T> critic(false);
 
 	double mse = critic.forward(inp, tgt);
-	NNHardAssert(fabs(mse - sqd.sum()) < 1e-12, "MSE<NN_REAL_T>::forward with no average failed!");
+	NNAssert(fabs(mse - math::sum(sqd)) < 1e-12, "MSE::forward with no average failed!");
 
 	critic.average(true);
 	mse = critic.forward(inp, tgt);
-	NNHardAssert(fabs(mse - sqd.mean()) < 1e-12, "MSE<NN_REAL_T>::forward with average failed!");
+	NNAssert(fabs(mse - math::mean(sqd)) < 1e-12, "MSE::forward with average failed!");
 
 	critic.average(false);
 	critic.backward(inp, tgt);
-	NNHardAssert((critic.inGrad() - dif).square().sum() < 1e-12, "MSE<NN_REAL_T>::backward with no average failed!");
+	NNAssert(math::sum(math::square(critic.inGrad() - dif)) < 1e-12, "MSE::backward with no average failed!");
 
 	critic.average(true);
 	critic.backward(inp, tgt);
-	NNHardAssert((critic.inGrad() - dif * 1.0 / dif.size()).square().sum() < 1e-12, "MSE<NN_REAL_T>::backward with average failed!");
+	NNAssert(math::sum(math::square(critic.inGrad() - dif / dif.size())) < 1e-12, "MSE::backward with average failed!");
 }

@@ -1,5 +1,6 @@
 #include "../test_module.hpp"
 #include "../test_sequencer.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/batchnorm.hpp"
 #include "nnlib/nn/sequencer.hpp"
 #include "nnlib/nn/lstm.hpp"
@@ -57,17 +58,17 @@ void TestSequencer()
 	module.forward(inp);
 	module.backward(inp, grd);
 
-	NNAssertLessThan((module.output() - out).square().sum(), 1e-9, "Sequencer::forward failed!");
-	NNAssertLessThan((module.inGrad() - ing).square().sum(), 1e-9, "Sequencer::backward failed; wrong inGrad!");
-	NNAssertLessThan((module.grad() - prg).square().sum(), 1e-9, "Sequencer::backward failed; wrong grad!");
+	NNAssertLessThan(math::sum(math::square(module.output() - out)), 1e-9, "Sequencer::forward failed!");
+	NNAssertLessThan(math::sum(math::square(module.inGrad() - ing)), 1e-9, "Sequencer::backward failed; wrong inGrad!");
+	NNAssertLessThan(math::sum(math::square(module.grad() - prg)), 1e-9, "Sequencer::backward failed; wrong grad!");
 
 	module.forget();
 	module.reverse(true);
 	module.forward(inp);
 	module.backward(inp, grd);
 
-	NNAssertLessThan((module.output() - rOut).square().sum(), 1e-9, "Sequencer::forward (reversed) failed!");
-	NNAssertLessThan((module.inGrad() - rIng).square().sum(), 1e-9, "Sequencer::backward (reversed) failed; wrong inGrad!");
+	NNAssertLessThan(math::sum(math::square(module.output() - rOut)), 1e-9, "Sequencer::forward (reversed) failed!");
+	NNAssertLessThan(math::sum(math::square(module.inGrad() - rIng)), 1e-9, "Sequencer::backward (reversed) failed; wrong inGrad!");
 
 	{
 		BatchNorm<NN_REAL_T> *b = new BatchNorm<NN_REAL_T>(10);

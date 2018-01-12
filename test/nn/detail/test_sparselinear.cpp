@@ -1,5 +1,6 @@
 #include "../test_module.hpp"
 #include "../test_sparselinear.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/sparselinear.hpp"
 using namespace nnlib;
 
@@ -38,9 +39,9 @@ void TestSparseLinear()
 	module.backward(inp, grd);
 	linear.backward(dense, grd);
 
-	NNAssertLessThan((module.output() - linear.output()).square().sum(), 1e-9, "SparseLinear::forward failed; wrong output!");
-	NNAssertLessThan((module.inGrad() - linear.inGrad()).square().sum(), 1e-9, "SparseLinear::backward failed; wrong input gradient!");
-	NNAssertLessThan((module.grad() - linear.grad()).square().sum(), 1e-9, "SparseLinear::backward failed; wrong parameter gradient!");
+	NNAssertLessThan(math::sum(math::square(module.output() - linear.output())), 1e-9, "SparseLinear::forward failed; wrong output!");
+	NNAssertLessThan(math::sum(math::square(module.inGrad() - linear.inGrad())), 1e-9, "SparseLinear::backward failed; wrong input gradient!");
+	NNAssertLessThan(math::sum(math::square(module.grad() - linear.grad())), 1e-9, "SparseLinear::backward failed; wrong parameter gradient!");
 
 	inp = Tensor<NN_REAL_T>({ 2, 0.0, 0, 3.14 }).resize(2, 2);
 	dense = inp.unsparsify();
@@ -52,8 +53,8 @@ void TestSparseLinear()
 	module.backward(inp, grd);
 	linear.backward(dense, grd);
 
-	NNAssertLessThan((module.output() - linear.output()).square().sum(), 1e-9, "SparseLinear::forward failed for a vector; wrong output!");
-	NNAssertLessThan((module.inGrad() - linear.inGrad()).square().sum(), 1e-9, "SparseLinear::backward failed for a vector; wrong input gradient!");
+	NNAssertLessThan(math::sum(math::square(module.output() - linear.output())), 1e-9, "SparseLinear::forward failed for a vector; wrong output!");
+	NNAssertLessThan(math::sum(math::square(module.inGrad() - linear.inGrad())), 1e-9, "SparseLinear::backward failed for a vector; wrong input gradient!");
 
 	SparseLinear<NN_REAL_T> unbiased(2, 3, false);
 	unbiased.weights().copy(module.weights());
@@ -61,8 +62,8 @@ void TestSparseLinear()
 	unbiased.forward(inp);
 	unbiased.backward(inp, grd);
 
-	NNAssertLessThan((unbiased.output() + module.bias() - linear.output()).square().sum(), 1e-9, "SparseLinear::forward failed without bias; wrong output!");
-	NNAssertLessThan((unbiased.inGrad() - linear.inGrad()).square().sum(), 1e-9, "SparseLinear::backward failed without bias; wrong input gradient!");
+	NNAssertLessThan(math::sum(math::square(unbiased.output() + module.bias() - linear.output())), 1e-9, "SparseLinear::forward failed without bias; wrong output!");
+	NNAssertLessThan(math::sum(math::square(unbiased.inGrad() - linear.inGrad())), 1e-9, "SparseLinear::backward failed without bias; wrong input gradient!");
 
 	bool ok = true;
 	try

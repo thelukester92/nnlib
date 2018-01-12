@@ -1,5 +1,6 @@
 #include "../test_map.hpp"
 #include "../test_relu.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/relu.hpp"
 using namespace nnlib;
 
@@ -23,8 +24,8 @@ void TestReLU()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "ReLU::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "ReLU::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "ReLU::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "ReLU::backward failed!");
 
 	TestMap("ReLU", map, inp);
 }

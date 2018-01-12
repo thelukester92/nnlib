@@ -1,6 +1,7 @@
 #include "../test_criticsequencer.hpp"
 #include "nnlib/critics/criticsequencer.hpp"
 #include "nnlib/critics/mse.hpp"
+#include "nnlib/math/math.hpp"
 using namespace nnlib;
 
 void TestCriticSequencer()
@@ -14,8 +15,8 @@ void TestCriticSequencer()
 	CriticSequencer<NN_REAL_T> critic(innerCritic);
 
 	double mse = critic.forward(inp, tgt);
-	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer::forward with no average failed!");
+	NNAssertAlmostEquals(mse, math::sum(sqd), 1e-12, "CriticSequencer::forward with no average failed!");
 
 	critic.backward(inp, tgt);
-	NNAssert((critic.inGrad().reshape(5, 1) - dif.reshape(5, 1)).square().sum() < 1e-12, "CriticSequencer::backward failed!");
+	NNAssert(math::sum(math::square(critic.inGrad().reshape(5, 1) - dif.reshape(5, 1))) < 1e-12, "CriticSequencer::backward failed!");
 }

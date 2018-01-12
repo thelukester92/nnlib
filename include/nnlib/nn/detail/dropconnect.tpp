@@ -2,6 +2,7 @@
 #define DROPCONNECT_TPP
 
 #include "../dropconnect.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -125,12 +126,13 @@ Tensor<T> &DropConnect<T>::forward(const Tensor<T> &input)
 		m_mask.resize(m_module->params().shape());
 		m_backup.resize(m_module->params().shape());
 		m_backup.copy(m_module->params());
-		m_module->params().pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability));
+
+		math::pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability), m_module->params());
 		m_output = m_module->forward(input);
 	}
 	else
 		m_output = m_module->forward(input).scale(1 - m_dropProbability);
-	
+
 	return m_output;
 }
 
@@ -144,7 +146,7 @@ Tensor<T> &DropConnect<T>::backward(const Tensor<T> &input, const Tensor<T> &out
 	}
 	else
 		m_inGrad = m_module->backward(input, outGrad).scale(1 - m_dropProbability);
-	
+
 	return m_inGrad;
 }
 

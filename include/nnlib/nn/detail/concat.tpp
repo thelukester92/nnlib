@@ -75,7 +75,12 @@ Tensor<T> &Concat<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 
 	m_inGrad.resize(m_components[0]->inGrad().shape()).zeros();
 	for(size_t i = 0, count = components(); i < count; ++i)
-		m_inGrad.add(m_components[i]->inGrad());
+	{
+		forEach([&](T x, T &y)
+		{
+			y += x;
+		}, m_components[i]->inGrad(), m_inGrad);
+	}
 
 	return m_inGrad;
 }

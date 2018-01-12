@@ -1,5 +1,6 @@
 #include "../test_map.hpp"
 #include "../test_tanh.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/nn/tanh.hpp"
 using namespace nnlib;
 
@@ -21,8 +22,8 @@ void TestTanH()
 	map.forward(inp);
 	map.backward(inp, grd);
 
-	NNAssert((map.output() - out).square().sum() < 1e-9, "TanH::forward failed!");
-	NNAssert((map.inGrad() - ing).square().sum() < 1e-9, "TanH::backward failed!");
+	NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "TanH::forward failed!");
+	NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "TanH::backward failed!");
 
 	TestMap("TanH", map, inp);
 }
