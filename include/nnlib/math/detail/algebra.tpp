@@ -19,6 +19,12 @@ void Algebra<T>::vFill(Tensor<T> &_x, T alpha)
 }
 
 template <typename T>
+void Algebra<T>::vFill(Tensor<T> &&_x, T alpha)
+{
+	Algebra<T>::vFill(_x, alpha);
+}
+
+template <typename T>
 void Algebra<T>::vScale(Tensor<T> &_x, T alpha)
 {
 	NNAssertEquals(_x.dims(), 1, "Expected a vector!");
@@ -26,6 +32,12 @@ void Algebra<T>::vScale(Tensor<T> &_x, T alpha)
 	size_t n = _x.size(), s = _x.stride(0);
 	for(size_t i = 0; i < n; ++i)
 		x[i * s] *= alpha;
+}
+
+template <typename T>
+void Algebra<T>::vScale(Tensor<T> &&_x, T alpha)
+{
+	Algebra<T>::vScale(_x, alpha);
 }
 
 template <typename T>
@@ -41,6 +53,12 @@ void Algebra<T>::mFill(Tensor<T> &_A, T alpha)
 }
 
 template <typename T>
+void Algebra<T>::mFill(Tensor<T> &&_A, T alpha)
+{
+	Algebra<T>::mFill(_A, alpha);
+}
+
+template <typename T>
 void Algebra<T>::mScale(Tensor<T> &_A, T alpha)
 {
 	NNAssertEquals(_A.dims(), 2, "Expected a matrix!");
@@ -50,6 +68,12 @@ void Algebra<T>::mScale(Tensor<T> &_A, T alpha)
 	for(size_t i = 0; i < r; ++i)
 		for(size_t j = 0; j < c; ++j)
 			A[i * ld + j] *= alpha;
+}
+
+template <typename T>
+void Algebra<T>::mScale(Tensor<T> &&_A, T alpha)
+{
+	Algebra<T>::mScale(_A, alpha);
 }
 
 template <typename T>
@@ -65,6 +89,12 @@ void Algebra<T>::vAdd_v(const Tensor<T> &_x, Tensor<T> &_y, T alpha)
 }
 
 template <typename T>
+void Algebra<T>::vAdd_v(const Tensor<T> &_x, Tensor<T> &&_y, T alpha)
+{
+	Algebra<T>::vAdd_v(_x, _y, alpha);
+}
+
+template <typename T>
 void Algebra<T>::vAdd_v(const Tensor<T> &_x, Tensor<T> &_y, T alpha, T beta)
 {
 	NNAssertEquals(_x.dims(), 1, "Expected a vector!");
@@ -74,6 +104,12 @@ void Algebra<T>::vAdd_v(const Tensor<T> &_x, Tensor<T> &_y, T alpha, T beta)
 	size_t n = _x.size(), sx = _x.stride(0), sy = _y.stride(0);
 	for(size_t i = 0; i < n; ++i)
 		y[i * sy] = alpha * x[i * sx] + beta * y[i * sy];
+}
+
+template <typename T>
+void Algebra<T>::vAdd_v(const Tensor<T> &_x, Tensor<T> &&_y, T alpha, T beta)
+{
+	Algebra<T>::vAdd_v(_x, _y, alpha, beta);
 }
 
 template <typename T>
@@ -92,6 +128,12 @@ void Algebra<T>::mAdd_vv(const Tensor<T> &_x, const Tensor<T> &_y, Tensor<T> &_A
 	for(size_t i = 0; i < r; ++i)
 		for(size_t j = 0; j < c; ++j)
 			A[i * lda + j] = alpha * x[i * sx] * y[j * sy] + beta * A[i * lda + j];
+}
+
+template <typename T>
+void Algebra<T>::mAdd_vv(const Tensor<T> &_x, const Tensor<T> &_y, Tensor<T> &&_A, T alpha, T beta)
+{
+	Algebra<T>::mAdd_vv(_x, _y, _A, alpha, beta);
 }
 
 template <typename T>
@@ -117,6 +159,12 @@ void Algebra<T>::vAdd_mv(const Tensor<T> &_A, const Tensor<T> &_x, Tensor<T> &_y
 }
 
 template <typename T>
+void Algebra<T>::vAdd_mv(const Tensor<T> &_A, const Tensor<T> &_x, Tensor<T> &&_y, T alpha, T beta)
+{
+	Algebra<T>::vAdd_mv(_A, _x, _y, alpha, beta);
+}
+
+template <typename T>
 void Algebra<T>::vAdd_mtv(const Tensor<T> &_A, const Tensor<T> &_x, Tensor<T> &_y, T alpha, T beta)
 {
 	NNAssertEquals(_x.dims(), 1, "Expected a vector!");
@@ -139,6 +187,12 @@ void Algebra<T>::vAdd_mtv(const Tensor<T> &_A, const Tensor<T> &_x, Tensor<T> &_
 }
 
 template <typename T>
+void Algebra<T>::vAdd_mtv(const Tensor<T> &_A, const Tensor<T> &_x, Tensor<T> &&_y, T alpha, T beta)
+{
+	Algebra<T>::vAdd_mtv(_A, _x, _y, alpha, beta);
+}
+
+template <typename T>
 void Algebra<T>::mAdd_m(const Tensor<T> &_A, Tensor<T> &_B, T alpha, T beta)
 {
 	NNAssertEquals(_A.dims(), 2, "Expected a matrix!");
@@ -152,6 +206,12 @@ void Algebra<T>::mAdd_m(const Tensor<T> &_A, Tensor<T> &_B, T alpha, T beta)
 	for(size_t i = 0; i < r; ++i)
 		for(size_t j = 0; j < c; ++j)
 			B[i * ldb + j] = alpha * A[i * lda + j] + beta * B[i * ldb + j];
+}
+
+template <typename T>
+void Algebra<T>::mAdd_m(const Tensor<T> &_A, Tensor<T> &&_B, T alpha, T beta)
+{
+	Algebra<T>::mAdd_m(_A, _B, alpha, beta);
 }
 
 template <typename T>
@@ -169,6 +229,12 @@ void Algebra<T>::mAdd_mt(const Tensor<T> &_A, Tensor<T> &_B, T alpha, T beta)
 	for(size_t i = 0; i < r; ++i)
 		for(size_t j = 0; j < c; ++j)
 			B[i * ldb + j] = alpha * A[j * lda + i] + beta * B[i * ldb + j];
+}
+
+template <typename T>
+void Algebra<T>::mAdd_mt(const Tensor<T> &_A, Tensor<T> &&_B, T alpha, T beta)
+{
+	Algebra<T>::mAdd_mt(_A, _B, alpha, beta);
 }
 
 template <typename T>
@@ -203,6 +269,12 @@ void Algebra<T>::mAdd_mm(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &_C
 }
 
 template <typename T>
+void Algebra<T>::mAdd_mm(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &&_C, T alpha, T beta)
+{
+	Algebra<T>::mAdd_mm(_A, _B, _C, alpha, beta);
+}
+
+template <typename T>
 void Algebra<T>::mAdd_mtm(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &_C, T alpha, T beta)
 {
 	NNAssertEquals(_A.dims(), 2, "Expected a matrix!");
@@ -234,6 +306,12 @@ void Algebra<T>::mAdd_mtm(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &_
 }
 
 template <typename T>
+void Algebra<T>::mAdd_mtm(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &&_C, T alpha, T beta)
+{
+	Algebra<T>::mAdd_mtm(_A, _B, _C, alpha, beta);
+}
+
+template <typename T>
 void Algebra<T>::mAdd_mmt(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &_C, T alpha, T beta)
 {
 	NNAssertEquals(_A.dims(), 2, "Expected a matrix!");
@@ -262,6 +340,12 @@ void Algebra<T>::mAdd_mmt(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &_
 			}
 		}
 	}
+}
+
+template <typename T>
+void Algebra<T>::mAdd_mmt(const Tensor<T> &_A, const Tensor<T> &_B, Tensor<T> &&_C, T alpha, T beta)
+{
+	Algebra<T>::mAdd_mmt(_A, _B, _C, alpha, beta);
 }
 
 }
