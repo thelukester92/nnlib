@@ -31,6 +31,14 @@ T mean(const Tensor<T> &x);
 template <typename T>
 T variance(const Tensor<T> &x, bool sample = false);
 
+/// Scales and shifts the elements in x to lie in [from..to].
+template <typename T>
+Tensor<T> &normalize(Tensor<T> &x, T from = 0, T to = 1);
+
+/// Scales and shifts the elements in x to lie in [from..to].
+template <typename T>
+Tensor<T> &&normalize(Tensor<T> &&x, T from = 0, T to = 1);
+
 /// Caps elements in x to lie in [min..max].
 template <typename T>
 Tensor<T> &clip(Tensor<T> &x, T min, T max);
@@ -83,6 +91,8 @@ Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &
 	extern template NN_REAL_T nnlib::math::sum<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
 	extern template NN_REAL_T nnlib::math::mean<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
 	extern template NN_REAL_T nnlib::math::variance<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &, bool);
+	extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+	extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
 	extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
 	extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
 	extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &);

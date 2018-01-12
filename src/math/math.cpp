@@ -9,6 +9,8 @@ template NN_REAL_T nnlib::math::max<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &)
 template NN_REAL_T nnlib::math::sum<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
 template NN_REAL_T nnlib::math::mean<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
 template NN_REAL_T nnlib::math::variance<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &, bool);
+template nnlib::Tensor<NN_REAL_T> &nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+template nnlib::Tensor<NN_REAL_T> &&nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
 template nnlib::Tensor<NN_REAL_T> &nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
 template nnlib::Tensor<NN_REAL_T> &&nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
 template nnlib::Tensor<NN_REAL_T> &nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &);

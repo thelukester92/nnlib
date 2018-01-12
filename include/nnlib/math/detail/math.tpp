@@ -65,6 +65,20 @@ T variance(const Tensor<T> &x, bool sample)
 }
 
 template <typename T>
+Tensor<T> &normalize(Tensor<T> &x, T from, T to)
+{
+	NNAssertLessThanOrEquals(from, to, "Invalid normalization range!");
+	T small = min(x), large = max(x);
+	return x.add(-small).scale((to - from) / (large - small)).add(from);
+}
+
+template <typename T>
+Tensor<T> &&normalize(Tensor<T> &&x, T from, T to)
+{
+	return std::move(normalize(x, from, to));
+}
+
+template <typename T>
 Tensor<T> &sum(const Tensor<T> &x, Tensor<T> &y, size_t dim)
 {
 	NNAssertLessThan(dim, x.dims(), "Invalid dimension for summation!");
