@@ -2,6 +2,7 @@
 #define NN_SPARSE_LINEAR_TPP
 
 #include "../sparselinear.hpp"
+#include "nnlib/math/algebra.hpp"
 
 namespace nnlib
 {

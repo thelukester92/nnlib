@@ -2,6 +2,7 @@
 #define OPT_SGD_TPP
 
 #include "../sgd.hpp"
+#include "nnlib/math/algebra.hpp"
 
 namespace nnlib
 {
@@ -50,20 +51,20 @@ SGD<T> &SGD<T>::step(const Tensor<T> &input, const Tensor<T> &target)
 	// calculate gradient
 	m_grads.fill(0);
 	m_model.backward(input, m_critic.backward(m_model.forward(input), target));
-	
+
 	if(m_momentum)
 	{
 		// apply momentum
 		m_velocity.scale(m_momentum);
-		m_velocity.addV(m_grads);
-		
+		Algebra<T>::vAdd_v(m_grads, m_velocity);
+
 		// Nesterov step
-		m_grads.addV(m_velocity, m_momentum);
+		Algebra<T>::vAdd_v(m_velocity, m_grads, m_momentum);
 	}
-	
+
 	// update parameters
-	m_parameters.addV(m_grads, -m_learningRate);
-	
+	Algebra<T>::vAdd_v(m_grads, m_parameters, -m_learningRate);
+
 	return *this;
 }
 

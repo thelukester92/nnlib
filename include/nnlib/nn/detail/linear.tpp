@@ -2,6 +2,7 @@
 #define NN_LINEAR_TPP
 
 #include "../linear.hpp"
+#include "nnlib/math/algebra.hpp"
 
 namespace nnlib
 {

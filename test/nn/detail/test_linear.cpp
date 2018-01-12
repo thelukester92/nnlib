@@ -30,9 +30,9 @@ void TestLinear()
 	module.forward(inp);
 	module.backward(inp, grd);
 
-	NNAssertLessThan(module.output().copy().addM(out, -1).square().sum(), 1e-9, "Linear::forward failed; wrong output!");
-	NNAssertLessThan(module.inGrad().copy().addM(ing, -1).square().sum(), 1e-9, "Linear::backward failed; wrong input gradient!");
-	NNAssertLessThan(module.grad().addV(prg, -1).square().sum(), 1e-9, "Linear::backward failed; wrong parameter gradient!");
+	NNAssertLessThan((module.output() - out).square().sum(), 1e-9, "Linear::forward failed; wrong output!");
+	NNAssertLessThan((module.inGrad() - ing).square().sum(), 1e-9, "Linear::backward failed; wrong input gradient!");
+	NNAssertLessThan((module.grad() - prg).square().sum(), 1e-9, "Linear::backward failed; wrong parameter gradient!");
 
 	module.forward(inp.select(0, 0));
 	module.backward(inp.select(0, 0), grd.select(0, 0));

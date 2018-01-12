@@ -12,10 +12,10 @@ void TestCriticSequencer()
 	Tensor<NN_REAL_T> dif = Tensor<NN_REAL_T>({ -2, -4, -6, -8, 10 }).resize(shape);
 	MSE<NN_REAL_T> *innerCritic = new MSE<NN_REAL_T>(false);
 	CriticSequencer<NN_REAL_T> critic(innerCritic);
-	
+
 	double mse = critic.forward(inp, tgt);
 	NNAssertAlmostEquals(mse, sqd.sum(), 1e-12, "CriticSequencer::forward with no average failed!");
-	
+
 	critic.backward(inp, tgt);
-	NNAssert(critic.inGrad().reshape(5, 1).addM(dif.reshape(5, 1), -1).square().sum() < 1e-12, "CriticSequencer::backward failed!");
+	NNAssert((critic.inGrad().reshape(5, 1) - dif.reshape(5, 1)).square().sum() < 1e-12, "CriticSequencer::backward failed!");
 }

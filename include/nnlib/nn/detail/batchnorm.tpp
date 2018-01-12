@@ -144,33 +144,46 @@ Tensor<T> &BatchNorm<T>::forward(const Tensor<T> &input)
 	NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 	NNAssertEquals(input.size(1), m_weights.size(), "Incompatible input!");
 	m_output.resize(input.shape());
-	
+
 	size_t n = input.size(0);
 	T norm = 1.0 / n;
-	
+
 	// Get means and variances to use
 	Tensor<T> means, invStds;
 	if(m_training)
 	{
 		NNAssertGreaterThan(input.size(0), 1, "Expected a batch in training mode!");
-		
+
 		// Get means
 		input.sum(m_means, 0);
 		m_means.scale(norm);
-		
+
 		// Get unnormalized variances (temporarily stored in m_invStds)
 		for(size_t i = 0; i < n; ++i)
-			m_invStds.addV(input.select(0, i).copy().addV(m_means, -1).square());
-		
+		{
+			forEach([&](T x, T mean, T &y)
+			{
+				y += (x - mean) * (x - mean);
+			}, input.select(0, i), m_means, m_invStds);
+		}
+
 		// Update running mean
-		m_runningMeans.scale(1 - m_momentum).addV(m_means.copy().scale(m_momentum));
-		
+		forEach([&](T mean, T &runningMean)
+		{
+			runningMean *= 1 - m_momentum;
+			runningMean += m_momentum * mean;
+		}, m_means, m_runningMeans);
+
 		// Update running variance (normalize as sample)
-		m_runningVars.scale(1 - m_momentum).addV(m_invStds.copy().scale(m_momentum / (n - 1)));
-		
+		forEach([&](T invStd, T &runningVar)
+		{
+			runningVar *= 1 - m_momentum;
+			runningVar += m_momentum / (n - 1) * invStd;
+		}, m_invStds, m_runningVars);
+
 		// Now normalize variance as population; will invert and sqrt after this if statement
 		m_invStds.scale(norm);
-		
+
 		// Use the batch statistics
 		means = m_means;
 		invStds = m_invStds;
@@ -181,28 +194,36 @@ Tensor<T> &BatchNorm<T>::forward(const Tensor<T> &input)
 		means = m_runningMeans;
 		invStds = m_runningVars.copy();
 	}
-	
+
 	// Turn variance into inverted standard deviation
 	forEach([&](T &invStd)
 	{
 		invStd = 1.0 / sqrt(invStd + 1e-12);
 	}, invStds);
-	
+
 	// Use the statistics to normalize the data row-by-row
 	for(size_t i = 0; i < n; ++i)
 	{
 		Tensor<T> out = m_output.select(0, i);
-		
+
 		// Copy
 		out.copy(input.select(0, i));
-		
+
 		// Normalize
-		out.addV(means, -1).pointwiseProduct(invStds);
-		
+		forEach([&](T mean, T invStd, T &y)
+		{
+			y -= mean;
+			y *= invStd;
+		}, means, invStds, out);
+
 		// Rescale and reshift using the parameters
-		out.pointwiseProduct(m_weights).addV(m_biases);
+		forEach([&](T w, T b, T &y)
+		{
+			y *= w;
+			y += b;
+		}, m_weights, m_biases, out);
 	}
-	
+
 	return m_output;
 }
 
@@ -214,9 +235,9 @@ Tensor<T> &BatchNorm<T>::backward(const Tensor<T> &input, const Tensor<T> &outGr
 	NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible outGrad!");
 	m_output.resize(input.shape());
 	m_inGrad.resize(input.shape());
-	
+
 	size_t inps = m_inGrad.size(1), bats = m_inGrad.size(0);
-	
+
 	// Get means and variances to use
 	Tensor<T> means, invStds;
 	if(m_training)
@@ -230,31 +251,31 @@ Tensor<T> &BatchNorm<T>::backward(const Tensor<T> &input, const Tensor<T> &outGr
 		// Use the running statistics
 		means = m_runningMeans;
 		invStds = m_runningVars.copy();
-		
+
 		// Turn variance into inverted standard deviation
 		forEach([&](T &invStd)
 		{
 			invStd = 1.0 / sqrt(invStd + 1e-12);
 		}, invStds);
 	}
-	
+
 	for(size_t i = 0; i < inps; ++i)
 	{
 		T sum = 0;
 		for(size_t j = 0; j < bats; ++j)
 			sum += outGrad(j, i);
-		
+
 		T dotp = 0;
 		for(size_t j = 0; j < bats; ++j)
 			dotp += (input(j, i) - means(i)) * outGrad(j, i);
-		
+
 		// gradient of inputs
 		if(m_training)
 		{
 			T k = dotp * invStds(i) * invStds(i) / bats;
 			for(size_t j = 0; j < bats; ++j)
 				m_inGrad(j, i) = (input(j, i) - means(i)) * k;
-			
+
 			T gradMean = sum / bats;
 			for(size_t j = 0; j < bats; ++j)
 				m_inGrad(j, i) = (outGrad(j, i) - gradMean - m_inGrad(j, i)) * invStds(i) * m_weights(i);
@@ -264,14 +285,14 @@ Tensor<T> &BatchNorm<T>::backward(const Tensor<T> &input, const Tensor<T> &outGr
 			for(size_t j = 0; j < bats; ++j)
 				m_inGrad(j, i) = outGrad(j, i) * invStds(i) * m_weights(i);
 		}
-	
+
 		// gradient of biases
 		m_biasesGrad(i) += sum;
-		
+
 		// gradient of weights
 		m_weightsGrad(i) += dotp * invStds(i);
 	}
-	
+
 	return m_inGrad;
 }
 

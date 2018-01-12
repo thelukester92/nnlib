@@ -2,7 +2,6 @@
 #define CORE_TENSOR_TPP
 
 #include "../tensor.hpp"
-#include "nnlib/math/algebra.hpp"
 #include "nnlib/util/random.hpp"
 
 namespace nnlib
@@ -641,20 +640,6 @@ Tensor<T> &Tensor<T>::add(T alpha)
 }
 
 template <typename T>
-Tensor<T> &Tensor<T>::addV(const Tensor<T> &x, T alpha)
-{
-	Algebra<T>::vAdd_v(x, *this, alpha);
-	return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::addM(const Tensor<T> &A, T alpha)
-{
-	Algebra<T>::mAdd_m(A, *this, alpha);
-	return *this;
-}
-
-template <typename T>
 Tensor<T> &Tensor<T>::pointwiseProduct(const Tensor<T> &x)
 {
 	NNAssertEquals(shape(), x.shape(), "Incompatible operands!");
@@ -671,20 +656,13 @@ template <typename T>
 Tensor<T> &Tensor<T>::add(const Tensor<T> &x, T alpha)
 {
 	NNAssertEquals(shape(), x.shape(), "Incompatible operands to add!");
-	if(m_dims.size() == 1)
-		return addV(x, alpha);
-	else if(m_dims.size() == 2)
-		return addM(x, alpha);
-	else
+	auto i = x.begin();
+	forEach([&](T &el)
 	{
-		auto i = x.begin();
-		forEach([&](T &el)
-		{
-			el += *i * alpha;
-			++i;
-		}, *this);
-		return *this;
-	}
+		el += *i * alpha;
+		++i;
+	}, *this);
+	return *this;
 }
 
 template <typename T>

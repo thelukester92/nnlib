@@ -430,31 +430,16 @@ public:
 	/// \return This tensor, for chaining.
 	Tensor &randn(const T &mean, const T &stddev, const T &cap);
 
-	/// \brief Multiplies this tensor by a scalar.
-	///
-	/// \param alpha The scalar.
-	/// \return This tensor, for chaining.
+	/// \brief Multiply this tensor by a scalar.
 	Tensor &scale(T alpha);
 
-	/// \brief Adds a scalar to each element in this tensor.
-	///
-	/// \param alpha The scalar.
-	/// \return This tensor, for chaining.
+	/// Add a scalar to each element in this tensor.
 	Tensor &add(T alpha);
-
-	/// Add another vector to this vector.
-	Tensor &addV(const Tensor &x, T alpha = 1);
-
-	/// Add another matrix to this matrix.
-	Tensor &addM(const Tensor &A, T alpha = 1);
 
 	/// Hadamard/elementwise/pointwise product.
 	Tensor &pointwiseProduct(const Tensor &x);
 
-	/// \brief Compute elementwise/pointwise sum (general purpose).
-	///
-	/// This is a general purpose function for any size of tensor.
-	/// For vectors, addV is called; for matrices, addM is called.
+	/// Compute elementwise/pointwise sum.
 	Tensor &add(const Tensor &x, T alpha = 1);
 
 	/// Perform a pointwise product with the current tensor, squaring it.
@@ -480,14 +465,10 @@ public:
 	/// See sparsify for an explanation of sparse tensors.
 	Tensor unsparsify();
 
-	/// \brief Apply the given function to each element in this tensor.
-	///
-	/// \note We may eventually split to apply(V|M) (see the add method) for acceleration.
+	/// Apply the given function to each element in this tensor.
 	Tensor &apply(const std::function<void(T&)> &f);
 
-	/// \brief Apply the given function to each element in this tensor.
-	///
-	/// \note We may eventually split to apply(V|M) (see the add method) for acceleration.
+	/// Apply the given function to each element in this tensor.
 	const Tensor &apply(const std::function<void(const T&)> &f) const;
 
 	/// Calculate the sum of all elements in this tensor.

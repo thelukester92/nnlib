@@ -208,35 +208,11 @@ void TestTensor()
 	for(auto x = view.begin(), y = vector.begin(); x != view.end(); ++x, ++y)
 		NNAssertAlmostEquals(*x, 2 + *y, 1e-12, "Tensor::add(T) failed!");
 
-	view.resize(12).rand();
-	vector.resize(12).rand();
-	empty = view.copy().addV(vector);
-	for(auto x = view.begin(), y = vector.begin(), z = empty.begin(); x != view.end(); ++x, ++y, ++z)
-		NNAssertAlmostEquals(*x + *y, *z, 1e-12, "Tensor::addV failed!");
-
 	// test tensor math
 
-	view = Tensor<NN_REAL_T>(3, 100).rand();
-	vector = Tensor<NN_REAL_T>(100).rand();
-	viewOfMoved = Tensor<NN_REAL_T>(view.size(0));
-	empty = Tensor<NN_REAL_T>(view.size(0));
-
-	vector.resize(3);
-	viewOfMoved.resize(100).zeros();
-	empty.resize(100);
-
-	empty.resize(3, 3);
-	viewOfMoved.resize(3, 3);
-
-	view = empty.copy().addM(viewOfMoved);
-	for(size_t i = 0; i < view.size(0); ++i)
-		for(size_t j = 0; j < view.size(1); ++j)
-			NNAssertAlmostEquals(view(i, j), empty(i, j) + viewOfMoved(i, j), 1e-12, "Tensor::addM failed!");
-
-	empty.resize(10, 5).rand();
-	vector.resize(10, 5).rand();
-	view.resize(10, 10);
-	viewOfMoved.resize(10, 10);
+	vector = Tensor<NN_REAL_T>(10, 5).rand();
+	empty = Tensor<NN_REAL_T>(10, 5).rand();
+	viewOfMoved = Tensor<NN_REAL_T>(10, 10);
 
 	for(size_t i = 0; i < 10; ++i)
 	{
