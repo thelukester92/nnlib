@@ -12,6 +12,7 @@ void TestMath()
 		4, 5, 6,
 		7, 8, 9
 	}).resize(3, 3);
+	Tensor<NN_REAL_T> c;
 
 	NNAssertAlmostEquals(min(a), -6, 1e-12, "math::min failed!");
 	NNAssertAlmostEquals(max(a), 9, 1e-12, "math::max failed!");
@@ -54,25 +55,59 @@ void TestMath()
 	NNAssertAlmostEquals(a(2), 1, 1e-12, "math::square(Tensor &&) failed!");
 	NNAssertAlmostEquals(a(3), 4, 1e-12, "math::square(Tensor &&) failed!");
 
-	a.resize(3);
+	a.resize(3).zeros();
 	sum(b, a, 0);
 	NNAssertAlmostEquals(a(0), 12, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
 	NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
 	NNAssertAlmostEquals(a(2), 18, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
+
+	a.resize(3).zeros();
 	sum(b, a, 1);
 	NNAssertAlmostEquals(a(0), 6, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
 	NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
 	NNAssertAlmostEquals(a(2), 24, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
 
-	a = { 1, 2, 3, 4 };
+	a.resize(4).zeros();
 	sum(b, a.view(3), 0);
 	NNAssertAlmostEquals(a(0), 12, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
 	NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
 	NNAssertAlmostEquals(a(2), 18, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-	NNAssertAlmostEquals(a(3), 4, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
+	NNAssertAlmostEquals(a(3), 0, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
+
+	a.resize(4).zeros();
 	sum(b, a.view(3), 1);
 	NNAssertAlmostEquals(a(0), 6, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
 	NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
 	NNAssertAlmostEquals(a(2), 24, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-	NNAssertAlmostEquals(a(3), 4, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
+	NNAssertAlmostEquals(a(3), 0, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
+
+	a = {  1, 2, 0 };
+	b = { -1, 5, 3 };
+	pointwiseProduct(a, b);
+	NNAssertAlmostEquals(b(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &) failed!");
+	NNAssertAlmostEquals(b(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &) failed!");
+	NNAssertAlmostEquals(b(2), 0, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &) failed!");
+
+	a = {  1, 2, 0 };
+	b = { -1, 5, 3 };
+	pointwiseProduct(a.view(2), b.view(2));
+	NNAssertAlmostEquals(b(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &&) failed!");
+	NNAssertAlmostEquals(b(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &&) failed!");
+	NNAssertAlmostEquals(b(2), 3, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &&) failed!");
+
+	a = {  1, 2, 3 };
+	b = { -1, 5, 3 };
+	c.resize(3).zeros();
+	pointwiseProduct(a, b, c);
+	NNAssertAlmostEquals(c(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &) failed!");
+	NNAssertAlmostEquals(c(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &) failed!");
+	NNAssertAlmostEquals(c(2), 9, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &) failed!");
+
+	a = {  1, 2, 3 };
+	b = { -1, 5, 3 };
+	c.resize(3).zeros();
+	pointwiseProduct(a.view(2), b.view(2), c.view(2));
+	NNAssertAlmostEquals(c(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &&) failed!");
+	NNAssertAlmostEquals(c(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &&) failed!");
+	NNAssertAlmostEquals(c(2), 0, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &&) failed!");
 }
