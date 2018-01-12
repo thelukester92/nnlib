@@ -48,8 +48,8 @@ void TestBatchNorm()
 	bn.training(false);
 
 	paramGrad.copy({
-		12.21528, 2.30940, 0,
-		10, 5, 12
+		27.17588, 5.13783, 0,
+		20, 10, 24
 	});
 
 	inGrad.copy({

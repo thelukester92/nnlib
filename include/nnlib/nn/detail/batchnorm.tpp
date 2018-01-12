@@ -160,6 +160,7 @@ Tensor<T> &BatchNorm<T>::forward(const Tensor<T> &input)
 		m_means.scale(norm);
 
 		// Get unnormalized variances (temporarily stored in m_invStds)
+		m_invStds.zeros();
 		for(size_t i = 0; i < n; ++i)
 		{
 			forEach([&](T x, T mean, T &y)
@@ -234,7 +235,6 @@ Tensor<T> &BatchNorm<T>::backward(const Tensor<T> &input, const Tensor<T> &outGr
 	NNAssertEquals(input.dims(), 2, "Expected matrix input!");
 	NNAssertEquals(input.size(1), m_weights.size(), "Incompatible input!");
 	NNAssertEquals(input.shape(), outGrad.shape(), "Incompatible outGrad!");
-	m_output.resize(input.shape());
 	m_inGrad.resize(input.shape());
 
 	size_t inps = m_inGrad.size(1), bats = m_inGrad.size(0);
