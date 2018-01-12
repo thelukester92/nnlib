@@ -16,10 +16,10 @@ namespace detail
 	struct ForEachHelper
 	{
 		template <typename F, typename ... Ts>
-		static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, const Storage<size_t> &strides, F func, Ts &...ts)
+		static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, F func, Ts &...ts)
 		{
 			for(indices[I] = 0; indices[I] < shape[I]; ++indices[I])
-				ForEachHelper<D-1, I+1>::apply(indices, shape, strides, func, ts...);
+				ForEachHelper<D-1, I+1>::apply(indices, shape, func, ts...);
 		}
 	};
 
@@ -27,17 +27,19 @@ namespace detail
 	struct ForEachHelper<1ul, I>
 	{
 		template <typename F, typename ... Ts>
-		static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, const Storage<size_t> &strides, F func, Ts &...ts)
+		static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, F func, Ts &...ts)
 		{
 			for(indices[I] = 0; indices[I] < shape[I]; ++indices[I])
-				func(ts.ptr()[indexOf(indices, strides)]...);
+				func(ts.ptr()[indexOf(ts, indices)]...);
 		}
 
 	private:
-		static size_t indexOf(const Storage<size_t> &indices, const Storage<size_t> &strides)
+		template <typename T>
+		static size_t indexOf(T &&tensor, const Storage<size_t> &indices)
 		{
-			size_t i = 0, j;
-			for(j = 0; j < I + 1; ++j)
+			const Storage<size_t> &strides = tensor.strides();
+			size_t i = 0;
+			for(size_t j = 0; j < I + 1; ++j)
 				i += indices[j] * strides[j];
 			return i;
 		}
@@ -47,10 +49,10 @@ namespace detail
 	struct ForEach
 	{
 		template <typename F, typename ... Ts>
-		static void apply(F func, const Storage<size_t> &shape, const Storage<size_t> &strides, Ts &...ts)
+		static void apply(const Storage<size_t> &shape, F func, Ts &...ts)
 		{
 			Storage<size_t> indices(D);
-			ForEachHelper<D, 0>::apply(indices, shape, strides, func, ts...);
+			ForEachHelper<D, 0>::apply(indices, shape, func, ts...);
 		}
 	};
 
@@ -83,7 +85,7 @@ namespace detail
 template <typename F, typename T, typename ... Ts>
 void forEach(F func, T &first, Ts &...ts)
 {
-	detail::TemplateSearch<1ul, NN_MAX_NUM_DIMENSIONS, detail::ForEach>::apply(first.dims(), func, first.shape(), first.strides(), first, ts...);
+	detail::TemplateSearch<1ul, NN_MAX_NUM_DIMENSIONS, detail::ForEach>::apply(first.dims(), first.shape(), func, first, ts...);
 }
 
 /// Output a tensor to a stream.
