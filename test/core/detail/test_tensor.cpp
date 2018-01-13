@@ -11,23 +11,6 @@ void TestTensor()
 		NNAssertEquals(empty.size(), 0, "Tensor::concatenate on an empty list failed!");
 	}
 
-	// test random permutation
-
-	{
-		Tensor<size_t> perm = Tensor<size_t>::randPermutation(3);
-		bool hasZero = false, hasOne = false, hasTwo = false;
-		for(size_t i = 0; i < 3; ++i)
-		{
-			if(perm(i) == 0)
-				hasZero = true;
-			else if(perm(i) == 1)
-				hasOne = true;
-			else if(perm(i) == 2)
-				hasTwo = true;
-		}
-		NNAssert(hasZero && hasOne && hasTwo, "Tensor::randPermutation failed!");
-	}
-
 	// test resizing to the same size
 
 	{
