@@ -18,7 +18,7 @@ void TestStorage()
 	NNAssertEquals(copy.size(), 5, "Storage::Storage(Storage &) failed! Wrong size!");
 	NNAssertEquals(*copy.ptr(), 3.14, "Storage::Storage(Storage &) failed! Wrong value!");
 
-	Storage<double> fromTemporary(Storage({ 7 }));
+	Storage<double> fromTemporary(Storage<double>({ 7 }));
 	NNAssertEquals(fromTemporary.size(), 1, "Storage::Storage(Storage &&) failed! Wrong size!");
 	NNAssertEquals(*fromTemporary.ptr(), 7, "Storage::Storage(Storage &&) failed! Wrong value!");
 
