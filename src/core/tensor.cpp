@@ -3,11 +3,7 @@
 
 #include "nnlib/core/tensor.hpp"
 #include "nnlib/core/detail/tensor.tpp"
-#include "nnlib/core/detail/tensor_iterator.tpp"
-#include "nnlib/core/detail/tensor_operators.tpp"
 
 template class nnlib::Tensor<NN_REAL_T>;
-template class nnlib::TensorIterator<NN_REAL_T>;
-template class nnlib::TensorIterator<const NN_REAL_T>;
 
 #endif

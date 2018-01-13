@@ -60,6 +60,13 @@ namespace traits
 	template <typename T>
 	struct HasBeginAndEnd<T, decltype(std::declval<T>().begin(), 0), decltype(std::declval<T>().end(), 0)> : std::true_type
 	{};
+
+	/// Identity of a type; for marking types to ignore during type inference.
+	template <typename T>
+	struct Identity
+	{
+		using type = T;
+	};
 }
 
 }

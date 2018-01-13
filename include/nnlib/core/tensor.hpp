@@ -524,37 +524,16 @@ private:
 	void checkContiguous();
 };
 
-template <typename T>
-class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::ptrdiff_t, const T *, T &>
-{
-using TT = typename std::remove_const<T>::type;
-public:
-	TensorIterator(const Tensor<TT> *tensor, bool end = false);
-	TensorIterator &operator++();
-	TensorIterator operator++(int);
-	T &operator*();
-	bool operator==(const TensorIterator &other);
-	bool operator!=(const TensorIterator &other);
-
-private:
-	bool m_contiguous;
-	const Storage<size_t> &m_shape;
-	const Storage<size_t> &m_stride;
-	Storage<size_t> m_indices;
-	TT *m_ptr;
-};
-
 }
 
 #if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::Tensor<NN_REAL_T>;
-	extern template class nnlib::TensorIterator<NN_REAL_T>;
-	extern template class nnlib::TensorIterator<const NN_REAL_T>;
 #elif !defined NN_IMPL
 	#include "detail/tensor.tpp"
-	#include "detail/tensor_iterator.tpp"
 #endif
 
-#include "detail/tensor_operators.tpp"
+#include "detail/tensor_iterator.hpp"
+#include "detail/tensor_operators.hpp"
+#include "detail/tensor_util.hpp"
 
 #endif

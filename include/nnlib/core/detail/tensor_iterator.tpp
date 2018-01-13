@@ -1,7 +1,7 @@
 #ifndef CORE_TENSOR_ITERATOR_TPP
 #define CORE_TENSOR_ITERATOR_TPP
 
-#include "../tensor.hpp"
+#include "tensor_iterator.hpp"
 
 namespace nnlib
 {
