@@ -11,6 +11,23 @@ void TestTensor()
 		NNAssertEquals(empty.size(), 0, "Tensor::concatenate on an empty list failed!");
 	}
 
+	// test random permutation
+
+	{
+		Tensor<size_t> perm = Tensor<size_t>::randPermutation(3);
+		bool hasZero = false, hasOne = false, hasTwo = false;
+		for(size_t i = 0; i < 3; ++i)
+		{
+			if(perm(i) == 0)
+				hasZero = true;
+			else if(perm(i) == 1)
+				hasOne = true;
+			else if(perm(i) == 2)
+				hasTwo = true;
+		}
+		NNAssert(hasZero && hasOne && hasTwo, "Tensor::randPermutation failed!");
+	}
+
 	// test resizing to the same size
 
 	{
@@ -66,10 +83,18 @@ void TestTensor()
 	empty = vector;
 	NNAssertEquals(empty.shape(), vector.shape(), "Tensor::operator=(Tensor &) failed! Wrong shape!");
 	NNAssertEquals(empty.ptr(), vector.ptr(), "Tensor::operator=(Tensor &) failed! Wrong data!");
+	NNAssertEquals(empty.sharedCount(), 2, "Tensor::operator=(Tensor &) failed! Not sharing data!");
+	NNAssert(empty.sharedWith(vector), "Tensor::operator=(Tensor &) failed! Not sharing data!");
 
 	empty = std::move(initFromStorage);
 	NNAssertEquals(empty.shape(), initFromStorage.shape(), "Tensor::operator=(Tensor &&) failed! Wrong shape!");
 	NNAssertEquals(empty.ptr(), initFromStorage.ptr(), "Tensor::operator=(Tensor &&) failed! Wrong data!");
+
+	empty = Tensor<NN_REAL_T>(3, 3).rand().transpose();
+	NNAssert(!empty.contiguous(), "Tensor::transpose failed to make discontiguous!");
+
+	empty.makeContiguous();
+	NNAssert(empty.contiguous(), "Tensor::makeContiguous failed!");
 
 	// test element access
 
@@ -77,6 +102,7 @@ void TestTensor()
 	NNAssertEquals(vector(2, 2), 3.14, "Tensor::operator() failed!");
 	NNAssertEquals(view(2, 2), 3.14, "Tensor::operator() failed!");
 	NNAssertEquals(&vector(2, 2), &view(2, 2), "Tensor::operator() failed!");
+	NNAssertEquals(vector.at(2, 2), view.at(2, 2), "Tensor::at(size_t) failed!");
 
 	vector.fill(6.26);
 	for(auto &v : vector)
@@ -210,11 +236,49 @@ void TestTensor()
 
 	NNAssertNotEquals(vector.begin(), view.begin(), "TensorIterator::operator== failed!");
 
+	// test sparsification / unsparsification
+
+	view = Tensor<NN_REAL_T>({
+		3, 3, 0,
+		0, 0, 1,
+		1, 1, 1,
+		2, 2, 1
+	}).resize(4, 3);
+	empty = Tensor<NN_REAL_T>({
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1
+	}).resize(3, 3).sparsify();
+
+	forEach([&](NN_REAL_T x, NN_REAL_T y)
+	{
+		NNAssertAlmostEquals(x, y, 1e-12, "Tensor::sparsify failed!");
+	}, view, empty);
+
+	view = Tensor<NN_REAL_T>({
+		3, 3, 0,
+		0, 0, 1,
+		1, 1, 1,
+		2, 2, 1
+	}).resize(4, 3).unsparsify();
+	empty = Tensor<NN_REAL_T>({
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1
+	}).resize(3, 3);
+
+	forEach([&](NN_REAL_T x, NN_REAL_T y)
+	{
+		NNAssertAlmostEquals(x, y, 1e-12, "Tensor::unsparsify failed!");
+	}, view, empty);
+
 	// test const methods
 
 	view.resize(10, 10);
 
 	const Tensor<NN_REAL_T> &constant = view;
+	NNAssertEquals(&constant.at(0, 0), &view.at(0, 0), "const Tensor::at(size_t) failed!");
+	NNAssertEquals(&constant.data(), &view.data(), "const Tensor::data(size_t) failed!");
 
 	{
 		const Tensor<NN_REAL_T> &constView = constant.view(Storage<size_t>({ 3, 3 }));
