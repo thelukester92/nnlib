@@ -106,7 +106,7 @@ $(OBJ)/%.o: src/%.cpp
 dbg: clean-gcda $(LIB)/$(DBGLIB)
 $(LIB)/$(DBGLIB): $(DBGFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) -fPIC $(DBGFILES) $(DBGFLAGS) $(LDFLAGS) -lgcov -o $@
+	$(CXX) -fPIC $(DBGFILES) $(DBGFLAGS) $(LDFLAGS) -fprofile-arcs -o $@
 $(OBJ)/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@
