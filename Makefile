@@ -84,7 +84,7 @@ else
 endif
 
 override OPTFLAGS := $(CXXFLAGS) -DNN_OPT -O3
-override DBGFLAGS := $(CXXFLAGS) -g -fprofile-arcs -ftest-coverage
+override DBGFLAGS := $(CXXFLAGS) -g
 
 override TSTFILES := $(shell find test -name *.cpp)
 override TSTFILES := $(TSTFILES:test/%.cpp=$(OBJ)/test/%.o)
@@ -106,10 +106,10 @@ $(OBJ)/%.o: src/%.cpp
 dbg: clean-gcda $(LIB)/$(DBGLIB)
 $(LIB)/$(DBGLIB): $(DBGFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) -fPIC $(DBGFILES) $(DBGFLAGS) $(LDFLAGS) -fprofile-arcs -o $@
+	$(CXX) -fPIC $(DBGFILES) $(DBGFLAGS) $(LDFLAGS) -o $@ --coverage
 $(OBJ)/dbg/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@
+	$(CXX) -fPIC $< $(DBGFLAGS) -MMD -c -o $@ --coverage
 
 test: dbg $(BIN)/$(TST) $(BIN)/nvblas.conf
 	NVBLAS_CONFIG_FILE=$(BIN)/nvblas.conf ./$(BIN)/$(TST)
