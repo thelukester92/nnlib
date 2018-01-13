@@ -2,6 +2,7 @@
 #define TEST_MODULE_HPP
 
 #include "nnlib/nn/module.hpp"
+#include "nnlib/util/random.hpp"
 using namespace std;
 using namespace nnlib;
 

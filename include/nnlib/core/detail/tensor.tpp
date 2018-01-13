@@ -638,14 +638,15 @@ Tensor<T> Tensor<T>::sparsify(T epsilon) const
 			++count;
 	}, *this);
 
-	Tensor<T> sparse(count, m_dims.size() + 1);
+	Tensor<T> sparse(count + 1, m_dims.size() + 1);
+	for(size_t i = 0; i < m_dims.size(); ++i)
+		sparse(0, i) = m_dims[i];
+
 	Storage<size_t> indices(m_dims.size());
-	size_t idx = 0;
+	size_t idx = 1;
 
 	while(indices.front() < m_dims[0])
 	{
-		std::cout << "(" << indices[0] << "," << indices[1] << ")" << std::endl;
-
 		const T &x = (*this)(indices);
 
 		if(std::abs(x) > epsilon)
@@ -659,7 +660,7 @@ Tensor<T> Tensor<T>::sparsify(T epsilon) const
 		size_t d = indices.size() - 1;
 		++indices[d];
 
-		while(indices[d] > m_dims[d] && d > 0)
+		while(indices[d] >= m_dims[d] && d > 0)
 		{
 			indices[d] = 0;
 			--d;

@@ -548,6 +548,8 @@ private:
 
 #if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::Tensor<NN_REAL_T>;
+	extern template class nnlib::TensorIterator<NN_REAL_T>;
+	extern template class nnlib::TensorIterator<const NN_REAL_T>;
 #elif !defined NN_IMPL
 	#include "detail/tensor.tpp"
 	#include "detail/tensor_iterator.tpp"

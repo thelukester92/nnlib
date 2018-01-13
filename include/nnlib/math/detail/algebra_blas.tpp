@@ -6,6 +6,7 @@
 #define MATH_ALGEBRA_BLAS_TPP
 
 #include "../algebra.hpp"
+#include "nnlib/core/detail/tensor.tpp"
 
 #ifdef __APPLE__
 	#include <Accelerate/Accelerate.h>
