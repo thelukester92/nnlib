@@ -11,17 +11,17 @@ template <typename T = NN_REAL_T>
 class Map : public Module<T>
 {
 public:
-	virtual T forwardOne(const T &x) = 0;
-	virtual T backwardOne(const T &x, const T &y) = 0;
-	
-	virtual void save(Serialized &node) const override;
-	
-	virtual Tensor<T> &forward(const Tensor<T> &input) override;
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-	
+    virtual T forwardOne(const T &x) = 0;
+    virtual T backwardOne(const T &x, const T &y) = 0;
+    
+    virtual void save(Serialized &node) const override;
+    
+    virtual Tensor<T> &forward(const Tensor<T> &input) override;
+    virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
+    
 protected:
-	using Module<T>::m_output;
-	using Module<T>::m_inGrad;
+    using Module<T>::m_output;
+    using Module<T>::m_inGrad;
 };
 
 }
@@ -29,9 +29,9 @@ protected:
 NNRegisterType(Map, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::Map<NN_REAL_T>;
+    extern template class nnlib::Map<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/map.tpp"
+    #include "detail/map.tpp"
 #endif
 
 #endif

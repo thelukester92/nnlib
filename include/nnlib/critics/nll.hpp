@@ -13,33 +13,33 @@ template <typename T = NN_REAL_T>
 class NLL : public Critic<T>
 {
 public:
-	NLL(bool average = true);
-	
-	bool average() const;
-	NLL &average(bool ave);
-	
-	/// A convenience method for counting misclassifications, since we know the output will be categorical.
-	size_t misclassifications(const Tensor<T> &input, const Tensor<T> &target);
-	
-	/// L = 1/n sum_i( -input(target(i)) )
-	virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override;
-	
-	/// dL/di = target == i ? -1/n : 0
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override;
-	
+    NLL(bool average = true);
+
+    bool average() const;
+    NLL &average(bool ave);
+
+    /// A convenience method for counting misclassifications, since we know the output will be categorical.
+    size_t misclassifications(const Tensor<T> &input, const Tensor<T> &target);
+
+    /// L = 1/n sum_i( -input(target(i)) )
+    virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override;
+    
+    /// dL/di = target == i ? -1/n : 0
+    virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override;
+
 protected:
-	using Critic<T>::m_inGrad;
-	
+    using Critic<T>::m_inGrad;
+
 private:
-	bool m_average;
+    bool m_average;
 };
 
 }
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::NLL<NN_REAL_T>;
+    extern template class nnlib::NLL<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/nll.tpp"
+    #include "detail/nll.tpp"
 #endif
 
 #endif

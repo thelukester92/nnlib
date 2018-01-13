@@ -11,22 +11,22 @@ template <typename T = NN_REAL_T>
 class ReLU : public Map<T>
 {
 public:
-	ReLU(T leak = 0.1);
-	ReLU(const ReLU &module);
-	ReLU(const Serialized &node);
+    ReLU(T leak = 0.1);
+    ReLU(const ReLU &module);
+    ReLU(const Serialized &node);
 
-	ReLU &operator=(const ReLU &module);
+    ReLU &operator=(const ReLU &module);
 
-	virtual void save(Serialized &node) const override;
+    virtual void save(Serialized &node) const override;
 
-	T leak() const;
-	ReLU &leak(T leak);
+    T leak() const;
+    ReLU &leak(T leak);
 
-	virtual T forwardOne(const T &x) override;
-	virtual T backwardOne(const T &x, const T &y) override;
+    virtual T forwardOne(const T &x) override;
+    virtual T backwardOne(const T &x, const T &y) override;
 
 private:
-	T m_leak;
+    T m_leak;
 };
 
 }
@@ -34,9 +34,9 @@ private:
 NNRegisterType(ReLU, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::ReLU<NN_REAL_T>;
+    extern template class nnlib::ReLU<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/relu.tpp"
+    #include "detail/relu.tpp"
 #endif
 
 #endif

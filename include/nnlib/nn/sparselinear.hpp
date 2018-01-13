@@ -15,23 +15,23 @@ template <typename T = NN_REAL_T>
 class SparseLinear : public Linear<T>
 {
 public:
-	using Linear<T>::Linear;
-	
-	virtual Tensor<T> &forward(const Tensor<T> &input) override;
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-	
+    using Linear<T>::Linear;
+    
+    virtual Tensor<T> &forward(const Tensor<T> &input) override;
+    virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
+    
 protected:
-	using Module<T>::m_output;
-	using Module<T>::m_inGrad;
-	
-	using Linear<T>::m_weights;
-	using Linear<T>::m_weightsGrad;
-	
-	using Linear<T>::m_useBias;
-	using Linear<T>::m_bias;
-	using Linear<T>::m_biasGrad;
-	
-	using Linear<T>::m_ones;
+    using Module<T>::m_output;
+    using Module<T>::m_inGrad;
+    
+    using Linear<T>::m_weights;
+    using Linear<T>::m_weightsGrad;
+    
+    using Linear<T>::m_useBias;
+    using Linear<T>::m_bias;
+    using Linear<T>::m_biasGrad;
+    
+    using Linear<T>::m_ones;
 };
 
 }
@@ -39,9 +39,9 @@ protected:
 NNRegisterType(SparseLinear, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::SparseLinear<NN_REAL_T>;
+    extern template class nnlib::SparseLinear<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/sparselinear.tpp"
+    #include "detail/sparselinear.tpp"
 #endif
 
 #endif

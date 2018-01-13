@@ -22,19 +22,19 @@ Sin<T>::Sin(const Sin<T> &)
 template <typename T>
 Sin<T> &Sin<T>::operator=(const Sin<T> &)
 {
-	return *this;
+    return *this;
 }
 
 template <typename T>
 T Sin<T>::forwardOne(const T &x)
 {
-	return sin(x);
+    return sin(x);
 }
 
 template <typename T>
 T Sin<T>::backwardOne(const T &x, const T &y)
 {
-	return cos(x);
+    return cos(x);
 }
 
 }

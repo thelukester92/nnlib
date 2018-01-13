@@ -11,22 +11,22 @@ template <typename T = NN_REAL_T>
 class ELU : public Map<T>
 {
 public:
-	ELU(T alpha = 1.0);
-	ELU(const ELU &module);
-	ELU(const Serialized &node);
+    ELU(T alpha = 1.0);
+    ELU(const ELU &module);
+    ELU(const Serialized &node);
 
-	ELU &operator=(const ELU &module);
+    ELU &operator=(const ELU &module);
 
-	virtual void save(Serialized &node) const override;
+    virtual void save(Serialized &node) const override;
 
-	T alpha() const;
-	ELU &alpha(T alpha);
+    T alpha() const;
+    ELU &alpha(T alpha);
 
-	virtual T forwardOne(const T &x) override;
-	virtual T backwardOne(const T &x, const T &y) override;
+    virtual T forwardOne(const T &x) override;
+    virtual T backwardOne(const T &x, const T &y) override;
 
 private:
-	T m_alpha;
+    T m_alpha;
 };
 
 }
@@ -34,9 +34,9 @@ private:
 NNRegisterType(ELU, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::ELU<NN_REAL_T>;
+    extern template class nnlib::ELU<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/elu.tpp"
+    #include "detail/elu.tpp"
 #endif
 
 #endif

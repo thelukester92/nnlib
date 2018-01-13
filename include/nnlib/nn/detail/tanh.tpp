@@ -22,19 +22,19 @@ TanH<T>::TanH(const TanH<T> &)
 template <typename T>
 TanH<T> &TanH<T>::operator=(const TanH<T> &)
 {
-	return *this;
+    return *this;
 }
 
 template <typename T>
 T TanH<T>::forwardOne(const T &x)
 {
-	return tanh(x);
+    return tanh(x);
 }
 
 template <typename T>
 T TanH<T>::backwardOne(const T &x, const T &y)
 {
-	return 1.0 - y * y;
+    return 1.0 - y * y;
 }
 
 }

@@ -7,76 +7,76 @@ using namespace nnlib;
 
 void TestConcat()
 {
-	// Input, arbitrary
-	Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
-		-5, 10,
-		15, -20
-	}).resize(2, 2);
+    // Input, arbitrary
+    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
+        -5, 10,
+        15, -20
+    }).resize(2, 2);
 
-	// Output gradient, arbitrary
-	Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({
-		1, 2, 3, 4, 5, -6,
-		-4, -3, 2, 1, -1, 2
-	}).resize(2, 6);
+    // Output gradient, arbitrary
+    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({
+        1, 2, 3, 4, 5, -6,
+        -4, -3, 2, 1, -1, 2
+    }).resize(2, 6);
 
-	// Linear layer with weights and bias, arbitrary
-	Linear<NN_REAL_T> *linear = new Linear<NN_REAL_T>(2, 3);
-	linear->weights().copy({
-		-0.50667886785403, 0.32759806987449, 0.65755833165511,
-		0.10750948608753, -0.4340286671044, 0.23516327870398
-	});
-	linear->bias().copy({ -0.025146033726567, 0.6293391970186, -0.60999610504332 });
+    // Linear layer with weights and bias, arbitrary
+    Linear<NN_REAL_T> *linear = new Linear<NN_REAL_T>(2, 3);
+    linear->weights().copy({
+        -0.50667886785403, 0.32759806987449, 0.65755833165511,
+        0.10750948608753, -0.4340286671044, 0.23516327870398
+    });
+    linear->bias().copy({ -0.025146033726567, 0.6293391970186, -0.60999610504332 });
 
-	// Second linear layer with weights and bias, arbitrary
-	Linear<NN_REAL_T> *linear2 = new Linear<NN_REAL_T>(2, 3);
-	linear2->weights().copy({
-		-0.26131507397613, -0.25173198611324, -0.15799479364335,
-		-0.12238678004357, -0.52631174306551, 0.076954514512593
-	});
-	linear2->bias().copy({ 0.089687510972433, -0.1780101224473, 0.5643456848455 });
+    // Second linear layer with weights and bias, arbitrary
+    Linear<NN_REAL_T> *linear2 = new Linear<NN_REAL_T>(2, 3);
+    linear2->weights().copy({
+        -0.26131507397613, -0.25173198611324, -0.15799479364335,
+        -0.12238678004357, -0.52631174306551, 0.076954514512593
+    });
+    linear2->bias().copy({ 0.089687510972433, -0.1780101224473, 0.5643456848455 });
 
-	// Output, fixed given input
-	Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({
-		3.5833431664189, -5.3489378233979, -1.5461549762791, 0.17239508041738, -4.1824676225362, 2.1238647981882,
-		-9.7755187732876, 14.223883587224, 4.5501132957037, -1.3823029977981, 6.5722449471643, -3.3446665100566
-	}).resize(2, 6);
+    // Output, fixed given input
+    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({
+        3.5833431664189, -5.3489378233979, -1.5461549762791, 0.17239508041738, -4.1824676225362, 2.1238647981882,
+        -9.7755187732876, 14.223883587224, 4.5501132957037, -1.3823029977981, 6.5722449471643, -3.3446665100566
+    }).resize(2, 6);
 
-	// Input gradient, fixed given input and output gradient
-	Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({
-		0.76524080224966, -3.6378909345867,
-		2.0334652499533, 1.9002086064182
-	}).resize(2, 2);
+    // Input gradient, fixed given input and output gradient
+    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({
+        0.76524080224966, -3.6378909345867,
+        2.0334652499533, 1.9002086064182
+    }).resize(2, 2);
 
-	// Parameter gradient, fixed given the input and output gradient
-	Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({
-		-65, -55, 15,
-		90, 80, -10,
-		-3, -1, 5,
-		-5, -40, 60,
-		20, 70, -100,
-		5, 4, -4
-	});
+    // Parameter gradient, fixed given the input and output gradient
+    Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({
+        -65, -55, 15,
+        90, 80, -10,
+        -3, -1, 5,
+        -5, -40, 60,
+        20, 70, -100,
+        5, 4, -4
+    });
 
-	// Test forward and backward using the parameters and targets above
+    // Test forward and backward using the parameters and targets above
 
-	Concat<NN_REAL_T> module(linear, linear2);
-	module.forward(inp);
-	module.backward(inp, grd);
+    Concat<NN_REAL_T> module(linear, linear2);
+    module.forward(inp);
+    module.backward(inp, grd);
 
-	NNAssert(math::sum(math::square(module.output() - out)) < 1e-9, "Concat::forward failed!");
-	NNAssert(math::sum(math::square(module.inGrad() - ing)) < 1e-9, "Concat::backward failed; wrong inGrad!");
-	NNAssert(math::sum(math::square(module.grad() - prg)) < 1e-9, "Concat::backward failed; wrong grad!");
+    NNAssert(math::sum(math::square(module.output() - out)) < 1e-9, "Concat::forward failed!");
+    NNAssert(math::sum(math::square(module.inGrad() - ing)) < 1e-9, "Concat::backward failed; wrong inGrad!");
+    NNAssert(math::sum(math::square(module.grad() - prg)) < 1e-9, "Concat::backward failed; wrong grad!");
 
-	NNAssertEquals(module.component(0), linear, "Concat::component failed to get the correct component!");
-	NNAssertEquals(module.components(), 2, "Concat::components failed!");
-	NNAssertEquals(module.remove(0), linear, "Concat::remove failed to return the removed component!");
+    NNAssertEquals(module.component(0), linear, "Concat::component failed to get the correct component!");
+    NNAssertEquals(module.components(), 2, "Concat::components failed!");
+    NNAssertEquals(module.remove(0), linear, "Concat::remove failed to return the removed component!");
 
-	module.clear();
-	NNAssertEquals(module.components(), 0, "Concat::clear failed!");
+    module.clear();
+    NNAssertEquals(module.components(), 0, "Concat::clear failed!");
 
-	module.add(linear);
-	NNAssertEquals(module.paramsList(), linear->paramsList(), "Concat::paramsList failed!");
-	NNAssertEquals(module.gradList(), linear->gradList(), "Concat::gradList failed!");
+    module.add(linear);
+    NNAssertEquals(module.paramsList(), linear->paramsList(), "Concat::paramsList failed!");
+    NNAssertEquals(module.gradList(), linear->gradList(), "Concat::gradList failed!");
 
-	TestContainer("Concat", module, inp);
+    TestContainer("Concat", module, inp);
 }

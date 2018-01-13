@@ -11,16 +11,16 @@ template <typename T = NN_REAL_T>
 class Sequential : public Container<T>
 {
 public:
-	using Container<T>::Container;
-	using Container<T>::components;
-	
-	virtual Tensor<T> &forward(const Tensor<T> &input) override;
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-	virtual Tensor<T> &output() override;
-	virtual Tensor<T> &inGrad() override;
-	
+    using Container<T>::Container;
+    using Container<T>::components;
+    
+    virtual Tensor<T> &forward(const Tensor<T> &input) override;
+    virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
+    virtual Tensor<T> &output() override;
+    virtual Tensor<T> &inGrad() override;
+    
 protected:
-	using Container<T>::m_components;
+    using Container<T>::m_components;
 };
 
 }
@@ -28,9 +28,9 @@ protected:
 NNRegisterType(Sequential, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::Sequential<NN_REAL_T>;
+    extern template class nnlib::Sequential<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/sequential.tpp"
+    #include "detail/sequential.tpp"
 #endif
 
 #endif

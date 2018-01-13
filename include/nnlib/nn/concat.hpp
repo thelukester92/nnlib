@@ -31,40 +31,40 @@ template <typename T = NN_REAL_T>
 class Concat : public Container<T>
 {
 public:
-	using Container<T>::components;
-	
-	template <typename ... Ms>
-	Concat(Module<T> *first, Ms... rest) :
-		Container<T>(first, rest...),
-		m_concatDim((size_t) -1)
-	{}
+    using Container<T>::components;
 
-	template <typename ... Ms>
-	Concat(size_t concatDim, Ms... components) :
-		Container<T>(components...),
-		m_concatDim(concatDim)
-	{}
-	
-	Concat(const Concat &module);
-	Concat(const Serialized &node);
-	
-	Concat &operator=(const Concat &module);
-	
-	size_t concatDim() const;
-	Concat &concatDim(size_t dim);
-	
-	virtual void save(Serialized &node) const override;
-	
-	virtual Tensor<T> &forward(const Tensor<T> &input) override;
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-	
+    template <typename ... Ms>
+    Concat(Module<T> *first, Ms... rest) :
+        Container<T>(first, rest...),
+        m_concatDim((size_t) -1)
+    {}
+
+    template <typename ... Ms>
+    Concat(size_t concatDim, Ms... components) :
+        Container<T>(components...),
+        m_concatDim(concatDim)
+    {}
+
+    Concat(const Concat &module);
+    Concat(const Serialized &node);
+
+    Concat &operator=(const Concat &module);
+
+    size_t concatDim() const;
+    Concat &concatDim(size_t dim);
+
+    virtual void save(Serialized &node) const override;
+
+    virtual Tensor<T> &forward(const Tensor<T> &input) override;
+    virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
+
 protected:
-	using Module<T>::m_output;
-	using Module<T>::m_inGrad;
-	using Container<T>::m_components;
-	
+    using Module<T>::m_output;
+    using Module<T>::m_inGrad;
+    using Container<T>::m_components;
+
 private:
-	size_t m_concatDim;
+    size_t m_concatDim;
 };
 
 }
@@ -72,9 +72,9 @@ private:
 NNRegisterType(Concat, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::Concat<NN_REAL_T>;
+    extern template class nnlib::Concat<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/concat.tpp"
+    #include "detail/concat.tpp"
 #endif
 
 #endif

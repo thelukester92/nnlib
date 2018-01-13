@@ -11,18 +11,18 @@ namespace nnlib
 class FileSerializer
 {
 public:
-	FileSerializer() = delete;
-	FileSerializer(const FileSerializer &) = delete;
-	FileSerializer &operator=(const FileSerializer &) = delete;
+    FileSerializer() = delete;
+    FileSerializer(const FileSerializer &) = delete;
+    FileSerializer &operator=(const FileSerializer &) = delete;
 
-	static Serialized read(const std::string &filename);
-	static void write(const Serialized &root, const std::string &filename);
+    static Serialized read(const std::string &filename);
+    static void write(const Serialized &root, const std::string &filename);
 };
 
 }
 
 #if !defined NN_REAL_T && !defined NN_IMPL
-	#include "detail/fileserializer.tpp"
+    #include "detail/fileserializer.tpp"
 #endif
 
 #endif

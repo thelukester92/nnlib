@@ -13,18 +13,18 @@ template <typename T = NN_REAL_T>
 class LogSoftMax : public Module<T>
 {
 public:
-	LogSoftMax();
-	LogSoftMax(const LogSoftMax &module);
-	LogSoftMax(const Serialized &node);
-	LogSoftMax &operator=(const LogSoftMax &module);
-	
-	virtual void save(Serialized &node) const override;
-	virtual Tensor<T> &forward(const Tensor<T> &input) override;
-	virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-	
+    LogSoftMax();
+    LogSoftMax(const LogSoftMax &module);
+    LogSoftMax(const Serialized &node);
+    LogSoftMax &operator=(const LogSoftMax &module);
+    
+    virtual void save(Serialized &node) const override;
+    virtual Tensor<T> &forward(const Tensor<T> &input) override;
+    virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
+    
 protected:
-	using Module<T>::m_output;
-	using Module<T>::m_inGrad;
+    using Module<T>::m_output;
+    using Module<T>::m_inGrad;
 };
 
 }
@@ -32,9 +32,9 @@ protected:
 NNRegisterType(LogSoftMax, Module);
 
 #if defined NN_REAL_T && !defined NN_IMPL
-	extern template class nnlib::LogSoftMax<NN_REAL_T>;
+    extern template class nnlib::LogSoftMax<NN_REAL_T>;
 #elif !defined NN_IMPL
-	#include "detail/logsoftmax.tpp"
+    #include "detail/logsoftmax.tpp"
 #endif
 
 #endif
