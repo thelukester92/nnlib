@@ -1,30 +1,69 @@
 #include "../test_storage.hpp"
 #include "nnlib/core/error.hpp"
 #include "nnlib/core/storage.hpp"
+#include "nnlib/serialization/serialized.hpp"
 using namespace nnlib;
+
+NNTestClass(Storage)
+{
+    NNTestMethod(Storage)
+    {
+        NNTestParams()
+        {
+            Storage<int> s;
+            NNTestAssertEquals(s.size(), 0);
+        }
+
+        NNTestParams(size_t, T)
+        {
+            Storage<int> s(5, 42);
+            NNTestAssertEquals(s.size(), 5);
+            for(size_t i = 0; i < 5; ++i)
+                NNTestAssertEquals(s[i], 42);
+        }
+
+        NNTestParams(const Storage &)
+        {
+            Storage<int> s(5, 42);
+            Storage<int> t(s);
+            NNTestAssertEquals(t.size(), 5);
+            for(size_t i = 0; i < 5; ++i)
+                NNTestAssertEquals(t[i], 42);
+        }
+
+        NNTestParams(Storage &&)
+        {
+            Storage<int> s(5, 42);
+            Storage<int> t(std::move(s));
+            NNTestAssertEquals(t.size(), 5);
+            for(size_t i = 0; i < 5; ++i)
+                NNTestAssertEquals(t[i], 42);
+        }
+
+        NNTestParams(const std::initializer_list &)
+        {
+            Storage<int> s({ 0, 1, 2, 3, 4, 5 });
+            NNTestAssertEquals(s.size(), 6);
+            for(size_t i = 0; i < 6; ++i)
+                NNTestAssertEquals(s[i], i);
+        }
+
+        NNTestParams(const Serialized &)
+        {
+            Storage<int> s(5, 42);
+            Storage<int> t(Serialized(s));
+            NNTestAssertEquals(t.size(), 5);
+            for(size_t i = 0; i < 5; ++i)
+                NNTestAssertEquals(t[i], 42);
+        }
+    }
+}
+
+
 
 void TestStorage()
 {
-    // test constructors
-
-    Storage<double> empty;
-    NNAssertEquals(empty.size(), 0, "Storage::Storage() failed!");
-
-    Storage<double> regular(5, 3.14);
-    NNAssertEquals(regular.size(), 5, "Storage::Storage(size_t, T) failed! Wrong size!");
-    NNAssertEquals(*regular.ptr(), 3.14, "Storage::Storage(size_t, T) failed! Wrong value!");
-
-    Storage<double> copy(regular);
-    NNAssertEquals(copy.size(), 5, "Storage::Storage(Storage &) failed! Wrong size!");
-    NNAssertEquals(*copy.ptr(), 3.14, "Storage::Storage(Storage &) failed! Wrong value!");
-
-    Storage<double> fromTemporary(Storage<double>({ 7 }));
-    NNAssertEquals(fromTemporary.size(), 1, "Storage::Storage(Storage &&) failed! Wrong size!");
-    NNAssertEquals(*fromTemporary.ptr(), 7, "Storage::Storage(Storage &&) failed! Wrong value!");
-
-    Storage<double> initialized({ 1.0, 2.0, 3.0, 4.0 });
-    NNAssertEquals(initialized.size(), 4, "Storage::Storage(initializer_list) failed! Wrong size!");
-    NNAssertEquals(*initialized.ptr(), 1.0, "Storage::Storage(initializer_list) failed! Wrong value!");
+    TestStorage_contructor();
 
     // test equality checks
 
