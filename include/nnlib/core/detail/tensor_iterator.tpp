@@ -7,82 +7,75 @@ namespace nnlib
 {
 
 template <typename T>
-class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::ptrdiff_t, const T *, T &>
+TensorIterator<T>::TensorIterator(const Tensor<TT> *tensor, bool end) :
+	m_contiguous(tensor->contiguous()),
+	m_shape(tensor->shape()),
+	m_stride(tensor->strides()),
+	m_indices(m_contiguous ? 1 : tensor->dims(), 0),
+	m_ptr(const_cast<Tensor<TT> *>(tensor)->ptr())
 {
-using TT = typename std::remove_const<T>::type;
-public:
-	TensorIterator(const Tensor<TT> *tensor, bool end = false) :
-		m_contiguous(tensor->contiguous()),
-		m_shape(tensor->shape()),
-		m_stride(tensor->strides()),
-		m_indices(m_contiguous ? 1 : tensor->dims(), 0),
-		m_ptr(const_cast<Tensor<TT> *>(tensor)->ptr())
+	if(end || tensor->size() == 0)
 	{
-		if(end || tensor->size() == 0)
-		{
-			m_indices[0] = m_shape[0];
-			m_ptr += m_stride[0] * m_indices[0];
-		}
+		m_indices[0] = m_shape[0];
+		m_ptr += m_stride[0] * m_indices[0];
 	}
-	
-	TensorIterator &operator++()
+}
+
+template <typename T>
+TensorIterator<T> &TensorIterator<T>::operator++()
+{
+	if(m_contiguous)
 	{
-		if(m_contiguous)
-		{
-			++m_ptr;
-			return *this;
-		}
-		
-		size_t d = m_indices.size() - 1;
-		++m_indices[d];
-		m_ptr += m_stride[d];
-		
-		while(m_indices[d] >= m_shape[d] && d > 0)
-		{
-			m_ptr -= m_stride[d] * m_indices[d];
-			m_indices[d] = 0;
-			
-			--d;
-			
-			++m_indices[d];
-			m_ptr += m_stride[d];
-		}
-		
+		++m_ptr;
 		return *this;
 	}
-	
-	TensorIterator operator++(int)
+
+	size_t d = m_indices.size() - 1;
+	++m_indices[d];
+	m_ptr += m_stride[d];
+
+	while(m_indices[d] >= m_shape[d] && d > 0)
 	{
-		TensorIterator it = *this;
-		++(*this);
-		return it;
+		m_ptr -= m_stride[d] * m_indices[d];
+		m_indices[d] = 0;
+
+		--d;
+
+		++m_indices[d];
+		m_ptr += m_stride[d];
 	}
-	
-	T &operator*()
-	{
-		return *m_ptr;
-	}
-	
-	bool operator==(const TensorIterator &other)
-	{
-		return !(*this != other);
-	}
-	
-	bool operator!=(const TensorIterator &other)
-	{
-		if(m_contiguous)
-			return m_ptr != other.m_ptr;
-		else
-			return m_indices != other.m_indices;
-	}
-	
-private:
-	bool m_contiguous;
-	const Storage<size_t> &m_shape;
-	const Storage<size_t> &m_stride;
-	Storage<size_t> m_indices;
-	TT *m_ptr;
-};
+
+	return *this;
+}
+
+template <typename T>
+TensorIterator<T> TensorIterator<T>::operator++(int)
+{
+	TensorIterator it = *this;
+	++(*this);
+	return it;
+}
+
+template <typename T>
+T &TensorIterator<T>::operator*()
+{
+	return *m_ptr;
+}
+
+template <typename T>
+bool TensorIterator<T>::operator==(const TensorIterator<T> &other)
+{
+	return !(*this != other);
+}
+
+template <typename T>
+bool TensorIterator<T>::operator!=(const TensorIterator<T> &other)
+{
+	if(m_contiguous)
+		return m_ptr != other.m_ptr;
+	else
+		return m_indices != other.m_indices;
+}
 
 }
 

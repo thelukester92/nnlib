@@ -83,7 +83,7 @@ void TestTensor()
 	empty = vector;
 	NNAssertEquals(empty.shape(), vector.shape(), "Tensor::operator=(Tensor &) failed! Wrong shape!");
 	NNAssertEquals(empty.ptr(), vector.ptr(), "Tensor::operator=(Tensor &) failed! Wrong data!");
-	NNAssertEquals(empty.sharedCount(), 2, "Tensor::operator=(Tensor &) failed! Not sharing data!");
+	NNAssertGreaterThan(empty.sharedCount(), 1, "Tensor::operator=(Tensor &) failed! Not sharing data!");
 	NNAssert(empty.sharedWith(vector), "Tensor::operator=(Tensor &) failed! Not sharing data!");
 
 	empty = std::move(initFromStorage);
@@ -235,6 +235,25 @@ void TestTensor()
 		NNAssertAlmostEquals(*x, 2 + *y, 1e-12, "Tensor::add(T) failed!");
 
 	NNAssertNotEquals(vector.begin(), view.begin(), "TensorIterator::operator== failed!");
+
+	view = Tensor<NN_REAL_T>({
+		1, 4, 7,
+		2, 5, 8,
+		3, 6, 9
+	}).resize(3, 3).transpose();
+
+	{
+		auto itr = view.begin();
+		NNAssertAlmostEquals(*itr++, 1, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 2, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 3, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 4, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 5, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 6, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 7, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 8, 1e-12, "TensorIterator failed for discontiguous tensor!");
+		NNAssertAlmostEquals(*itr++, 9, 1e-12, "TensorIterator failed for discontiguous tensor!");
+	}
 
 	// test sparsification / unsparsification
 

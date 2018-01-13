@@ -44,9 +44,6 @@ public:
 	/// \return The concatenated tensor.
 	static Tensor concatenate(const Storage<Tensor *> &tensors, size_t dim = (size_t) -1);
 
-	/// Generate a vector containing a random permutation of integers in [0, n)
-	static Tensor randPermutation(size_t n);
-
 	/// Create a zero-length, one-dimensional tensor.
 	Tensor();
 
@@ -451,12 +448,12 @@ public:
 	///     0 0 1.0
 	///     1 1 1.0
 	///     2 2 1.0
-	Tensor sparsify(T epsilon = 1e-12);
+	Tensor sparsify(T epsilon = 1e-12) const;
 
 	/// \brief Unsparsify the current sparse tensor.
 	///
 	/// See sparsify for an explanation of sparse tensors.
-	Tensor unsparsify();
+	Tensor unsparsify() const;
 
 	T &at(const Storage<size_t> &indices);
 	const T &at(const Storage<size_t> &indices) const;
@@ -527,14 +524,35 @@ private:
 	void checkContiguous();
 };
 
+template <typename T>
+class TensorIterator : public std::iterator<std::forward_iterator_tag, T, std::ptrdiff_t, const T *, T &>
+{
+using TT = typename std::remove_const<T>::type;
+public:
+	TensorIterator(const Tensor<TT> *tensor, bool end = false);
+	TensorIterator &operator++();
+	TensorIterator operator++(int);
+	T &operator*();
+	bool operator==(const TensorIterator &other);
+	bool operator!=(const TensorIterator &other);
+
+private:
+	bool m_contiguous;
+	const Storage<size_t> &m_shape;
+	const Storage<size_t> &m_stride;
+	Storage<size_t> m_indices;
+	TT *m_ptr;
+};
+
 }
 
 #if defined NN_REAL_T && !defined NN_IMPL
 	extern template class nnlib::Tensor<NN_REAL_T>;
+#elif !defined NN_IMPL
+	#include "detail/tensor.tpp"
+	#include "detail/tensor_iterator.tpp"
 #endif
 
-#include "detail/tensor.tpp"
-#include "detail/tensor_iterator.tpp"
 #include "detail/tensor_operators.tpp"
 
 #endif

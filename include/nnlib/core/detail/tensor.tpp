@@ -73,17 +73,6 @@ Tensor<T> Tensor<T>::concatenate(const Storage<Tensor<T> *> &tensors, size_t dim
 }
 
 template <typename T>
-Tensor<T> Tensor<T>::randPermutation(size_t n)
-{
-	Tensor<T> t(n);
-	for(size_t i = 0; i < n; ++i)
-		t(i) = i;
-	for(size_t i = 1; i < n; ++i)
-		std::swap(t(i), t(Random<size_t>::sharedRandom().uniform(i + 1)));
-	return t;
-}
-
-template <typename T>
 Tensor<T>::Tensor() :
 	m_dims({ 0 }),
 	m_strides({ 1 }),
@@ -640,10 +629,10 @@ Tensor<T> &Tensor<T>::add(T alpha)
 }
 
 template <typename T>
-Tensor<T> Tensor<T>::sparsify(T epsilon)
+Tensor<T> Tensor<T>::sparsify(T epsilon) const
 {
 	size_t count = 0;
-	forEach([&](const T &x)
+	forEach([&](T x)
 	{
 		if(std::abs(x) > epsilon)
 			++count;
@@ -655,7 +644,9 @@ Tensor<T> Tensor<T>::sparsify(T epsilon)
 
 	while(indices.front() < m_dims[0])
 	{
-		T &x = (*this)(indices);
+		std::cout << "(" << indices[0] << "," << indices[1] << ")" << std::endl;
+
+		const T &x = (*this)(indices);
 
 		if(std::abs(x) > epsilon)
 		{
@@ -680,7 +671,7 @@ Tensor<T> Tensor<T>::sparsify(T epsilon)
 }
 
 template <typename T>
-Tensor<T> Tensor<T>::unsparsify()
+Tensor<T> Tensor<T>::unsparsify() const
 {
 	NNAssertEquals(m_dims.size(), 2, "Sparse tensors must be represented by matrices!");
 
