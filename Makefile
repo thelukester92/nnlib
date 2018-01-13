@@ -84,7 +84,7 @@ else
 endif
 
 override OPTFLAGS := $(CXXFLAGS) -DNN_OPT -O3
-override DBGFLAGS := $(CXXFLAGS) -g
+override DBGFLAGS := $(CXXFLAGS) -g -O0
 
 override TSTFILES := $(shell find test -name *.cpp)
 override TSTFILES := $(TSTFILES:test/%.cpp=$(OBJ)/test/%.o)
@@ -115,7 +115,7 @@ test: dbg $(BIN)/$(TST) $(BIN)/nvblas.conf
 	NVBLAS_CONFIG_FILE=$(BIN)/nvblas.conf ./$(BIN)/$(TST)
 $(BIN)/$(TST): $(TSTFILES)
 	@mkdir -p $(dir $@)
-	$(CXX) $(TSTFILES) -Wl,-rpath,$(LIB) -L$(LIB) -l$(DBG) -o $@
+	$(CXX) $(TSTFILES) $(DBGFLAGS) -Wl,-rpath,$(LIB) -L$(LIB) -l$(DBG) -o $@ --coverage
 $(OBJ)/test/%.o: test/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
