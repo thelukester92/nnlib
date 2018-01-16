@@ -3,8 +3,12 @@
 
 #include "nnlib/core/error.hpp"
 #include <string>
+#include <vector>
 
 namespace nnlib
+{
+
+namespace test
 {
 
 class Test
@@ -20,24 +24,36 @@ protected:
     std::string nnClass;
     std::string nnMethod;
     std::string nnParams;
+    std::vector<Error> nnErrors;
 };
 
 }
 
-#define NNTestClass(Class)               \
-    namespace nnlib                      \
-    {                                    \
-        class Test##Class : public Test  \
-        {                                \
-        public:                          \
-            Test##Class();               \
-            virtual void run() override; \
-        };                               \
-    }                                    \
-    nnlib::Test##Class::Test##Class() :  \
-        nnlib::Test(#Class)              \
-    {}                                   \
-    void nnlib::Test##Class::run()
+}
+
+#define NNTestClassDecl(Class)               \
+    namespace nnlib                          \
+    {                                        \
+        namespace test                       \
+        {                                    \
+            class Test##Class : public Test  \
+            {                                \
+            public:                          \
+                Test##Class();               \
+                virtual void run() override; \
+            };                               \
+        }                                    \
+    }
+
+#define NNTestClassImpl(Class)                \
+    nnlib::test::Test##Class::Test##Class() : \
+        nnlib::test::Test(#Class)             \
+    {}                                        \
+    void nnlib::test::Test##Class::run()
+
+#define NNTestClass(Class) \
+    NNTestClassDecl(Class) \
+    NNTestClassImpl(Class)
 
 #define NNTestMethod(Method) \
     nnMethod = #Method;
@@ -68,5 +84,18 @@ protected:
 
 #define NNTestGreaterThanOrEquals(...) \
     NNAssertGreaterThanOrEquals(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+
+#define NNRunTest(Class)                                          \
+    try                                                           \
+    {                                                             \
+        std::cout << "Testing " << #Class << "..." << std::flush; \
+        nnlib::test::Test##Class().run();                         \
+        std::cout << " Passed!" << std::endl;                     \
+    }                                                             \
+    catch(const nnlib::Error &e)                                  \
+    {                                                             \
+        std::cerr << std::endl << "\t" << e.what() << std::endl;  \
+        exit(1);                                                  \
+    }
 
 #endif

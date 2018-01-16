@@ -1,6 +1,7 @@
 #ifndef TEST_STORAGE_HPP
 #define TEST_STORAGE_HPP
 
-void TestStorage();
+#include "../test.hpp"
+NNTestClassDecl(Storage);
 
 #endif

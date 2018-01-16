@@ -1,144 +1,59 @@
 #include "../test_storage.hpp"
-#include "nnlib/core/error.hpp"
 #include "nnlib/core/storage.hpp"
 #include "nnlib/serialization/serialized.hpp"
 using namespace nnlib;
 
-NNTestClass(Storage)
+NNTestClassImpl(Storage)
 {
     NNTestMethod(Storage)
     {
         NNTestParams()
         {
             Storage<int> s;
-            NNTestAssertEquals(s.size(), 0);
+            NNTestEquals(s.size(), 0);
         }
 
         NNTestParams(size_t, T)
         {
             Storage<int> s(5, 42);
-            NNTestAssertEquals(s.size(), 5);
+            NNTestEquals(s.size(), 5);
             for(size_t i = 0; i < 5; ++i)
-                NNTestAssertEquals(s[i], 42);
+                NNTestEquals(s[i], 42);
         }
 
         NNTestParams(const Storage &)
         {
             Storage<int> s(5, 42);
             Storage<int> t(s);
-            NNTestAssertEquals(t.size(), 5);
+            NNTestEquals(t.size(), 5);
             for(size_t i = 0; i < 5; ++i)
-                NNTestAssertEquals(t[i], 42);
+                NNTestEquals(t[i], 42);
         }
 
         NNTestParams(Storage &&)
         {
             Storage<int> s(5, 42);
             Storage<int> t(std::move(s));
-            NNTestAssertEquals(t.size(), 5);
+            NNTestEquals(t.size(), 5);
             for(size_t i = 0; i < 5; ++i)
-                NNTestAssertEquals(t[i], 42);
+                NNTestEquals(t[i], 42);
         }
 
         NNTestParams(const std::initializer_list &)
         {
             Storage<int> s({ 0, 1, 2, 3, 4, 5 });
-            NNTestAssertEquals(s.size(), 6);
+            NNTestEquals(s.size(), 6);
             for(size_t i = 0; i < 6; ++i)
-                NNTestAssertEquals(s[i], i);
+                NNTestEquals(s[i], i);
         }
 
         NNTestParams(const Serialized &)
         {
             Storage<int> s(5, 42);
-            Storage<int> t(Serialized(s));
-            NNTestAssertEquals(t.size(), 5);
+            Storage<int> t((Serialized(s)));
+            NNTestEquals(t.size(), 5);
             for(size_t i = 0; i < 5; ++i)
-                NNTestAssertEquals(t[i], 42);
+                NNTestEquals(t[i], 42);
         }
     }
-}
-
-
-
-void TestStorage()
-{
-    TestStorage_contructor();
-
-    // test equality checks
-
-    NNAssertEquals(empty, empty, "Storage::operator== failed!");
-    NNAssertEquals(empty, Storage<double>(), "Storage::operator== failed!");
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14 }), "Storage::operator== failed!");
-    NNAssertEquals(copy, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14 }), "Storage::operator== failed!");
-    NNAssertEquals(initialized, Storage<double>({ 1.0, 2.0, 3.0, 4.0 }), "Storage::operator== failed!");
-    NNAssertEquals(regular, copy, "Storage::operator== failed!");
-
-    NNAssertNotEquals(empty, regular, "Storage::operator!=(Storage) failed!");
-    NNAssertNotEquals(regular, initialized, "Storage::operator!=(Storage) failed!");
-    NNAssertNotEquals(initialized, Storage<double>({ 2.0 }), "Storage::operator!=(initializer_list) failed!");
-    NNAssertNotEquals(initialized, Storage<double>({ 1.0, 2.0, 3.0, 3.14 }), "Storage::operator!=(initializer_list) failed!");
-
-    // test assignment
-
-    empty = initialized;
-    NNAssertEquals(empty, initialized, "Storage::operator=(Storage) failed!");
-
-    empty = {};
-    NNAssertEquals(empty, Storage<double>(), "Storage::operator=(initializer_list) failed!");
-
-    // test other methods
-
-    regular.resize(7, 6.28);
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14, 6.28, 6.28 }), "Storage::resize failed!");
-
-    regular.push_back(31.4);
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14, 6.28, 6.28, 31.4 }), "Storage::push_back failed!");
-
-    regular.pop_back();
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 3.14, 6.28, 6.28 }), "Storage::pop_back failed!");
-
-    regular.erase(0);
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 6.28, 6.28 }), "Storage::erase(0) failed!");
-
-    regular.erase(4);
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14, 6.28 }), "Storage::erase(4) failed!");
-
-    regular.erase(regular.size() - 1);
-    NNAssertEquals(regular, Storage<double>({ 3.14, 3.14, 3.14, 3.14 }), "Storage::erase(size() - 1) failed!");
-
-    regular.clear();
-    NNAssertEquals(regular, Storage<double>(), "Storage::clear failed!");
-
-    NNAssertEquals(copy[0], 3.14, "Storage::operator[] failed!");
-    NNAssertEquals(copy.at(0), 3.14, "Storage::at(size_t) failed!");
-    NNAssertEquals(initialized.front(), 1.0, "Storage::front failed!");
-    NNAssertEquals(initialized.back(), 4.0, "Storage::back failed!");
-
-    size_t i = 0;
-    for(auto &v : copy)
-    {
-        NNAssertEquals(&v, &copy[i], "Storage::begin and/or Storage::end failed!");
-        ++i;
-    }
-
-    // test const methods
-
-    const Storage<double> &constant = copy;
-    NNAssertEquals((size_t)(constant.end() - constant.begin()), constant.size(), "const Storage::begin and/or const Storage::end failed!");
-    NNAssertEquals(constant.ptr(), copy.ptr(), "const Storage::ptr failed!");
-    NNAssertEquals(constant[2], copy[2], "const Storage::operator[] failed!");
-    NNAssertEquals(constant.at(2), copy.at(2), "const Storage::at(size_t) failed!");
-    NNAssertEquals(constant.front(), copy.front(), "const Storage::front failed!");
-    NNAssertEquals(constant.back(), copy.back(), "const Storage::back failed!");
-
-    // test serialization
-
-    Storage<size_t> serializable = { 1, 2, 3, 4, 5 };
-    Storage<size_t> serialized;
-
-    Serialized node;
-    serializable.save(node);
-    serialized = Storage<size_t>(node);
-    NNAssertEquals(serializable, serialized, "Storage::save and/or Storage::load failed!");
 }
