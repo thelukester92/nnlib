@@ -496,6 +496,12 @@ Tensor<T> Tensor<T>::transpose(size_t dim1, size_t dim2)
 }
 
 template <typename T>
+const Tensor<T> Tensor<T>::transpose(size_t dim1, size_t dim2) const
+{
+    return const_cast<Tensor<T> &>(*this).transpose(dim1, dim2);
+}
+
+template <typename T>
 const Storage<size_t> &Tensor<T>::shape() const
 {
     return m_dims;

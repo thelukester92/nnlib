@@ -359,6 +359,15 @@ public:
     /// \return A tensor with a subview of this tensor but with the dimensions switched.
     Tensor transpose(size_t dim1 = 1, size_t dim2 = 0);
 
+    /// \brief Creates a new tensor as a view of this tensor in which two dimensions are switched.
+    ///
+    /// By default, this will switch the first and second dimension, which are rows and columns in a matrix.
+    /// The resulting tensor has a view, not a copy, of this tensor.
+    /// \param dim1 The first dimension to switch.
+    /// \param dim2 The second dimension to switch.
+    /// \return A tensor with a subview of this tensor but with the dimensions switched.
+    const Tensor transpose(size_t dim1 = 1, size_t dim2 = 0) const;
+
     /// Gets the list of dimension sizes.
     const Storage<size_t> &shape() const;
 
