@@ -1,6 +1,7 @@
 #ifndef TEST_ERROR_HPP
 #define TEST_ERROR_HPP
 
-void TestError();
+#include "../test.hpp"
+NNTestClassDecl(Error);
 
 #endif

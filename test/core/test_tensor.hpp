@@ -1,6 +1,7 @@
 #ifndef TEST_TENSOR_HPP
 #define TEST_TENSOR_HPP
 
-void TestTensor();
+#include "../test.hpp"
+NNTestClassDecl(Tensor);
 
 #endif

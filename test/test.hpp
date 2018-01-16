@@ -14,6 +14,12 @@ namespace test
 class Test
 {
 public:
+    static int &verbosity()
+    {
+        static int i;
+        return i;
+    }
+
     Test(const std::string &nnClass) :
         nnClass(nnClass)
     {}
@@ -56,10 +62,14 @@ protected:
     NNTestClassImpl(Class)
 
 #define NNTestMethod(Method) \
-    nnMethod = #Method;
+    nnMethod = #Method;      \
+    if(verbosity() == 1) \
+        std::cout << "\n\t" << nnMethod << "..." << std::flush;
 
-#define NNTestParams(...) \
-    nnParams = #__VA_ARGS__;
+#define NNTestParams(...)    \
+    nnParams = #__VA_ARGS__; \
+    if(verbosity() == 2) \
+        std::cout << "\n\t" << nnMethod << "(" << nnParams << ")..." << std::flush;
 
 #define NNTest(...) \
     NNAssert(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");

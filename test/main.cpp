@@ -4,6 +4,7 @@
     #undef OPTIMIZE
 #endif
 
+// include tests
 #include "test.hpp"
 #include "core/test_error.hpp"
 #include "core/test_storage.hpp"
@@ -45,8 +46,21 @@
 #include "util/test_batcher.hpp"
 #include "util/test_random.hpp"
 
-int main()
+// other includes
+#include "nnlib/util/args.hpp"
+
+int main(int argc, const char **argv)
 {
+    nnlib::ArgsParser args;
+    args.addFlag('v', "verbose");
+    args.addFlag('V', "very-verbose");
+    args.parse(argc, argv);
+
+    if(args.getFlag('v'))
+        nnlib::test::Test::verbosity() = 1;
+    else if(args.getFlag('V'))
+        nnlib::test::Test::verbosity() = 2;
+
     NNRunTest(Storage);
     return 0;
 }
