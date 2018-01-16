@@ -1,7 +1,7 @@
 #ifndef UTIL_BATCHER_HPP
 #define UTIL_BATCHER_HPP
 
-#include "random.hpp"
+#include "../math/random.hpp"
 #include "../core/tensor.hpp"
 
 namespace nnlib

@@ -3,6 +3,7 @@
 
 #include "../linear.hpp"
 #include "nnlib/math/algebra.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -68,10 +69,10 @@ template <typename T>
 Linear<T> &Linear<T>::reset()
 {
     T dev = 1.0 / sqrt(m_weights.size(1));
-    m_weights.rand(-dev, dev);
+    math::rand(m_weights, -dev, dev);
 
     if(m_useBias)
-        m_bias.rand(-dev, dev);
+        math::rand(m_bias, -dev, dev);
 
     return *this;
 }

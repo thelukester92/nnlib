@@ -2,7 +2,6 @@
 #define CORE_TENSOR_TPP
 
 #include "../tensor.hpp"
-#include "nnlib/util/random.hpp"
 
 namespace nnlib
 {
@@ -572,46 +571,6 @@ template <typename T>
 Tensor<T> &Tensor<T>::ones()
 {
     return fill(1);
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::rand(const T &from, const T &to)
-{
-    forEach([&](T &v)
-    {
-        v = Random<T>::sharedRandom().uniform(from, to);
-    }, *this);
-    return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::randn(const T &mean, const T &stddev)
-{
-    forEach([&](T &v)
-    {
-        v = Random<T>::sharedRandom().normal(mean, stddev);
-    }, *this);
-    return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::bernoulli(const T &p)
-{
-    forEach([&](T &v)
-    {
-        v = Random<T>::sharedRandom().bernoulli(p);
-    }, *this);
-    return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::randn(const T &mean, const T &stddev, const T &cap)
-{
-    forEach([&](T &v)
-    {
-        v = Random<T>::sharedRandom().normal(mean, stddev, cap);
-    }, *this);
-    return *this;
 }
 
 template <typename T>

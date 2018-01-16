@@ -2,7 +2,8 @@
 #define TEST_MODULE_HPP
 
 #include "nnlib/nn/module.hpp"
-#include "nnlib/util/random.hpp"
+#include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 using namespace std;
 using namespace nnlib;
 
@@ -12,11 +13,11 @@ class ModuleTests
 public:
     static void run(const std::string &name, M<T> &module, const Tensor<T> &sampleInput, bool randomizeInput = true)
     {
-        testDeterministic(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
-        testState(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
-        testCopyConstructor(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
-        testAssignment(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
-        testSerialization(name, module, randomizeInput ? Tensor<T>(sampleInput.shape(), true).rand() : sampleInput);
+        testDeterministic(name, module, randomizeInput ? math::rand(Tensor<T>(sampleInput.shape(), true)) : sampleInput);
+        testState(name, module, randomizeInput ? math::rand(Tensor<T>(sampleInput.shape(), true)) : sampleInput);
+        testCopyConstructor(name, module, randomizeInput ? math::rand(Tensor<T>(sampleInput.shape(), true)) : sampleInput);
+        testAssignment(name, module, randomizeInput ? math::rand(Tensor<T>(sampleInput.shape(), true)) : sampleInput);
+        testSerialization(name, module, randomizeInput ? math::rand(Tensor<T>(sampleInput.shape(), true)) : sampleInput);
         testFlattening(name, module);
     }
 
@@ -116,7 +117,7 @@ private:
 
     static void testCopyConstructor(const std::string &name, M<T> &module, const Tensor<T> &input)
     {
-        module.params().rand();
+        math::rand(module.params());
         M<T> copy(module);
         NNAssert(testEqualParams(module, copy), name + "::" + name + "(const " + name + " &) failed! Parameters are not equal!");
         NNAssert(testNotShared(module, copy), name + "::" + name + "(const " + name + " &) failed! Sharing parameters; not a deep copy!");
@@ -125,7 +126,7 @@ private:
 
     static void testAssignment(const std::string &name, M<T> &module, const Tensor<T> &input)
     {
-        module.params().rand();
+        math::rand(module.params());
 
         M<T> copy(module);
         copy.params().fill(0);

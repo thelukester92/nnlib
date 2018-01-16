@@ -11,7 +11,9 @@
 #include "nnlib/critics/mse.hpp"
 
 /// Math
+#include "nnlib/math/algebra.hpp"
 #include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 
 /// Neural Networks
 #include "nnlib/nn/batchnorm.hpp"
@@ -56,5 +58,4 @@
 #include "nnlib/util/args.hpp"
 #include "nnlib/util/batcher.hpp"
 #include "nnlib/util/progress.hpp"
-#include "nnlib/util/random.hpp"
 #include "nnlib/util/timer.hpp"

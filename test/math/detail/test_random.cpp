@@ -1,7 +1,7 @@
 #include "../test_random.hpp"
 #include "nnlib/core/tensor.hpp"
 #include "nnlib/math/math.hpp"
-#include "nnlib/util/random.hpp"
+#include "nnlib/math/random.hpp"
 using namespace nnlib;
 
 void TestRandom()

@@ -14,6 +14,7 @@
 #include "critics/test_nll.hpp"
 #include "math/test_algebra.hpp"
 #include "math/test_math.hpp"
+#include "math/test_random.hpp"
 #include "nn/test_batchnorm.hpp"
 #include "nn/test_concat.hpp"
 #include "nn/test_dropconnect.hpp"
@@ -44,7 +45,6 @@
 #include "toy_problems/timeseries.hpp"
 #include "util/test_args.hpp"
 #include "util/test_batcher.hpp"
-#include "util/test_random.hpp"
 
 // other includes
 #include "nnlib/util/args.hpp"

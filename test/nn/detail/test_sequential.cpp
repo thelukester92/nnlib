@@ -89,5 +89,5 @@ void TestSequential()
     }
 
     Sequential<NN_REAL_T> module2(new Linear<NN_REAL_T>(5, 10), new Linear<NN_REAL_T>(10, 2));
-    TestContainer("Sequential", module2, Tensor<NN_REAL_T>(100, 5).rand());
+    TestContainer("Sequential", module2, math::rand(Tensor<NN_REAL_T>(100, 5)));
 }

@@ -3,6 +3,7 @@
 
 #include "../algebra.hpp"
 #include "../math.hpp"
+#include "nnlib/util/random.hpp"
 #include <math.h>
 
 namespace nnlib
@@ -130,6 +131,70 @@ template <typename T>
 Tensor<T> &&square(Tensor<T> &&x)
 {
     return std::move(pointwiseProduct(x, x));
+}
+
+template <typename T>
+Tensor<T> &rand(Tensor<T> &x, T min, T max)
+{
+    forEach([&](T &v)
+    {
+        v = Random<T>::sharedRandom().uniform(min, max);
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&rand(Tensor<T> &&x, T min, T max)
+{
+    return std::move(rand(x, min, max));
+}
+
+template <typename T>
+Tensor<T> &randn(Tensor<T> &x, T mean, T stddev)
+{
+    forEach([&](T &v)
+    {
+        v = Random<T>::sharedRandom().normal(mean, stddev);
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&randn(Tensor<T> &&x, T mean, T stddev)
+{
+    return std::move(randn(x, mean, stddev));
+}
+
+template <typename T>
+Tensor<T> &randn(Tensor<T> &x, T mean, T stddev, T cap)
+{
+    forEach([&](T &v)
+    {
+        v = Random<T>::sharedRandom().normal(mean, stddev, cap);
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&randn(Tensor<T> &&x, T mean, T stddev, T cap)
+{
+    return std::move(randn(x, mean, stddev, cap));
+}
+
+template <typename T>
+Tensor<T> &bernoulli(Tensor<T> &x, T p)
+{
+    forEach([&](T &v)
+    {
+        v = Random<T>::sharedRandom().bernoulli(p);
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&bernoulli(Tensor<T> &&x, T p)
+{
+    return std::move(bernoulli(x, p));
 }
 
 template <typename T>

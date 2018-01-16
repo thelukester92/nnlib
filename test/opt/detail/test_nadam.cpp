@@ -1,16 +1,17 @@
 #include "../test_nadam.hpp"
-#include "nnlib/opt/nadam.hpp"
-#include "nnlib/nn/linear.hpp"
 #include "nnlib/critics/mse.hpp"
-#include "nnlib/util/random.hpp"
+#include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
+#include "nnlib/nn/linear.hpp"
+#include "nnlib/opt/nadam.hpp"
 using namespace nnlib;
 
 void TestNadam()
 {
     RandomEngine::sharedEngine().seed(0);
 
-    Tensor<NN_REAL_T> feat = Tensor<NN_REAL_T>(10, 2).rand();
-    Tensor<NN_REAL_T> lab = Tensor<NN_REAL_T>(10, 3).rand();
+    Tensor<NN_REAL_T> feat = math::rand(Tensor<NN_REAL_T>(10, 2));
+    Tensor<NN_REAL_T> lab = math::rand(Tensor<NN_REAL_T>(10, 3));
 
     Linear<NN_REAL_T> nn(2, 3);
     MSE<NN_REAL_T> critic;

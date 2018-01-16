@@ -127,7 +127,7 @@ Tensor<T> &DropConnect<T>::forward(const Tensor<T> &input)
         m_backup.resize(m_module->params().shape());
         m_backup.copy(m_module->params());
 
-        math::pointwiseProduct(m_mask.bernoulli(1 - m_dropProbability), m_module->params());
+        math::pointwiseProduct(math::bernoulli(m_mask, 1 - m_dropProbability), m_module->params());
         m_output = m_module->forward(input);
     }
     else

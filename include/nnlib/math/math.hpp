@@ -56,6 +56,38 @@ Tensor<T> &square(Tensor<T> &x);
 template <typename T>
 Tensor<T> &&square(Tensor<T> &&x);
 
+/// Fills x with values drawn from a uniform distribution over [min..max].
+template <typename T>
+Tensor<T> &rand(Tensor<T> &x, T min = -1, T max = 1);
+
+/// Fills x with values drawn from a uniform distribution over [min..max].
+template <typename T>
+Tensor<T> &&rand(Tensor<T> &&x, T min = -1, T max = 1);
+
+/// Fills x with values drawn from a normal distribution with the given mean and standard deviation.
+template <typename T>
+Tensor<T> &randn(Tensor<T> &x, T mean = 0, T stddev = 1);
+
+/// Fills x with values drawn from a normal distribution with the given mean and standard deviation.
+template <typename T>
+Tensor<T> &&randn(Tensor<T> &&x, T mean = 0, T stddev = 1);
+
+/// Fills x with values drawn from a normal distribution with the given mean and standard deviation, redrawing until within cap of mean.
+template <typename T>
+Tensor<T> &randn(Tensor<T> &x, T mean, T stddev, T cap);
+
+/// Fills x with values drawn from a normal distribution with the given mean and standard deviation, redrawing until within cap of mean.
+template <typename T>
+Tensor<T> &&randn(Tensor<T> &&x, T mean, T stddev, T cap);
+
+/// Fills x with values drawn from a Bernoulli distribution with a p probability of a 1.
+template <typename T>
+Tensor<T> &bernoulli(Tensor<T> &x, T p = 0.5);
+
+/// Fills x with values drawn from a Bernoulli distribution with a p probability of a 1.
+template <typename T>
+Tensor<T> &&bernoulli(Tensor<T> &&x, T p = 0.5);
+
 // MARK: Tensor-tensor operations.
 
 /// Flattens the dim'th dimension of x into y by summing.
@@ -98,6 +130,14 @@ Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &
     extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
     extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &);
     extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&);
+    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::rand<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::rand<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::bernoulli<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::bernoulli<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T);
     extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::sum(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &, size_t);
     extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::sum(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&, size_t);
     extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &);

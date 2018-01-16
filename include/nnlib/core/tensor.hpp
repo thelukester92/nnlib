@@ -408,36 +408,6 @@ public:
     /// Sets every element in this tensor to 1.
     Tensor &ones();
 
-    /// \brief Sets every element in this tensor to a uniformly distributed random value.
-    ///
-    /// \param from The lowest value in the uniform distribution.
-    /// \param to The highest value in the uniform distribution.
-    /// \return This tensor, for chaining.
-    Tensor &rand(const T &from = -1, const T &to = 1);
-
-    /// \brief Sets every element in this tensor to a normally distributed random value.
-    ///
-    /// \param mean The mean of the normal distribution.
-    /// \param stddev The standard deviation of the normal distribution.
-    /// \return This tensor, for chaining.
-    Tensor &randn(const T &mean = 0, const T &stddev = 1);
-
-    /// \brief Sets every element in this tensor to a value sampled from a Bernoulli distribution (1 or 0).
-    ///
-    /// \param p The probability of a 1.
-    /// \return This tensor, for chaining.
-    Tensor &bernoulli(const T &p = 0.5);
-
-    /// \brief Sets every element in this tensor to a normally distributed random value, capped.
-    ///
-    /// This resamples from the distribution when it finds a value too far away from the mean,
-    /// which may be slow for a small threshold.
-    /// \param mean The mean of the normal distribution.
-    /// \param stddev The standard deviation of the normal distribution.
-    /// \param cap The threshold value for the maximum allowed distance away from the mean.
-    /// \return This tensor, for chaining.
-    Tensor &randn(const T &mean, const T &stddev, const T &cap);
-
     /// Multiply this tensor by a scalar.
     Tensor &scale(T alpha);
 

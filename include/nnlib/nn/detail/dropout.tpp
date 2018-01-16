@@ -77,7 +77,7 @@ Tensor<T> &Dropout<T>::forward(const Tensor<T> &input)
     m_output.resize(input.shape());
 
     if(m_training)
-        return math::pointwiseProduct(input, m_mask.bernoulli(1 - m_dropProbability), m_output);
+        return math::pointwiseProduct(input, math::bernoulli(m_mask, 1 - m_dropProbability), m_output);
     else
         return m_output.copy(input).scale(1 - m_dropProbability);
 }

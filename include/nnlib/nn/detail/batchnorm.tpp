@@ -83,7 +83,7 @@ BatchNorm<T> &BatchNorm<T>::reset()
 {
     if(m_weights.size(0) > 0)
     {
-        m_weights.rand();
+        math::rand(m_weights);
         m_biases.zeros();
     }
     return *this;
