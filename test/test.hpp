@@ -63,12 +63,12 @@ protected:
 
 #define NNTestMethod(Method) \
     nnMethod = #Method;      \
-    if(verbosity() == 1) \
+    if(verbosity() == 1)     \
         std::cout << "\n\t" << nnMethod << "..." << std::flush;
 
 #define NNTestParams(...)    \
     nnParams = #__VA_ARGS__; \
-    if(verbosity() == 2) \
+    if(verbosity() == 2)     \
         std::cout << "\n\t" << nnMethod << "(" << nnParams << ")..." << std::flush;
 
 #define NNTest(...) \
