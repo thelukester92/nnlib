@@ -63,5 +63,7 @@ int main(int argc, const char **argv)
 
     NNRunTest(Error);
     NNRunTest(Storage);
+    NNRunTest(Tensor);
+
     return 0;
 }
