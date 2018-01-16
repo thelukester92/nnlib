@@ -2,29 +2,55 @@
 #include "nnlib/core/error.hpp"
 using namespace nnlib;
 
-struct testError_struct {};
+struct test_struct {};
 
-void testError_constructor()
+NNTestClassImpl(Error)
 {
-    Error e("reason");
-    NNAssertEquals(e.what(), std::string("reason"), "Error::Error(string) failed!");
+    NNTestMethod(Error)
+    {
+        NNTestParams(const std::string &)
+        {
+            Error e("reason");
+            NNTestEquals(std::string(e.what()), "reason");
+        }
 
-    Error f("file", "func", 123, "test");
-    NNAssertEquals(f.what(), std::string("file:123 (func): test"), "Error::Error(string, string, int, string) failed!");
-}
+        NNTestParams(const std::string &, const std::string &, int)
+        {
+            Error e("file", "func", 0);
+            NNTestEquals(std::string(e.what()), "file:0 (func): ");
+        }
+    }
 
-void testError_stringify()
-{
-    NNAssertEquals(Error::stringify("hi", "there"), "hithere", "Error::stringify(string, string) failed!");
-    NNAssertEquals(Error::stringify(12), "12", "Error::stringify(int) failed!");
-    NNAssertEquals(Error::stringify(testError_struct()), "object", "Error::stringify(Tensor) failed!");
-    NNAssertEquals(Error::stringify(std::string("hi")), "hi", "Error::stringify(string) failed!");
-    NNAssertEquals(Error::stringify("hi"), "hi", "Error::stringify(const char *) failed!");
-    NNAssertEquals(Error::stringify(nullptr), "null", "Error::stringify(nullptr_t) failed!");
-}
+    NNTestMethod(stringify)
+    {
+        NNTestParams(int)
+        {
+            NNTestEquals(Error::stringify(1), "1");
+        }
 
-void TestError()
-{
-    testError_constructor();
-    testError_stringify();
+        NNTestParams(test_struct)
+        {
+            NNTestEquals(Error::stringify(test_struct()), "object");
+        }
+
+        NNTestParams(const std::string &)
+        {
+            NNTestEquals(Error::stringify(std::string("test")), "test");
+        }
+
+        NNTestParams(const char *)
+        {
+            NNTestEquals(Error::stringify("test"), "test");
+        }
+
+        NNTestParams(nullptr_t)
+        {
+            NNTestEquals(Error::stringify(nullptr), "null");
+        }
+
+        NNTestParams()
+        {
+            NNTestEquals(Error::stringify(), "");
+        }
+    }
 }

@@ -61,6 +61,7 @@ int main(int argc, const char **argv)
     else if(args.getFlag('V'))
         nnlib::test::Test::verbosity() = 2;
 
+    NNRunTest(Error);
     NNRunTest(Storage);
     return 0;
 }
