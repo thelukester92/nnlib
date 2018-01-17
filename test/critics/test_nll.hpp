@@ -1,6 +1,7 @@
 #ifndef TEST_NLL_HPP
 #define TEST_NLL_HPP
 
-void TestNLL();
+#include "../test.hpp"
+NNTestClassDecl(NLL);
 
 #endif

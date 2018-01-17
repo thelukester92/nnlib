@@ -1,29 +1,98 @@
+#include "../test_critic.hpp"
 #include "../test_nll.hpp"
 #include "nnlib/critics/nll.hpp"
-#include "nnlib/math/math.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestNLL()
+NNTestClassImpl(NLL)
 {
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
-    Tensor<NN_REAL_T> tgt = Tensor<NN_REAL_T>({ 2, 0 }).resize(2, 1);
-    Tensor<NN_REAL_T> dif = Tensor<NN_REAL_T>({ -3, -4 }).resize(2, 1);
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 0, 0, -1.0, -1.0, 0, 0 }).resize(2, 3);
-    NLL<NN_REAL_T> critic(false);
+    NNTestMethod(NLL)
+    {
+        NNTestParams()
+        {
+            NLL<T> critic;
+            NNTestEquals(critic.average(), true);
+        }
 
-    double nll = critic.forward(inp, tgt);
-    NNAssert(fabs(nll - math::sum(dif)) < 1e-12, "NLL::forward with no average failed!");
+        NNTestParams(bool)
+        {
+            NLL<T> critic(false);
+            NNTestEquals(critic.average(), false);
+        }
+    }
 
-    critic.average(true);
-    nll = critic.forward(inp, tgt);
-    dif.scale(1.0/6.0);
-    NNAssert(fabs(nll - math::sum(dif)) < 1e-12, "NLL::forward with average failed!");
+    NNTestMethod(average)
+    {
+        NNTestParams()
+        {
+            NLL<T> critic;
+            NNTestEquals(critic.average(), true);
+        }
 
-    critic.average(false);
-    critic.backward(inp, tgt);
-    NNAssert(math::sum(math::square(critic.inGrad() - grd)) < 1e-12, "NLL::backward with no average failed!");
+        NNTestParams(bool)
+        {
+            NLL<T> critic;
+            NNTestEquals(&critic.average(false), &critic);
+            NNTestEquals(critic.average(), false);
+        }
+    }
 
-    critic.average(true);
-    critic.backward(inp, tgt);
-    NNAssert(math::sum(math::square(critic.inGrad() - grd / inp.size())) < 1e-12, "NLL::backward with average failed!");
+    NNTestMethod(misclassifications)
+    {
+        NNTestParams(const Tensor<T> &, const Tensor<T> &)
+        {
+            NLL<T> critic(false);
+            Tensor<T> inputs = Tensor<T>({
+                -0.1, -1.0, -1.0, -1.0,
+                -0.7, -0.2, -0.7, -0.7,
+                -0.6, -0.6, -0.3, -0.6
+            }).resize(3, 4);
+            Tensor<T> target = Tensor<T>({ 0, 1, 3 }).resize(3, 1);
+            NNTestEquals(critic.misclassifications(inputs, target), 1);
+        }
+    }
+
+    NNTestMethod(forward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            NLL<T> critic(false);
+            Tensor<T> inputs = Tensor<T>({
+                -0.1, -1.0, -1.0, -1.0,
+                -0.7, -0.2, -0.7, -0.7,
+                -0.6, -0.6, -0.3, -0.6
+            }).resize(3, 4);
+            Tensor<T> target = Tensor<T>({ 0, 1, 3 }).resize(3, 1);
+            NNTestAlmostEquals(critic.forward(inputs, target), 0.9, 1e-12);
+        }
+    }
+
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            NLL<T> critic(false);
+            Tensor<T> inputs = Tensor<T>({
+                -0.1, -1.0, -1.0, -1.0,
+                -0.7, -0.2, -0.7, -0.7,
+                -0.6, -0.6, -0.3, -0.6
+            }).resize(3, 4);
+            Tensor<T> target = Tensor<T>({ 0, 1, 3 }).resize(3, 1);
+            Tensor<T> inGrad = critic.backward(inputs, target);
+            for(size_t i = 0; i < 3; ++i)
+            {
+                for(size_t j = 0; j < 4; ++j)
+                {
+                    if(target(i, 0) == j)
+                    {
+                        NNTestAlmostEquals(inGrad(i, j), -1, 1e-12);
+                    }
+                    else
+                    {
+                        NNTestAlmostEquals(inGrad(i, j), 0, 1e-12);
+                    }
+                }
+            }
+        }
+    }
 }
