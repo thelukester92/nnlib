@@ -1,216 +1,355 @@
-#include "nnlib/core/error.hpp"
+#include "../test_algebra.hpp"
 #include "nnlib/core/tensor.hpp"
 #include "nnlib/math/algebra.hpp"
-#include <algorithm>
-#include <math.h>
-#include <string>
-#include <vector>
 using namespace nnlib;
+using T = NN_REAL_T;
 
-template <bool TransA, bool TransB, typename T>
-void addMatrixMultiply(size_t M, size_t N, size_t K, const T *A, size_t lda, const T *B, size_t ldb, T *C, size_t ldc, T alpha = 1, T beta = 1)
+NNTestClassImpl(Algebra)
 {
-    for(size_t i = 0; i < M; ++i)
+    NNTestMethod(vFill)
     {
-        for(size_t j = 0; j < N; ++j)
+        NNTestParams(Tensor &x, T)
         {
-            C[i * ldc + j] *= beta;
-            for(size_t k = 0; k < K; ++k)
+            Tensor<T> t(5);
+            Algebra<T>::vFill(t, 3.14);
+            forEach([&](T t)
             {
-                C[i * ldc + j] += alpha * (TransA ? A[k * lda + i] : A[i * lda + k]) * (TransB ? B[j * ldb + k] : B[k * ldb + j]);
-            }
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
         }
-    }
-}
 
-template <typename T>
-bool almostEqual(T a, T b)
-{
-    return fabs(a - b) < 1e-9;
-}
-
-template <>
-bool almostEqual<float>(float a, float b)
-{
-    return fabs(a - b) < 1e-2;
-}
-
-template <typename T>
-void TestAlgebraImpl(std::string name)
-{
-    Tensor<T> x(10), y(10);
-    Tensor<T> A(10, 10), B(10, 10), C(10, 10), D(10, 10);
-
-    Tensor<T> z = y.view(5, 2).select(1, 0);
-    Tensor<T> E = B.view(5, 2, 10).select(1, 0);
-    Tensor<T> F = E.narrow(1, 0, 5);
-
-    std::fill(x.begin(), x.end(), 0.5);
-    Algebra<T>::vFill(y, 0.5);
-    NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vFill with stride = 1 failed!");
-
-
-    for(size_t i = 0; i < x.size(); i += 2)
-        x(i) = 3.14;
-    Algebra<T>::vFill(z, 3.14);
-    NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vFill with stride = 2 failed!");
-
-    for(size_t i = 0; i < x.size(); ++i)
-        x(i) *= 2;
-    Algebra<T>::vScale(y, 2);
-    NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vScale with stride = 1 failed!");
-
-    for(size_t i = 0; i < x.size(); i += 2)
-        x(i) *= 0.75;
-    Algebra<T>::vScale(z, 0.75);
-    NNAssert(std::equal(x.begin(), x.end(), y.begin()), name + "::vScale with stride = 2 failed!");
-
-    std::fill(A.begin(), A.end(), 0.5);
-    Algebra<T>::mFill(B, 0.5);
-    NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mFill with ld == cols failed!");
-
-    for(size_t i = 0; i < 10; i += 2)
-        for(size_t j = 0; j < 10; ++j)
-            A(i, j) = 3.14;
-    Algebra<T>::mFill(E, 3.14);
-    NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mFill with ld != cols failed!");
-
-    for(size_t i = 0; i < A.size(0); ++i)
-        for(size_t j = 0; j < A.size(1); ++j)
-            A(i, j) *= 2;
-    Algebra<T>::mScale(B, 2);
-    NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mScale with ld == cols failed!");
-
-    for(size_t i = 0; i < 10; i += 2)
-        for(size_t j = 0; j < 10; ++j)
-            A(i, j) *= 0.75;
-    Algebra<T>::mScale(E, 0.75);
-    NNAssert(std::equal(A.begin(), A.end(), B.begin()), name + "::mScale with ld != cols failed!");
-
-    std::fill(y.begin(), y.end(), 0.12345);
-    Algebra<T>::vAdd_v(x, y);
-    for(size_t i = 0; i < x.size(); ++i)
-        NNAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 1 failed!");
-
-    Algebra<T>::vAdd_v(z, z);
-    for(size_t i = 0; i < x.size(); ++i)
-    {
-        if(i % 2 == 0)
+        NNTestParams(Tensor &&x, T)
         {
-            NNAssert(almostEqual<T>(2 * (x(i) + 0.12345), y(i)), name + "::vAdd_v with stride = 2 failed!");
-        }
-        else
-        {
-            NNAssert(almostEqual<T>(x(i) + 0.12345, y(i)), name + "::vAdd_v with stride = 2 failed!");
-        }
-    }
-
-    std::fill(y.begin(), y.end(), 0.12345);
-    Algebra<T>::vAdd_v(x, y, 0.5);
-    for(size_t i = 0; i < x.size(); ++i)
-        NNAssert(almostEqual<T>(0.5 * x(i) + 0.12345, y(i)), name + "::vAdd_v with alpha != 1 failed!");
-
-    std::fill(y.begin(), y.end(), 0.12345);
-    Algebra<T>::vAdd_v(x, y, 1, 0.75);
-    for(size_t i = 0; i < x.size(); ++i)
-        NNAssert(almostEqual<T>(x(i) + 0.75 * 0.12345, y(i)), name + "::vAdd_v with beta != 1 failed!");
-
-    std::fill(A.begin(), A.end(), 0);
-    Algebra<T>::mAdd_vv(x, y, A);
-    for(size_t i = 0; i < x.size(); ++i)
-        for(size_t j = 0; j < y.size(); ++j)
-            NNAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with stride = 1 failed!");
-
-    std::fill(B.begin(), B.end(), 0);
-    Algebra<T>::mAdd_vv(z, z, F);
-    for(size_t i = 0; i < y.size(); ++i)
-    {
-        for(size_t j = 0; j < y.size(); ++j)
-        {
-            if(i % 2 == 0 && j < y.size() / 2)
+            Tensor<T> t(5);
+            Algebra<T>::vFill(std::move(t), 3.14);
+            forEach([&](T t)
             {
-                NNAssert(almostEqual<T>(B(i, j), z(i / 2) * z(j)), name + "::mAdd_vv with stride = 2 failed!");
-            }
-            else
-            {
-                NNAssert(almostEqual<T>(B(i, j), 0), name + "::mAdd_vv with stride = 2 failed!");
-            }
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
         }
     }
 
-    Algebra<T>::mAdd_vv(x, y, A, 1, 0);
-    for(size_t i = 0; i < x.size(); ++i)
-        for(size_t j = 0; j < y.size(); ++j)
-            NNAssert(almostEqual<T>(A(i, j), x(i) * y(j)), name + "::mAdd_vv with beta != 1 failed!");
-
-    std::fill(y.begin(), y.end(), 0);
-    Algebra<T>::vAdd_mv(A, x, y);
-    for(size_t i = 0; i < 10; ++i)
+    NNTestMethod(vScale)
     {
-        T value = 0.0;
-        for(size_t j = 0; j < 10; ++j)
-            value += A(i, j) * x(j);
-        NNAssert(almostEqual<T>(y(i), value), name + "::vAdd_mv failed!");
+        NNTestParams(Tensor &x, T)
+        {
+            Tensor<T> t({ 1, 1, 1, 1, 1, 1 });
+            Algebra<T>::vScale(t, 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+        }
+
+        NNTestParams(Tensor &&x, T)
+        {
+            Tensor<T> t({ 1, 1, 1, 1, 1, 1 });
+            Algebra<T>::vScale(std::move(t), 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+        }
     }
 
-    std::fill(y.begin(), y.end(), 0);
-    Algebra<T>::vAdd_mtv(A, x, y);
-    for(size_t i = 0; i < 10; ++i)
+    NNTestMethod(mFill)
     {
-        T value = 0.0;
-        for(size_t j = 0; j < 10; ++j)
-            value += A(j, i) * x(j);
-        NNAssert(almostEqual<T>(y(i), value), name + "::vAdd_mtv failed!");
+        NNTestParams(Tensor &x, T)
+        {
+            Tensor<T> t(5, 3);
+            Algebra<T>::mFill(t, 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+        }
+
+        NNTestParams(Tensor &&x, T)
+        {
+            Tensor<T> t(5, 3);
+            Algebra<T>::mFill(std::move(t), 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+        }
     }
 
-    std::fill(B.begin(), B.end(), 10);
-    Algebra<T>::mAdd_m(A, B);
-    for(size_t i = 0; i < 10; ++i)
-        for(size_t j = 0; j < 10; ++j)
-            NNAssert(almostEqual<T>(B(i, j), A(i, j) + 10), name + "::mAdd_m failed!");
+    NNTestMethod(mScale)
+    {
+        NNTestParams(Tensor &x, T)
+        {
+            Tensor<T> t = Tensor<T>({ 1, 1, 1, 1, 1, 1 }).resize(2, 3);
+            Algebra<T>::mScale(t, 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+        }
 
-    std::fill(B.begin(), B.end(), 10);
-    Algebra<T>::mAdd_mt(A, B);
-    for(size_t i = 0; i < 10; ++i)
-        for(size_t j = 0; j < 10; ++j)
-            NNAssert(almostEqual<T>(B(i, j), A(j, i) + 10), name + "::mAdd_mt failed!");
+        NNTestParams(Tensor &&x, T)
+        {
+            Tensor<T> t = Tensor<T>({ 1, 1, 1, 1, 1, 1 }).resize(2, 3);
+            Algebra<T>::mScale(std::move(t), 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+        }
+    }
 
-    std::fill(C.begin(), C.end(), 0);
-    addMatrixMultiply<false, false, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
-    Algebra<T>::mAdd_mm(A, B, D, 1, 0);
-    for(size_t i = 0; i < 10; ++i)
-        for(size_t j = 0; j < 10; ++j)
-            NNAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
+    NNTestMethod(vAdd_v)
+    {
+        NNTestParams(cosnt Tensor &, Tensor &, T)
+        {
+            Tensor<T> t({ 1, 2, 3 });
+            Tensor<T> u({ 4, 5, 6 });
+            Algebra<T>::vAdd_v(u, t, 0.5);
+            NNTestAlmostEquals(t(0), 3, 1e-12);
+            NNTestAlmostEquals(t(1), 4.5, 1e-12);
+            NNTestAlmostEquals(t(2), 6, 1e-12);
+        }
 
-    addMatrixMultiply<true, false, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
-    Algebra<T>::mAdd_mtm(A, B, D, 1, 0);
-    for(size_t i = 0; i < 10; ++i)
-        for(size_t j = 0; j < 10; ++j)
-            NNAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
+        NNTestParams(cosnt Tensor &, Tensor &&, T)
+        {
+            Tensor<T> t({ 1, 2, 3 });
+            Tensor<T> u({ 4, 5, 6 });
+            Algebra<T>::vAdd_v(u, std::move(t), 0.5);
+            NNTestAlmostEquals(t(0), 3, 1e-12);
+            NNTestAlmostEquals(t(1), 4.5, 1e-12);
+            NNTestAlmostEquals(t(2), 6, 1e-12);
+        }
 
-    addMatrixMultiply<false, true, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
-    Algebra<T>::mAdd_mmt(A, B, D, 1, 0);
-    for(size_t i = 0; i < 10; ++i)
-        for(size_t j = 0; j < 10; ++j)
-            NNAssert(almostEqual<T>(C(i, j), D(i, j)), name + "::mAdd_mm failed!");
+        NNTestParams(cosnt Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> t({ 1, 2, 4 });
+            Tensor<T> u({ 4, 5, 6 });
+            Algebra<T>::vAdd_v(u, t, 0.5, 0.25);
+            NNTestAlmostEquals(t(0), 2.25, 1e-12);
+            NNTestAlmostEquals(t(1), 3, 1e-12);
+            NNTestAlmostEquals(t(2), 4, 1e-12);
+        }
 
-    addMatrixMultiply<true, true, T>(10, 10, 10, A.ptr(), 10, B.ptr(), 10, C.ptr(), 10, 1, 0);
-    Algebra<T>::mAdd_mm(B, A, D, 1, 0);
-    for(size_t i = 0; i < 10; ++i)
-        for(size_t j = 0; j < 10; ++j)
-            NNAssert(almostEqual<T>(C(i, j), D(j, i)), name + "::mAdd_mm with both matrices transposed failed!");
-}
+        NNTestParams(cosnt Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> t({ 1, 2, 4 });
+            Tensor<T> u({ 4, 5, 6 });
+            Algebra<T>::vAdd_v(u, std::move(t), 0.5, 0.25);
+            NNTestAlmostEquals(t(0), 2.25, 1e-12);
+            NNTestAlmostEquals(t(1), 3, 1e-12);
+            NNTestAlmostEquals(t(2), 4, 1e-12);
+        }
+    }
 
-void TestAlgebra()
-{
-#if defined NN_REAL_T && !defined NN_IMPL
-#define NN_STR2(s) #s
-#define NN_STR(s) NN_STR2(s)
-    TestAlgebraImpl<NN_REAL_T>(std::string("Algebra<") + NN_STR(NN_REAL_T) + ">");
-#undef NN_STR
-#undef NN_STR2
-#elif !defined NN_IMPL
-    TestAlgebraImpl<double>("Algebra<double>");
-    TestAlgebraImpl<float>("Algebra<float>");
-#endif
+    NNTestMethod(mAdd_vv)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> t({ 1, 2, 3 });
+            Tensor<T> u({ 4, 5 });
+            Tensor<T> A = Tensor<T>({ 1, 1, 1, 1, 1, 1 }).resize(3, 2);
+            Algebra<T>::mAdd_vv(t, u, A, 0.5, 0.25);
+            for(size_t i = 0; i < A.size(0); ++i)
+                for(size_t j = 0; j < A.size(1); ++j)
+                    NNTestAlmostEquals(A(i, j), 0.5 * t(i) * u(j) + 0.25, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> t({ 1, 2, 3 });
+            Tensor<T> u({ 4, 5 });
+            Tensor<T> A = Tensor<T>({ 1, 1, 1, 1, 1, 1 }).resize(3, 2);
+            Algebra<T>::mAdd_vv(t, u, std::move(A), 0.5, 0.25);
+            for(size_t i = 0; i < A.size(0); ++i)
+                for(size_t j = 0; j < A.size(1); ++j)
+                    NNTestAlmostEquals(A(i, j), 0.5 * t(i) * u(j) + 0.25, 1e-12);
+        }
+    }
+
+    NNTestMethod(vAdd_mv)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> t({ 1, 2, 3 }), u({ 1, 1 });
+            Tensor<T> A = Tensor<T>({ 4, 5, 6, 7, 8, 9 }).resize(2, 3);
+            Algebra<T>::vAdd_mv(A, t, u, 0.5, 0.25);
+            NNTestAlmostEquals(u(0), 16.25, 1e-12);
+            NNTestAlmostEquals(u(1), 25.25, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> t({ 1, 2, 3 }), u({ 1, 1 });
+            Tensor<T> A = Tensor<T>({ 4, 5, 6, 7, 8, 9 }).resize(2, 3);
+            Algebra<T>::vAdd_mv(A, t, std::move(u), 0.5, 0.25);
+            NNTestAlmostEquals(u(0), 16.25, 1e-12);
+            NNTestAlmostEquals(u(1), 25.25, 1e-12);
+        }
+    }
+
+    NNTestMethod(vAdd_mtv)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> t({ 1, 2, 3 }), u({ 1, 1 });
+            Tensor<T> A = Tensor<T>({ 4, 7, 5, 8, 6, 9 }).resize(3, 2);
+            Algebra<T>::vAdd_mtv(A, t, u, 0.5, 0.25);
+            NNTestAlmostEquals(u(0), 16.25, 1e-12);
+            NNTestAlmostEquals(u(1), 25.25, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> t({ 1, 2, 3 }), u({ 1, 1 });
+            Tensor<T> A = Tensor<T>({ 4, 7, 5, 8, 6, 9 }).resize(3, 2);
+            Algebra<T>::vAdd_mtv(A, t, std::move(u), 0.5, 0.25);
+            NNTestAlmostEquals(u(0), 16.25, 1e-12);
+            NNTestAlmostEquals(u(1), 25.25, 1e-12);
+        }
+    }
+
+    NNTestMethod(mAdd_m)
+    {
+        NNTestParams(const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 2, 4, 6, 8, 10, 12 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 1, 2, 4, 8, 16, 32 }).resize(2, 3);
+            Algebra<T>::mAdd_m(B, A, 0.5, 0.25);
+            NNTestAlmostEquals(A(0, 0), 1, 1e-12);
+            NNTestAlmostEquals(A(0, 1), 2, 1e-12);
+            NNTestAlmostEquals(A(0, 2), 3.5, 1e-12);
+            NNTestAlmostEquals(A(1, 0), 6, 1e-12);
+            NNTestAlmostEquals(A(1, 1), 10.5, 1e-12);
+            NNTestAlmostEquals(A(1, 2), 19, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 2, 4, 6, 8, 10, 12 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 1, 2, 4, 8, 16, 32 }).resize(2, 3);
+            Algebra<T>::mAdd_m(B, std::move(A), 0.5, 0.25);
+            NNTestAlmostEquals(A(0, 0), 1, 1e-12);
+            NNTestAlmostEquals(A(0, 1), 2, 1e-12);
+            NNTestAlmostEquals(A(0, 2), 3.5, 1e-12);
+            NNTestAlmostEquals(A(1, 0), 6, 1e-12);
+            NNTestAlmostEquals(A(1, 1), 10.5, 1e-12);
+            NNTestAlmostEquals(A(1, 2), 19, 1e-12);
+        }
+    }
+
+    NNTestMethod(mAdd_mt)
+    {
+        NNTestParams(const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 2, 4, 6, 8, 10, 12 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 1, 8, 2, 16, 4, 32 }).resize(3, 2);
+            Algebra<T>::mAdd_mt(B, A, 0.5, 0.25);
+            NNTestAlmostEquals(A(0, 0), 1, 1e-12);
+            NNTestAlmostEquals(A(0, 1), 2, 1e-12);
+            NNTestAlmostEquals(A(0, 2), 3.5, 1e-12);
+            NNTestAlmostEquals(A(1, 0), 6, 1e-12);
+            NNTestAlmostEquals(A(1, 1), 10.5, 1e-12);
+            NNTestAlmostEquals(A(1, 2), 19, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 2, 4, 6, 8, 10, 12 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 1, 8, 2, 16, 4, 32 }).resize(3, 2);
+            Algebra<T>::mAdd_mt(B, std::move(A), 0.5, 0.25);
+            NNTestAlmostEquals(A(0, 0), 1, 1e-12);
+            NNTestAlmostEquals(A(0, 1), 2, 1e-12);
+            NNTestAlmostEquals(A(0, 2), 3.5, 1e-12);
+            NNTestAlmostEquals(A(1, 0), 6, 1e-12);
+            NNTestAlmostEquals(A(1, 1), 10.5, 1e-12);
+            NNTestAlmostEquals(A(1, 2), 19, 1e-12);
+        }
+    }
+
+    NNTestMethod(mAdd_mm)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 7, 8, 9, 0, 1, 2 }).resize(3, 2);
+            Tensor<T> C = Tensor<T>({ 2, 4, 6, 8 }).resize(2, 2);
+            Tensor<T> D = Tensor<T>({ 29, 16, 82, 48 }).resize(2, 2);
+            Algebra<T>::mAdd_mm(A, B, C, 1, 0.5);
+            forEach([&](T c, T d)
+            {
+                NNTestAlmostEquals(c, d, 1e-12);
+            }, C, D);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 7, 8, 9, 0, 1, 2 }).resize(3, 2);
+            Tensor<T> C = Tensor<T>({ 2, 4, 6, 8 }).resize(2, 2);
+            Tensor<T> D = Tensor<T>({ 29, 16, 82, 48 }).resize(2, 2);
+            Algebra<T>::mAdd_mm(A, B, std::move(C), 1, 0.5);
+            forEach([&](T c, T d)
+            {
+                NNTestAlmostEquals(c, d, 1e-12);
+            }, C, D);
+        }
+    }
+
+    NNTestMethod(mAdd_mtm)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 1, 4, 2, 5, 3, 6 }).resize(3, 2);
+            Tensor<T> B = Tensor<T>({ 7, 8, 9, 0, 1, 2 }).resize(3, 2);
+            Tensor<T> C = Tensor<T>({ 2, 4, 6, 8 }).resize(2, 2);
+            Tensor<T> D = Tensor<T>({ 29, 16, 82, 48 }).resize(2, 2);
+            Algebra<T>::mAdd_mtm(A, B, C, 1, 0.5);
+            forEach([&](T c, T d)
+            {
+                NNTestAlmostEquals(c, d, 1e-12);
+            }, C, D);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 1, 4, 2, 5, 3, 6 }).resize(3, 2);
+            Tensor<T> B = Tensor<T>({ 7, 8, 9, 0, 1, 2 }).resize(3, 2);
+            Tensor<T> C = Tensor<T>({ 2, 4, 6, 8 }).resize(2, 2);
+            Tensor<T> D = Tensor<T>({ 29, 16, 82, 48 }).resize(2, 2);
+            Algebra<T>::mAdd_mtm(A, B, std::move(C), 1, 0.5);
+            forEach([&](T c, T d)
+            {
+                NNTestAlmostEquals(c, d, 1e-12);
+            }, C, D);
+        }
+    }
+
+    NNTestMethod(mAdd_mmt)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 7, 9, 1, 8, 0, 2 }).resize(2, 3);
+            Tensor<T> C = Tensor<T>({ 2, 4, 6, 8 }).resize(2, 2);
+            Tensor<T> D = Tensor<T>({ 29, 16, 82, 48 }).resize(2, 2);
+            Algebra<T>::mAdd_mmt(A, B, C, 1, 0.5);
+            forEach([&](T c, T d)
+            {
+                NNTestAlmostEquals(c, d, 1e-12);
+            }, C, D);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&, T, T)
+        {
+            Tensor<T> A = Tensor<T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
+            Tensor<T> B = Tensor<T>({ 7, 9, 1, 8, 0, 2 }).resize(2, 3);
+            Tensor<T> C = Tensor<T>({ 2, 4, 6, 8 }).resize(2, 2);
+            Tensor<T> D = Tensor<T>({ 29, 16, 82, 48 }).resize(2, 2);
+            Algebra<T>::mAdd_mmt(A, B, std::move(C), 1, 0.5);
+            forEach([&](T c, T d)
+            {
+                NNTestAlmostEquals(c, d, 1e-12);
+            }, C, D);
+        }
+    }
 }

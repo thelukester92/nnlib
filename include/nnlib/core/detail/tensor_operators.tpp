@@ -89,6 +89,13 @@ nnlib::Tensor<T> operator*(const nnlib::Tensor<T> &lhs, typename nnlib::traits::
 }
 
 template <typename T>
+nnlib::Tensor<T> operator*(typename nnlib::traits::Identity<T>::type lhs, const nnlib::Tensor<T> &rhs)
+{
+    nnlib::Tensor<T> product = rhs.copy();
+    return product *= lhs;
+}
+
+template <typename T>
 nnlib::Tensor<T> &operator/=(nnlib::Tensor<T> &lhs, typename nnlib::traits::Identity<T>::type rhs)
 {
     return lhs.scale(1.0 / rhs);

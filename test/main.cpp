@@ -77,5 +77,8 @@ int main(int argc, const char **argv)
     NNRunTest(MSE);
     NNRunTest(NLL);
 
+    // Math
+    NNRunTest(Algebra);
+
     return 0;
 }

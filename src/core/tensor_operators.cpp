@@ -11,6 +11,7 @@ template nnlib::Tensor<NN_REAL_T> &operator-=(nnlib::Tensor<NN_REAL_T> &, const 
 template nnlib::Tensor<NN_REAL_T> operator-(const nnlib::Tensor<NN_REAL_T> &, const nnlib::Tensor<NN_REAL_T> &);
 template nnlib::Tensor<NN_REAL_T> &operator*=(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
 template nnlib::Tensor<NN_REAL_T> operator*(const nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
+template nnlib::Tensor<NN_REAL_T> operator*(NN_REAL_T, const nnlib::Tensor<NN_REAL_T> &);
 template nnlib::Tensor<NN_REAL_T> &operator/=(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
 template nnlib::Tensor<NN_REAL_T> operator/(const nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
 

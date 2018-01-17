@@ -83,10 +83,21 @@ NNTestClassImpl(TensorOperators)
 
     NNTestMethod(operator*)
     {
-        NNTestParams(const Tensor &, const Tensor &)
+        NNTestParams(const Tensor &, T)
         {
             Tensor<T> t({ 2 });
             Tensor<T> u = t * 3.14;
+            NNTestEquals(u.dims(), 1);
+            NNTestEquals(u.size(), 1);
+            NNTestAlmostEquals(u(0), 6.28, 1e-12);
+            NNTestAlmostEquals(t(0), 2, 1e-12);
+            NNTest(!u.sharedWith(t));
+        }
+
+        NNTestParams(T, const Tensor &)
+        {
+            Tensor<T> t({ 2 });
+            Tensor<T> u = 3.14 * t;
             NNTestEquals(u.dims(), 1);
             NNTestEquals(u.size(), 1);
             NNTestAlmostEquals(u(0), 6.28, 1e-12);

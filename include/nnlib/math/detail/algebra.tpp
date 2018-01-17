@@ -225,7 +225,7 @@ void Algebra<T>::mAdd_mt(const Tensor<T> &_A, Tensor<T> &_B, T alpha, T beta)
     NNAssertEquals(_A.size(1), _B.size(0), "Incompatible operands!");
     const T *A = _A.ptr();
     T *B = _B.ptr();
-    size_t r = _A.size(0), c = _A.size(1), lda = _A.stride(0), ldb = _B.stride(0);
+    size_t r = _A.size(1), c = _A.size(0), lda = _A.stride(0), ldb = _B.stride(0);
     for(size_t i = 0; i < r; ++i)
         for(size_t j = 0; j < c; ++j)
             B[i * ldb + j] = alpha * A[j * lda + i] + beta * B[i * ldb + j];
