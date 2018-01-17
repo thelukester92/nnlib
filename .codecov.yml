@@ -1,4 +1,2 @@
 ignore:
     - "test/*"
-    - "include/nnlib/util/progress.hpp"
-    - "include/nnlib/util/timer.hpp"

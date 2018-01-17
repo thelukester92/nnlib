@@ -25,5 +25,5 @@ script:
     - make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib"
 after_success:
     - cd $TRAVIS_BUILD_DIR
-    - lcov -c -d obj -o obj/lcov.info
+    - lcov -c -b . -d obj --no-external -o obj/lcov.info
     - bash <(curl -s https://codecov.io/bash) -X gcov -f obj/lcov.info
