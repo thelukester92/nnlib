@@ -118,7 +118,7 @@ $(BIN)/$(TST): $(TSTFILES)
 	$(CXX) $(TSTFILES) $(DBGFLAGS) -Wl,-rpath,$(LIB) -L$(LIB) -l$(DBG) -o $@ --coverage
 $(OBJ)/test/%.o: test/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@
+	$(CXX) $< $(DBGFLAGS) -MMD -c -o $@ --coverage
 $(BIN)/nvblas.conf:
 	@echo "NVBLAS_CPU_BLAS_LIB" $(CPU_BLAS) > $@
 	@echo "NVBLAS_GPU_LIST ALL" >> $@
