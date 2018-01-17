@@ -158,50 +158,50 @@ Tensor<T>::Tensor(const Serialized &node) :
 template <typename T>
 Tensor<T> &Tensor<T>::operator=(const Storage<T> &values)
 {
-    m_dims			= { values.size() };
-    m_strides		= { 1 };
-    m_offset		= 0;
-    *m_data			= values;
-    m_size			= values.size();
-    m_contiguous	= true;
+    m_dims = { values.size() };
+    m_strides = { 1 };
+    m_offset = 0;
+    *m_data = values;
+    m_size = values.size();
+    m_contiguous = true;
     return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::operator=(const std::initializer_list<T> &values)
 {
-    m_dims			= { values.size() };
-    m_strides		= { 1 };
-    m_offset		= 0;
-    *m_data			= values;
-    m_size			= values.size();
-    m_contiguous	= true;
+    m_dims = { values.size() };
+    m_strides = { 1 };
+    m_offset = 0;
+    *m_data = values;
+    m_size = values.size();
+    m_contiguous = true;
     return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::operator=(Tensor<T> &other)
 {
-    m_dims			= other.m_dims;
-    m_strides		= other.m_strides;
-    m_offset		= other.m_offset;
-    m_data			= other.m_data;
-    m_shared		= other.m_shared;
-    m_size			= other.m_size;
-    m_contiguous	= other.m_contiguous;
+    m_dims = other.m_dims;
+    m_strides = other.m_strides;
+    m_offset = other.m_offset;
+    m_data = other.m_data;
+    m_shared = other.m_shared;
+    m_size = other.m_size;
+    m_contiguous = other.m_contiguous;
     return *this;
 }
 
 template <typename T>
 Tensor<T> &Tensor<T>::operator=(Tensor<T> &&other)
 {
-    m_dims			= other.m_dims;
-    m_strides		= other.m_strides;
-    m_offset		= other.m_offset;
-    m_data			= other.m_data;
-    m_shared		= other.m_shared;
-    m_size			= other.m_size;
-    m_contiguous	= other.m_contiguous;
+    m_dims = other.m_dims;
+    m_strides = other.m_strides;
+    m_offset = other.m_offset;
+    m_data = other.m_data;
+    m_shared = other.m_shared;
+    m_size = other.m_size;
+    m_contiguous = other.m_contiguous;
     return *this;
 }
 

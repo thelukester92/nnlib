@@ -61,9 +61,9 @@ public:
     void save(Serialized &node) const;
 
 private:
-    T *m_ptr;			///< The data itself.
-    size_t m_size;		///< Number of elements being used.
-    size_t m_capacity;	///< Number of elements available in buffer.
+    T *m_ptr;          ///< The data itself.
+    size_t m_size;     ///< Number of elements being used.
+    size_t m_capacity; ///< Number of elements available in buffer.
 };
 
 }

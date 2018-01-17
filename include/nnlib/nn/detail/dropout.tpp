@@ -31,8 +31,8 @@ Dropout<T>::Dropout(const Serialized &node) :
 template <typename T>
 Dropout<T> &Dropout<T>::operator=(const Dropout<T> &module)
 {
-    m_dropProbability	= module.m_dropProbability;
-    m_training			= module.m_training;
+    m_dropProbability = module.m_dropProbability;
+    m_training = module.m_training;
     return *this;
 }
 

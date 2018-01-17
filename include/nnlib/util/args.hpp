@@ -278,7 +278,7 @@ public:
             {
                 name = std::string("-") + opt;
                 if(p.first.size() > 1)
-             		name += ",--" + p.first;
+                    name += ",--" + p.first;
             }
 
             out << std::setw(25) << name;

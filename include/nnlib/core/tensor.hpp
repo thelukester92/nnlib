@@ -479,13 +479,13 @@ public:
     void save(Serialized &node) const;
 
 private:
-    Storage<size_t> m_dims;					///< The length along each dimension.
-    Storage<size_t> m_strides;				///< Strides between dimensions.
-    size_t m_offset;						///< Offset of data for this view.
-    Storage<T> *m_data;						///< The actual data.
-    std::shared_ptr<Storage<T>> m_shared;	///< Wrapped around m_data for ARC.
-    size_t m_size;							///< The total number of elements.
-    bool m_contiguous;						///< Whether this tensor is contiguous (i.e. can be vectorized).
+    Storage<size_t> m_dims;               ///< The length along each dimension.
+    Storage<size_t> m_strides;            ///< Strides between dimensions.
+    size_t m_offset;                      ///< Offset of data for this view.
+    Storage<T> *m_data;                   ///< The actual data.
+    std::shared_ptr<Storage<T>> m_shared; ///< Wrapped around m_data for ARC.
+    size_t m_size;                        ///< The total number of elements.
+    bool m_contiguous;                    ///< Whether this tensor is contiguous (i.e. can be vectorized).
 
     /// Check whether the given list of tensors is already vectorized.
     static bool isVectorized(const Storage<Tensor *> &tensors);

@@ -70,68 +70,68 @@ public:
 
 #define NNHardAssert(x, ...) if(!(x)) throw ::nnlib::Error(__FILE__, __func__, __LINE__, ##__VA_ARGS__);
 
-#define NNHardAssertEquals(x, y, ...)								\
-    NNHardAssert(													\
-        (x) == (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
-        " Expected ", #x, " == ", #y, ", but ", x, " != ", y, "."	\
+#define NNHardAssertEquals(x, y, ...)                             \
+    NNHardAssert(                                                 \
+        (x) == (y), ::nnlib::Error::stringify(__VA_ARGS__),       \
+        " Expected ", #x, " == ", #y, ", but ", x, " != ", y, "." \
     )
 
-#define NNHardAssertAlmostEquals(x, y, eps, ...)							\
-    NNHardAssert(															\
-        std::fabs((x) - (y)) < eps, ::nnlib::Error::stringify(__VA_ARGS__),	\
-        " Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."			\
+#define NNHardAssertAlmostEquals(x, y, eps, ...)                            \
+    NNHardAssert(                                                           \
+        std::fabs((x) - (y)) < eps, ::nnlib::Error::stringify(__VA_ARGS__), \
+        " Expected ", #x, " ~= ", #y, ", but ", x, " != ", y, "."           \
     )
 
-#define NNHardAssertNotEquals(x, y, ...)							\
-    NNHardAssert(													\
-        (x) != (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
-        " Expected ", #x, " != ", #y, ", but ", x, " == ", y, "."	\
+#define NNHardAssertNotEquals(x, y, ...)                          \
+    NNHardAssert(                                                 \
+        (x) != (y), ::nnlib::Error::stringify(__VA_ARGS__),       \
+        " Expected ", #x, " != ", #y, ", but ", x, " == ", y, "." \
     )
 
-#define NNHardAssertLessThan(x, y, ...)								\
-    NNHardAssert(													\
-        (x) < (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
-        " Expected ", #x, " < ", #y, ", but ", x, " >= ", y, "."	\
+#define NNHardAssertLessThan(x, y, ...)                          \
+    NNHardAssert(                                                \
+        (x) < (y), ::nnlib::Error::stringify(__VA_ARGS__),       \
+        " Expected ", #x, " < ", #y, ", but ", x, " >= ", y, "." \
     )
 
-#define NNHardAssertLessThanOrEquals(x, y, ...)						\
-    NNHardAssert(													\
-        (x) <= (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
-        " Expected ", #x, " <= ", #y, ", but ", x, " > ", y, "."	\
+#define NNHardAssertLessThanOrEquals(x, y, ...)                  \
+    NNHardAssert(                                                \
+        (x) <= (y), ::nnlib::Error::stringify(__VA_ARGS__),      \
+        " Expected ", #x, " <= ", #y, ", but ", x, " > ", y, "." \
     )
 
-#define NNHardAssertGreaterThan(x, y, ...)							\
-    NNHardAssert(													\
-        (x) > (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
-        " Expected ", #x, " > ", #y, ", but ", x, " <= ", y, "."	\
+#define NNHardAssertGreaterThan(x, y, ...)                       \
+    NNHardAssert(                                                \
+        (x) > (y), ::nnlib::Error::stringify(__VA_ARGS__),       \
+        " Expected ", #x, " > ", #y, ", but ", x, " <= ", y, "." \
     )
 
-#define NNHardAssertGreaterThanOrEquals(x, y, ...)					\
-    NNHardAssert(													\
-        (x) >= (y), ::nnlib::Error::stringify(__VA_ARGS__),			\
-        " Expected ", #x, " >= ", #y, ", but ", x, " < ", y, "."	\
+#define NNHardAssertGreaterThanOrEquals(x, y, ...)               \
+    NNHardAssert(                                                \
+        (x) >= (y), ::nnlib::Error::stringify(__VA_ARGS__),      \
+        " Expected ", #x, " >= ", #y, ", but ", x, " < ", y, "." \
     )
 
 /// General asserts that can be optimized out after testing.
 
 #ifndef NN_OPT
-    #define NNAssert(x, ...)						NNHardAssert(x, ##__VA_ARGS__)
-    #define NNAssertEquals(x, y, ...)				NNHardAssertEquals(x, y, ##__VA_ARGS__)
-    #define NNAssertAlmostEquals(x, y, eps, ...)	NNHardAssertAlmostEquals(x, y, eps, ##__VA_ARGS__)
-    #define NNAssertNotEquals(x, y, ...)			NNHardAssertNotEquals(x, y, ##__VA_ARGS__)
-    #define NNAssertLessThan(x, y, ...)				NNHardAssertLessThan(x, y, ##__VA_ARGS__)
-    #define NNAssertLessThanOrEquals(x, y, ...)		NNHardAssertLessThanOrEquals(x, y, ##__VA_ARGS__)
-    #define NNAssertGreaterThan(x, y, ...)			NNHardAssertGreaterThan(x, y, ##__VA_ARGS__)
-    #define NNAssertGreaterThanOrEquals(x, y, ...)	NNHardAssertGreaterThanOrEquals(x, y, ##__VA_ARGS__)
+    #define NNAssert(x, ...)                       NNHardAssert(x, ##__VA_ARGS__)
+    #define NNAssertEquals(x, y, ...)              NNHardAssertEquals(x, y, ##__VA_ARGS__)
+    #define NNAssertAlmostEquals(x, y, eps, ...)   NNHardAssertAlmostEquals(x, y, eps, ##__VA_ARGS__)
+    #define NNAssertNotEquals(x, y, ...)           NNHardAssertNotEquals(x, y, ##__VA_ARGS__)
+    #define NNAssertLessThan(x, y, ...)            NNHardAssertLessThan(x, y, ##__VA_ARGS__)
+    #define NNAssertLessThanOrEquals(x, y, ...)    NNHardAssertLessThanOrEquals(x, y, ##__VA_ARGS__)
+    #define NNAssertGreaterThan(x, y, ...)         NNHardAssertGreaterThan(x, y, ##__VA_ARGS__)
+    #define NNAssertGreaterThanOrEquals(x, y, ...) NNHardAssertGreaterThanOrEquals(x, y, ##__VA_ARGS__)
 #else
-    #define NNAssert(...)						(void) 0
-    #define NNAssertEquals(...)					(void) 0
-    #define NNAssertAlmostEquals(...)			(void) 0
-    #define NNAssertNotEquals(...)				(void) 0
-    #define NNAssertLessThan(...)				(void) 0
-    #define NNAssertLessThanOrEquals(...)		(void) 0
-    #define NNAssertGreaterThan(...)			(void) 0
-    #define NNAssertGreaterThanOrEquals(...)	(void) 0
+    #define NNAssert(...)                    (void) 0
+    #define NNAssertEquals(...)              (void) 0
+    #define NNAssertAlmostEquals(...)        (void) 0
+    #define NNAssertNotEquals(...)           (void) 0
+    #define NNAssertLessThan(...)            (void) 0
+    #define NNAssertLessThanOrEquals(...)    (void) 0
+    #define NNAssertGreaterThan(...)         (void) 0
+    #define NNAssertGreaterThanOrEquals(...) (void) 0
 #endif
 
 }

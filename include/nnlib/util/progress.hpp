@@ -28,11 +28,11 @@ public:
         if(m_total == 0)
             return;
 
-        size_t degreeCurrent	= current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));
-        size_t middle			= degreeCurrent + m_degreeTotal + 5;
-        size_t head				= current == m_total ? m_length + 1 : m_length * current / double(m_total);
-        size_t leading			= (m_length - middle) / 2;
-        size_t trailing			= m_length - middle - leading;
+        size_t degreeCurrent = current == 0 ? 1 : (size_t) ceil(log(current + 1) / log(10));
+        size_t middle = degreeCurrent + m_degreeTotal + 5;
+        size_t head = current == m_total ? m_length + 1 : m_length * current / double(m_total);
+        size_t leading = (m_length - middle) / 2;
+        size_t trailing = m_length - middle - leading;
 
         m_out << "\r\33[2K[";
         for(size_t i = 1; i < leading; ++i)

@@ -37,9 +37,9 @@ Storage<T>::Storage(Storage<T> &&rhs) :
     m_size(rhs.m_size),
     m_capacity(rhs.m_capacity)
 {
-    rhs.m_ptr		= nullptr;
-    rhs.m_size		= 0;
-    rhs.m_capacity	= 0;
+    rhs.m_ptr = nullptr;
+    rhs.m_size = 0;
+    rhs.m_capacity = 0;
 }
 
 template <typename T>
