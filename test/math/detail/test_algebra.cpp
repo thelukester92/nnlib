@@ -16,6 +16,12 @@ NNTestClassImpl(Algebra)
             {
                 NNTestAlmostEquals(t, 3.14, 1e-12);
             }, t);
+            t = Tensor<T>(5, 3).select(1, 1);
+            Algebra<T>::vFill(t, 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
         }
 
         NNTestParams(Tensor &&x, T)
@@ -34,6 +40,13 @@ NNTestClassImpl(Algebra)
         NNTestParams(Tensor &x, T)
         {
             Tensor<T> t({ 1, 1, 1, 1, 1, 1 });
+            Algebra<T>::vScale(t, 3.14);
+            forEach([&](T t)
+            {
+                NNTestAlmostEquals(t, 3.14, 1e-12);
+            }, t);
+            t = Tensor<T>(5, 3).select(1, 1);
+            t.fill(1);
             Algebra<T>::vScale(t, 3.14);
             forEach([&](T t)
             {
@@ -107,6 +120,12 @@ NNTestClassImpl(Algebra)
             Algebra<T>::vAdd_v(u, t, 0.5);
             NNTestAlmostEquals(t(0), 3, 1e-12);
             NNTestAlmostEquals(t(1), 4.5, 1e-12);
+            NNTestAlmostEquals(t(2), 6, 1e-12);
+            t = Tensor<T>(3, 5).select(1, 1);
+            t.fill(0);
+            Algebra<T>::vAdd_v(u, t, 1);
+            NNTestAlmostEquals(t(0), 4, 1e-12);
+            NNTestAlmostEquals(t(1), 5, 1e-12);
             NNTestAlmostEquals(t(2), 6, 1e-12);
         }
 

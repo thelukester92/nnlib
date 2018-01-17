@@ -1,113 +1,272 @@
-#include "nnlib/core/error.hpp"
-#include "nnlib/core/tensor.hpp"
+#include "../test_math.hpp"
 #include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 using namespace nnlib;
 using namespace nnlib::math;
+using T = NN_REAL_T;
 
-void TestMath()
+NNTestClassImpl(Math)
 {
-    Tensor<NN_REAL_T> a = { 8, -6, 7, 5, 3, 0, 9, 3.14159 };
-    Tensor<NN_REAL_T> b = Tensor<NN_REAL_T>({
-        1, 2, 3,
-        4, 5, 6,
-        7, 8, 9
-    }).resize(3, 3);
-    Tensor<NN_REAL_T> c;
+    NNTestMethod(min)
+    {
+        NNTestParams(const Tensor &)
+        {
+            Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
+            NNTestAlmostEquals(min(x), -6, 1e-12);
+        }
+    }
 
-    NNAssertAlmostEquals(min(a), -6, 1e-12, "math::min failed!");
-    NNAssertAlmostEquals(max(a), 9, 1e-12, "math::max failed!");
-    NNAssertAlmostEquals(sum(a), 29.14159, 1e-12, "math::sum failed!");
-    NNAssertAlmostEquals(mean(a), 3.64269875, 1e-12, "math::mean failed!");
-    NNAssertAlmostEquals(variance(a), 20.964444282761, 1e-12, "math::variance failed!");
-    NNAssertAlmostEquals(variance(a, true), 23.959364894584, 1e-12, "math::variance as sample failed!");
+    NNTestMethod(max)
+    {
+        NNTestParams(const Tensor &)
+        {
+            Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
+            NNTestAlmostEquals(max(x), 9, 1e-12);
+        }
+    }
 
-    normalize(a);
-    NNAssertAlmostEquals(min(a), 0, 1e-12, "math::normalize(Tensor &) failed!");
-    NNAssertAlmostEquals(max(a), 1, 1e-12, "math::normalize(Tensor &) failed!");
+    NNTestMethod(sum)
+    {
+        NNTestParams(const Tensor &)
+        {
+            Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
+            NNTestAlmostEquals(sum(x), 29.14159, 1e-12);
+        }
+    }
 
-    normalize(a.view(2), -3.14, -1.21);
-    NNAssertAlmostEquals(a(0), -1.21, 1e-12, "math::normalize(Tensor &&) failed!");
-    NNAssertAlmostEquals(a(1), -3.14, 1e-12, "math::normalize(Tensor &&) failed!");
+    NNTestMethod(mean)
+    {
+        NNTestParams(const Tensor &)
+        {
+            Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
+            NNTestAlmostEquals(mean(x), 3.64269875, 1e-12);
+        }
+    }
 
-    a = { 3, 4, 5 };
-    clip(a, 3.14, 4.25);
-    NNAssertAlmostEquals(a(0), 3.14, 1e-12, "math::clip(Tensor &) failed!");
-    NNAssertAlmostEquals(a(1), 4, 1e-12, "math::clip(Tensor &) failed!");
-    NNAssertAlmostEquals(a(2), 4.25, 1e-12, "math::clip(Tensor &) failed!");
+    NNTestMethod(variance)
+    {
+        NNTestParams(const Tensor &)
+        {
+            Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
+            NNTestAlmostEquals(variance(x), 20.964444282761, 1e-12);
+        }
 
-    a = { 3, 4, 5 };
-    clip(a.view(2), 3.14, 4.25);
-    NNAssertAlmostEquals(a(0), 3.14, 1e-12, "math::clip(Tensor &&) failed!");
-    NNAssertAlmostEquals(a(1), 4, 1e-12, "math::clip(Tensor &&) failed!");
-    NNAssertAlmostEquals(a(2), 5, 1e-12, "math::clip(Tensor &&) failed!");
+        NNTestParams(const Tensor &, bool)
+        {
+            Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
+            NNTestAlmostEquals(variance(x, true), 23.959364894584, 1e-12);
+        }
+    }
 
-    a = { -3, 0, 1, 4 };
-    square(a);
-    NNAssertAlmostEquals(a(0), 9, 1e-12, "math::square(Tensor &) failed!");
-    NNAssertAlmostEquals(a(1), 0, 1e-12, "math::square(Tensor &) failed!");
-    NNAssertAlmostEquals(a(2), 1, 1e-12, "math::square(Tensor &) failed!");
-    NNAssertAlmostEquals(a(3), 16, 1e-12, "math::square(Tensor &) failed!");
+    NNTestMethod(normalize)
+    {
+        NNTestParams(Tensor &, T, T)
+        {
+            Tensor<T> x({ -2, 0, 8, 3 });
+            normalize(x, -1, 4);
+            NNTestAlmostEquals(x(0), -1, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 4, 1e-12);
+            NNTestAlmostEquals(x(3), 1.5, 1e-12);
+        }
 
-    a = { -3, 0, 1, 4 };
-    square(a.view(2));
-    NNAssertAlmostEquals(a(0), 9, 1e-12, "math::square(Tensor &&) failed!");
-    NNAssertAlmostEquals(a(1), 0, 1e-12, "math::square(Tensor &&) failed!");
-    NNAssertAlmostEquals(a(2), 1, 1e-12, "math::square(Tensor &&) failed!");
-    NNAssertAlmostEquals(a(3), 4, 1e-12, "math::square(Tensor &&) failed!");
+        NNTestParams(Tensor &&, T, T)
+        {
+            Tensor<T> x = normalize(Tensor<T>({ -2, 0, 8, 3 }), -1, 4);
+            NNTestAlmostEquals(x(0), -1, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 4, 1e-12);
+            NNTestAlmostEquals(x(3), 1.5, 1e-12);
+        }
+    }
 
-    a.resize(3).zeros();
-    sum(b, a, 0);
-    NNAssertAlmostEquals(a(0), 12, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
-    NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
-    NNAssertAlmostEquals(a(2), 18, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
+    NNTestMethod(clip)
+    {
+        NNTestParams(Tensor &, T, T)
+        {
+            Tensor<T> x({ -2, 0, 8, 3 });
+            clip(x, -1, 4);
+            NNTestAlmostEquals(x(0), -1, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 4, 1e-12);
+            NNTestAlmostEquals(x(3), 3, 1e-12);
+        }
 
-    a.resize(3).zeros();
-    sum(b, a, 1);
-    NNAssertAlmostEquals(a(0), 6, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
-    NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
-    NNAssertAlmostEquals(a(2), 24, 1e-12, "math::sum(const Tensor &, Tensor &, size_t) failed!")
+        NNTestParams(Tensor &&, T, T)
+        {
+            Tensor<T> x = clip(Tensor<T>({ -2, 0, 8, 3 }), -1, 4);
+            NNTestAlmostEquals(x(0), -1, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 4, 1e-12);
+            NNTestAlmostEquals(x(3), 3, 1e-12);
+        }
+    }
 
-    a.resize(4).zeros();
-    sum(b, a.view(3), 0);
-    NNAssertAlmostEquals(a(0), 12, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-    NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-    NNAssertAlmostEquals(a(2), 18, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-    NNAssertAlmostEquals(a(3), 0, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
+    NNTestMethod(square)
+    {
+        NNTestParams(Tensor &)
+        {
+            Tensor<T> x({ -2, 0, 1, 6 });
+            square(x);
+            NNTestAlmostEquals(x(0), 4, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 1, 1e-12);
+            NNTestAlmostEquals(x(3), 36, 1e-12);
+        }
 
-    a.resize(4).zeros();
-    sum(b, a.view(3), 1);
-    NNAssertAlmostEquals(a(0), 6, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-    NNAssertAlmostEquals(a(1), 15, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-    NNAssertAlmostEquals(a(2), 24, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
-    NNAssertAlmostEquals(a(3), 0, 1e-12, "math::sum(const Tensor &, Tensor &&, size_t) failed!")
+        NNTestParams(Tensor &&)
+        {
+            Tensor<T> x = square(Tensor<T>({ -2, 0, 1, 6 }));
+            NNTestAlmostEquals(x(0), 4, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 1, 1e-12);
+            NNTestAlmostEquals(x(3), 36, 1e-12);
+        }
+    }
 
-    a = {  1, 2, 0 };
-    b = { -1, 5, 3 };
-    pointwiseProduct(a, b);
-    NNAssertAlmostEquals(b(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &) failed!");
-    NNAssertAlmostEquals(b(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &) failed!");
-    NNAssertAlmostEquals(b(2), 0, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &) failed!");
+    NNTestMethod(rand)
+    {
+        NNTestParams(Tensor &, T, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x(1000);
+            rand(x, -1, 1);
+            NNTestAlmostEquals(mean(x), 0, 0.5);
+            NNTestAlmostEquals(variance(x), 0.3333, 0.5);
+        }
 
-    a = {  1, 2, 0 };
-    b = { -1, 5, 3 };
-    pointwiseProduct(a.view(2), b.view(2));
-    NNAssertAlmostEquals(b(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &&) failed!");
-    NNAssertAlmostEquals(b(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &&) failed!");
-    NNAssertAlmostEquals(b(2), 3, 1e-12, "math::pointwiseProduct(const Tensor &, Tensor &&) failed!");
+        NNTestParams(Tensor &&, T, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x = rand(Tensor<T>(1000), -1, 1);
+            NNTestAlmostEquals(mean(x), 0, 0.5);
+            NNTestAlmostEquals(variance(x), 0.3333, 0.5);
+        }
+    }
 
-    a = {  1, 2, 3 };
-    b = { -1, 5, 3 };
-    c.resize(3).zeros();
-    pointwiseProduct(a, b, c);
-    NNAssertAlmostEquals(c(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &) failed!");
-    NNAssertAlmostEquals(c(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &) failed!");
-    NNAssertAlmostEquals(c(2), 9, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &) failed!");
+    NNTestMethod(randn)
+    {
+        NNTestParams(Tensor &, T, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x(1000);
+            randn(x, -1, 3.14);
+            NNTestAlmostEquals(mean(x), -1, 0.5);
+            NNTestAlmostEquals(variance(x), 9.8596, 0.5);
+        }
 
-    a = {  1, 2, 3 };
-    b = { -1, 5, 3 };
-    c.resize(3).zeros();
-    pointwiseProduct(a.view(2), b.view(2), c.view(2));
-    NNAssertAlmostEquals(c(0), -1, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &&) failed!");
-    NNAssertAlmostEquals(c(1), 10, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &&) failed!");
-    NNAssertAlmostEquals(c(2), 0, 1e-12, "math::pointwiseProduct(const Tensor &, const Tensor &, Tensor &&) failed!");
+        NNTestParams(Tensor &&, T, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x = randn(Tensor<T>(1000), -1, 3.14);
+            NNTestAlmostEquals(mean(x), -1, 0.5);
+            NNTestAlmostEquals(variance(x), 9.8596, 0.5);
+        }
+
+        NNTestParams(Tensor &, T, T, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x(1000);
+            randn(x, -1, 3.14, 3);
+            NNTestAlmostEquals(mean(x), -1, 0.5);
+            NNTestGreaterThanOrEquals(min(x), -4);
+            NNTestLessThanOrEquals(max(x), 2);
+        }
+
+        NNTestParams(Tensor &&, T, T, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x = randn(Tensor<T>(1000), -1, 3.14, 3);
+            NNTestAlmostEquals(mean(x), -1, 0.5);
+            NNTestGreaterThanOrEquals(min(x), -4);
+            NNTestLessThanOrEquals(max(x), 2);
+        }
+    }
+
+    NNTestMethod(bernoulli)
+    {
+        NNTestParams(Tensor &, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x(1000);
+            bernoulli(x, 0.25);
+            size_t n = 0;
+            forEach([&](T x)
+            {
+                if(x > 0.5)
+                    ++n;
+            }, x);
+            NNTestAlmostEquals(n, 0.25 * x.size(), 50);
+        }
+
+        NNTestParams(Tensor &&, T)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> x = bernoulli(Tensor<T>(1000), 0.25);
+            size_t n = 0;
+            forEach([&](T x)
+            {
+                if(x > 0.5)
+                    ++n;
+            }, x);
+            NNTestAlmostEquals(n, 0.25 * x.size(), 50);
+        }
+    }
+
+    NNTestMethod(sum)
+    {
+        NNTestParams(const Tensor &, Tensor &, size_t)
+        {
+            Tensor<T> x = Tensor<T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
+            Tensor<T> y = Tensor<T>({ 5, 7, 9 });
+            Tensor<T> z(3);
+            sum(x, z, 0);
+            forEach([&](T y, T z)
+            {
+                NNTestAlmostEquals(y, z, 1e-12);
+            }, y, z);
+            y = Tensor<T>({ 6, 15 });
+            z.resize(2);
+            sum(x, z, 1);
+            forEach([&](T y, T z)
+            {
+                NNTestAlmostEquals(y, z, 1e-12);
+            }, y, z);
+        }
+
+        NNTestParams(const Tensor &, Tensor &&, size_t)
+        {
+            Tensor<T> x = Tensor<T>({ 1, 2, 3, 4, 5, 6 }).resize(2, 3);
+            Tensor<T> y = Tensor<T>({ 5, 7, 9 });
+            Tensor<T> z = sum(x, Tensor<T>(3), 0);
+            forEach([&](T y, T z)
+            {
+                NNTestAlmostEquals(y, z, 1e-12);
+            }, y, z);
+        }
+    }
+
+    NNTestMethod(pointwiseProduct)
+    {
+        NNTestParams(const Tensor &, const Tensor &, Tensor &)
+        {
+            Tensor<T> x = Tensor<T>({ 1, 2, 3 });
+            Tensor<T> y = Tensor<T>({ 4, 5, 6 });
+            Tensor<T> z(3);
+            pointwiseProduct(x, y, z);
+            NNTestAlmostEquals(z(0), 4, 1e-12);
+            NNTestAlmostEquals(z(1), 10, 1e-12);
+            NNTestAlmostEquals(z(2), 18, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, Tensor &&)
+        {
+            Tensor<T> x = Tensor<T>({ 1, 2, 3 });
+            Tensor<T> y = Tensor<T>({ 4, 5, 6 });
+            Tensor<T> z = pointwiseProduct(x, y, Tensor<T>(3));
+            NNTestAlmostEquals(z(0), 4, 1e-12);
+            NNTestAlmostEquals(z(1), 10, 1e-12);
+            NNTestAlmostEquals(z(2), 18, 1e-12);
+        }
+    }
 }

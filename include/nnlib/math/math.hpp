@@ -34,19 +34,19 @@ T variance(const Tensor<T> &x, bool sample = false);
 
 /// Scales and shifts the elements in x to lie in [from..to].
 template <typename T>
-Tensor<T> &normalize(Tensor<T> &x, T from = 0, T to = 1);
+Tensor<T> &normalize(Tensor<T> &x, typename traits::Identity<T>::type from = 0, typename traits::Identity<T>::type to = 1);
 
 /// Scales and shifts the elements in x to lie in [from..to].
 template <typename T>
-Tensor<T> &&normalize(Tensor<T> &&x, T from = 0, T to = 1);
+Tensor<T> &&normalize(Tensor<T> &&x, typename traits::Identity<T>::type from = 0, typename traits::Identity<T>::type to = 1);
 
 /// Caps elements in x to lie in [min..max].
 template <typename T>
-Tensor<T> &clip(Tensor<T> &x, T min, T max);
+Tensor<T> &clip(Tensor<T> &x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max);
 
 /// Caps elements in x to lie in [min..max].
 template <typename T>
-Tensor<T> &&clip(Tensor<T> &&x, T min, T max);
+Tensor<T> &&clip(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max);
 
 /// Squares each element in x.
 template <typename T>
@@ -58,35 +58,35 @@ Tensor<T> &&square(Tensor<T> &&x);
 
 /// Fills x with values drawn from a uniform distribution over [min..max].
 template <typename T>
-Tensor<T> &rand(Tensor<T> &x, T min = -1, T max = 1);
+Tensor<T> &rand(Tensor<T> &x, typename traits::Identity<T>::type min = -1, typename traits::Identity<T>::type max = 1);
 
 /// Fills x with values drawn from a uniform distribution over [min..max].
 template <typename T>
-Tensor<T> &&rand(Tensor<T> &&x, T min = -1, T max = 1);
+Tensor<T> &&rand(Tensor<T> &&x, typename traits::Identity<T>::type min = -1, typename traits::Identity<T>::type max = 1);
 
 /// Fills x with values drawn from a normal distribution with the given mean and standard deviation.
 template <typename T>
-Tensor<T> &randn(Tensor<T> &x, T mean = 0, T stddev = 1);
+Tensor<T> &randn(Tensor<T> &x, typename traits::Identity<T>::type mean = 0, typename traits::Identity<T>::type stddev = 1);
 
 /// Fills x with values drawn from a normal distribution with the given mean and standard deviation.
 template <typename T>
-Tensor<T> &&randn(Tensor<T> &&x, T mean = 0, T stddev = 1);
+Tensor<T> &&randn(Tensor<T> &&x, typename traits::Identity<T>::type mean = 0, typename traits::Identity<T>::type stddev = 1);
 
 /// Fills x with values drawn from a normal distribution with the given mean and standard deviation, redrawing until within cap of mean.
 template <typename T>
-Tensor<T> &randn(Tensor<T> &x, T mean, T stddev, T cap);
+Tensor<T> &randn(Tensor<T> &x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev, typename traits::Identity<T>::type cap);
 
 /// Fills x with values drawn from a normal distribution with the given mean and standard deviation, redrawing until within cap of mean.
 template <typename T>
-Tensor<T> &&randn(Tensor<T> &&x, T mean, T stddev, T cap);
+Tensor<T> &&randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev, typename traits::Identity<T>::type cap);
 
 /// Fills x with values drawn from a Bernoulli distribution with a p probability of a 1.
 template <typename T>
-Tensor<T> &bernoulli(Tensor<T> &x, T p = 0.5);
+Tensor<T> &bernoulli(Tensor<T> &x, typename traits::Identity<T>::type p = 0.5);
 
 /// Fills x with values drawn from a Bernoulli distribution with a p probability of a 1.
 template <typename T>
-Tensor<T> &&bernoulli(Tensor<T> &&x, T p = 0.5);
+Tensor<T> &&bernoulli(Tensor<T> &&x, typename traits::Identity<T>::type p = 0.5);
 
 // MARK: Tensor-tensor operations.
 

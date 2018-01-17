@@ -17,6 +17,26 @@ NNTestClassImpl(TensorUtil)
             }, t);
             for(size_t i = 0; i < t.size(); ++i)
                 NNTestAlmostEquals(t(i), i * 3.14, 1e-12);
+
+            t.resize(5, 3);
+            Tensor<T> u = t.select(1, 1);
+            u.fill(42);
+            forEach([&](T u)
+            {
+                NNTestAlmostEquals(u, 42, 1e-12);
+            }, u);
+
+            Tensor<T> v = t.select(1, 2);
+            v.fill(13);
+            forEach([](T &u, T v)
+            {
+                u += v;
+            }, u, v);
+            forEach([&](T u)
+            {
+                NNTestAlmostEquals(u, 55, 1e-12);
+            }, u);
+
             Tensor<T> almostTooBig(Storage<size_t>(NN_MAX_NUM_DIMENSIONS -1, 1), true);
             try
             {
@@ -26,6 +46,7 @@ NNTestClassImpl(TensorUtil)
             {
                 NNTest(false);
             }
+
             Tensor<T> tooBig(Storage<size_t>(NN_MAX_NUM_DIMENSIONS, 1), true);
             try
             {

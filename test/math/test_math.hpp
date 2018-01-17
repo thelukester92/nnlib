@@ -1,6 +1,7 @@
 #ifndef TEST_MATH_HPP
 #define TEST_MATH_HPP
 
-void TestMath();
+#include "../test.hpp"
+NNTestClassDecl(Math);
 
 #endif

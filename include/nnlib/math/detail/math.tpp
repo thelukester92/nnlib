@@ -66,7 +66,7 @@ T variance(const Tensor<T> &x, bool sample)
 }
 
 template <typename T>
-Tensor<T> &normalize(Tensor<T> &x, T from, T to)
+Tensor<T> &normalize(Tensor<T> &x, typename traits::Identity<T>::type from, typename traits::Identity<T>::type to)
 {
     NNAssertLessThanOrEquals(from, to, "Invalid normalization range!");
     T small = min(x), large = max(x);
@@ -74,7 +74,7 @@ Tensor<T> &normalize(Tensor<T> &x, T from, T to)
 }
 
 template <typename T>
-Tensor<T> &&normalize(Tensor<T> &&x, T from, T to)
+Tensor<T> &&normalize(Tensor<T> &&x, typename traits::Identity<T>::type from, typename traits::Identity<T>::type to)
 {
     return std::move(normalize(x, from, to));
 }
@@ -102,7 +102,7 @@ Tensor<T> &&sum(const Tensor<T> &x, Tensor<T> &&y, size_t dim)
 }
 
 template <typename T>
-Tensor<T> &clip(Tensor<T> &x, T min, T max)
+Tensor<T> &clip(Tensor<T> &x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
 {
     NNAssertLessThanOrEquals(min, max, "Invalid clipping range!");
     forEach([&](T &x)
@@ -116,7 +116,7 @@ Tensor<T> &clip(Tensor<T> &x, T min, T max)
 }
 
 template <typename T>
-Tensor<T> &&clip(Tensor<T> &&x, T min, T max)
+Tensor<T> &&clip(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
 {
     return std::move(clip(x, min, max));
 }
@@ -134,7 +134,7 @@ Tensor<T> &&square(Tensor<T> &&x)
 }
 
 template <typename T>
-Tensor<T> &rand(Tensor<T> &x, T min, T max)
+Tensor<T> &rand(Tensor<T> &x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
 {
     forEach([&](T &v)
     {
@@ -144,13 +144,13 @@ Tensor<T> &rand(Tensor<T> &x, T min, T max)
 }
 
 template <typename T>
-Tensor<T> &&rand(Tensor<T> &&x, T min, T max)
+Tensor<T> &&rand(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
 {
     return std::move(rand(x, min, max));
 }
 
 template <typename T>
-Tensor<T> &randn(Tensor<T> &x, T mean, T stddev)
+Tensor<T> &randn(Tensor<T> &x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev)
 {
     forEach([&](T &v)
     {
@@ -160,13 +160,13 @@ Tensor<T> &randn(Tensor<T> &x, T mean, T stddev)
 }
 
 template <typename T>
-Tensor<T> &&randn(Tensor<T> &&x, T mean, T stddev)
+Tensor<T> &&randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev)
 {
     return std::move(randn(x, mean, stddev));
 }
 
 template <typename T>
-Tensor<T> &randn(Tensor<T> &x, T mean, T stddev, T cap)
+Tensor<T> &randn(Tensor<T> &x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev, typename traits::Identity<T>::type cap)
 {
     forEach([&](T &v)
     {
@@ -176,13 +176,13 @@ Tensor<T> &randn(Tensor<T> &x, T mean, T stddev, T cap)
 }
 
 template <typename T>
-Tensor<T> &&randn(Tensor<T> &&x, T mean, T stddev, T cap)
+Tensor<T> &&randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev, typename traits::Identity<T>::type cap)
 {
     return std::move(randn(x, mean, stddev, cap));
 }
 
 template <typename T>
-Tensor<T> &bernoulli(Tensor<T> &x, T p)
+Tensor<T> &bernoulli(Tensor<T> &x, typename traits::Identity<T>::type p)
 {
     forEach([&](T &v)
     {
@@ -192,7 +192,7 @@ Tensor<T> &bernoulli(Tensor<T> &x, T p)
 }
 
 template <typename T>
-Tensor<T> &&bernoulli(Tensor<T> &&x, T p)
+Tensor<T> &&bernoulli(Tensor<T> &&x, typename traits::Identity<T>::type p)
 {
     return std::move(bernoulli(x, p));
 }
