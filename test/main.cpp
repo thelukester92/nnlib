@@ -10,6 +10,7 @@
 #include "core/test_storage.hpp"
 #include "core/test_tensor.hpp"
 #include "core/test_tensor_iterator.hpp"
+#include "core/test_tensor_operators.hpp"
 #include "critics/test_criticsequencer.hpp"
 #include "critics/test_mse.hpp"
 #include "critics/test_nll.hpp"
@@ -66,6 +67,7 @@ int main(int argc, const char **argv)
     NNRunTest(Storage);
     NNRunTest(Tensor);
     NNRunTest(TensorIterator);
+    NNRunTest(TensorOperators);
 
     return 0;
 }
