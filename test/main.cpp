@@ -80,6 +80,7 @@ int main(int argc, const char **argv)
     // Math
     NNRunTest(Algebra);
     NNRunTest(Math);
+    NNRunTest(Random);
 
     return 0;
 }

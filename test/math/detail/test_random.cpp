@@ -3,27 +3,121 @@
 #include "nnlib/math/math.hpp"
 #include "nnlib/math/random.hpp"
 using namespace nnlib;
+using namespace nnlib::math;
+using T = NN_REAL_T;
 
-void TestRandom()
+NNTestClassImpl(RandomEngine)
 {
-    RandomEngine::sharedEngine().seed();
-    double r;
+    NNTestMethod(sharedEngine)
+    {
+        NNTestParams()
+        {
+            RandomEngine *e = &RandomEngine::sharedEngine();
+            RandomEngine *f = &RandomEngine::sharedEngine();
+            NNTestEquals(e, f);
+        }
+    }
 
-    r = Random<NN_REAL_T>::sharedRandom().uniform(3.14);
-    NNAssertGreaterThanOrEquals(r, 0, "Random::uniform(T) produced a value too small!");
-    NNAssertLessThan(r, 3.14, "Random::uniform(T) produced a value too big!");
+    NNTestMethod(RandomEngine)
+    {
+        NNTestParams()
+        {
+            RandomEngine e;
+            RandomEngine &f = RandomEngine::sharedEngine();
+            NNTestNotEquals(&e.engine(), &f.engine());
+        }
 
-    r = Random<NN_REAL_T>::sharedRandom().uniform(2.19, 3.14);
-    NNAssertGreaterThanOrEquals(r, 2.19, "Random::uniform(T, T) produced a value too small!");
-    NNAssertLessThan(r, 3.14, "Random::uniform(T, T) produced a value too big!");
+        NNTestParams(size_t)
+        {
+            RandomEngine e(0);
+            RandomEngine f(0);
+            Random<size_t> r(&e);
+            Random<size_t> s(&f);
+            for(size_t i = 0; i < 100; ++i)
+                NNTestEquals(r.uniform(), s.uniform());
+        }
+    }
 
-    Tensor<NN_REAL_T> t(1000);
-    for(auto &v : t)
-        v = Random<NN_REAL_T>::sharedRandom().normal();
-    NNAssertAlmostEquals(math::mean(t), 0.0, 1e-1, "Random::normal produced an unexpected mean!");
-    NNAssertAlmostEquals(math::variance(t), 1.0, 1e-1, "Random::normal produced an unexpected variance!");
+    NNTestMethod(seed)
+    {
+        NNTestParams(size_t)
+        {
+            RandomEngine e, f;
+            e.seed(0);
+            f.seed(0);
+            Random<size_t> r(&e);
+            Random<size_t> s(&f);
+            for(size_t i = 0; i < 100; ++i)
+                NNTestEquals(r.uniform(), s.uniform());
+        }
+    }
 
-    r = Random<NN_REAL_T>::sharedRandom().normal(0, 1, 1);
-    NNAssertGreaterThanOrEquals(r, -1.0, "Random::normal(T, T, T) produced a value too small!");
-    NNAssertLessThanOrEquals(r, 1.0, "Random::uniform(T, T, T) produced a value too big!");
+    NNTestMethod(engine)
+    {
+        NNTestParams()
+        {
+            RandomEngine e;
+            RandomEngine &f = RandomEngine::sharedEngine();
+            NNTestNotEquals(&e.engine(), &f.engine());
+        }
+    }
+}
+
+NNTestClassImpl(Random)
+{
+    NNTestMethod(sharedRandom)
+    {
+        NNTestParams()
+        {
+            Random<T> *r = &Random<T>::sharedRandom();
+            Random<T> *s = &Random<T>::sharedRandom();
+            NNTestEquals(r, s);
+        }
+    }
+
+    NNTestMethod(Random)
+    {
+        NNTestParams()
+        {
+            Random<T> r;
+            Random<T> s;
+            for(size_t i = 0; i < 100; ++i)
+                NNTestEquals(r.uniform(), s.uniform());
+        }
+
+        NNTestParams(RandomEngine *)
+        {
+            Random<T> r(new RandomEngine(0));
+            Random<T> s(new RandomEngine(0));
+            for(size_t i = 0; i < 100; ++i)
+                NNTestEquals(r.uniform(), s.uniform());
+        }
+    }
+
+    NNTestMethod(uniform)
+    {
+        NNTestParams(size_t)
+        {
+            Random<size_t> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.uniform(101);
+            }, x);
+            NNTestAlmostEquals(mean(x), 50, 10);
+            NNTestAlmostEquals(variance(x), 833.3333, 100);
+        }
+
+        NNTestParams(size_t, size_t)
+        {
+            Random<size_t> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.uniform(80, 121);
+            }, x);
+            NNTestAlmostEquals(mean(x), 100, 10);
+            NNTestAlmostEquals(variance(x), 133.3333, 40);
+        }
+    }
 }
