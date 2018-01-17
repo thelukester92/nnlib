@@ -74,6 +74,7 @@ int main(int argc, const char **argv)
 
     // Critics
     NNRunTest(CriticSequencer);
+    NNRunTest(MSE);
 
     return 0;
 }

@@ -1,29 +1,66 @@
+#include "../test_critic.hpp"
 #include "../test_mse.hpp"
 #include "nnlib/critics/mse.hpp"
-#include "nnlib/math/math.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestMSE()
+NNTestClassImpl(MSE)
 {
-    Storage<size_t> shape = { 5, 1 };
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({  1,  2,  3,  4,  5 }).resize(shape);
-    Tensor<NN_REAL_T> tgt = Tensor<NN_REAL_T>({  2,  4,  6,  8,  0 }).resize(shape);
-    Tensor<NN_REAL_T> sqd = Tensor<NN_REAL_T>({  1,  4,  9, 16, 25 }).resize(shape);
-    Tensor<NN_REAL_T> dif = Tensor<NN_REAL_T>({ -2, -4, -6, -8, 10 }).resize(shape);
-    MSE<NN_REAL_T> critic(false);
+    NNRunAbstractTest(Critic, MSE, new MSE<T>());
 
-    double mse = critic.forward(inp, tgt);
-    NNAssert(fabs(mse - math::sum(sqd)) < 1e-12, "MSE::forward with no average failed!");
+    NNTestMethod(MSE)
+    {
+        NNTestParams()
+        {
+            MSE<T> critic;
+            NNTestEquals(critic.average(), true);
+        }
 
-    critic.average(true);
-    mse = critic.forward(inp, tgt);
-    NNAssert(fabs(mse - math::mean(sqd)) < 1e-12, "MSE::forward with average failed!");
+        NNTestParams(bool)
+        {
+            MSE<T> critic(false);
+            NNTestEquals(critic.average(), false);
+        }
+    }
 
-    critic.average(false);
-    critic.backward(inp, tgt);
-    NNAssert(math::sum(math::square(critic.inGrad() - dif)) < 1e-12, "MSE::backward with no average failed!");
+    NNTestMethod(average)
+    {
+        NNTestParams()
+        {
+            MSE<T> critic;
+            NNTestEquals(critic.average(), true);
+        }
 
-    critic.average(true);
-    critic.backward(inp, tgt);
-    NNAssert(math::sum(math::square(critic.inGrad() - dif / dif.size())) < 1e-12, "MSE::backward with average failed!");
+        NNTestParams(bool)
+        {
+            MSE<T> critic;
+            NNTestEquals(&critic.average(false), &critic);
+            NNTestEquals(critic.average(), false);
+        }
+    }
+
+    NNTestMethod(forward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            MSE<T> critic(false);
+            Tensor<T> inputs = Tensor<T>({ 1, 2, 3 });
+            Tensor<T> target = Tensor<T>({ 0, 3, 5 });
+            NNTestAlmostEquals(critic.forward(inputs, target), 6, 1e-12);
+        }
+    }
+
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            MSE<T> critic(false);
+            Tensor<T> inputs = Tensor<T>({ 1, 2, 3 });
+            Tensor<T> target = Tensor<T>({ 0, 3, 5 });
+            Tensor<T> inGrad = critic.backward(inputs, target);
+            NNTestAlmostEquals(inGrad(0),  2, 1e-12);
+            NNTestAlmostEquals(inGrad(1), -2, 1e-12);
+            NNTestAlmostEquals(inGrad(2), -4, 1e-12);
+        }
+    }
 }
