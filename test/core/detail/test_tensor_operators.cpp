@@ -14,6 +14,10 @@ NNTestClassImpl(TensorOperators)
             std::stringstream ss;
             NNTestEquals(&(ss << t), &ss);
             NNTestEquals(ss.str(), std::string("0.00000\n[ Tensor of dimension 1 ]"));
+            t.resize(1, 1);
+            std::stringstream ss2;
+            ss2 << t;
+            NNTestEquals(ss2.str(), std::string("0.00000   \n[ Tensor of dimension 1 x 1 ]"));
         }
     }
 
@@ -87,6 +91,30 @@ NNTestClassImpl(TensorOperators)
             NNTestEquals(u.size(), 1);
             NNTestAlmostEquals(u(0), 6.28, 1e-12);
             NNTestAlmostEquals(t(0), 2, 1e-12);
+            NNTest(!u.sharedWith(t));
+        }
+    }
+
+    NNTestMethod(operator/=)
+    {
+        NNTestParams(Tensor &, T)
+        {
+            Tensor<T> t({ 3.14 });
+            NNTestEquals(&(t /= 3.14), &t);
+            NNTestAlmostEquals(t(0), 1, 1e-12);
+        }
+    }
+
+    NNTestMethod(operator/)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            Tensor<T> t({ 6.28 });
+            Tensor<T> u = t / 3.14;
+            NNTestEquals(u.dims(), 1);
+            NNTestEquals(u.size(), 1);
+            NNTestAlmostEquals(u(0), 2, 1e-12);
+            NNTestAlmostEquals(t(0), 6.28, 1e-12);
             NNTest(!u.sharedWith(t));
         }
     }

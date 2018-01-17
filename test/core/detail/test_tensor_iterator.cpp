@@ -30,7 +30,7 @@ NNTestClassImpl(TensorIterator)
     {
         NNTestParams()
         {
-            Tensor<T> t(5, 3);
+            Tensor<T> t(2, 5);
             TensorIterator<T> itr(&t);
             TensorIterator<T> itr2 = ++itr;
             NNTestEquals(t.ptr() + 1, &*itr);
@@ -38,7 +38,8 @@ NNTestClassImpl(TensorIterator)
             Tensor<T> s = t.transpose();
             TensorIterator<T> itr3(&s);
             ++itr3;
-            NNTestEquals(s.ptr() + 3, &*itr3);
+            ++itr3;
+            NNTestEquals(s.ptr() + 1, &*itr3);
         }
 
         NNTestParams(int)
