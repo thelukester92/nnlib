@@ -52,5 +52,10 @@ NNTestClassImpl(Error)
         {
             NNTestEquals(Error::stringify(), "");
         }
+
+        NNTestParams(int, int)
+        {
+            NNTestEquals(Error::stringify(1, 1), "11");
+        }
     }
 }
