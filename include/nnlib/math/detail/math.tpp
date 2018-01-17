@@ -3,7 +3,7 @@
 
 #include "../algebra.hpp"
 #include "../math.hpp"
-#include "nnlib/util/random.hpp"
+#include "nnlib/math/random.hpp"
 #include <math.h>
 
 namespace nnlib

@@ -3,7 +3,7 @@
 
 #include "../algebra.hpp"
 #include "nnlib/core/tensor.hpp"
-#include "nnlib/util/random.hpp"
+#include "nnlib/math/random.hpp"
 
 namespace nnlib
 {
