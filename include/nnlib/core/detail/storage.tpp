@@ -154,9 +154,7 @@ Storage<T> &Storage<T>::erase(size_t index)
 {
     NNAssertLessThan(index, m_size, "Attempted to erase an index that is out of bounds!");
     for(size_t i = index + 1; i < m_size; ++i)
-    {
         m_ptr[i - 1] = m_ptr[i];
-    }
     --m_size;
     return *this;
 }
@@ -190,20 +188,14 @@ template <typename T>
 bool Storage<T>::operator==(const Storage<T> &other) const
 {
     if(this == &other)
-    {
         return true;
-    }
-    if(m_size != other.m_size)
-    {
+    else if(m_size != other.m_size)
         return false;
-    }
+
     for(size_t i = 0; i < other.m_size; ++i)
-    {
         if(m_ptr[i] != other.m_ptr[i])
-        {
             return false;
-        }
-    }
+
     return true;
 }
 
