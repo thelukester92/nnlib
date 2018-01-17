@@ -20,6 +20,8 @@ NNTestClassImpl(Tensor)
             NNTest(d.sharedWith(c));
             for(size_t i = 0; i < 8; ++i)
                 NNTestEquals(d(i), i);
+            Tensor<T> e = Tensor<T>::vectorize(Storage<Tensor<T> *>({ &a, &b, &c }));
+            NNTestEquals(d.ptr(), e.ptr());
         }
     }
 
@@ -39,6 +41,8 @@ NNTestClassImpl(Tensor)
             for(size_t i = 0; i < 2; ++i)
                 for(size_t j = 0; j < 5; ++j)
                     NNTestEquals(c(i, j), (5 * i + j) % 10);
+            Tensor<T> d = Tensor<T>::concatenate(Storage<Tensor<T> *>());
+            NNTestEquals(d.size(), 0);
         }
 
         NNTestParams(const Storage<Tensor *> &, size_t)
@@ -126,12 +130,27 @@ NNTestClassImpl(Tensor)
 
         NNTestParams(const Serialized &)
         {
-            Tensor<T> t(Storage<T>({ 0, 1, 2, 3, 4, 5 }));
-            Tensor<T> s((Serialized(t)));
-            NNTestEquals(s.size(), 6);
-            NNTestEquals(s.dims(), 1);
+            Tensor<T> t((Serialized(Tensor<T>(Storage<T>({ 0, 1, 2, 3, 4, 5 })))));
+            NNTestEquals(t.size(), 6);
+            NNTestEquals(t.dims(), 1);
             for(size_t i = 0; i < 6; ++i)
-                NNTestEquals(s(i), i);
+                NNTestEquals(t(i), i);
+            Serialized s;
+            s.add(new Serialized());
+            s.add(new Serialized());
+            s.get(0)->add(0);
+            s.get(0)->add(1);
+            s.get(0)->add(2);
+            s.get(1)->add(3);
+            s.get(1)->add(4);
+            s.get(1)->add(5);
+            Tensor<T> u(s);
+            NNTestEquals(u.dims(), 2);
+            NNTestEquals(u.size(0), 2);
+            NNTestEquals(u.size(1), 3);
+            for(size_t i = 0; i < 2; ++i)
+                for(size_t j = 0; j < 3; ++j)
+                    NNTestEquals(u(i, j), 3 * i + j);
         }
     }
 
@@ -247,6 +266,10 @@ NNTestClassImpl(Tensor)
             NNTestEquals(t.size(), 6);
             NNTestEquals(t.size(0), 3);
             NNTestEquals(t.size(1), 2);
+            Tensor<T> s = t;
+            NNTest(t.sharedWith(s));
+            t.resize(10);
+            NNTest(!t.sharedWith(s));
         }
 
         NNTestParams(size_t, size_t)
@@ -264,6 +287,9 @@ NNTestClassImpl(Tensor)
         NNTestParams(size_t, size_t)
         {
             Tensor<T> t;
+            t.resizeDim(0, 5);
+            NNTestEquals(t.size(), 5);
+            NNTestEquals(t.dims(), 1);
             t.resizeDim(0, 5);
             NNTestEquals(t.size(), 5);
             NNTestEquals(t.dims(), 1);
