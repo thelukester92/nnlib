@@ -64,12 +64,16 @@ int main(int argc, const char **argv)
     else if(args.getFlag('V'))
         nnlib::test::Test::verbosity() = 2;
 
+    // Core
     NNRunTest(Error);
     NNRunTest(Storage);
     NNRunTest(Tensor);
     NNRunTest(TensorIterator);
     NNRunTest(TensorOperators);
     NNRunTest(TensorUtil);
+
+    // Critics
+    NNRunTest(CriticSequencer);
 
     return 0;
 }

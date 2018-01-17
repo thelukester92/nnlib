@@ -30,7 +30,20 @@ protected:
     std::string nnClass;
     std::string nnMethod;
     std::string nnParams;
-    std::vector<Error> nnErrors;
+};
+
+class AbstractTest
+{
+public:
+    static int &verbosity()
+    {
+        static int i;
+        return i;
+    }
+
+protected:
+    std::string nnMethod;
+    std::string nnParams;
 };
 
 }
@@ -60,6 +73,26 @@ protected:
 #define NNTestClass(Class) \
     NNTestClassDecl(Class) \
     NNTestClassImpl(Class)
+
+#define NNTestAbstractClassDecl(Class, Impl)                        \
+    namespace nnlib                                                 \
+    {                                                               \
+        namespace test                                              \
+        {                                                           \
+            class Test##Class : public AbstractTest                 \
+            {                                                       \
+            public:                                                 \
+                void run(const std::string &nnClass, Impl &nnImpl); \
+            };                                                      \
+        }                                                           \
+    }
+
+#define NNTestAbstractClassImpl(Class, Impl) \
+    void nnlib::test::Test##Class::run(const std::string &nnClass, Impl &nnImpl)
+
+#define NNTestAbstractClass(Class) \
+    NNTestAbstractClassDecl(Class) \
+    NNTestAbstractClassImpl(Class)
 
 #define NNTestMethod(Method) \
     nnMethod = #Method;      \
@@ -106,6 +139,13 @@ protected:
     {                                                             \
         std::cerr << std::endl << "\t" << e.what() << std::endl;  \
         exit(1);                                                  \
+    }
+
+#define NNRunAbstractTest(Base, ClassName, Impl)          \
+    {                                                     \
+        auto impl = Impl;                                 \
+        nnlib::test::Test##Base().run(#ClassName, *impl); \
+        delete impl;                                      \
     }
 
 #endif
