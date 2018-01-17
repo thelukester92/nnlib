@@ -9,7 +9,6 @@ group: edge
 cache:
     directories:
     - cache
-    - obj
 before_install:
     - cd $TRAVIS_BUILD_DIR
     - sudo apt-get update -qq -y || true

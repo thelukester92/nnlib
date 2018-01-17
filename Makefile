@@ -103,7 +103,7 @@ $(OBJ)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $< $(OPTFLAGS) -MMD -c -o $@
 
-dbg: clean-gcda $(LIB)/$(DBGLIB)
+dbg: clean-coverage $(LIB)/$(DBGLIB)
 $(LIB)/$(DBGLIB): $(DBGFILES)
 	@mkdir -p $(dir $@)
 	$(CXX) -fPIC $(DBGFILES) $(DBGFLAGS) $(LDFLAGS) -o $@ --coverage
@@ -139,13 +139,13 @@ $(PREFIX)/%: %
 clean:
 	rm -rf $(BIN) $(LIB) $(OBJ)
 
-clean-gcda:
+clean-coverage:
 	@find obj -name "*.gcda" -print0 | xargs -0 rm -f
 
 uninstall:
 	rm -rf $(PREFIX)/include/nnlib*
 	rm -f $(PREFIX)/lib/$(OPTLIB) $(PREFIX)/lib/$(DBGLIB)
 
-.PHONY: all opt dbg test install headers clean clean-gcda uninstall
+.PHONY: all opt dbg test install headers clean clean-coverage uninstall
 
 -include $(DEPFILES)
