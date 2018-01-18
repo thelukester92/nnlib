@@ -248,6 +248,25 @@ NNTestClassImpl(Math)
 
     NNTestMethod(pointwiseProduct)
     {
+        NNTestParams(const Tensor &, Tensor &)
+        {
+            Tensor<T> x = Tensor<T>({ 1, 2, 3 });
+            Tensor<T> y = Tensor<T>({ 4, 5, 6 });
+            pointwiseProduct(x, y);
+            NNTestAlmostEquals(y(0), 4, 1e-12);
+            NNTestAlmostEquals(y(1), 10, 1e-12);
+            NNTestAlmostEquals(y(2), 18, 1e-12);
+        }
+
+        NNTestParams(const Tensor &, Tensor &&)
+        {
+            Tensor<T> x = Tensor<T>({ 1, 2, 3 });
+            Tensor<T> y = pointwiseProduct(x, Tensor<T>({ 4, 5, 6 }));
+            NNTestAlmostEquals(y(0), 4, 1e-12);
+            NNTestAlmostEquals(y(1), 10, 1e-12);
+            NNTestAlmostEquals(y(2), 18, 1e-12);
+        }
+
         NNTestParams(const Tensor &, const Tensor &, Tensor &)
         {
             Tensor<T> x = Tensor<T>({ 1, 2, 3 });
