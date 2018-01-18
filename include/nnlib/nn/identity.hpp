@@ -14,15 +14,11 @@ template <typename T = NN_REAL_T>
 class Identity : public Module<T>
 {
 public:
-    Identity();
-    Identity(const Serialized &);
-    Identity(const Identity &);
-    Identity &operator=(const Identity &);
-    
-    virtual void save(Serialized &node) const override;
+    using Module<T>::Module;
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-    
+
 protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;

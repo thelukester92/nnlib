@@ -10,6 +10,7 @@ namespace nnlib
 
 template <typename T>
 LSTM<T>::LSTM(size_t inps, size_t outs) :
+    Module<T>({ 1, inps }, { 1, outs }),
     m_inpGateX(new Linear<T>(inps, outs, false)),
     m_inpGateY(new Linear<T>(outs, outs, false)),
     m_inpGateH(new Linear<T>(outs, outs)),
@@ -34,6 +35,7 @@ LSTM<T>::LSTM(size_t inps, size_t outs) :
 
 template <typename T>
 LSTM<T>::LSTM(const LSTM<T> &module) :
+    Module<T>(module),
     m_inpGateX(module.m_inpGateX->copy()),
     m_inpGateY(module.m_inpGateY->copy()),
     m_inpGateH(module.m_inpGateH->copy()),
@@ -56,6 +58,7 @@ LSTM<T>::LSTM(const LSTM<T> &module) :
 
 template <typename T>
 LSTM<T>::LSTM(const Serialized &node) :
+    Module<T>(node),
     m_inpGateX(node.get<Module<T> *>("inpGateX")),
     m_inpGateY(node.get<Module<T> *>("inpGateY")),
     m_inpGateH(node.get<Module<T> *>("inpGateH")),
@@ -100,6 +103,7 @@ LSTM<T>::~LSTM()
 template <typename T>
 LSTM<T> &LSTM<T>::operator=(LSTM<T> module)
 {
+    Module<T>::operator=(module);
     swap(*this, module);
     return *this;
 }
@@ -153,6 +157,7 @@ void LSTM<T>::forget()
 template <typename T>
 void LSTM<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("inpGateX", m_inpGateX);
     node.set("inpGateY", m_inpGateY);
     node.set("inpGateH", m_inpGateH);

@@ -9,6 +9,7 @@ namespace nnlib
 
 template <typename T>
 BatchNorm<T>::BatchNorm(size_t inps) :
+    Module<T>({ 1, inps }),
     m_weights(inps),
     m_weightsGrad(inps),
     m_biases(inps),
@@ -25,6 +26,7 @@ BatchNorm<T>::BatchNorm(size_t inps) :
 
 template <typename T>
 BatchNorm<T>::BatchNorm(const BatchNorm<T> &module) :
+    Module<T>(module),
     m_weights(module.m_weights.copy()),
     m_weightsGrad(module.m_weightsGrad.copy()),
     m_biases(module.m_biases.copy()),
@@ -39,6 +41,7 @@ BatchNorm<T>::BatchNorm(const BatchNorm<T> &module) :
 
 template <typename T>
 BatchNorm<T>::BatchNorm(const Serialized &node) :
+    Module<T>(node),
     m_weights(node.get<Tensor<T>>("weights")),
     m_weightsGrad(m_weights.shape(), true),
     m_biases(node.get<Tensor<T>>("biases")),
@@ -58,6 +61,7 @@ BatchNorm<T>::BatchNorm(const Serialized &node) :
 template <typename T>
 BatchNorm<T> &BatchNorm<T>::operator=(BatchNorm<T> module)
 {
+    Module<T>::operator=(module);
     swap(*this, module);
     return *this;
 }
@@ -129,6 +133,7 @@ void BatchNorm<T>::training(bool training)
 template <typename T>
 void BatchNorm<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("weights", m_weights);
     node.set("biases", m_biases);
     node.set("runningMeans", m_runningMeans);

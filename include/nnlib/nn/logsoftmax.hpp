@@ -13,15 +13,11 @@ template <typename T = NN_REAL_T>
 class LogSoftMax : public Module<T>
 {
 public:
-    LogSoftMax();
-    LogSoftMax(const LogSoftMax &module);
-    LogSoftMax(const Serialized &node);
-    LogSoftMax &operator=(const LogSoftMax &module);
-    
-    virtual void save(Serialized &node) const override;
+    using Module<T>::Module;
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-    
+
 protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;

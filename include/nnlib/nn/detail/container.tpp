@@ -8,6 +8,7 @@ namespace nnlib
 
 template <typename T>
 Container<T>::Container(const Container<T> &module) :
+    Module<T>(module),
     m_components(module.m_components)
 {
     for(Module<T> *&m : m_components)
@@ -19,12 +20,15 @@ Container<T>::Container(const Container<T> &module) :
 
 template <typename T>
 Container<T>::Container(const Serialized &node) :
+    Module<T>(node),
     m_components(node.get<Storage<Module<T> *>>("components"))
 {}
 
 template <typename T>
 Container<T> &Container<T>::operator=(const Container<T> &module)
 {
+    Module<T>::operator=(module);
+
     Storage<Module<T> *> components = module.m_components;
     for(Module<T> *&m : components)
     {
@@ -65,6 +69,7 @@ void Container<T>::forget()
 template <typename T>
 void Container<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("components", m_components);
 }
 

@@ -11,10 +11,7 @@ template <typename T = NN_REAL_T>
 class Logistic : public Map<T>
 {
 public:
-    Logistic();
-    Logistic(const Serialized &);
-    Logistic(const Logistic &);
-    Logistic &operator=(const Logistic &);
+    using Map<T>::Map;
 
     virtual T forwardOne(const T &x) override;
     virtual T backwardOne(const T &x, const T &y) override;

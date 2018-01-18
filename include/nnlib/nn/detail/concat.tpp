@@ -47,6 +47,17 @@ void Concat<T>::save(Serialized &node) const
 }
 
 template <typename T>
+Concat<T> &Concat<T>::add(Module<T> *component)
+{
+    Container<T>::add(component);
+    Storage<Tensor<T> *> outputs(components());
+    for(size_t i = 0, count = components(); i < count; ++i)
+        outputs[i] = &m_components[i]->output();
+    m_output = Tensor<T>::concatenate(outputs, m_concatDim);
+    return *this;
+}
+
+template <typename T>
 Tensor<T> &Concat<T>::forward(const Tensor<T> &input)
 {
     Storage<Tensor<T> *> outputs(components());

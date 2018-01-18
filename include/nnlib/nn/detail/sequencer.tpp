@@ -8,18 +8,21 @@ namespace nnlib
 
 template <typename T>
 Sequencer<T>::Sequencer(Module<T> *module, bool reverse) :
+    Module<T>(module->inputShape(), module->outputShape()),
     m_module(module),
     m_reverse(reverse)
 {}
 
 template <typename T>
 Sequencer<T>::Sequencer(const Sequencer<T> &module) :
+    Module<T>(module),
     m_module(module.m_module->copy()),
     m_reverse(module.m_reverse)
 {}
 
 template <typename T>
 Sequencer<T>::Sequencer(const Serialized &node) :
+    Module<T>(node),
     m_module(node.get<Module<T> *>("module")),
     m_reverse(node.get<bool>("reverse"))
 {}
@@ -33,6 +36,7 @@ Sequencer<T>::~Sequencer()
 template <typename T>
 Sequencer<T> &Sequencer<T>::operator=(Sequencer<T> module)
 {
+    Module<T>::operator=(module);
     swap(*this, module);
     return *this;
 }
@@ -120,6 +124,7 @@ void Sequencer<T>::forget()
 template <typename T>
 void Sequencer<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("module", m_module);
     node.set("reverse", m_reverse);
 }

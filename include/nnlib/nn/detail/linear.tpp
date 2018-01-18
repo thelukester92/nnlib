@@ -10,6 +10,7 @@ namespace nnlib
 
 template <typename T>
 Linear<T>::Linear(size_t inps, size_t outs, bool bias) :
+    Module<T>({ 1, inps }, { 1, outs }),
     m_weights(inps, outs),
     m_weightsGrad(inps, outs),
     m_useBias(bias),
@@ -21,6 +22,7 @@ Linear<T>::Linear(size_t inps, size_t outs, bool bias) :
 
 template <typename T>
 Linear<T>::Linear(const Linear<T> &module) :
+    Module<T>(module),
     m_weights(module.m_weights.copy()),
     m_weightsGrad(m_weights.shape(), true),
     m_useBias(module.m_useBias),
@@ -30,6 +32,7 @@ Linear<T>::Linear(const Linear<T> &module) :
 
 template <typename T>
 Linear<T>::Linear(const Serialized &node) :
+    Module<T>(node),
     m_weights(node.get<Tensor<T>>("weights")),
     m_weightsGrad(m_weights.shape(), true),
     m_useBias(node.get<bool>("useBias")),
@@ -44,6 +47,7 @@ Linear<T>::Linear(const Serialized &node) :
 template <typename T>
 Linear<T> &Linear<T>::operator=(Linear<T> module)
 {
+    Module<T>::operator=(module);
     swap(*this, module);
     return *this;
 }
@@ -93,6 +97,7 @@ Tensor<T> Linear<T>::bias()
 template <typename T>
 void Linear<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("weights", m_weights);
     node.set("useBias", m_useBias);
     node.set("bias", m_bias);

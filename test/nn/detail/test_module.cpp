@@ -1,15 +1,91 @@
-#ifndef TEST_MODULE_HPP
-#define TEST_MODULE_HPP
-
-#include "../test.hpp"
-#include "nnlib/nn/module.hpp"
-NNTestAbstractClassDecl(Module, Module<NN_REAL_T>);
-
-// todo: remove below
+#include "../test_module.hpp"
 #include "nnlib/math/math.hpp"
 #include "nnlib/math/random.hpp"
 using namespace nnlib;
-using namespace nnlib::math;
+using T = NN_REAL_T;
+
+NNTestAbstractClassImpl(Module, Module<T>)
+{
+    NNTestMethod(copy)
+    {
+        /*RandomEngine::sharedEngine().seed(0);
+        auto rand = math::rand(Tensor<T>(100));
+        auto copy = nnImpl.copy();
+        auto out1 = nnImpl.forward(Tensor<T>)
+        forEach([&](T x, T y)
+        {
+            NNTestAlmostEquals(x, y, 1e-12);
+        }, nnImpl.params(), copy.params());
+        delete copy;*/
+    }
+
+    NNTestMethod(training)
+    {
+
+    }
+
+    NNTestMethod(forget)
+    {
+
+    }
+
+    NNTestMethod(save)
+    {
+
+    }
+
+    NNTestMethod(forward)
+    {
+
+    }
+
+    NNTestMethod(backward)
+    {
+
+    }
+
+    NNTestMethod(paramsList)
+    {
+
+    }
+
+    NNTestMethod(gradList)
+    {
+
+    }
+
+    NNTestMethod(stateList)
+    {
+
+    }
+
+    NNTestMethod(params)
+    {
+
+    }
+
+    NNTestMethod(grad)
+    {
+
+    }
+
+    NNTestMethod(state)
+    {
+
+    }
+
+    NNTestMethod(output)
+    {
+
+    }
+
+    NNTestMethod(inGrad)
+    {
+
+    }
+}
+
+/*
 template <template <typename> class M, typename T = NN_REAL_T>
 class ModuleTests
 {
@@ -224,5 +300,4 @@ void TestModule(const std::string &name, M<T> &module, const Tensor<T> &input, b
 {
     ModuleTests<M, T>::run(name, module, input, randomizeInput);
 }
-
-#endif
+*/

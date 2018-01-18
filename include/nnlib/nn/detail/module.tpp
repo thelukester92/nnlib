@@ -8,12 +8,52 @@ namespace nnlib
 {
 
 template <typename T>
-Module<T>::Module()
+Module<T>::Module() :
+    m_inGrad(1),
+    m_output(1)
+{}
+
+template <typename T>
+Module<T>::Module(const std::initializer_list<size_t> &ioShape) :
+    m_inGrad(ioShape, true),
+    m_output(ioShape, true)
+{}
+
+template <typename T>
+Module<T>::Module(const Storage<size_t> &ioShape) :
+    m_inGrad(ioShape, true),
+    m_output(ioShape, true)
+{}
+
+template <typename T>
+Module<T>::Module(const Storage<size_t> &inputShape, const Storage<size_t> &outputShape) :
+    m_inGrad(inputShape, true),
+    m_output(outputShape, true)
+{}
+
+template <typename T>
+Module<T>::Module(const Serialized &node) :
+    m_inGrad(node.get<Storage<size_t>>("inputShape"), true),
+    m_output(node.get<Storage<size_t>>("outputShape"), true)
+{}
+
+template <typename T>
+Module<T>::Module(const Module<T> &module) :
+    m_inGrad(module.inputShape(), true),
+    m_output(module.outputShape(), true)
 {}
 
 template <typename T>
 Module<T>::~Module()
 {}
+
+template <typename T>
+Module<T> &Module<T>::operator=(const Module<T> &module)
+{
+    m_inGrad.resize(module.inputShape());
+    m_output.resize(module.outputShape());
+    return *this;
+}
 
 template <typename T>
 Module<T> *Module<T>::copy() const
@@ -29,6 +69,13 @@ template <typename T>
 void Module<T>::forget()
 {
     state().fill(0);
+}
+
+template <typename T>
+void Module<T>::save(Serialized &node) const
+{
+    node.set("inputShape", m_inGrad.shape());
+    node.set("outputShape", m_output.shape());
 }
 
 template <typename T>
@@ -98,6 +145,18 @@ template <typename T>
 const Tensor<T> &Module<T>::inGrad() const
 {
     return const_cast<Module<T> *>(this)->inGrad();
+}
+
+template <typename T>
+const Storage<size_t> &Module<T>::inputShape() const
+{
+    return m_inGrad.shape();
+}
+
+template <typename T>
+const Storage<size_t> &Module<T>::outputShape() const
+{
+    return m_output.shape();
 }
 
 }

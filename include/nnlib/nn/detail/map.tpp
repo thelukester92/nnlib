@@ -7,10 +7,6 @@ namespace nnlib
 {
 
 template <typename T>
-void Map<T>::save(Serialized &node) const
-{}
-
-template <typename T>
 Tensor<T> &Map<T>::forward(const Tensor<T> &input)
 {
     m_output.resize(input.shape());

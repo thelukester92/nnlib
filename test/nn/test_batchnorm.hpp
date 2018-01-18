@@ -1,6 +1,7 @@
 #ifndef TEST_BATCHNORM_HPP
 #define TEST_BATCHNORM_HPP
 
-void TestBatchNorm();
+#include "../test.hpp"
+NNTestClassDecl(BatchNorm);
 
 #endif

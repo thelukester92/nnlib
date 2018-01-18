@@ -14,10 +14,14 @@ class Module
 {
 public:
     Module();
-    Module(const Module &) = delete;
+    explicit Module(const std::initializer_list<size_t> &ioShape);
+    explicit Module(const Storage<size_t> &ioShape);
+    explicit Module(const Storage<size_t> &inputShape, const Storage<size_t> &outputShape);
+    explicit Module(const Serialized &node);
+    explicit Module(const Module &);
     virtual ~Module();
 
-    Module &operator=(const Module &) = delete;
+    Module &operator=(const Module &);
 
     /// Construct a copy of this module. Must be registered with NNRegisterType.
     Module *copy() const;
@@ -32,7 +36,7 @@ public:
     ///
     /// The load method is omitted; instead, a constructor taking a Serialized& should be implemented
     /// in subclasses of Module.
-    virtual void save(Serialized &) const = 0;
+    virtual void save(Serialized &) const;
 
     /// Evaluate the module and return the new output.
     virtual Tensor<T> &forward(const Tensor<T> &input) = 0;
@@ -53,9 +57,12 @@ public:
     virtual Tensor<T> &inGrad();
     const Tensor<T> &inGrad() const;
 
+    virtual const Storage<size_t> &inputShape() const;
+    virtual const Storage<size_t> &outputShape() const;
+
 protected:
-    Tensor<T> m_output;
     Tensor<T> m_inGrad;
+    Tensor<T> m_output;
 
     Tensor<T> m_params;
     Tensor<T> m_grad;

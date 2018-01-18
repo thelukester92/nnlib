@@ -18,12 +18,14 @@ Dropout<T>::Dropout(T dropProbability) :
 
 template <typename T>
 Dropout<T>::Dropout(const Dropout<T> &module) :
+    Module<T>(module),
     m_dropProbability(module.m_dropProbability),
     m_training(module.m_training)
 {}
 
 template <typename T>
 Dropout<T>::Dropout(const Serialized &node) :
+    Module<T>(node),
     m_dropProbability(node.get<T>("dropProbability")),
     m_training(node.get<bool>("training"))
 {}
@@ -31,6 +33,7 @@ Dropout<T>::Dropout(const Serialized &node) :
 template <typename T>
 Dropout<T> &Dropout<T>::operator=(const Dropout<T> &module)
 {
+    Module<T>::operator=(module);
     m_dropProbability = module.m_dropProbability;
     m_training = module.m_training;
     return *this;
@@ -66,6 +69,7 @@ void Dropout<T>::training(bool training)
 template <typename T>
 void Dropout<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("dropProbability", m_dropProbability);
     node.set("training", m_training);
 }

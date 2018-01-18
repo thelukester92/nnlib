@@ -31,17 +31,18 @@ template <typename T = NN_REAL_T>
 class Concat : public Container<T>
 {
 public:
+    using Container<T>::add;
     using Container<T>::components;
 
     template <typename ... Ms>
     Concat(Module<T> *first, Ms... rest) :
-        Container<T>(first, rest...),
+        Container<T>(Tensor<T>::concatenate({ &first->output(), &rest->output()... }, (size_t) -1).shape(), first, rest...),
         m_concatDim((size_t) -1)
     {}
 
     template <typename ... Ms>
-    Concat(size_t concatDim, Ms... components) :
-        Container<T>(components...),
+    Concat(size_t concatDim, Module<T> *first, Ms... rest) :
+        Container<T>(Tensor<T>::concatenate({ &first->output(), &rest->output()... }, concatDim).shape(), first, rest...),
         m_concatDim(concatDim)
     {}
 
@@ -54,6 +55,8 @@ public:
     Concat &concatDim(size_t dim);
 
     virtual void save(Serialized &node) const override;
+
+    virtual Concat &add(Module<T> *component) override;
 
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;

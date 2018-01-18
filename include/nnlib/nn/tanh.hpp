@@ -11,10 +11,7 @@ template <typename T = NN_REAL_T>
 class TanH : public Map<T>
 {
 public:
-    TanH();
-    TanH(const Serialized &);
-    TanH(const TanH &);
-    TanH &operator=(const TanH &);
+    using Map<T>::Map;
 
     virtual T forwardOne(const T &x) override;
     virtual T backwardOne(const T &x, const T &y) override;

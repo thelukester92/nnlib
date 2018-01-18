@@ -17,17 +17,20 @@ ReLU<T>::ReLU(T leak) :
 
 template <typename T>
 ReLU<T>::ReLU(const ReLU<T> &module) :
+    Map<T>(module),
     m_leak(module.m_leak)
 {}
 
 template <typename T>
 ReLU<T>::ReLU(const Serialized &node) :
+    Map<T>(node),
     m_leak(node.get<T>("leak"))
 {}
 
 template <typename T>
 ReLU<T> &ReLU<T>::operator=(const ReLU<T> &module)
 {
+    Map<T>::operator=(module);
     m_leak = module.m_leak;
     return *this;
 }

@@ -11,14 +11,14 @@ template <typename T = NN_REAL_T>
 class Map : public Module<T>
 {
 public:
+    using Module<T>::Module;
+
     virtual T forwardOne(const T &x) = 0;
     virtual T backwardOne(const T &x, const T &y) = 0;
-    
-    virtual void save(Serialized &node) const override;
-    
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-    
+
 protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;

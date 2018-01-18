@@ -13,16 +13,11 @@ template <typename T = NN_REAL_T>
 class SoftMax : public Module<T>
 {
 public:
-    SoftMax();
-    SoftMax(const SoftMax &module);
-    SoftMax(const Serialized &node);
-    SoftMax &operator=(const SoftMax &module);
-    
-    virtual void save(Serialized &node) const override;
-    
+    using Module<T>::Module;
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-    
+
 protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;

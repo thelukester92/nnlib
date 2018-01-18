@@ -16,17 +16,20 @@ ELU<T>::ELU(T alpha) :
 
 template <typename T>
 ELU<T>::ELU(const ELU<T> &module) :
+    Map<T>(module),
     m_alpha(module.m_alpha)
 {}
 
 template <typename T>
 ELU<T>::ELU(const Serialized &node) :
+    Map<T>(node),
     m_alpha(node.get<T>("alpha"))
 {}
 
 template <typename T>
 ELU<T> &ELU<T>::operator=(const ELU<T> &module)
 {
+    Map<T>::operator=(module);
     m_alpha = module.m_alpha;
     return *this;
 }

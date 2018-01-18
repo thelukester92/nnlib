@@ -36,6 +36,18 @@ Tensor<T> &Sequential<T>::inGrad()
     return m_components[0]->inGrad();
 }
 
+template <typename T>
+const Storage<size_t> &Sequential<T>::inputShape() const
+{
+    return m_components[0]->inputShape();
+}
+
+template <typename T>
+const Storage<size_t> &Sequential<T>::outputShape() const
+{
+    return m_components.back()->outputShape();
+}
+
 }
 
 #endif

@@ -11,10 +11,7 @@ template <typename T = NN_REAL_T>
 class Sin : public Map<T>
 {
 public:
-    Sin();
-    Sin(const Serialized &);
-    Sin(const Sin &);
-    Sin &operator=(const Sin &);
+    using Map<T>::Map;
 
     virtual T forwardOne(const T &x) override;
     virtual T backwardOne(const T &x, const T &y) override;

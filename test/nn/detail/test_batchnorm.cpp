@@ -3,7 +3,14 @@
 #include "nnlib/nn/batchnorm.hpp"
 #include "nnlib/math/math.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
+NNTestClassImpl(BatchNorm)
+{
+    NNRunAbstractTest(Module, BatchNorm, new BatchNorm<T>(10));
+}
+
+/*
 void TestBatchNorm()
 {
     Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
@@ -78,3 +85,4 @@ void TestBatchNorm()
 
     TestModule("BatchNorm", bn, inp);
 }
+*/

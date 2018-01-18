@@ -12,7 +12,14 @@ class Container : public Module<T>
 {
 public:
     template <typename ... Ms>
-    Container(Ms... components) :
+    Container(const Storage<size_t> &ioShape, Ms... components) :
+        Module<T>(ioShape),
+        m_components({ static_cast<Module<T> *>(components)... })
+    {}
+
+    template <typename ... Ms>
+    Container(const Storage<size_t> &inputShape, const Storage<size_t> &outputShape, Ms... components) :
+        Module<T>(inputShape, outputShape),
         m_components({ static_cast<Module<T> *>(components)... })
     {}
 

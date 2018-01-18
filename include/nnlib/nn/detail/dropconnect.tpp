@@ -9,6 +9,7 @@ namespace nnlib
 
 template <typename T>
 DropConnect<T>::DropConnect(Module<T> *module, T dropProbability) :
+    Module<T>(module->inputShape(), module->outputShape()),
     m_module(module),
     m_dropProbability(dropProbability),
     m_training(true)
@@ -19,6 +20,7 @@ DropConnect<T>::DropConnect(Module<T> *module, T dropProbability) :
 
 template <typename T>
 DropConnect<T>::DropConnect(const DropConnect<T> &module) :
+    Module<T>(module),
     m_module(module.m_module->copy()),
     m_dropProbability(module.m_dropProbability),
     m_training(module.m_training)
@@ -26,6 +28,7 @@ DropConnect<T>::DropConnect(const DropConnect<T> &module) :
 
 template <typename T>
 DropConnect<T>::DropConnect(const Serialized &node) :
+    Module<T>(node),
     m_module(node.get<Module<T> *>("module")),
     m_dropProbability(node.get<T>("dropProbability")),
     m_training(node.get<bool>("training"))
@@ -34,6 +37,7 @@ DropConnect<T>::DropConnect(const Serialized &node) :
 template <typename T>
 DropConnect<T> &DropConnect<T>::operator=(DropConnect<T> module)
 {
+    Module<T>::operator=(module);
     swap(*this, module);
     return *this;
 }
@@ -110,6 +114,7 @@ void DropConnect<T>::forget()
 template <typename T>
 void DropConnect<T>::save(Serialized &node) const
 {
+    Module<T>::save(node);
     node.set("module", m_module);
     node.set("dropProbability", m_dropProbability);
     node.set("training", m_training);
