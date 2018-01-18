@@ -23,50 +23,6 @@ NNTestClassImpl(Concat)
             NNTestEquals(module.component(0), comp1);
             NNTestEquals(module.component(1), comp2);
         }
-
-        NNTestParams(const Concat &)
-        {
-            Linear<T> *comp1 = new Linear<T>(3, 4);
-            Linear<T> *comp2 = new Linear<T>(3, 2);
-            Concat<T> module(comp1, comp2);
-            Concat<T> copy(module);
-            NNTestEquals(module.inputShape(), copy.inputShape());
-            NNTestEquals(module.outputShape(), copy.outputShape());
-
-            auto input = math::rand(Tensor<T>(module.inputShape(), true));
-            RandomEngine::sharedEngine().seed(0);
-            auto origOut = module.forward(input);
-            RandomEngine::sharedEngine().seed(0);
-            auto copyOut = copy.forward(input);
-
-            forEach([&](T origOut, T copyOut)
-            {
-                NNTestAlmostEquals(origOut, copyOut, 1e-12);
-            }, origOut, copyOut);
-        }
-
-        NNTestParams(const Serialized &)
-        {
-            Linear<T> *comp1 = new Linear<T>(3, 4);
-            Linear<T> *comp2 = new Linear<T>(3, 2);
-            Concat<T> module(comp1, comp2);
-            Serialized s;
-            module.save(s);
-            Concat<T> copy(s);
-            NNTestEquals(module.inputShape(), copy.inputShape());
-            NNTestEquals(module.outputShape(), copy.outputShape());
-
-            auto input = math::rand(Tensor<T>(module.inputShape(), true));
-            RandomEngine::sharedEngine().seed(0);
-            auto origOut = module.forward(input);
-            RandomEngine::sharedEngine().seed(0);
-            auto copyOut = copy.forward(input);
-
-            forEach([&](T origOut, T copyOut)
-            {
-                NNTestAlmostEquals(origOut, copyOut, 1e-12);
-            }, origOut, copyOut);
-        }
     }
 
     NNTestMethod(operator=)

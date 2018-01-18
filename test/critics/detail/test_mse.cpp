@@ -47,6 +47,8 @@ NNTestClassImpl(MSE)
             Tensor<T> inputs = Tensor<T>({ 1, 2, 3 });
             Tensor<T> target = Tensor<T>({ 0, 3, 5 });
             NNTestAlmostEquals(critic.forward(inputs, target), 6, 1e-12);
+            critic.average(true);
+            NNTestAlmostEquals(critic.forward(inputs, target), 2, 1e-12);
         }
     }
 
@@ -61,6 +63,11 @@ NNTestClassImpl(MSE)
             NNTestAlmostEquals(inGrad(0),  2, 1e-12);
             NNTestAlmostEquals(inGrad(1), -2, 1e-12);
             NNTestAlmostEquals(inGrad(2), -4, 1e-12);
+            critic.average(true);
+            inGrad = critic.backward(inputs, target);
+            NNTestAlmostEquals(inGrad(0),  2.0 / 3.0, 1e-12);
+            NNTestAlmostEquals(inGrad(1), -2.0 / 3.0, 1e-12);
+            NNTestAlmostEquals(inGrad(2), -4.0 / 3.0, 1e-12);
         }
     }
 }

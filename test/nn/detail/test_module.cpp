@@ -74,6 +74,45 @@ NNTestAbstractClassImpl(Module, Module<T>)
             nnImpl.save(s);
             NNTestEquals(nnImpl.inputShape(), s.get<Storage<size_t>>("inputShape"));
             NNTestEquals(nnImpl.outputShape(), s.get<Storage<size_t>>("outputShape"));
+
+            RandomEngine::sharedEngine().seed(0);
+            auto input = math::rand(Tensor<T>(nnImpl.inputShape(), true));
+            auto output = math::rand(Tensor<T>(nnImpl.outputShape(), true));
+
+            auto copy = Serialized(nnImpl).get<Module<T> *>();
+            NNTestEquals(nnImpl.inputShape(), copy->inputShape());
+            NNTestEquals(nnImpl.outputShape(), copy->outputShape());
+            forEach([&](T origParam, T copyParam)
+            {
+                NNTestAlmostEquals(origParam, copyParam, 1e-12);
+            }, nnImpl.params(), copy->params());
+
+            RandomEngine::sharedEngine().seed(0);
+            nnImpl.grad().fill(0);
+            nnImpl.forward(input);
+            nnImpl.backward(input, output);
+
+            RandomEngine::sharedEngine().seed(0);
+            copy->grad().fill(0);
+            copy->forward(input);
+            copy->backward(input, output);
+
+            forEach([&](T origOutput, T copyOutput)
+            {
+                NNTestAlmostEquals(origOutput, copyOutput, 1e-12);
+            }, nnImpl.output(), copy->output());
+
+            forEach([&](T origInGrad, T copyInGrad)
+            {
+                NNTestAlmostEquals(origInGrad, copyInGrad, 1e-12);
+            }, nnImpl.inGrad(), copy->inGrad());
+
+            forEach([&](T origParamGrad, T copyParamGrad)
+            {
+                NNTestAlmostEquals(origParamGrad, copyParamGrad, 1e-12);
+            }, nnImpl.grad(), copy->grad());
+
+            delete copy;
         }
     }
 

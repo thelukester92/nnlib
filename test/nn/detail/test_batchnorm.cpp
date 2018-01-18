@@ -8,6 +8,135 @@ using T = NN_REAL_T;
 NNTestClassImpl(BatchNorm)
 {
     NNRunAbstractTest(Module, BatchNorm, new BatchNorm<T>(10));
+
+    NNTestMethod(BatchNorm)
+    {
+        NNTestParams(size_t)
+        {
+            BatchNorm<T> module(5);
+            NNTest(module.isTraining());
+            NNTestEquals(module.inputShape()[1], 5);
+        }
+    }
+
+    NNTestMethod(operator=)
+    {
+        NNTestParams(BatchNorm)
+        {
+            BatchNorm<T> orig(10);
+            BatchNorm<T> copy(25);
+            copy = orig;
+
+            NNTestEquals(orig.inputShape(), copy.inputShape());
+            NNTestEquals(orig.outputShape(), copy.outputShape());
+
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
+    }
+
+    NNTestMethod(reset)
+    {
+        NNTestParams()
+        {
+
+        }
+    }
+
+    NNTestMethod(weights)
+    {
+        NNTestParams()
+        {
+
+        }
+    }
+
+    NNTestMethod(bias)
+    {
+        NNTestParams()
+        {
+
+        }
+    }
+
+    NNTestMethod(momentum)
+    {
+        NNTestParams()
+        {
+
+        }
+
+        NNTestParams(T)
+        {
+
+        }
+    }
+
+    NNTestMethod(isTraining)
+    {
+        NNTestParams()
+        {
+
+        }
+    }
+
+    NNTestMethod(training)
+    {
+        NNTestParams(bool)
+        {
+
+        }
+    }
+
+    NNTestMethod(save)
+    {
+        NNTestParams(Serialized &)
+        {
+
+        }
+    }
+
+    NNTestMethod(forward)
+    {
+        NNTestParams(const Tensor &)
+        {
+
+        }
+    }
+
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+
+        }
+    }
+
+    NNTestMethod(paramsList)
+    {
+        NNTestParams()
+        {
+            // weights, biases
+        }
+    }
+
+    NNTestMethod(gradList)
+    {
+        NNTestParams()
+        {
+            // weightsGrad, biasesGrad
+        }
+    }
+
+    NNTestMethod(stateList)
+    {
+        NNTestParams()
+        {
+            // means, invStds, runningMeans, runningVars
+        }
+    }
 }
 
 /*
