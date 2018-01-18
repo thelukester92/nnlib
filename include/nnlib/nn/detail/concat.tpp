@@ -36,6 +36,10 @@ template <typename T>
 Concat<T> &Concat<T>::concatDim(size_t dim)
 {
     m_concatDim = dim;
+    Storage<Tensor<T> *> outputs(components());
+    for(size_t i = 0, count = components(); i < count; ++i)
+        outputs[i] = &m_components[i]->output();
+    m_output = Tensor<T>::concatenate(outputs, m_concatDim);
     return *this;
 }
 

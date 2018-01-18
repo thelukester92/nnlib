@@ -37,13 +37,7 @@ public:
     template <typename ... Ms>
     Concat(Module<T> *first, Ms... rest) :
         Container<T>(first->inputShape(), Tensor<T>::concatenate({ &first->output(), &rest->output()... }, (size_t) -1).shape(), first, rest...),
-        m_concatDim((size_t) -1)
-    {}
-
-    template <typename ... Ms>
-    Concat(size_t concatDim, Module<T> *first, Ms... rest) :
-        Container<T>(first->inputShape(), Tensor<T>::concatenate({ &first->output(), &rest->output()... }, concatDim).shape(), first, rest...),
-        m_concatDim(concatDim)
+        m_concatDim(first->outputShape().size() - 1)
     {}
 
     Concat(const Concat &module);

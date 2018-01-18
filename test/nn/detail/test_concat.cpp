@@ -1,6 +1,7 @@
 #include "../test_concat.hpp"
 #include "../test_container.hpp"
 #include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 #include "nnlib/nn/concat.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;
@@ -9,80 +10,199 @@ using T = NN_REAL_T;
 NNTestClassImpl(Concat)
 {
     NNRunAbstractTest(Container, Concat, new Concat<T>(new Linear<T>(3, 4), new Linear<T>(3, 2)));
-}
 
-void TestConcat()
-{
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
-        -5, 10,
-        15, -20
-    }).resize(2, 2);
+    NNTestMethod(Concat)
+    {
+        NNTestParams(Module *, Module *)
+        {
+            Linear<T> *comp1 = new Linear<T>(3, 4);
+            Linear<T> *comp2 = new Linear<T>(3, 2);
+            Concat<T> module(comp1, comp2);
+            NNTestEquals(module.inputShape()[1], 3);
+            NNTestEquals(module.outputShape()[1], 6);
+            NNTestEquals(module.component(0), comp1);
+            NNTestEquals(module.component(1), comp2);
+        }
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({
-        1, 2, 3, 4, 5, -6,
-        -4, -3, 2, 1, -1, 2
-    }).resize(2, 6);
+        NNTestParams(const Concat &)
+        {
+            Linear<T> *comp1 = new Linear<T>(3, 4);
+            Linear<T> *comp2 = new Linear<T>(3, 2);
+            Concat<T> module(comp1, comp2);
+            Concat<T> copy(module);
+            NNTestEquals(module.inputShape(), copy.inputShape());
+            NNTestEquals(module.outputShape(), copy.outputShape());
 
-    // Linear layer with weights and bias, arbitrary
-    Linear<NN_REAL_T> *linear = new Linear<NN_REAL_T>(2, 3);
-    linear->weights().copy({
-        -0.50667886785403, 0.32759806987449, 0.65755833165511,
-        0.10750948608753, -0.4340286671044, 0.23516327870398
-    });
-    linear->bias().copy({ -0.025146033726567, 0.6293391970186, -0.60999610504332 });
+            auto input = math::rand(Tensor<T>(module.inputShape(), true));
+            RandomEngine::sharedEngine().seed(0);
+            auto origOut = module.forward(input);
+            RandomEngine::sharedEngine().seed(0);
+            auto copyOut = copy.forward(input);
 
-    // Second linear layer with weights and bias, arbitrary
-    Linear<NN_REAL_T> *linear2 = new Linear<NN_REAL_T>(2, 3);
-    linear2->weights().copy({
-        -0.26131507397613, -0.25173198611324, -0.15799479364335,
-        -0.12238678004357, -0.52631174306551, 0.076954514512593
-    });
-    linear2->bias().copy({ 0.089687510972433, -0.1780101224473, 0.5643456848455 });
+            forEach([&](T origOut, T copyOut)
+            {
+                NNTestAlmostEquals(origOut, copyOut, 1e-12);
+            }, origOut, copyOut);
+        }
 
-    // Output, fixed given input
-    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({
-        3.5833431664189, -5.3489378233979, -1.5461549762791, 0.17239508041738, -4.1824676225362, 2.1238647981882,
-        -9.7755187732876, 14.223883587224, 4.5501132957037, -1.3823029977981, 6.5722449471643, -3.3446665100566
-    }).resize(2, 6);
+        NNTestParams(const Serialized &)
+        {
+            Linear<T> *comp1 = new Linear<T>(3, 4);
+            Linear<T> *comp2 = new Linear<T>(3, 2);
+            Concat<T> module(comp1, comp2);
+            Serialized s;
+            module.save(s);
+            Concat<T> copy(s);
+            NNTestEquals(module.inputShape(), copy.inputShape());
+            NNTestEquals(module.outputShape(), copy.outputShape());
 
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({
-        0.76524080224966, -3.6378909345867,
-        2.0334652499533, 1.9002086064182
-    }).resize(2, 2);
+            auto input = math::rand(Tensor<T>(module.inputShape(), true));
+            RandomEngine::sharedEngine().seed(0);
+            auto origOut = module.forward(input);
+            RandomEngine::sharedEngine().seed(0);
+            auto copyOut = copy.forward(input);
 
-    // Parameter gradient, fixed given the input and output gradient
-    Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({
-        -65, -55, 15,
-        90, 80, -10,
-        -3, -1, 5,
-        -5, -40, 60,
-        20, 70, -100,
-        5, 4, -4
-    });
+            forEach([&](T origOut, T copyOut)
+            {
+                NNTestAlmostEquals(origOut, copyOut, 1e-12);
+            }, origOut, copyOut);
+        }
+    }
 
-    // Test forward and backward using the parameters and targets above
+    NNTestMethod(operator=)
+    {
+        NNTestParams(const Concat &)
+        {
+            Concat<T> orig(new Linear<T>(3, 4), new Linear<T>(3, 2));
+            Concat<T> copy(new Linear<T>(3, 4), new Linear<T>(3, 2));
+            copy = orig;
+            NNTestEquals(orig.components(), copy.components());
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
+    }
 
-    Concat<NN_REAL_T> module(linear, linear2);
-    module.forward(inp);
-    module.backward(inp, grd);
+    NNTestMethod(concatDim)
+    {
+        NNTestParams()
+        {
+            Concat<T> module(new Linear<T>(3, 4), new Linear<T>(3, 4));
+            NNTestEquals(module.concatDim(), 1);
+            module.concatDim(0);
+            NNTestEquals(module.concatDim(), 0);
+        }
 
-    NNAssert(math::sum(math::square(module.output() - out)) < 1e-9, "Concat::forward failed!");
-    NNAssert(math::sum(math::square(module.inGrad() - ing)) < 1e-9, "Concat::backward failed; wrong inGrad!");
-    NNAssert(math::sum(math::square(module.grad() - prg)) < 1e-9, "Concat::backward failed; wrong grad!");
+        NNTestParams(size_t)
+        {
+            Concat<T> module(new Linear<T>(3, 4), new Linear<T>(3, 4));
+            module.concatDim(0);
+            NNTestEquals(module.outputShape()[0], 2);
+            NNTestEquals(module.outputShape()[1], 4);
+        }
+    }
 
-    NNAssertEquals(module.component(0), linear, "Concat::component failed to get the correct component!");
-    NNAssertEquals(module.components(), 2, "Concat::components failed!");
-    NNAssertEquals(module.remove(0), linear, "Concat::remove failed to return the removed component!");
+    NNTestMethod(save)
+    {
+        NNTestParams(Serialized &)
+        {
+            Concat<T> module(new Linear<T>(3, 4), new Linear<T>(3, 4));
+            Serialized s;
+            module.save(s);
+            NNTestEquals(s.get<size_t>("concatDim"), 1);
+            module.concatDim(0);
+            module.save(s);
+            NNTestEquals(s.get<size_t>("concatDim"), 0);
+        }
+    }
 
-    module.clear();
-    NNAssertEquals(module.components(), 0, "Concat::clear failed!");
+    NNTestMethod(add)
+    {
+        NNTestParams(Module *)
+        {
+            Concat<T> module(new Linear<T>(3, 4), new Linear<T>(3, 2));
+            module.add(new Linear<T>(3, 12));
+            NNTestEquals(module.components(), 3);
+            NNTestEquals(module.outputShape()[1], 18);
+        }
+    }
 
-    module.add(linear);
-    NNAssertEquals(module.paramsList(), linear->paramsList(), "Concat::paramsList failed!");
-    NNAssertEquals(module.gradList(), linear->gradList(), "Concat::gradList failed!");
+    NNTestMethod(remove)
+    {
+        NNTestParams(size_t)
+        {
+            auto comp1 = new Linear<T>(3, 4);
+            auto comp2 = new Linear<T>(3, 2);
+            auto comp3 = new Linear<T>(3, 12);
+            auto comp4 = new Linear<T>(3, 2);
+            Concat<T> module(comp1, comp2, comp3, comp4);
+            NNTestEquals(module.remove(1), comp2);
+            NNTestEquals(module.components(), 3);
+            NNTestEquals(module.outputShape()[1], 18);
+            NNTestEquals(module.remove(2), comp4);
+            NNTestEquals(module.components(), 2);
+            NNTestEquals(module.outputShape()[1], 16);
+            NNTestEquals(module.remove(0), comp1);
+            NNTestEquals(module.components(), 1);
+            NNTestEquals(module.outputShape()[1], 12);
+            NNTestEquals(module.remove(0), comp3);
+            NNTestEquals(module.components(), 0);
+            delete comp1;
+            delete comp2;
+            delete comp3;
+            delete comp4;
+        }
+    }
 
-    TestContainer("Concat", module, inp);
+    NNTestMethod(forward)
+    {
+        NNTestParams(const Tensor &)
+        {
+            auto comp1 = new Linear<T>(2, 2, false);
+            auto comp2 = new Linear<T>(2, 3, false);
+            comp1->params().copy({ 0, 1, 2, 3 });
+            comp2->params().copy({ 4, 5, 6, 7, 8, 9 });
+
+            Tensor<T> input({ 0.5, 2 });
+            Tensor<T> target({ 4, 6.5, 16, 18.5, 21 });
+            Concat<T> module(comp1, comp2);
+            module.forward(input);
+
+            forEach([&](T output, T target)
+            {
+                NNTestAlmostEquals(output, target, 1e-12);
+            }, module.output(), target);
+        }
+    }
+
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &)
+        {
+            auto comp1 = new Linear<T>(2, 2, false);
+            auto comp2 = new Linear<T>(2, 3, false);
+
+            Concat<T> module(comp1, comp2);
+            module.params().copy({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+            Tensor<T> input({ 0.5, 2 });
+            Tensor<T> grad({ 0.5, 0, 1, 2, -1 });
+            Tensor<T> inGrad({ 8, 15 });
+            Tensor<T> pGrad({ 0.25, 0, 1, 0, 0.5, 1, -0.5, 2, 4, -2 });
+
+            module.forward(input);
+            module.backward(input, grad);
+
+            forEach([&](T inGrad, T target)
+            {
+                NNTestAlmostEquals(inGrad, target, 1e-12);
+            }, module.inGrad(), inGrad);
+
+            forEach([&](T pGrad, T target)
+            {
+                NNTestAlmostEquals(pGrad, target, 1e-12);
+            }, module.grad(), pGrad);
+        }
+    }
 }

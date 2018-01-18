@@ -443,21 +443,21 @@ const std::vector<std::string> &Serialized::keys() const
 Serialized::Type Serialized::type(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
     return m_object.map.at(key)->type();
 }
 
 void Serialized::type(const std::string &key, Type type)
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
     m_object.map.at(key)->type(type);
 }
 
 size_t Serialized::size(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
     return m_object.map.at(key)->size();
 }
 
@@ -465,7 +465,7 @@ template <typename T>
 T Serialized::get(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
     return m_object.map.at(key)->get<T>();
 }
 
@@ -473,7 +473,7 @@ template <typename T>
 T Serialized::get(const std::string &key)
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
     return m_object.map.at(key)->get<T>();
 }
 
@@ -481,7 +481,7 @@ template <typename T>
 void Serialized::get(const std::string &key, T itr, const T &end) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key!");
+    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
     m_object.map.at(key)->get(itr, end);
 }
 
