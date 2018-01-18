@@ -119,5 +119,77 @@ NNTestClassImpl(Random)
             NNTestAlmostEquals(mean(x), 100, 10);
             NNTestAlmostEquals(variance(x), 133.3333, 40);
         }
+
+        NNTestParams(double)
+        {
+            Random<double> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.uniform(100);
+            }, x);
+            NNTestAlmostEquals(mean(x), 50, 5);
+            NNTestAlmostEquals(variance(x), 833.3333, 50);
+        }
+
+        NNTestParams(double, double)
+        {
+            Random<double> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.uniform(80, 120);
+            }, x);
+            NNTestAlmostEquals(mean(x), 100, 5);
+            NNTestAlmostEquals(variance(x), 133.3333, 20);
+        }
+    }
+
+    NNTestMethod(normal)
+    {
+        NNTestParams(double, double)
+        {
+            Random<double> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.normal(-1, 3.14);
+            }, x);
+            NNTestAlmostEquals(mean(x), -1, 0.5);
+            NNTestAlmostEquals(variance(x), 9.8596, 0.5);
+        }
+
+        NNTestParams(double, double, double)
+        {
+            Random<double> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.normal(-1, 3.14, 3);
+            }, x);
+            NNTestAlmostEquals(mean(x), -1, 0.5);
+            NNTestGreaterThanOrEquals(min(x), -4);
+            NNTestLessThanOrEquals(max(x), 2);
+        }
+    }
+
+    NNTestMethod(bernoulli)
+    {
+        NNTestParams(double)
+        {
+            Random<double> r;
+            Tensor<T> x(1000);
+            forEach([&](T &x)
+            {
+                x = r.bernoulli(0.25);
+            }, x);
+            size_t n = 0;
+            forEach([&](T x)
+            {
+                if(x > 0.5)
+                    ++n;
+            }, x);
+            NNTestAlmostEquals(n, 0.25 * x.size(), 50);
+        }
     }
 }
