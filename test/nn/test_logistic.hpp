@@ -1,6 +1,7 @@
 #ifndef TEST_LOGISTIC_HPP
 #define TEST_LOGISTIC_HPP
 
-void TestLogistic();
+#include "../test.hpp"
+NNTestClassDecl(Logistic);
 
 #endif

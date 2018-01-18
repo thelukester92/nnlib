@@ -1,6 +1,7 @@
 #ifndef TEST_SOFTMAX_HPP
 #define TEST_SOFTMAX_HPP
 
-void TestSoftMax();
+#include "../test.hpp"
+NNTestClassDecl(SoftMax);
 
 #endif

@@ -36,13 +36,13 @@ public:
 
     template <typename ... Ms>
     Concat(Module<T> *first, Ms... rest) :
-        Container<T>(Tensor<T>::concatenate({ &first->output(), &rest->output()... }, (size_t) -1).shape(), first, rest...),
+        Container<T>(first->inputShape(), Tensor<T>::concatenate({ &first->output(), &rest->output()... }, (size_t) -1).shape(), first, rest...),
         m_concatDim((size_t) -1)
     {}
 
     template <typename ... Ms>
     Concat(size_t concatDim, Module<T> *first, Ms... rest) :
-        Container<T>(Tensor<T>::concatenate({ &first->output(), &rest->output()... }, concatDim).shape(), first, rest...),
+        Container<T>(first->inputShape(), Tensor<T>::concatenate({ &first->output(), &rest->output()... }, concatDim).shape(), first, rest...),
         m_concatDim(concatDim)
     {}
 
@@ -57,6 +57,7 @@ public:
     virtual void save(Serialized &node) const override;
 
     virtual Concat &add(Module<T> *component) override;
+    virtual Module<T> *remove(size_t index) override;
 
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;

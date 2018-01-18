@@ -1,6 +1,7 @@
 #ifndef TEST_DROPCONNECT_HPP
 #define TEST_DROPCONNECT_HPP
 
-void TestDropConnect();
+#include "../test.hpp"
+NNTestClassDecl(DropConnect);
 
 #endif

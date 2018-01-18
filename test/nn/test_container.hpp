@@ -1,7 +1,11 @@
 #ifndef TEST_CONTAINER_HPP
 #define TEST_CONTAINER_HPP
 
+#include "../test.hpp"
 #include "nnlib/nn/container.hpp"
+NNTestAbstractClassDecl(Container, Container<NN_REAL_T>);
+
+// todo: remove below
 #include "test_module.hpp"
 using namespace std;
 using namespace nnlib;

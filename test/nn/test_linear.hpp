@@ -1,6 +1,7 @@
 #ifndef TEST_LINEAR_HPP
 #define TEST_LINEAR_HPP
 
-void TestLinear();
+#include "../test.hpp"
+NNTestClassDecl(Linear);
 
 #endif

@@ -58,6 +58,17 @@ Concat<T> &Concat<T>::add(Module<T> *component)
 }
 
 template <typename T>
+Module<T> *Concat<T>::remove(size_t index)
+{
+    Module<T> *component = Container<T>::remove(index);
+    Storage<Tensor<T> *> outputs(components());
+    for(size_t i = 0, count = components(); i < count; ++i)
+        outputs[i] = &m_components[i]->output();
+    m_output = Tensor<T>::concatenate(outputs, m_concatDim);
+    return component;
+}
+
+template <typename T>
 Tensor<T> &Concat<T>::forward(const Tensor<T> &input)
 {
     Storage<Tensor<T> *> outputs(components());

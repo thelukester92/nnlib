@@ -1,6 +1,7 @@
 #ifndef TEST_ELU_HPP
 #define TEST_ELU_HPP
 
-void TestELU();
+#include "../test.hpp"
+NNTestClassDecl(ELU);
 
 #endif

@@ -12,6 +12,7 @@ class Sequential : public Container<T>
 {
 public:
     using Container<T>::Container;
+    using Container<T>::add;
     using Container<T>::components;
 
     template <typename ... Ms>

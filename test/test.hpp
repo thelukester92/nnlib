@@ -21,12 +21,14 @@ public:
     }
 
     Test(const std::string &nnClass) :
+        nnPrefix(""),
         nnClass(nnClass)
     {}
 
     virtual void run() = 0;
 
 protected:
+    std::string nnPrefix;
     std::string nnClass;
     std::string nnMethod;
     std::string nnParams;
@@ -40,7 +42,12 @@ public:
         return Test::verbosity();
     }
 
+    AbstractTest(const std::string &nnPrefix) :
+        nnPrefix(nnPrefix)
+    {}
+
 protected:
+    std::string nnPrefix;
     std::string nnMethod;
     std::string nnParams;
 };
@@ -81,12 +88,16 @@ protected:
             class Test##Class : public AbstractTest                 \
             {                                                       \
             public:                                                 \
+                Test##Class();                                      \
                 void run(const std::string &nnClass, Impl &nnImpl); \
             };                                                      \
         }                                                           \
     }
 
-#define NNTestAbstractClassImpl(Class, Impl) \
+#define NNTestAbstractClassImpl(Class, Impl)                  \
+    nnlib::test::Test##Class::Test##Class() :                 \
+        nnlib::test::AbstractTest(#Class + std::string("::")) \
+    {}                                                        \
     void nnlib::test::Test##Class::run(const std::string &nnClass, Impl &nnImpl)
 
 #define NNTestAbstractClass(Class) \
@@ -96,36 +107,36 @@ protected:
 #define NNTestMethod(Method) \
     nnMethod = #Method;      \
     if(verbosity() == 1)     \
-        std::cout << "\n\t" << nnMethod << "..." << std::flush;
+        std::cout << "\n\t" << nnPrefix << nnMethod << "..." << std::flush;
 
 #define NNTestParams(...)    \
     nnParams = #__VA_ARGS__; \
     if(verbosity() == 2)     \
-        std::cout << "\n\t" << nnMethod << "(" << nnParams << ")..." << std::flush;
+        std::cout << "\n\t" << nnPrefix << nnMethod << "(" << nnParams << ")..." << std::flush;
 
 #define NNTest(...) \
-    NNAssert(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssert(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestEquals(...) \
-    NNAssertEquals(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertEquals(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestAlmostEquals(...) \
-    NNAssertAlmostEquals(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertAlmostEquals(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestNotEquals(...) \
-    NNAssertNotEquals(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertNotEquals(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestLessThan(...) \
-    NNAssertLessThan(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertLessThan(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestLessThanOrEquals(...) \
-    NNAssertLessThanOrEquals(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertLessThanOrEquals(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestGreaterThan(...) \
-    NNAssertGreaterThan(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertGreaterThan(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNTestGreaterThanOrEquals(...) \
-    NNAssertGreaterThanOrEquals(__VA_ARGS__, nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
+    NNAssertGreaterThanOrEquals(__VA_ARGS__, nnPrefix + nnClass + "::" + nnMethod + "(" + nnParams + ") failed!");
 
 #define NNRunTest(Class)                                          \
     try                                                           \

@@ -1,7 +1,11 @@
 #ifndef TEST_MAP_HPP
 #define TEST_MAP_HPP
 
+#include "../test.hpp"
 #include "nnlib/nn/map.hpp"
+NNTestAbstractClassDecl(Map, Map<NN_REAL_T>);
+
+// todo: remove below
 #include "test_module.hpp"
 using namespace std;
 using namespace nnlib;

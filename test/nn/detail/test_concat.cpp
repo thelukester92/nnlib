@@ -4,6 +4,12 @@
 #include "nnlib/nn/concat.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
+
+NNTestClassImpl(Concat)
+{
+    NNRunAbstractTest(Container, Concat, new Concat<T>(new Linear<T>(3, 4), new Linear<T>(3, 2)));
+}
 
 void TestConcat()
 {

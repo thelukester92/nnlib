@@ -1,6 +1,7 @@
 #ifndef TEST_TANH_HPP
 #define TEST_TANH_HPP
 
-void TestTanH();
+#include "../test.hpp"
+NNTestClassDecl(TanH);
 
 #endif
