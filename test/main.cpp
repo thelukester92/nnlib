@@ -83,7 +83,7 @@ int main(int argc, const char **argv)
     NNRunTest(Random);
 
     // Neural Network Modules
-    // NNRunTest(BatchNorm);
+    NNRunTest(BatchNorm);
 
     return 0;
 }

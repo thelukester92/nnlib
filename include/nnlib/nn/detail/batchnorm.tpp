@@ -9,7 +9,7 @@ namespace nnlib
 
 template <typename T>
 BatchNorm<T>::BatchNorm(size_t inps) :
-    Module<T>({ 1, inps }),
+    Module<T>({ 2, inps }),
     m_weights(inps),
     m_weightsGrad(inps),
     m_biases(inps),

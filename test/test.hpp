@@ -37,8 +37,7 @@ class AbstractTest
 public:
     static int &verbosity()
     {
-        static int i;
-        return i;
+        return Test::verbosity();
     }
 
 protected:
