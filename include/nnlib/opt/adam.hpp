@@ -14,8 +14,6 @@ using Optimizer<T>::m_critic;
 public:
     Adam(Module<T> &model, Critic<T> &critic);
 
-    void reset();
-
     Adam &learningRate(T learningRate);
     T learningRate() const;
 
@@ -25,6 +23,7 @@ public:
     Adam &beta2(T beta2);
     T beta2() const;
 
+    virtual void reset() override;
     virtual Adam &step(const Tensor<T> &input, const Tensor<T> &target) override;
 
 private:

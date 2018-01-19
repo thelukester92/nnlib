@@ -22,15 +22,6 @@ Adam<T>::Adam(Module<T> &model, Critic<T> &critic) :
 }
 
 template <typename T>
-void Adam<T>::reset()
-{
-    m_normalize1 = 1;
-    m_normalize2 = 1;
-    m_mean.fill(0);
-    m_variance.fill(0);
-}
-
-template <typename T>
 Adam<T> &Adam<T>::learningRate(T learningRate)
 {
     m_learningRate = learningRate;
@@ -67,6 +58,15 @@ template <typename T>
 T Adam<T>::beta2() const
 {
     return m_beta2;
+}
+
+template <typename T>
+void Adam<T>::reset()
+{
+    m_normalize1 = 1;
+    m_normalize2 = 1;
+    m_mean.fill(0);
+    m_variance.fill(0);
 }
 
 template <typename T>

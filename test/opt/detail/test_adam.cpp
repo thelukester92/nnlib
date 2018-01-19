@@ -14,36 +14,6 @@ NNTestClassImpl(Adam)
     MSE<T> critic;
     NNRunAbstractTest(Optimizer, Adam, new Adam<T>(model, critic));
 
-    NNTestMethod(reset)
-    {
-        NNTestParams()
-        {
-            RandomEngine::sharedEngine().seed(0);
-
-            Linear<T> model(2, 3);
-            MSE<T> critic;
-            Adam<T> opt(model, critic);
-
-            auto inputs = math::rand(Tensor<T>(2));
-            auto target = math::rand(Tensor<T>(3));
-
-            auto before = model.params().copy();
-            for(size_t i = 0; i < 100; ++i)
-                opt.step(inputs, target);
-            auto after = model.params().copy();
-
-            model.params().copy(before);
-            opt.reset();
-            for(size_t i = 0; i < 100; ++i)
-                opt.step(inputs, target);
-
-            forEach([&](T first, T second)
-            {
-                NNTestAlmostEquals(first, second, 1e-12);
-            }, after, model.params());
-        }
-    }
-
     NNTestMethod(learningRate)
     {
         NNTestParams(T)

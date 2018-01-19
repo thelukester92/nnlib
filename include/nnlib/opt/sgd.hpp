@@ -14,14 +14,13 @@ using Optimizer<T>::m_critic;
 public:
     SGD(Module<T> &model, Critic<T> &critic);
 
-    void reset();
-
     SGD &learningRate(T learningRate);
     T learningRate() const;
 
     SGD &momentum(T momentum);
     T momentum() const;
 
+    virtual void reset() override;
     virtual SGD &step(const Tensor<T> &input, const Tensor<T> &target) override;
 
 private:

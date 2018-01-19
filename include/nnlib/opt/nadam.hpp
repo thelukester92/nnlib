@@ -14,8 +14,6 @@ using Optimizer<T>::m_critic;
 public:
     Nadam(Module<T> &model, Critic<T> &critic);
 
-    void reset();
-
     Nadam &learningRate(T learningRate);
     T learningRate() const;
 
@@ -25,6 +23,7 @@ public:
     Nadam &beta2(T beta2);
     T beta2() const;
 
+    virtual void reset() override;
     virtual Nadam &step(const Tensor<T> &input, const Tensor<T> &target) override;
 
 private:

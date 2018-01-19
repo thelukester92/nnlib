@@ -17,6 +17,12 @@ public:
     Module<T> &model();
     Critic<T> &critic();
 
+    /// Convenience method for evaluating the error given an input and output.
+    T evaluate(const Tensor<T> &input, const Tensor<T> &target);
+
+    /// Reset the state of the optimizer, if any.
+    virtual void reset();
+
     /// Perform a single step of training given an input and a target.
     virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
 

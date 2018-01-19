@@ -22,15 +22,6 @@ Nadam<T>::Nadam(Module<T> &model, Critic<T> &critic) :
 }
 
 template <typename T>
-void Nadam<T>::reset()
-{
-    m_normalize1 = 1;
-    m_normalize2 = 1;
-    m_mean.fill(0);
-    m_variance.fill(0);
-}
-
-template <typename T>
 Nadam<T> &Nadam<T>::learningRate(T learningRate)
 {
     m_learningRate = learningRate;
@@ -67,6 +58,15 @@ template <typename T>
 T Nadam<T>::beta2() const
 {
     return m_beta2;
+}
+
+template <typename T>
+void Nadam<T>::reset()
+{
+    m_normalize1 = 1;
+    m_normalize2 = 1;
+    m_mean.fill(0);
+    m_variance.fill(0);
 }
 
 template <typename T>
