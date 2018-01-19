@@ -203,6 +203,8 @@ void LSTM<T>::save(Serialized &node) const
 template <typename T>
 Tensor<T> &LSTM<T>::forward(const Tensor<T> &input)
 {
+    NNAssertEquals(input.dims(), 2, "Expected a matrix!");
+
     m_state.resize(input.size(0), m_outs);
     m_prevState.resize(input.size(0), m_outs);
     m_prevState.copy(m_state);
@@ -250,7 +252,10 @@ Tensor<T> &LSTM<T>::forward(const Tensor<T> &input)
 template <typename T>
 Tensor<T> &LSTM<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 {
+    NNAssertEquals(input.dims(), 2, "Expected a matrix!");
+    NNAssertEquals(outGrad.dims(), 2, "Expected a matrix!");
     NNAssertEquals(input.size(0), outGrad.size(0), "Incompatible input and outGrad!");
+
     m_outGrad.resize(input.size(0), m_outs);
     m_stateGrad.resize(input.size(0), m_outs);
     m_curStateGrad.resize(input.size(0), m_outs);

@@ -8,7 +8,10 @@ namespace nnlib
 
 template <typename T>
 Sequencer<T>::Sequencer(Module<T> *module, bool reverse) :
-    Module<T>(module->inputShape(), module->outputShape()),
+    Module<T>(
+        Storage<size_t>({ 1 }).append(module->inputShape()),
+        Storage<size_t>({ 1 }).append(module->outputShape())
+    ),
     m_module(module),
     m_reverse(reverse)
 {}
