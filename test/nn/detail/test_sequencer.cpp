@@ -118,6 +118,16 @@ NNTestClassImpl(Sequencer)
             {
                 NNTestAlmostEquals(actual, target, 1e-9);
             }, module.output(), target);
+
+            target.copy({ 0.3523252224669841, 0.1900534836059371, 0 });
+            module.forget();
+            module.reverse(true);
+            module.forward(input);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-9);
+            }, module.output(), target);
         }
     }
 
@@ -155,6 +165,17 @@ NNTestClassImpl(Sequencer)
             {
                 NNTestAlmostEquals(actual, target, 1e-9);
             }, module.grad(), pGrad);
+
+            inGrad.copy({ -0.01058507197696686, -0.02743768942521932, 0.1646924317207443 });
+            module.forget();
+            module.reverse(true);
+            module.forward(input);
+            module.backward(input, blame);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-9);
+            }, module.inGrad(), inGrad);
         }
     }
 }

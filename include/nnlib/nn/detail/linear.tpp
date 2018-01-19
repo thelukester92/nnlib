@@ -118,6 +118,8 @@ void Linear<T>::save(Serialized &node) const
 template <typename T>
 Tensor<T> &Linear<T>::forward(const Tensor<T> &input)
 {
+    NNAssert(input.dims() == 1 || input.dims() == 2, "Expected vector or matrix input!");
+
     if(input.dims() == 1)
     {
         m_output.resize(m_weights.size(1));
@@ -133,10 +135,6 @@ Tensor<T> &Linear<T>::forward(const Tensor<T> &input)
         if(m_useBias)
             math::mAdd_vv(m_ones.resize(input.size(0)).fill(1), m_bias, m_output);
     }
-    else
-    {
-        throw Error("Expected vector or matrix input!");
-    }
 
     return m_output;
 }
@@ -145,6 +143,8 @@ template <typename T>
 Tensor<T> &Linear<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 {
     NNAssertEquals(input.dims(), outGrad.dims(), "Incompatible input and outGrad!");
+    NNAssert(input.dims() == 1 || input.dims() == 2, "Expected vector or matrix input!");
+
     if(input.dims() == 1)
     {
         math::mAdd_vv(input, outGrad, m_weightsGrad);
@@ -162,10 +162,6 @@ Tensor<T> &Linear<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 
         m_inGrad.resize(input.size(0), m_weights.size(0));
         math::mAdd_mmt(outGrad, m_weights, m_inGrad, 1, 0);
-    }
-    else
-    {
-        throw Error("Expected vector or matrix input and outGrad!");
     }
 
     return m_inGrad;
