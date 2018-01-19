@@ -86,6 +86,7 @@ int main(int argc, const char **argv)
     NNRunTest(BatchNorm);
     NNRunTest(Concat);
     NNRunTest(DropConnect);
+    NNRunTest(Dropout);
 
     return 0;
 }

@@ -13,7 +13,7 @@ class Optimizer
 public:
     Optimizer(Module<T> &model, Critic<T> &critic);
     virtual ~Optimizer();
-    
+
     Module<T> &model();
     Critic<T> &critic();
 

@@ -2,6 +2,6 @@
 #define TEST_DROPOUT_HPP
 
 #include "../test.hpp"
-NNTestClassDecl(DropOut);
+NNTestClassDecl(Dropout);
 
 #endif

@@ -23,7 +23,7 @@ public:
 
     /// L = 1/n sum_i( -input(target(i)) )
     virtual T forward(const Tensor<T> &input, const Tensor<T> &target) override;
-    
+
     /// dL/di = target == i ? -1/n : 0
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override;
 

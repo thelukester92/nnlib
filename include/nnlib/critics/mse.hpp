@@ -23,7 +23,7 @@ public:
 
     /// dL/di = 2/n (input(i) - target(i))
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &target) override;
-    
+
 protected:
     using Critic<T>::m_inGrad;
 

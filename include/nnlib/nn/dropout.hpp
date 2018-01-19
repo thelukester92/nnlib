@@ -14,24 +14,24 @@ public:
     Dropout(const Dropout &module);
     Dropout(const Serialized &node);
     Dropout &operator=(const Dropout &module);
-    
+
     T dropProbability() const;
     Dropout &dropProbability(T dropProbability);
-    
+
     bool isTraining() const;
     virtual void training(bool training = true) override;
-    
+
     virtual void save(Serialized &node) const override;
-    
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-    
+
     virtual Storage<Tensor<T> *> stateList() override;
-    
+
 protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;
-    
+
 private:
     Tensor<T> m_mask;
     T m_dropProbability;

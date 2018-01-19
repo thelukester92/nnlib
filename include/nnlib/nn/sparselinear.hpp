@@ -16,21 +16,21 @@ class SparseLinear : public Linear<T>
 {
 public:
     using Linear<T>::Linear;
-    
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
-    
+
 protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;
-    
+
     using Linear<T>::m_weights;
     using Linear<T>::m_weightsGrad;
-    
+
     using Linear<T>::m_useBias;
     using Linear<T>::m_bias;
     using Linear<T>::m_biasGrad;
-    
+
     using Linear<T>::m_ones;
 };
 
