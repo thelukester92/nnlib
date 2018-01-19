@@ -110,16 +110,16 @@ Tensor<T> &Linear<T>::forward(const Tensor<T> &input)
     {
         m_output.resize(m_weights.size(1));
         if(m_useBias)
-            Algebra<T>::vAdd_mtv(m_weights, input, m_output.copy(m_bias));
+            math::vAdd_mtv(m_weights, input, m_output.copy(m_bias));
         else
-            Algebra<T>::vAdd_mtv(m_weights, input, m_output, 1, 0);
+            math::vAdd_mtv(m_weights, input, m_output, 1, 0);
     }
     else if(input.dims() == 2)
     {
         m_output.resize(input.size(0), m_weights.size(1));
-        Algebra<T>::mAdd_mm(input, m_weights, m_output, 1, 0);
+        math::mAdd_mm(input, m_weights, m_output, 1, 0);
         if(m_useBias)
-            Algebra<T>::mAdd_vv(m_ones.resize(input.size(0)).fill(1), m_bias, m_output);
+            math::mAdd_vv(m_ones.resize(input.size(0)).fill(1), m_bias, m_output);
     }
     else
     {
@@ -135,21 +135,21 @@ Tensor<T> &Linear<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
     NNAssertEquals(input.dims(), outGrad.dims(), "Incompatible input and outGrad!");
     if(input.dims() == 1)
     {
-        Algebra<T>::mAdd_vv(input, outGrad, m_weightsGrad);
+        math::mAdd_vv(input, outGrad, m_weightsGrad);
         if(m_useBias)
-            Algebra<T>::vAdd_v(outGrad, m_biasGrad);
+            math::vAdd_v(outGrad, m_biasGrad);
 
         m_inGrad.resize(m_weights.size(0));
-        Algebra<T>::vAdd_mv(m_weights, outGrad, m_inGrad, 1, 0);
+        math::vAdd_mv(m_weights, outGrad, m_inGrad, 1, 0);
     }
     else if(input.dims() == 2)
     {
-        Algebra<T>::mAdd_mtm(input, outGrad, m_weightsGrad);
+        math::mAdd_mtm(input, outGrad, m_weightsGrad);
         if(m_useBias)
-            Algebra<T>::vAdd_mtv(outGrad, m_ones.resize(input.size(0)).fill(1), m_biasGrad);
+            math::vAdd_mtv(outGrad, m_ones.resize(input.size(0)).fill(1), m_biasGrad);
 
         m_inGrad.resize(input.size(0), m_weights.size(0));
-        Algebra<T>::mAdd_mmt(outGrad, m_weights, m_inGrad, 1, 0);
+        math::mAdd_mmt(outGrad, m_weights, m_inGrad, 1, 0);
     }
     else
     {

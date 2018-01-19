@@ -56,14 +56,14 @@ SGD<T> &SGD<T>::step(const Tensor<T> &input, const Tensor<T> &target)
     {
         // apply momentum
         m_velocity.scale(m_momentum);
-        Algebra<T>::vAdd_v(m_grads, m_velocity);
+        math::vAdd_v(m_grads, m_velocity);
 
         // Nesterov step
-        Algebra<T>::vAdd_v(m_velocity, m_grads, m_momentum);
+        math::vAdd_v(m_velocity, m_grads, m_momentum);
     }
 
     // update parameters
-    Algebra<T>::vAdd_v(m_grads, m_parameters, -m_learningRate);
+    math::vAdd_v(m_grads, m_parameters, -m_learningRate);
 
     return *this;
 }

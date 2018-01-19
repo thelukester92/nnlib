@@ -27,7 +27,7 @@ Tensor<T> &SparseLinear<T>::forward(const Tensor<T> &input)
 
         // sparse matrix/vector multiplication
         for(size_t i = 1, end = input.size(0); i != end; ++i)
-            Algebra<T>::vAdd_v(m_weights.select(0, input(i, 0)), m_output, input(i, 1));
+            math::vAdd_v(m_weights.select(0, input(i, 0)), m_output, input(i, 1));
     }
     else if(input.size(1) == 3)
     {
@@ -38,11 +38,11 @@ Tensor<T> &SparseLinear<T>::forward(const Tensor<T> &input)
 
         // sparse matrix/matrix multiplication
         for(size_t i = 1, end = input.size(0); i != end; ++i)
-            Algebra<T>::vAdd_v(m_weights.select(0, input(i, 1)), m_output.select(0, input(i, 0)), input(i, 2));
+            math::vAdd_v(m_weights.select(0, input(i, 1)), m_output.select(0, input(i, 0)), input(i, 2));
 
         // bias
         if(m_useBias)
-            Algebra<T>::mAdd_vv(m_ones.resize(input(0, 0)).fill(1), m_bias, m_output);
+            math::mAdd_vv(m_ones.resize(input(0, 0)).fill(1), m_bias, m_output);
     }
     else
     {
@@ -65,15 +65,15 @@ Tensor<T> &SparseLinear<T>::backward(const Tensor<T> &input, const Tensor<T> &ou
 
         // sparse vector outer product
         for(size_t i = 1, end = input.size(0); i != end; ++i)
-            Algebra<T>::vAdd_v(outGrad, m_weightsGrad.select(0, input(i, 0)), input(i, 1));
+            math::vAdd_v(outGrad, m_weightsGrad.select(0, input(i, 0)), input(i, 1));
 
         // bias gradient
         if(m_useBias)
-            Algebra<T>::vAdd_v(outGrad, m_biasGrad);
+            math::vAdd_v(outGrad, m_biasGrad);
 
         // input gradient
         m_inGrad.resize(m_weights.size(0));
-        Algebra<T>::vAdd_mv(m_weights, outGrad, m_inGrad, 1, 0);
+        math::vAdd_mv(m_weights, outGrad, m_inGrad, 1, 0);
     }
     else if(input.size(1) == 3)
     {
@@ -84,15 +84,15 @@ Tensor<T> &SparseLinear<T>::backward(const Tensor<T> &input, const Tensor<T> &ou
 
         // sparse matrix/matrix multiplication
         for(size_t i = 1, end = input.size(0); i != end; ++i)
-            Algebra<T>::vAdd_v(outGrad.select(0, input(i, 0)), m_weightsGrad.select(0, input(i, 1)), input(i, 2));
+            math::vAdd_v(outGrad.select(0, input(i, 0)), m_weightsGrad.select(0, input(i, 1)), input(i, 2));
 
         // bias gradient
         if(m_useBias)
-            Algebra<T>::vAdd_mtv(outGrad, m_ones.resize(input(0, 0)).fill(1), m_biasGrad);
+            math::vAdd_mtv(outGrad, m_ones.resize(input(0, 0)).fill(1), m_biasGrad);
 
         // input gradient
         m_inGrad.resize(input(0, 0), m_weights.size(0));
-        Algebra<T>::mAdd_mmt(outGrad, m_weights, m_inGrad, 1, 0);
+        math::mAdd_mmt(outGrad, m_weights, m_inGrad, 1, 0);
     }
     else
     {

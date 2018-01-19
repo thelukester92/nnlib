@@ -191,19 +191,19 @@ Tensor<T> &LSTM<T>::forward(const Tensor<T> &input)
 
     // input gate
     m_inpGateX->forward(input);
-    Algebra<T>::mAdd_m(m_inpGateY->forward(m_prevOutput), m_inpGateX->output());
-    Algebra<T>::mAdd_m(m_inpGateH->forward(m_prevState), m_inpGateX->output());
+    math::mAdd_m(m_inpGateY->forward(m_prevOutput), m_inpGateX->output());
+    math::mAdd_m(m_inpGateH->forward(m_prevState), m_inpGateX->output());
     m_inpGate->forward(m_inpGateX->output());
 
     // forget gate
     m_fgtGateX->forward(input);
-    Algebra<T>::mAdd_m(m_fgtGateY->forward(m_prevOutput), m_fgtGateX->output());
-    Algebra<T>::mAdd_m(m_fgtGateH->forward(m_prevState), m_fgtGateX->output());
+    math::mAdd_m(m_fgtGateY->forward(m_prevOutput), m_fgtGateX->output());
+    math::mAdd_m(m_fgtGateH->forward(m_prevState), m_fgtGateX->output());
     m_fgtGate->forward(m_fgtGateX->output());
 
     // input value
     m_inpModX->forward(input);
-    Algebra<T>::mAdd_m(m_inpModY->forward(m_prevOutput), m_inpModX->output());
+    math::mAdd_m(m_inpModY->forward(m_prevOutput), m_inpModX->output());
     m_inpMod->forward(m_inpModX->output());
 
     // update memory cell (hidden state)
@@ -211,14 +211,14 @@ Tensor<T> &LSTM<T>::forward(const Tensor<T> &input)
     m_fgtAdd.resize(m_fgtGate->output().shape());
     math::pointwiseProduct(m_inpGate->output(), m_inpMod->output(), m_inpAdd);
     math::pointwiseProduct(m_fgtGate->output(), m_prevState, m_fgtAdd);
-    Algebra<T>::mAdd_m(m_inpAdd, m_state, 1, 0);
-    Algebra<T>::mAdd_m(m_fgtAdd, m_state);
+    math::mAdd_m(m_inpAdd, m_state, 1, 0);
+    math::mAdd_m(m_fgtAdd, m_state);
     m_outMod->forward(m_state);
 
     // output gate
     m_outGateX->forward(input);
-    Algebra<T>::mAdd_m(m_outGateY->forward(m_prevOutput), m_outGateX->output());
-    Algebra<T>::mAdd_m(m_outGateH->forward(m_state), m_outGateX->output());
+    math::mAdd_m(m_outGateY->forward(m_prevOutput), m_outGateX->output());
+    math::mAdd_m(m_outGateH->forward(m_state), m_outGateX->output());
     m_outGate->forward(m_outGateX->output());
 
     // final output
@@ -236,43 +236,43 @@ Tensor<T> &LSTM<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
     m_inGrad.resize(input.shape());
 
     // update output gradient
-    Algebra<T>::mAdd_m(outGrad, m_outGrad);
+    math::mAdd_m(outGrad, m_outGrad);
 
     // backprop to hidden state
     math::pointwiseProduct(m_outGrad, m_outGate->output(), m_curStateGrad);
     m_curStateGrad.copy(m_outMod->backward(m_state, m_curStateGrad));
-    Algebra<T>::mAdd_m(m_stateGrad, m_curStateGrad);
+    math::mAdd_m(m_stateGrad, m_curStateGrad);
 
     // backprop through output gate
     math::pointwiseProduct(m_outGrad, m_outMod->output(), m_gradBuffer);
     m_outGate->backward(m_outGateX->output(), m_gradBuffer);
     m_inGrad.copy(m_outGateX->backward(input, m_outGate->inGrad()));
     m_outGrad.copy(m_outGateY->backward(m_prevOutput, m_outGate->inGrad()));
-    Algebra<T>::mAdd_m(m_outGateH->backward(m_state, m_outGate->inGrad()), m_curStateGrad);
+    math::mAdd_m(m_outGateH->backward(m_state, m_outGate->inGrad()), m_curStateGrad);
 
     // backprop through input value
     math::pointwiseProduct(m_curStateGrad, m_inpGate->output(), m_gradBuffer);
     m_inpMod->backward(m_inpModX->output(), m_gradBuffer);
-    Algebra<T>::mAdd_m(m_inpModX->backward(input, m_inpMod->inGrad()), m_inGrad);
-    Algebra<T>::mAdd_m(m_inpModY->backward(m_prevOutput, m_inpMod->inGrad()), m_outGrad);
+    math::mAdd_m(m_inpModX->backward(input, m_inpMod->inGrad()), m_inGrad);
+    math::mAdd_m(m_inpModY->backward(m_prevOutput, m_inpMod->inGrad()), m_outGrad);
 
     // backprop through forget gate
     math::pointwiseProduct(m_curStateGrad, m_prevState, m_gradBuffer);
     m_fgtGate->backward(m_fgtGateX->output(), m_gradBuffer);
     m_stateGrad.copy(m_fgtGateH->backward(m_prevState, m_fgtGate->inGrad()));
-    Algebra<T>::mAdd_m(m_fgtGateX->backward(input, m_fgtGate->inGrad()), m_inGrad);
-    Algebra<T>::mAdd_m(m_fgtGateY->backward(m_prevOutput, m_fgtGate->inGrad()), m_outGrad);
+    math::mAdd_m(m_fgtGateX->backward(input, m_fgtGate->inGrad()), m_inGrad);
+    math::mAdd_m(m_fgtGateY->backward(m_prevOutput, m_fgtGate->inGrad()), m_outGrad);
 
     // backprop through input gate
     math::pointwiseProduct(m_curStateGrad, m_inpMod->output(), m_gradBuffer);
     m_inpGate->backward(m_inpGateX->output(), m_gradBuffer);
-    Algebra<T>::mAdd_m(m_inpGateX->backward(input, m_inpGate->inGrad()), m_inGrad);
-    Algebra<T>::mAdd_m(m_inpGateH->backward(m_prevState, m_inpGate->inGrad()), m_stateGrad);
-    Algebra<T>::mAdd_m(m_inpGateY->backward(m_prevOutput, m_inpGate->inGrad()), m_outGrad);
+    math::mAdd_m(m_inpGateX->backward(input, m_inpGate->inGrad()), m_inGrad);
+    math::mAdd_m(m_inpGateH->backward(m_prevState, m_inpGate->inGrad()), m_stateGrad);
+    math::mAdd_m(m_inpGateY->backward(m_prevOutput, m_inpGate->inGrad()), m_outGrad);
 
     // backprop to hidden state
     math::pointwiseProduct(m_curStateGrad, m_fgtGate->output(), m_gradBuffer);
-    Algebra<T>::mAdd_m(m_gradBuffer, m_stateGrad);
+    math::mAdd_m(m_gradBuffer, m_stateGrad);
 
     // clip if necessary
     if(m_clip != 0)
