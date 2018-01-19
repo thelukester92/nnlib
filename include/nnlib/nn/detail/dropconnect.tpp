@@ -106,6 +106,7 @@ void DropConnect<T>::training(bool training)
 template <typename T>
 void DropConnect<T>::forget()
 {
+    Module<T>::forget();
     m_module->forget();
 }
 

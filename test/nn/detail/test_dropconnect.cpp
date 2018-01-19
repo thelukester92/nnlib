@@ -8,6 +8,8 @@ using T = NN_REAL_T;
 
 NNTestClassImpl(DropConnect)
 {
+    NNRunAbstractTest(Module, DropConnect, new DropConnect<T>(new Linear<T>(3, 4), 0.25));
+
     NNTestMethod(DropConnect)
     {
         NNTestParams(Module *, T)

@@ -7,6 +7,8 @@ using T = NN_REAL_T;
 
 NNTestClassImpl(Dropout)
 {
+    NNRunAbstractTest(Module, Dropout, new Dropout<T>(0.25));
+
     NNTestMethod(Dropout)
     {
         NNTestParams(T)
