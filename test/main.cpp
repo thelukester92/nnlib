@@ -101,6 +101,7 @@ int main(int argc, const char **argv)
 
     // Optimizers
     NNRunTest(Adam);
+    NNRunTest(Nadam);
 
     return 0;
 }

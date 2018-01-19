@@ -17,8 +17,8 @@ Nadam<T>::Nadam(Module<T> &model, Critic<T> &critic) :
     m_normalize1(1),
     m_normalize2(1)
 {
-    m_mean.resize(m_grads.size()).fill(0.0);
-    m_variance.resize(m_grads.size()).fill(0.0);
+    m_mean.resize(m_grads.size()).fill(0);
+    m_variance.resize(m_grads.size()).fill(0);
 }
 
 template <typename T>
@@ -26,6 +26,8 @@ void Nadam<T>::reset()
 {
     m_normalize1 = 1;
     m_normalize2 = 1;
+    m_mean.resize(m_grads.size()).fill(0);
+    m_variance.resize(m_grads.size()).fill(0);
 }
 
 template <typename T>
