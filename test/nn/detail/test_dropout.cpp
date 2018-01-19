@@ -18,6 +18,21 @@ NNTestClassImpl(Dropout)
         }
     }
 
+    NNTestMethod(operator=)
+    {
+        NNTestParams(const Dropout &)
+        {
+            Dropout<T> orig(0.7);
+            Dropout<T> copy(0.3);
+            copy = orig;
+            NNTestAlmostEquals(copy.dropProbability(), 0.7, 1e-12);
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
+    }
+
     NNTestMethod(dropProbability)
     {
         NNTestParams(T)

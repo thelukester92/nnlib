@@ -8,6 +8,17 @@ NNTestClassImpl(ELU)
 {
     NNRunAbstractTest(Map, ELU, new ELU<T>());
 
+    NNTestMethod(operator=)
+    {
+        NNTestParams(const ELU &)
+        {
+            ELU<T> orig(0.7);
+            ELU<T> copy(0.3);
+            copy = orig;
+            NNTestAlmostEquals(orig.alpha(), copy.alpha(), 1e-12);
+        }
+    }
+
     NNTestMethod(forward)
     {
         ELU<T> module(0.5);

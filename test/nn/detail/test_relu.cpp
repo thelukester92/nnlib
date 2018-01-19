@@ -8,6 +8,17 @@ NNTestClassImpl(ReLU)
 {
     NNRunAbstractTest(Map, ReLU, new ReLU<T>());
 
+    NNTestMethod(operator=)
+    {
+        NNTestParams(const ReLU &)
+        {
+            ReLU<T> orig(0.7);
+            ReLU<T> copy(0.3);
+            copy = orig;
+            NNTestAlmostEquals(orig.leak(), copy.leak(), 1e-12);
+        }
+    }
+
     NNTestMethod(forward)
     {
         ReLU<T> module(0.75);

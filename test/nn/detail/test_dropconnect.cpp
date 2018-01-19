@@ -21,6 +21,21 @@ NNTestClassImpl(DropConnect)
         }
     }
 
+    NNTestMethod(operator=)
+    {
+        NNTestParams(const DropConnect &)
+        {
+            DropConnect<T> orig(new Linear<T>(3, 4), 0.7);
+            DropConnect<T> copy(new Linear<T>(10, 10), 0.3);
+            copy = orig;
+            NNTestAlmostEquals(copy.dropProbability(), 0.7, 1e-12);
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
+    }
+
     NNTestMethod(module)
     {
         NNTestParams(Module *)
