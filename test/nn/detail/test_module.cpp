@@ -283,7 +283,9 @@ NNTestAbstractClassImpl(Module, Module<T>)
             RandomEngine::sharedEngine().seed(0);
             Tensor<T> *out1 = &nnImpl.forward(math::rand(Tensor<T>(nnImpl.inputShape(), true)));
             Tensor<T> *out2 = &nnImpl.output();
+            const Tensor<T> *out3 = &const_cast<const Module<T> &>(nnImpl).output();
             NNTestEquals(out1, out2);
+            NNTestEquals(out1, out3);
         }
     }
 
@@ -297,7 +299,9 @@ NNTestAbstractClassImpl(Module, Module<T>)
             nnImpl.forward(input);
             Tensor<T> *ing1 = &nnImpl.backward(input, output);
             Tensor<T> *ing2 = &nnImpl.inGrad();
+            const Tensor<T> *ing3 = &const_cast<const Module<T> &>(nnImpl).inGrad();
             NNTestEquals(ing1, ing2);
+            NNTestEquals(ing1, ing3);
         }
     }
 }

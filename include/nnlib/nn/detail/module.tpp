@@ -15,8 +15,7 @@ Module<T>::Module() :
 
 template <typename T>
 Module<T>::Module(const std::initializer_list<size_t> &ioShape) :
-    m_inGrad(ioShape, true),
-    m_output(ioShape, true)
+    Module(Storage<size_t>(ioShape))
 {}
 
 template <typename T>
