@@ -15,19 +15,19 @@ Adam<T>::Adam(Module<T> &model, Critic<T> &critic) :
     m_beta1(0.9),
     m_beta2(0.999),
     m_normalize1(1),
-    m_normalize2(1),
-    m_steps(0)
+    m_normalize2(1)
 {
-    m_mean.resize(m_grads.size()).fill(0.0);
-    m_variance.resize(m_grads.size()).fill(0.0);
+    m_mean.resize(m_grads.size()).fill(0);
+    m_variance.resize(m_grads.size()).fill(0);
 }
 
 template <typename T>
 void Adam<T>::reset()
 {
-    m_steps = 0;
     m_normalize1 = 1;
     m_normalize2 = 1;
+    m_mean.resize(m_grads.size()).fill(0);
+    m_variance.resize(m_grads.size()).fill(0);
 }
 
 template <typename T>
@@ -74,7 +74,6 @@ Adam<T> &Adam<T>::step(const Tensor<T> &input, const Tensor<T> &target)
 {
     m_normalize1 *= m_beta1;
     m_normalize2 *= m_beta2;
-    ++m_steps;
 
     T lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
 

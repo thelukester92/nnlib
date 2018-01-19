@@ -37,7 +37,6 @@ private:
     T m_beta2;
     T m_normalize1;
     T m_normalize2;
-    size_t m_steps;
 };
 
 }
