@@ -27,6 +27,9 @@ LSTM<T>::LSTM(size_t inps, size_t outs) :
     m_outGateH(new Linear<T>(outs, outs)),
     m_outGate(new Logistic<T>()),
     m_outMod(new TanH<T>()),
+    m_state(1, outs),
+    m_prevState(1, outs),
+    m_prevOutput(1, outs),
     m_clip(0),
     m_outs(outs)
 {
@@ -52,6 +55,9 @@ LSTM<T>::LSTM(const LSTM<T> &module) :
     m_outGateH(module.m_outGateH->copy()),
     m_outGate(module.m_outGate->copy()),
     m_outMod(module.m_outMod->copy()),
+    m_state(module.m_state),
+    m_prevState(m_state.shape(), true),
+    m_prevOutput(m_state.shape(), true),
     m_clip(module.m_clip),
     m_outs(module.m_outs)
 {}
@@ -75,6 +81,9 @@ LSTM<T>::LSTM(const Serialized &node) :
     m_outGateH(node.get<Module<T> *>("outGateH")),
     m_outGate(node.get<Module<T> *>("outGate")),
     m_outMod(node.get<Module<T> *>("outMod")),
+    m_state(1, node.get<size_t>("outs")),
+    m_prevState(m_state.shape(), true),
+    m_prevOutput(m_state.shape(), true),
     m_clip(node.get<T>("clip")),
     m_outs(node.get<size_t>("outs"))
 {}
@@ -128,8 +137,21 @@ void swap(LSTM<T> &a, LSTM<T> &b)
     swap(a.m_outGateH, b.m_outGateH);
     swap(a.m_outGate, b.m_outGate);
     swap(a.m_outMod, b.m_outMod);
+    swap(a.m_state, b.m_state);
     swap(a.m_clip, b.m_clip);
     swap(a.m_outs, b.m_outs);
+}
+
+template <typename T>
+size_t LSTM<T>::inputs() const
+{
+    return m_inGrad.size(1);
+}
+
+template <typename T>
+size_t LSTM<T>::outputs() const
+{
+    return m_output.size(1);
 }
 
 template <typename T>

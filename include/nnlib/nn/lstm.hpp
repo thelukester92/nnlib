@@ -31,6 +31,9 @@ public:
 
     friend void swap <> (LSTM &a, LSTM &b);
 
+    size_t inputs() const;
+    size_t outputs() const;
+
     LSTM &gradClip(T clip);
     T gradClip() const;
 

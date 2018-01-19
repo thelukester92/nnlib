@@ -3,86 +3,151 @@
 #include "nnlib/math/math.hpp"
 #include "nnlib/nn/lstm.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestLSTM()
+NNTestClassImpl(LSTM)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ 8, 6, 0 }).resize(3, 1, 1);
+    NNRunAbstractTest(Module, LSTM, new LSTM<T>(3, 2));
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 1, 0, -1 }).resize(3, 1, 1);
-
-    // LSTM layer with specific weights and bias, arbitrary
-    LSTM<NN_REAL_T> module(1, 1);
-    module.params().copy({
-        // inpGate (x, y, h, b)
-        -0.2, 0.5, 0.1, 0.0,
-
-        // fgtGate (x, y, h, b)
-        0.75, -0.6, 0.25, 0.0,
-
-        // inpMod (x, y, b)
-        1.0, -0.7, 0.0,
-
-        // outGate (x, y, h', b)
-        0.3, 0.3, -0.75, 0.0
-    });
-
-    // Output, fixed given input and weights
-    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({ 0.15089258930, 0.32260369939, 0.03848645247 }).resize(3, 1, 1);
-
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({ -0.01712796895, 0.00743178473, -0.30729831287 }).resize(3, 1, 1);
-
-    // Parameter gradient, fixed given the input and output gradient
-    Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({
-         0.73850659626,  0.00585685005,  0.00801518653,  0.11462669318,
-        -0.00117516696, -0.01646944995, -0.02114722491, -0.05115589662,
-        -0.00000416626, -0.08323296026, -0.25800409062,
-         0.18717939172, -0.00419251188,  0.00611825134,  0.00767284875
-    });
-
-    // Test forward and backward using the parameters and targets above
-
-    Tensor<NN_REAL_T> states(inp.size(0), 0);
-
-    Tensor<NN_REAL_T> outputs(3, 1, 1);
-    Tensor<NN_REAL_T> inGrads(3, 1, 1);
-
-    for(size_t i = 0; i < inp.size(0); ++i)
+    NNTestMethod(LSTM)
     {
-        outputs.select(0, i).copy(module.forward(inp.select(0, i)));
-        if(i == 0)
-            states.resizeDim(1, module.state().size());
-        states.select(0, i).copy(module.state());
+        NNTestParams(size_t, size_t)
+        {
+            LSTM<T> module(3, 2);
+            NNTestEquals(module.inputs(), 3);
+            NNTestEquals(module.outputs(), 2);
+        }
     }
 
-    for(size_t i = inp.size(0); i > 0; --i)
+    NNTestMethod(operator=)
     {
-        module.state().copy(states.select(0, i - 1));
-        inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
+        NNTestParams(LSTM)
+        {
+            LSTM<T> orig(3, 2);
+            LSTM<T> copy(1, 1);
+            copy = orig;
+            NNTestEquals(copy.inputs(), 3);
+            NNTestEquals(copy.outputs(), 2);
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
     }
 
-    NNAssertLessThan(math::sum(math::square(outputs - out)), 1e-6, "LSTM::forward failed!");
-    NNAssertLessThan(math::sum(math::square(inGrads - ing)), 1e-6, "LSTM::backward failed; wrong inGrad!");
-    NNAssertLessThan(math::sum(math::square(module.grad() - prg)), 1e-6, "LSTM::backward failed; wrong grad!");
-
-    module.gradClip(0.03);
-    module.forget();
-
-    for(size_t i = 0; i < inp.size(0); ++i)
+    NNTestMethod(gradClip)
     {
-        outputs.select(0, i).copy(module.forward(inp.select(0, i)));
-        states.select(0, i).copy(module.state());
+        NNTestParams(T)
+        {
+            LSTM<T> module(1, 1);
+            module.params().copy({
+                -0.2, 0.5, 0.1, 0,
+                0.75, -0.6, 0.25, 0,
+                1.0, -0.7, 0,
+                0.3, 0.3, -0.75, 0
+            });
+            module.gradClip(0.2);
+            NNTestAlmostEquals(module.gradClip(), 0.2, 1e-12);
+
+            auto input = Tensor<T>({ 8, 6, 0 }).resize(3, 1, 1);
+            auto blame = Tensor<T>({ 1, 0, -1 }).resize(3, 1, 1);
+            auto inGrad = Tensor<T>({ -0.01712796895, 0.00743178473, -0.2 });
+
+            Tensor<T> actual(3);
+            Tensor<T> states(2, module.state().size());
+
+            module.forward(input.select(0, 0))(0, 0);
+            states.select(0, 0).copy(module.state());
+            module.forward(input.select(0, 1))(0, 0);
+            states.select(0, 1).copy(module.state());
+            module.forward(input.select(0, 2))(0, 0);
+
+            actual(2) = module.backward(input.select(0, 2), blame.select(0, 2))(0, 0);
+            module.state().copy(states.select(0, 1));
+            actual(1) = module.backward(input.select(0, 1), blame.select(0, 1))(0, 0);
+            module.state().copy(states.select(0, 0));
+            actual(0) = module.backward(input.select(0, 0), blame.select(0, 0))(0, 0);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-9);
+            }, actual, inGrad);
+        }
     }
 
-    for(size_t i = inp.size(0); i > 0; --i)
+    NNTestMethod(forward)
     {
-        module.state().copy(states.select(0, i - 1));
-        inGrads.select(0, i - 1).copy(module.backward(inp.select(0, i - 1), grd.select(0, i - 1)));
+        NNTestParams(const Tensor &)
+        {
+            LSTM<T> module(1, 1);
+            module.params().copy({
+                -0.2, 0.5, 0.1, 0,
+                0.75, -0.6, 0.25, 0,
+                1.0, -0.7, 0,
+                0.3, 0.3, -0.75, 0
+            });
+
+            auto input = Tensor<T>({ 8, 6, 0 }).resize(3, 1, 1);
+            auto target = Tensor<T>({ 0.15089258930, 0.32260369939, 0.03848645247 });
+
+            Tensor<T> outputs(3);
+            outputs(0) = module.forward(input.select(0, 0))(0, 0);
+            outputs(1) = module.forward(input.select(0, 1))(0, 0);
+            outputs(2) = module.forward(input.select(0, 2))(0, 0);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-9);
+            }, outputs, target);
+        }
     }
 
-    NNAssert(math::sum(math::square(inGrads - math::clip(ing, -0.03, 0.03))) < 1e-6, "LSTM::gradClip failed!");
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            LSTM<T> module(1, 1);
+            module.params().copy({
+                -0.2, 0.5, 0.1, 0,
+                0.75, -0.6, 0.25, 0,
+                1.0, -0.7, 0,
+                0.3, 0.3, -0.75, 0
+            });
 
-    TestModule("LSTM", module, inp.select(0, 0));
+            auto input = Tensor<T>({ 8, 6, 0 }).resize(3, 1, 1);
+            auto blame = Tensor<T>({ 1, 0, -1 }).resize(3, 1, 1);
+            auto inGrad = Tensor<T>({ -0.01712796895, 0.00743178473, -0.30729831287 });
+            auto pGrad = Tensor<T>({
+                0.73850659626, 0.00585685005, 0.00801518653, 0.11462669318,
+                -0.00117516696, -0.01646944995, -0.02114722491, -0.05115589662,
+                -0.00000416626, -0.08323296026, -0.25800409062,
+                0.18717939172, -0.00419251188, 0.00611825134, 0.00767284875
+            });
+
+            Tensor<T> actual(3);
+            Tensor<T> states(2, module.state().size());
+
+            module.forward(input.select(0, 0))(0, 0);
+            states.select(0, 0).copy(module.state());
+            module.forward(input.select(0, 1))(0, 0);
+            states.select(0, 1).copy(module.state());
+            module.forward(input.select(0, 2))(0, 0);
+
+            actual(2) = module.backward(input.select(0, 2), blame.select(0, 2))(0, 0);
+            module.state().copy(states.select(0, 1));
+            actual(1) = module.backward(input.select(0, 1), blame.select(0, 1))(0, 0);
+            module.state().copy(states.select(0, 0));
+            actual(0) = module.backward(input.select(0, 0), blame.select(0, 0))(0, 0);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-9);
+            }, actual, inGrad);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-9);
+            }, module.grad(), pGrad);
+        }
+    }
 }
