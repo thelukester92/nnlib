@@ -1,29 +1,29 @@
 #include "../test_map.hpp"
 #include "../test_sin.hpp"
-#include "nnlib/math/math.hpp"
 #include "nnlib/nn/sin.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestSin()
+NNTestClassImpl(Sin)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+    NNRunAbstractTest(Map, Sin, new Sin<T>());
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
+    NNTestMethod(forward)
+    {
+        Sin<T> module;
+        module.forward({ -1.3, 1.0, 3.14 });
+        NNTestAlmostEquals(module.output()(0), -0.96355818541, 1e-9);
+        NNTestAlmostEquals(module.output()(1), 0.8414709848, 1e-9);
+        NNTestAlmostEquals(module.output()(2), 0.00159265291, 1e-9);
+    }
 
-    // Output, fixed given input
-    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({ -0.96355818541, 0.8414709848, 0.00159265291 }).resize(1, 3);
-
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({ 0.53499765724, -1.6209069176, -0.99999873172 }).resize(1, 3);
-
-    Sin<NN_REAL_T> map;
-    map.forward(inp);
-    map.backward(inp, grd);
-
-    NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "Sin::forward failed!");
-    NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "Sin::backward failed!");
-
-    TestMap("Sin", map, inp);
+    NNTestMethod(backward)
+    {
+        Sin<T> module;
+        module.forward({ -1.3, 1.0, 3.14 });
+        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+        NNTestAlmostEquals(module.inGrad()(0), 0.53499765724, 1e-9);
+        NNTestAlmostEquals(module.inGrad()(1), -1.6209069176, 1e-9);
+        NNTestAlmostEquals(module.inGrad()(2), -0.99999873172, 1e-9);
+    }
 }

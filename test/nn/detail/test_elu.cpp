@@ -1,32 +1,29 @@
 #include "../test_map.hpp"
 #include "../test_elu.hpp"
-#include "nnlib/math/math.hpp"
 #include "nnlib/nn/elu.hpp"
-#include <math.h>
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestELU()
+NNTestClassImpl(ELU)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+    NNRunAbstractTest(Map, ELU, new ELU<T>());
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
+    NNTestMethod(forward)
+    {
+        ELU<T> module(0.5);
+        module.forward({ -1.3, 1.0, 3.14 });
+        NNTestAlmostEquals(module.output()(0), -0.36373410348, 1e-9);
+        NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
+        NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+    }
 
-    // Output, fixed given input
-    Tensor<NN_REAL_T> out = inp.copy();
-    out(0, 0) = 0.5 * (exp(out(0, 0)) - 1);
-
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = grd.copy();
-    ing(0, 0) *= out(0, 0) + 0.5;
-
-    ELU<NN_REAL_T> map(0.5);
-    map.forward(inp);
-    map.backward(inp, grd);
-
-    NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "ELU::forward failed!");
-    NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "ELU::backward failed!");
-
-    TestMap("ELU", map, inp);
+    NNTestMethod(backward)
+    {
+        ELU<T> module(0.5);
+        module.forward({ -1.3, 1.0, 3.14 });
+        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+        NNTestAlmostEquals(module.inGrad()(0), 0.27253179304, 1e-9);
+        NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
+        NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+    }
 }

@@ -1,23 +1,29 @@
 #include "../test_identity.hpp"
 #include "../test_module.hpp"
-#include "nnlib/math/math.hpp"
 #include "nnlib/nn/identity.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestIdentity()
+NNTestClassImpl(Identity)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+    NNRunAbstractTest(Module, Identity, new Identity<T>());
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
+    NNTestMethod(forward)
+    {
+        Identity<T> module;
+        module.forward({ -1.3, 1.0, 3.14 });
+        NNTestAlmostEquals(module.output()(0), -1.3, 1e-12);
+        NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
+        NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+    }
 
-    Identity<NN_REAL_T> map;
-    map.forward(inp);
-    map.backward(inp, grd);
-
-    NNAssert(math::sum(math::square(map.output() - inp)) < 1e-9, "Identity::forward failed!");
-    NNAssert(math::sum(math::square(map.inGrad() - grd)) < 1e-9, "Identity::backward failed!");
-
-    TestModule("Identity", map, inp);
+    NNTestMethod(backward)
+    {
+        Identity<T> module;
+        module.forward({ -1.3, 1.0, 3.14 });
+        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+        NNTestAlmostEquals(module.inGrad()(0), 2, 1e-12);
+        NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
+        NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+    }
 }

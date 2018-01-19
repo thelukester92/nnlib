@@ -1,31 +1,29 @@
 #include "../test_map.hpp"
 #include "../test_relu.hpp"
-#include "nnlib/math/math.hpp"
 #include "nnlib/nn/relu.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestReLU()
+NNTestClassImpl(ReLU)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+    NNRunAbstractTest(Map, ReLU, new ReLU<T>());
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
+    NNTestMethod(forward)
+    {
+        ReLU<T> module(0.75);
+        module.forward({ -1.3, 1.0, 3.14 });
+        NNTestAlmostEquals(module.output()(0), -0.975, 1e-12);
+        NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
+        NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+    }
 
-    // Output, fixed given input
-    Tensor<NN_REAL_T> out = inp.copy();
-    out(0, 0) *= 0.5;
-
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = grd.copy();
-    ing(0, 0) *= 0.5;
-
-    ReLU<NN_REAL_T> map(0.5);
-    map.forward(inp);
-    map.backward(inp, grd);
-
-    NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "ReLU::forward failed!");
-    NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "ReLU::backward failed!");
-
-    TestMap("ReLU", map, inp);
+    NNTestMethod(backward)
+    {
+        ReLU<T> module(0.75);
+        module.forward({ -1.3, 1.0, 3.14 });
+        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+        NNTestAlmostEquals(module.inGrad()(0), 1.5, 1e-12);
+        NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
+        NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+    }
 }

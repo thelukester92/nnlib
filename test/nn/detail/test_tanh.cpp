@@ -1,29 +1,29 @@
 #include "../test_map.hpp"
 #include "../test_tanh.hpp"
-#include "nnlib/math/math.hpp"
 #include "nnlib/nn/tanh.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestTanH()
+NNTestClassImpl(TanH)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -1.3, 1.0, 3.14 }).resize(1, 3);
+    NNRunAbstractTest(Map, TanH, new TanH<T>());
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 2, -3, 1 }).resize(1, 3);
+    NNTestMethod(forward)
+    {
+        TanH<T> module;
+        module.forward({ -1.3, 1.0, 3.14 });
+        NNTestAlmostEquals(module.output()(0), -0.86172315931, 1e-9);
+        NNTestAlmostEquals(module.output()(1), 0.76159415595, 1e-9);
+        NNTestAlmostEquals(module.output()(2), 0.99626020494, 1e-9);
+    }
 
-    // Output, fixed given input
-    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({ -0.86172315931, 0.76159415595, 0.99626020494 }).resize(1, 3);
-
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({ 0.5148663934, -1.25992302484, 0.00746560404 }).resize(1, 3);
-
-    TanH<NN_REAL_T> map;
-    map.forward(inp);
-    map.backward(inp, grd);
-
-    NNAssert(math::sum(math::square(map.output() - out)) < 1e-9, "TanH::forward failed!");
-    NNAssert(math::sum(math::square(map.inGrad() - ing)) < 1e-9, "TanH::backward failed!");
-
-    TestMap("TanH", map, inp);
+    NNTestMethod(backward)
+    {
+        TanH<T> module;
+        module.forward({ -1.3, 1.0, 3.14 });
+        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+        NNTestAlmostEquals(module.inGrad()(0), 0.5148663934, 1e-9);
+        NNTestAlmostEquals(module.inGrad()(1), -1.25992302484, 1e-9);
+        NNTestAlmostEquals(module.inGrad()(2), 0.00746560404, 1e-9);
+    }
 }

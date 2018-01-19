@@ -8,6 +8,11 @@ namespace nnlib
 {
 
 template <typename T>
+SoftMax<T>::SoftMax() :
+    Module<T>({ 1, 1 })
+{}
+
+template <typename T>
 Tensor<T> &SoftMax<T>::forward(const Tensor<T> &input)
 {
     NNAssertEquals(input.dims(), 2, "Expected matrix input!");

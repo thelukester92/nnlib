@@ -88,11 +88,13 @@ NNTestAbstractClassImpl(Module, Module<T>)
             }, nnImpl.params(), copy->params());
 
             RandomEngine::sharedEngine().seed(0);
+            nnImpl.forget();
             nnImpl.grad().fill(0);
             nnImpl.forward(input);
             nnImpl.backward(input, output);
 
             RandomEngine::sharedEngine().seed(0);
+            copy->forget();
             copy->grad().fill(0);
             copy->forward(input);
             copy->backward(input, output);

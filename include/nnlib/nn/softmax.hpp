@@ -15,6 +15,8 @@ class SoftMax : public Module<T>
 public:
     using Module<T>::Module;
 
+    SoftMax();
+
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
     virtual Tensor<T> &backward(const Tensor<T> &input, const Tensor<T> &outGrad) override;
 

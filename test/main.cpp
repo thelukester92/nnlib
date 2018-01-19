@@ -87,6 +87,19 @@ int main(int argc, const char **argv)
     NNRunTest(Concat);
     NNRunTest(DropConnect);
     NNRunTest(Dropout);
+    NNRunTest(ELU);
+    NNRunTest(Identity);
+    // NNRunTest(Linear);
+    NNRunTest(Logistic);
+    NNRunTest(LogSoftMax);
+    // NNRunTest(LSTM);
+    NNRunTest(ReLU);
+    // NNRunTest(Sequencer);
+    // NNRunTest(Sequential);
+    NNRunTest(Sin);
+    NNRunTest(SoftMax);
+    // NNRunTest(SparseLinear);
+    NNRunTest(TanH);
 
     return 0;
 }
