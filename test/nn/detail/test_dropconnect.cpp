@@ -94,14 +94,13 @@ NNTestClassImpl(DropConnect)
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
 
             sum = 0;
-            input.resizeDim(0, 1);
+            input.resize(inps).ones();
             for(size_t i = 0; i < trials; ++i)
                 sum += math::sum(module.forward(input)) / module.output().size() / inps;
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
 
             module.training(false);
             sum = 0;
-            input.resizeDim(0, 1);
             for(size_t i = 0; i < trials; ++i)
                 sum += math::sum(module.forward(input)) / module.output().size() / inps;
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
@@ -134,8 +133,8 @@ NNTestClassImpl(DropConnect)
             NNTestAlmostEquals(sum1, sum2, 1e-12);
 
             sum1 = 0, sum2 = 0;
-            input.resizeDim(0, 1);
-            blame.resizeDim(0, 1);
+            input.resize(inps).ones();
+            blame.resize(1).ones();
             for(size_t i = 0; i < trials; ++i)
             {
                 sum1 += math::sum(module.forward(input)) / module.output().size() / inps;
@@ -146,8 +145,6 @@ NNTestClassImpl(DropConnect)
 
             module.training(false);
             sum1 = 0, sum2 = 0;
-            input.resizeDim(0, 1);
-            blame.resizeDim(0, 1);
             for(size_t i = 0; i < trials; ++i)
             {
                 sum1 += math::sum(module.forward(input)) / module.output().size() / inps;
