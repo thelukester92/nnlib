@@ -4,30 +4,40 @@
 #include "nnlib/math/math.hpp"
 #include "nnlib/math/detail/math.tpp"
 
-template NN_REAL_T nnlib::math::min<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-template NN_REAL_T nnlib::math::max<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-template NN_REAL_T nnlib::math::sum<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-template NN_REAL_T nnlib::math::mean<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-template NN_REAL_T nnlib::math::variance<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &, bool);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::rand<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::rand<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::bernoulli<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::bernoulli<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::sum(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &, size_t);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::sum(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&, size_t);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&);
-template nnlib::Tensor<NN_REAL_T> &nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &);
-template nnlib::Tensor<NN_REAL_T> &&nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&);
+namespace nnlib
+{
+
+namespace math
+{
+
+template NN_REAL_T min<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+template NN_REAL_T max<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+template NN_REAL_T sum<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+template NN_REAL_T mean<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+template NN_REAL_T variance<NN_REAL_T>(const Tensor<NN_REAL_T> &, bool);
+template Tensor<NN_REAL_T> &normalize<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &&normalize<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &clip<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &&clip<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &square<NN_REAL_T>(Tensor<NN_REAL_T> &);
+template Tensor<NN_REAL_T> &&square<NN_REAL_T>(Tensor<NN_REAL_T> &&);
+template Tensor<NN_REAL_T> &rand<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &&rand<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &randn<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &&randn<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &randn<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &&randn<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T, NN_REAL_T);
+template Tensor<NN_REAL_T> &bernoulli<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
+template Tensor<NN_REAL_T> &&bernoulli<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
+template Tensor<NN_REAL_T> &sum(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, size_t);
+template Tensor<NN_REAL_T> &&sum(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, size_t);
+template Tensor<NN_REAL_T> &pointwiseProduct(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &);
+template Tensor<NN_REAL_T> &&pointwiseProduct(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&);
+template Tensor<NN_REAL_T> &pointwiseProduct(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &);
+template Tensor<NN_REAL_T> &&pointwiseProduct(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&);
+
+} // namespace math
+
+} // namespace nnlib
 
 #endif

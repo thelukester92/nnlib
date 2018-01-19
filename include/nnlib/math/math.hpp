@@ -4,6 +4,8 @@
 #include "../core/tensor.hpp"
 #include "../util/traits.hpp"
 
+/// Dimension-agnostic mathematical tensor operations.
+
 namespace nnlib
 {
 
@@ -114,37 +116,39 @@ Tensor<T> &pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &z
 template <typename T>
 Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &&z);
 
-}
-
-}
-
 #if defined NN_REAL_T && !defined NN_IMPL
-    extern template NN_REAL_T nnlib::math::min<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-    extern template NN_REAL_T nnlib::math::max<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-    extern template NN_REAL_T nnlib::math::sum<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-    extern template NN_REAL_T nnlib::math::mean<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &);
-    extern template NN_REAL_T nnlib::math::variance<NN_REAL_T>(const nnlib::Tensor<NN_REAL_T> &, bool);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::normalize<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::clip<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::square<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::rand<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::rand<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::randn<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::bernoulli<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::bernoulli<NN_REAL_T>(nnlib::Tensor<NN_REAL_T> &&, NN_REAL_T);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::sum(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &, size_t);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::sum(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&, size_t);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&);
-    extern template nnlib::Tensor<NN_REAL_T> &nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &);
-    extern template nnlib::Tensor<NN_REAL_T> &&nnlib::math::pointwiseProduct(const nnlib::Tensor<NN_REAL_T> &, const nnlib::Tensor<NN_REAL_T> &, nnlib::Tensor<NN_REAL_T> &&);
-#elif !defined NN_IMPL
+    extern template NN_REAL_T min<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+    extern template NN_REAL_T max<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+    extern template NN_REAL_T sum<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+    extern template NN_REAL_T mean<NN_REAL_T>(const Tensor<NN_REAL_T> &);
+    extern template NN_REAL_T variance<NN_REAL_T>(const Tensor<NN_REAL_T> &, bool);
+    extern template Tensor<NN_REAL_T> &normalize<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &&normalize<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &clip<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &&clip<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &square<NN_REAL_T>(Tensor<NN_REAL_T> &);
+    extern template Tensor<NN_REAL_T> &&square<NN_REAL_T>(Tensor<NN_REAL_T> &&);
+    extern template Tensor<NN_REAL_T> &rand<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &&rand<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &randn<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &&randn<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &randn<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &&randn<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &bernoulli<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &&bernoulli<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
+    extern template Tensor<NN_REAL_T> &sum(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, size_t);
+    extern template Tensor<NN_REAL_T> &&sum(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, size_t);
+    extern template Tensor<NN_REAL_T> &pointwiseProduct(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &);
+    extern template Tensor<NN_REAL_T> &&pointwiseProduct(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&);
+    extern template Tensor<NN_REAL_T> &pointwiseProduct(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &);
+    extern template Tensor<NN_REAL_T> &&pointwiseProduct(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&);
+#endif
+
+} // namespace math
+
+} // namespace nnlib
+
+#if !defined NN_REAL_T && !defined NN_IMPL
     #include "detail/math.tpp"
 #endif
 

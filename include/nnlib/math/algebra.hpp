@@ -4,6 +4,12 @@
 #include "../core/type.hpp"
 #include "../util/traits.hpp"
 
+/// \brief Linear algebra and related tensor operations.
+///
+/// The operations defined here are dimension-specific
+/// methods that are optionally accelerated by BLAS/NVBLAS
+/// using NN_ACCEL_CPU/NN_ACCEL_GPU, respectively.
+
 namespace nnlib
 {
 
@@ -125,40 +131,42 @@ void mAdd_mmt(const Tensor<T> &A, const Tensor<T> &B, Tensor<T> &C, typename tra
 template <typename T>
 void mAdd_mmt(const Tensor<T> &A, const Tensor<T> &B, Tensor<T> &&C, typename traits::Identity<T>::type alpha = 1, typename traits::Identity<T>::type beta = 1);
 
+#if defined NN_REAL_T && !defined NN_IMPL
+    extern template void vFill<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template void vFill<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
+    extern template void vScale<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template void vScale<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
+    extern template void mFill<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template void mFill<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
+    extern template void mScale<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template void mScale<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
+    extern template void vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T);
+    extern template void vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T);
+    extern template void vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_vv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_vv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void vAdd_mv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void vAdd_mv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void vAdd_mtv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void vAdd_mtv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_m<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_m<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mt<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mt<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mtm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mtm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mmt<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
+    extern template void mAdd_mmt<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
+#endif
+
 } // namespace math
 
 } // namespace nnlib
 
-#if defined NN_REAL_T && !defined NN_IMPL
-    extern template void nnlib::math::vFill<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
-    extern template void nnlib::math::vFill<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
-    extern template void nnlib::math::vScale<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
-    extern template void nnlib::math::vScale<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
-    extern template void nnlib::math::mFill<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
-    extern template void nnlib::math::mFill<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
-    extern template void nnlib::math::mScale<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T);
-    extern template void nnlib::math::mScale<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T);
-    extern template void nnlib::math::vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T);
-    extern template void nnlib::math::vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T);
-    extern template void nnlib::math::vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::vAdd_v<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_vv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_vv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::vAdd_mv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::vAdd_mv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::vAdd_mtv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::vAdd_mtv<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_m<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_m<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mt<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mt<NN_REAL_T>(const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mtm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mtm<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mmt<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
-    extern template void nnlib::math::mAdd_mmt<NN_REAL_T>(const Tensor<NN_REAL_T> &, const Tensor<NN_REAL_T> &, Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
-#elif !defined NN_IMPL
+#if !defined NN_REAL_T && !defined NN_IMPL
     #include "detail/algebra.tpp"
     #include "detail/algebra_blas.tpp"
     #include "detail/algebra_nvblas.tpp"
