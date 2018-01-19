@@ -1,56 +1,20 @@
-#ifdef NN_ACCEL_GPU
+#ifdef NN_REAL_T
 #ifndef MATH_ALGEBRA_NVBLAS_TPP
 #define MATH_ALGEBRA_NVBLAS_TPP
 
-#include "../algebra.hpp"
-#include <nvblas.h>
+// in order to keep NN_REAL_T as the only required define,
+// the following hack avoids needing "#if NN_REAL_T == double"
+// by requiring a different file based on that define.
+// if NN_ACCEL_CPU is enabled but NN_REAL_T is not double or float,
+// this will cause a file not found error on the include directive.
 
-namespace nnlib
-{
-
-template <>
-void Algebra<float>::mAdd_mm(const Tensor<float> &_A, const Tensor<float> &_B, Tensor<float> &_C, float alpha, float beta)
-{
-    int m = (int) M, n = (int) N, k = (int) K, a = (int) lda, b = (int) ldb, c = (int) ldc;
-    sgemm("N", "N", &n, &m, &k, &alpha, B, &b, A, &a, &beta, C, &c);
-}
-
-template <>
-void Algebra<double>::mAdd_mm(const Tensor<double> &_A, const Tensor<double> &_B, Tensor<double> &_C, double alpha, double beta)
-{
-    int m = (int) M, n = (int) N, k = (int) K, a = (int) lda, b = (int) ldb, c = (int) ldc;
-    dgemm("N", "N", &n, &m, &k, &alpha, B, &b, A, &a, &beta, C, &c);
-}
-
-template <>
-void Algebra<float>::mAdd_mtm(const Tensor<float> &_A, const Tensor<float> &_B, Tensor<float> &_C, float alpha, float beta)
-{
-    int m = (int) M, n = (int) N, k = (int) K, a = (int) lda, b = (int) ldb, c = (int) ldc;
-    sgemm("N", "T", &n, &m, &k, &alpha, B, &b, A, &a, &beta, C, &c);
-}
-
-template <>
-void Algebra<double>::mAdd_mtm(const Tensor<double> &_A, const Tensor<double> &_B, Tensor<double> &_C, double alpha, double beta)
-{
-    int m = (int) M, n = (int) N, k = (int) K, a = (int) lda, b = (int) ldb, c = (int) ldc;
-    dgemm("N", "T", &n, &m, &k, &alpha, B, &b, A, &a, &beta, C, &c);
-}
-
-template <>
-void Algebra<float>::mAdd_mmt(const Tensor<float> &_A, const Tensor<float> &_B, Tensor<float> &_C, float alpha, float beta)
-{
-    int m = (int) M, n = (int) N, k = (int) K, a = (int) lda, b = (int) ldb, c = (int) ldc;
-    sgemm("T", "N", &n, &m, &k, &alpha, B, &b, A, &a, &beta, C, &c);
-}
-
-template <>
-void Algebra<double>::mAdd_mmt(const Tensor<double> &_A, const Tensor<double> &_B, Tensor<double> &_C, double alpha, double beta)
-{
-    int m = (int) M, n = (int) N, k = (int) K, a = (int) lda, b = (int) ldb, c = (int) ldc;
-    dgemm("T", "N", &n, &m, &k, &alpha, B, &b, A, &a, &beta, C, &c);
-}
-
-}
+#define  NN_TEMP_0(x)     #x
+#define  NN_TEMP_1(x,y,z) NN_TEMP_0(x##y##z)
+#define  NN_TEMP_2(x,y,z) NN_TEMP_1(x,y,z)
+#include NN_TEMP_2(algebra_nvblas_, NN_REAL_T, _impl.tpp)
+#undef NN_TEMP_0
+#undef NN_TEMP_1
+#undef NN_TEMP_2
 
 #endif
 #endif
