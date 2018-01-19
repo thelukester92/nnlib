@@ -14,6 +14,8 @@ using Optimizer<T>::m_critic;
 public:
     RMSProp(Module<T> &model, Critic<T> &critic);
 
+    void reset();
+
     RMSProp &learningRate(T learningRate);
     T learningRate() const;
 

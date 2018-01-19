@@ -18,6 +18,12 @@ RMSProp<T>::RMSProp(Module<T> &model, Critic<T> &critic) :
 }
 
 template <typename T>
+void RMSProp<T>::reset()
+{
+    m_variance.fill(0);
+}
+
+template <typename T>
 RMSProp<T> &RMSProp<T>::learningRate(T learningRate)
 {
     m_learningRate = learningRate;

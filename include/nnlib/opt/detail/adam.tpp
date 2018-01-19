@@ -26,8 +26,8 @@ void Adam<T>::reset()
 {
     m_normalize1 = 1;
     m_normalize2 = 1;
-    m_mean.resize(m_grads.size()).fill(0);
-    m_variance.resize(m_grads.size()).fill(0);
+    m_mean.fill(0);
+    m_variance.fill(0);
 }
 
 template <typename T>

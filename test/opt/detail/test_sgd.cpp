@@ -1,3 +1,4 @@
+#include "../test_optimizer.hpp"
 #include "../test_sgd.hpp"
 #include "nnlib/critics/mse.hpp"
 #include "nnlib/math/math.hpp"
@@ -5,31 +6,84 @@
 #include "nnlib/nn/linear.hpp"
 #include "nnlib/opt/sgd.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestSGD()
+NNTestClassImpl(SGD)
 {
-    RandomEngine::sharedEngine().seed(0);
+    Linear<T> model(2, 3);
+    MSE<T> critic;
+    NNRunAbstractTest(Optimizer, SGD, new SGD<T>(model, critic));
 
-    Tensor<NN_REAL_T> feat = math::rand(Tensor<NN_REAL_T>(10, 2));
-    Tensor<NN_REAL_T> lab = math::rand(Tensor<NN_REAL_T>(10, 3));
+    NNTestMethod(reset)
+    {
+        NNTestParams()
+        {
+            RandomEngine::sharedEngine().seed(0);
 
-    Linear<NN_REAL_T> nn(2, 3);
-    MSE<NN_REAL_T> critic;
+            Linear<T> model(2, 3);
+            MSE<T> critic;
+            SGD<T> opt(model, critic);
 
-    double errBefore = critic.forward(nn.forward(feat), lab);
+            auto inputs = math::rand(Tensor<T>(2));
+            auto target = math::rand(Tensor<T>(3));
 
-    SGD<NN_REAL_T> opt(nn, critic);
-    opt.step(feat.narrow(0, 0), lab.narrow(0, 0));
-    opt.step(feat, lab);
+            auto before = model.params().copy();
+            for(size_t i = 0; i < 100; ++i)
+                opt.step(inputs, target);
+            auto after = model.params().copy();
 
-    double errAfter = critic.forward(nn.forward(feat), lab);
+            model.params().copy(before);
+            opt.reset();
+            for(size_t i = 0; i < 100; ++i)
+                opt.step(inputs, target);
 
-    NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
+            forEach([&](T first, T second)
+            {
+                NNTestAlmostEquals(first, second, 1e-12);
+            }, after, model.params());
+        }
+    }
 
-    errBefore = errAfter;
-    opt.momentum(0.25);
-    opt.step(feat, lab);
-    errAfter = critic.forward(nn.forward(feat), lab);
+    NNTestMethod(learningRate)
+    {
+        NNTestParams(T)
+        {
+            RandomEngine::sharedEngine().seed(0);
 
-    NNAssertLessThan(errAfter - errBefore, 0, "Optimization failed!");
+            Linear<T> model(2, 3);
+            MSE<T> critic;
+            SGD<T> opt(model, critic);
+
+            auto inputs = math::rand(Tensor<T>(2));
+            auto target = math::rand(Tensor<T>(3));
+
+            opt.learningRate(0.1);
+            NNTestAlmostEquals(opt.learningRate(), 0.1, 1e-12);
+
+            auto before = model.params().copy();
+            opt.step(inputs, target);
+            T dist1 = sqrt(math::sum(math::square(before - model.params())));
+
+            model.params().copy(before);
+            opt.reset();
+            opt.learningRate(1);
+            opt.step(inputs, target);
+            T dist2 = sqrt(math::sum(math::square(before - model.params())));
+
+            NNTestAlmostEquals(dist1, 0.1 * dist2, 1e-12);
+        }
+    }
+
+    NNTestMethod(momentum)
+    {
+        NNTestParams(T)
+        {
+            Linear<T> model(1, 1);
+            model.params().fill(1);
+            MSE<T> critic;
+            SGD<T> opt(model, critic);
+            opt.momentum(0.5);
+            NNTestAlmostEquals(opt.momentum(), 0.5, 1e-12);
+        }
+    }
 }

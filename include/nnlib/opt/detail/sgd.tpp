@@ -16,7 +16,13 @@ SGD<T>::SGD(Module<T> &model, Critic<T> &critic) :
     m_learningRate(0.001),
     m_momentum(0)
 {
-    m_velocity.fill(0.0);
+    m_velocity.fill(0);
+}
+
+template <typename T>
+void SGD<T>::reset()
+{
+    m_velocity.fill(0);
 }
 
 template <typename T>
