@@ -16,11 +16,12 @@ NNTestClassImpl(Adam)
 
     NNTestMethod(reset)
     {
+        RandomEngine::sharedEngine().seed(0);
+
         Linear<T> model(2, 3);
         MSE<T> critic;
         Adam<T> opt(model, critic);
 
-        RandomEngine::sharedEngine().seed(0);
         auto inputs = math::rand(Tensor<T>(2));
         auto target = math::rand(Tensor<T>(3));
 
@@ -42,7 +43,29 @@ NNTestClassImpl(Adam)
 
     NNTestMethod(learningRate)
     {
+        RandomEngine::sharedEngine().seed(0);
 
+        Linear<T> model(2, 3);
+        MSE<T> critic;
+        Adam<T> opt(model, critic);
+
+        auto inputs = math::rand(Tensor<T>(2));
+        auto target = math::rand(Tensor<T>(3));
+
+        opt.learningRate(0.1);
+        NNTestAlmostEquals(opt.learningRate(), 0.1, 1e-12);
+
+        auto before = model.params().copy();
+        opt.step(inputs, target);
+        T err1 = critic.forward(model.forward(inputs), target);
+
+        model.params().copy(before);
+        opt.reset();
+        opt.learningRate(1);
+        opt.step(inputs, target);
+        T err2 = critic.forward(model.forward(inputs), target);
+
+        NNTestLessThan(err2, err1);
     }
 
     NNTestMethod(beta1)
