@@ -127,13 +127,32 @@ Tensor<T> &DropConnect<T>::forward(const Tensor<T> &input)
 {
     if(m_training)
     {
-        m_output.resize(input.shape());
-        m_mask.resize(m_module->params().shape());
-        m_backup.resize(m_module->params().shape());
+        NNAssert(input.dims() == 1 || input.dims() == 2, "Expected a vector or a matrix!");
+        m_backup.resize(m_module->params().size());
         m_backup.copy(m_module->params());
 
-        math::pointwiseProduct(math::bernoulli(m_mask, 1 - m_dropProbability), m_module->params());
-        m_output = m_module->forward(input);
+        if(input.dims() == 1)
+        {
+            m_mask.resize(m_module->params().size());
+            math::pointwiseProduct(math::bernoulli(m_mask, 1 - m_dropProbability), m_module->params());
+            m_output = m_module->forward(input);
+            m_module->params().copy(m_backup);
+        }
+        else
+        {
+            m_output.resize(input.size(0), 1);
+            m_mask.resize(input.size(0), m_module->params().size());
+            math::bernoulli(m_mask, 1 - m_dropProbability);
+            for(size_t i = 0; i < input.size(0); ++i)
+            {
+                math::pointwiseProduct(m_backup, m_mask.select(0, i), m_module->params());
+                m_module->forward(input.select(0, i));
+                NNAssertEquals(m_module->output().dims(), 1, "Expected a vector!");
+                m_output.resizeDim(1, m_module->output().size());
+                m_output.select(0, i).copy(m_module->output());
+            }
+            m_module->params().copy(m_backup);
+        }
     }
     else
         m_output = m_module->forward(input).scale(1 - m_dropProbability);
@@ -146,8 +165,29 @@ Tensor<T> &DropConnect<T>::backward(const Tensor<T> &input, const Tensor<T> &out
 {
     if(m_training)
     {
-        m_inGrad = m_module->backward(input, outGrad);
-        m_module->params().copy(m_backup);
+        NNAssert(input.dims() == 1 || input.dims() == 2, "Expected a vector or a matrix!");
+        m_backup.resize(m_module->params().size());
+        m_backup.copy(m_module->params());
+
+        if(input.dims() == 1)
+        {
+            math::pointwiseProduct(m_mask, m_module->params());
+            m_inGrad = m_module->backward(input, outGrad);
+            m_module->params().copy(m_backup);
+        }
+        else
+        {
+            m_inGrad.resize(input.size(0), 1);
+            for(size_t i = 0; i < input.size(0); ++i)
+            {
+                math::pointwiseProduct(m_backup, m_mask.select(0, i), m_module->params());
+                m_module->backward(input.select(0, i), outGrad.select(0, i));
+                NNAssertEquals(m_module->inGrad().dims(), 1, "Expected a vector!");
+                m_inGrad.resizeDim(1, m_module->inGrad().size());
+                m_inGrad.select(0, i).copy(m_module->inGrad());
+            }
+            m_module->params().copy(m_backup);
+        }
     }
     else
         m_inGrad = m_module->backward(input, outGrad).scale(1 - m_dropProbability);

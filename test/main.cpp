@@ -85,6 +85,7 @@ int main(int argc, const char **argv)
     // Neural Network Modules
     NNRunTest(BatchNorm);
     NNRunTest(Concat);
+    NNRunTest(DropConnect);
 
     return 0;
 }
