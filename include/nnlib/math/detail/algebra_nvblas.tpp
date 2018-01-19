@@ -1,4 +1,4 @@
-#ifdef NN_REAL_T
+#if defined NN_ACCEL_GPU && defined NN_REAL_T
 #ifndef MATH_ALGEBRA_NVBLAS_TPP
 #define MATH_ALGEBRA_NVBLAS_TPP
 
