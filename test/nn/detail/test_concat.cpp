@@ -1,7 +1,6 @@
 #include "../test_concat.hpp"
 #include "../test_container.hpp"
 #include "nnlib/math/math.hpp"
-#include "nnlib/math/random.hpp"
 #include "nnlib/nn/concat.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;

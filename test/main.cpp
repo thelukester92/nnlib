@@ -95,7 +95,7 @@ int main(int argc, const char **argv)
     NNRunTest(LSTM);
     NNRunTest(ReLU);
     NNRunTest(Sequencer);
-    // NNRunTest(Sequential);
+    NNRunTest(Sequential);
     NNRunTest(Sin);
     NNRunTest(SoftMax);
     // NNRunTest(SparseLinear);

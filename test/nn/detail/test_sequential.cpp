@@ -5,89 +5,133 @@
 #include "nnlib/nn/batchnorm.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestSequential()
+NNTestClassImpl(Sequential)
 {
-    // Input, arbitrary
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({
-        -5, 10,
-        15, -20
-    }).resize(2, 2);
+    NNRunAbstractTest(Container, Sequential, new Sequential<T>(new Linear<T>(3, 4), new Linear<T>(4, 2)));
 
-    // Output gradient, arbitrary
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({
-        1, 2,
-        -4, -3,
-    }).resize(2, 2);
-
-    // Linear layer with weights and bias, arbitrary
-    Linear<NN_REAL_T> *linear = new Linear<NN_REAL_T>(2, 3);
-    linear->weights().copy({
-        -0.50667886785403, 0.32759806987449, 0.65755833165511,
-        0.10750948608753, -0.4340286671044, 0.23516327870398
-    });
-    linear->bias().copy({ -0.025146033726567, 0.6293391970186, -0.60999610504332 });
-
-    // Second linear layer with weights and bias, arbitrary
-    Linear<NN_REAL_T> *linear2 = new Linear<NN_REAL_T>(3, 2);
-    linear2->weights().copy({
-        -0.26131507397613, -0.12238678004357,
-        -0.25173198611324, -0.52631174306551,
-        -0.15799479364335, 0.076954514512593
-    });
-    linear2->bias().copy({ 0.089687510972433, -0.1780101224473 });
-
-    // Output, fixed given input
-    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({
-        0.74408910465583, 2.0796612294443,
-        -1.6553227544948, -6.1176610608337
-    }).resize(2, 2);
-
-    // Input gradient, fixed given input and output gradient
-    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({
-        -0.17356654756232, 0.510757516282,
-        0.39523702099164, -0.87616246292012
-    }).resize(2, 2);
-
-    // Parameter gradient, fixed given the input and output gradient
-    Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({
-        23.716752710845, 45.309724965964, 6.037163288625,
-        -33.309299061337, -64.760818195432, -8.0631702668939,
-        0.90633200197196, 1.2815077014052, 0.39702986641745,
-        42.68541825957, 36.493242652701,
-        -62.244472172293, -53.369526408467,
-        -19.746608159094, -16.742649839669,
-        -3, -1
-    });
-
-    // Test forward and backward using the parameters and targets above
-
-    Sequential<NN_REAL_T> module(linear, linear2);
-    module.forward(inp);
-    module.backward(inp, grd);
-
-    NNAssert(math::sum(math::square(module.output() - out)) < 1e-9, "Sequential::forward failed!");
-    NNAssert(math::sum(math::square(module.inGrad() - ing)) < 1e-9, "Sequential::backward failed; wrong inGrad!");
-    NNAssert(math::sum(math::square(module.grad() - prg)) < 1e-9, "Sequential::backward failed; wrong grad!");
-
-    NNAssertEquals(module.component(0), linear, "Sequential::component failed to get the correct component!");
-    NNAssertEquals(module.components(), 2, "Sequential::components failed!");
-    NNAssertEquals(module.remove(0), linear, "Sequential::remove failed to return the removed component!");
-
-    module.clear();
-    NNAssertEquals(module.components(), 0, "Sequential::clear failed!");
-
-    module.add(linear);
-    NNAssertEquals(module.paramsList(), linear->paramsList(), "Sequential::paramsList failed!");
-    NNAssertEquals(module.gradList(), linear->gradList(), "Sequential::gradList failed!");
-
+    NNTestMethod(Sequential)
     {
-        BatchNorm<NN_REAL_T> *b = new BatchNorm<NN_REAL_T>(10);
-        Sequential<NN_REAL_T> s(b);
-        s.training(false);
-        NNAssert(!b->isTraining(), "Sequential::training failed!");
+        NNTestParams(Module *, Module *)
+        {
+            Linear<T> *comp1 = new Linear<T>(3, 4);
+            Linear<T> *comp2 = new Linear<T>(4, 2);
+            Sequential<T> module(comp1, comp2);
+            NNTestEquals(module.inputShape()[1], 3);
+            NNTestEquals(module.outputShape()[1], 2);
+            NNTestEquals(module.component(0), comp1);
+            NNTestEquals(module.component(1), comp2);
+        }
     }
 
-    Sequential<NN_REAL_T> module2(new Linear<NN_REAL_T>(5, 10), new Linear<NN_REAL_T>(10, 2));
-    TestContainer("Sequential", module2, math::rand(Tensor<NN_REAL_T>(100, 5)));
+    NNTestMethod(operator=)
+    {
+        NNTestParams(const Concat &)
+        {
+            Sequential<T> orig(new Linear<T>(3, 4), new Linear<T>(4, 2));
+            Sequential<T> copy(new Linear<T>(1, 2), new Linear<T>(2, 1));
+            copy = orig;
+            NNTestEquals(orig.components(), copy.components());
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
+    }
+
+    NNTestMethod(add)
+    {
+        NNTestParams(Module *)
+        {
+            Sequential<T> module(new Linear<T>(3, 4), new Linear<T>(4, 2));
+            module.add(new Linear<T>(2, 12));
+            NNTestEquals(module.components(), 3);
+            NNTestEquals(module.outputShape()[1], 12);
+        }
+    }
+
+    NNTestMethod(remove)
+    {
+        NNTestParams(size_t)
+        {
+            auto comp1 = new Linear<T>(3, 4);
+            auto comp2 = new Linear<T>(4, 2);
+            auto comp3 = new Linear<T>(2, 4);
+            auto comp4 = new Linear<T>(4, 5);
+            auto comp5 = new Linear<T>(5, 10);
+            Sequential<T> module(comp1, comp2, comp3, comp4, comp5);
+            NNTestEquals(module.remove(1), comp2);
+            NNTestEquals(module.remove(1), comp3);
+            NNTestEquals(module.components(), 3);
+            NNTestEquals(module.inputShape()[1], 3);
+            NNTestEquals(module.outputShape()[1], 10);
+            NNTestEquals(module.remove(2), comp5);
+            NNTestEquals(module.components(), 2);
+            NNTestEquals(module.inputShape()[1], 3);
+            NNTestEquals(module.outputShape()[1], 5);
+            NNTestEquals(module.remove(0), comp1);
+            NNTestEquals(module.components(), 1);
+            NNTestEquals(module.inputShape()[1], 4);
+            NNTestEquals(module.outputShape()[1], 5);
+            NNTestEquals(module.remove(0), comp4);
+            NNTestEquals(module.components(), 0);
+            delete comp1;
+            delete comp2;
+            delete comp3;
+            delete comp4;
+            delete comp5;
+        }
+    }
+
+    NNTestMethod(forward)
+    {
+        NNTestParams(const Tensor &)
+        {
+            auto comp1 = new Linear<T>(2, 2, false);
+            auto comp2 = new Linear<T>(2, 3, false);
+            comp1->params().copy({ 0, 1, 2, 3 });
+            comp2->params().copy({ 4, 5, 6, 7, 8, 9 });
+
+            Tensor<T> input({ 0.5, 2 });
+            Tensor<T> target({ 61.5, 72, 82.5 });
+            Sequential<T> module(comp1, comp2);
+            module.forward(input);
+
+            forEach([&](T output, T target)
+            {
+                NNTestAlmostEquals(output, target, 1e-12);
+            }, module.output(), target);
+        }
+    }
+
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &)
+        {
+            auto comp1 = new Linear<T>(2, 2, false);
+            auto comp2 = new Linear<T>(2, 3, false);
+
+            Sequential<T> module(comp1, comp2);
+            module.params().copy({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+            Tensor<T> input({ 0.5, 2 });
+            Tensor<T> grad({ 0.5, 0, -1 });
+            Tensor<T> inGrad({ -5.5, -24.5 });
+            Tensor<T> pGrad({ -2, -2.75, -8, -11, 2, 0, -4, 3.25, 0, -6.5 });
+
+            module.forward(input);
+            module.backward(input, grad);
+
+            forEach([&](T inGrad, T target)
+            {
+                NNTestAlmostEquals(inGrad, target, 1e-12);
+            }, module.inGrad(), inGrad);
+
+            forEach([&](T pGrad, T target)
+            {
+                NNTestAlmostEquals(pGrad, target, 1e-12);
+            }, module.grad(), pGrad);
+        }
+    }
 }
