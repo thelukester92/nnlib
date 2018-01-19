@@ -1,11 +1,25 @@
 #include "../test_module.hpp"
 #include "../test_container.hpp"
+#include "nnlib/nn/batchnorm.hpp"
 using namespace nnlib;
 using T = NN_REAL_T;
 
 NNTestAbstractClassImpl(Container, Container<T>)
 {
     NNRunAbstractTest(Module, Container, nnImpl.copy());
+
+    NNTestMethod(training)
+    {
+        auto component = new BatchNorm<T>(10);
+        auto copy = (Container<T> *) nnImpl.copy();
+        copy->clear();
+        copy->add(component);
+        copy->training(true);
+        NNTest(component->isTraining());
+        copy->training(false);
+        NNTest(!component->isTraining());
+        delete copy;
+    }
 
     NNTestMethod(forget)
     {
