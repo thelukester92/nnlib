@@ -41,44 +41,33 @@ NNTestClassImpl(BatchNorm)
     {
         NNTestParams()
         {
+            BatchNorm<T> module(10);
+            module.weights().fill(10);
+            module.bias().fill(5);
+            module.reset();
 
-        }
-    }
+            forEach([&](T weight)
+            {
+                NNTestGreaterThanOrEquals(weight, -1);
+                NNTestLessThanOrEquals(weight, 1);
+            }, module.weights());
 
-    NNTestMethod(weights)
-    {
-        NNTestParams()
-        {
-
-        }
-    }
-
-    NNTestMethod(bias)
-    {
-        NNTestParams()
-        {
-
+            forEach([&](T bias)
+            {
+                NNTestAlmostEquals(bias, 0, 1e-12);
+            }, module.bias());
         }
     }
 
     NNTestMethod(momentum)
     {
-        NNTestParams()
-        {
-
-        }
-
         NNTestParams(T)
         {
-
-        }
-    }
-
-    NNTestMethod(isTraining)
-    {
-        NNTestParams()
-        {
-
+            BatchNorm<T> module(10);
+            module.momentum(0.5);
+            NNTestAlmostEquals(module.momentum(), 0.5, 1e-12);
+            module.momentum(0.1);
+            NNTestAlmostEquals(module.momentum(), 0.1, 1e-12);
         }
     }
 
@@ -86,7 +75,12 @@ NNTestClassImpl(BatchNorm)
     {
         NNTestParams(bool)
         {
-
+            BatchNorm<T> module(10);
+            NNTest(module.isTraining());
+            module.training(false);
+            NNTest(!module.isTraining());
+            module.training(true);
+            NNTest(module.isTraining());
         }
     }
 
@@ -94,7 +88,27 @@ NNTestClassImpl(BatchNorm)
     {
         NNTestParams(Serialized &)
         {
+            BatchNorm<T> module(10);
+            module.weights().fill(1);
+            module.bias().fill(2);
+            module.momentum(0.125);
+            module.training(false);
 
+            Serialized s;
+            module.save(s);
+
+            forEach([&](T weight)
+            {
+                NNTestAlmostEquals(weight, 1, 1e-12);
+            }, s.get<Tensor<T>>("weights"));
+
+            forEach([&](T bias)
+            {
+                NNTestAlmostEquals(bias, 2, 1e-12);
+            }, s.get<Tensor<T>>("biases"));
+
+            NNTestAlmostEquals(s.get<T>("momentum"), 0.125, 1e-12);
+            NNTest(!s.get<bool>("training"));
         }
     }
 
@@ -102,7 +116,28 @@ NNTestClassImpl(BatchNorm)
     {
         NNTestParams(const Tensor &)
         {
+            auto input = Tensor<T>({ 3, 6, 9, -1, 5, 4, 12, 5, 11 }).resize(3, 3);
 
+            BatchNorm<T> module(3);
+            module.weights().ones();
+            module.bias().zeros();
+            module.momentum(1.0);
+
+            module.forward(input);
+            for(size_t i = 0; i < 3; ++i)
+            {
+                NNTestAlmostEquals(math::mean(module.output().select(1, i)), 0, 1e-9);
+                NNTestAlmostEquals(math::variance(module.output().select(1, i)), 1, 1e-9);
+            }
+
+            module.training(false);
+
+            module.forward(input);
+            for(size_t i = 0; i < 3; ++i)
+            {
+                NNTestAlmostEquals(math::mean(module.output().select(1, i)), 0, 1e-9);
+                NNTestAlmostEquals(math::variance(module.output().select(1, i).scale(sqrt(3) / sqrt(2))), 1, 1e-9);
+            }
         }
     }
 

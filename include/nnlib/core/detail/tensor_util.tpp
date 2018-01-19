@@ -16,10 +16,10 @@ namespace detail
     struct ForEachHelper
     {
         template <typename F, typename ... Ts>
-        static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, F func, Ts &...ts)
+        static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, F func, Ts && ...ts)
         {
             for(indices[I] = 0; indices[I] < shape[I]; ++indices[I])
-                ForEachHelper<D-1, I+1>::apply(indices, shape, func, ts...);
+                ForEachHelper<D-1, I+1>::apply(indices, shape, func, std::forward<Ts>(ts)...);
         }
     };
 
@@ -27,15 +27,15 @@ namespace detail
     struct ForEachHelper<1ul, I>
     {
         template <typename F, typename ... Ts>
-        static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, F func, Ts &...ts)
+        static void apply(Storage<size_t> &indices, const Storage<size_t> &shape, F func, Ts && ...ts)
         {
             for(indices[I] = 0; indices[I] < shape[I]; ++indices[I])
-                func(ts.ptr()[indexOf(ts, indices)]...);
+                func(std::forward<Ts>(ts).ptr()[indexOf(std::forward<Ts>(ts), indices)]...);
         }
 
     private:
         template <typename T>
-        static size_t indexOf(T &&tensor, const Storage<size_t> &indices)
+        static size_t indexOf(T && tensor, const Storage<size_t> &indices)
         {
             NNAssertEquals(tensor.dims(), indices.size(), "Incompatible tensors in forEach!");
             const Storage<size_t> &strides = tensor.strides();
@@ -53,10 +53,10 @@ namespace detail
     struct ForEach
     {
         template <typename F, typename ... Ts>
-        static void apply(const Storage<size_t> &shape, F func, Ts &...ts)
+        static void apply(const Storage<size_t> &shape, F func, Ts && ...ts)
         {
             Storage<size_t> indices(D);
-            ForEachHelper<D, 0>::apply(indices, shape, func, ts...);
+            ForEachHelper<D, 0>::apply(indices, shape, func, std::forward<Ts>(ts)...);
         }
     };
 
@@ -64,7 +64,7 @@ namespace detail
     struct TemplateSearch
     {
         template <typename ... Ts>
-        static void apply(size_t v, Ts &&...ts)
+        static void apply(size_t v, Ts && ...ts)
         {
             if(v == MIN)
                 WORKER<MIN>::apply(std::forward<Ts>(ts)...);
@@ -77,7 +77,7 @@ namespace detail
     struct TemplateSearch<MAX, MAX, WORKER>
     {
         template <typename ... Ts>
-        static void apply(size_t v, Ts &&...ts)
+        static void apply(size_t v, Ts && ...ts)
         {
             NNHardAssert(v == MAX, "Too many dimensions! Define NN_MAX_NUM_DIMENSIONS to increase this limit.");
             WORKER<MAX>::apply(std::forward<Ts>(ts)...);
@@ -87,9 +87,9 @@ namespace detail
 
 /// A more efficient way apply a function to each element in one or more tensors.
 template <typename F, typename T, typename ... Ts>
-void forEach(F func, T &first, Ts &...ts)
+void forEach(F func, T && first, Ts && ...ts)
 {
-    detail::TemplateSearch<1ul, NN_MAX_NUM_DIMENSIONS, detail::ForEach>::apply(first.dims(), first.shape(), func, first, ts...);
+    detail::TemplateSearch<1ul, NN_MAX_NUM_DIMENSIONS, detail::ForEach>::apply(first.dims(), first.shape(), func, std::forward<T>(first), std::forward<Ts>(ts)...);
 }
 
 }

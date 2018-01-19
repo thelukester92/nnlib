@@ -8,7 +8,7 @@ namespace nnlib
 
 /// A more efficient way apply a function to each element in one or more tensors.
 template <typename F, typename T, typename ... Ts>
-void forEach(F func, T &first, Ts &...ts);
+void forEach(F func, T && first, Ts && ...ts);
 
 }
 
