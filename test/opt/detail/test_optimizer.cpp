@@ -13,7 +13,7 @@ NNTestAbstractClassImpl(Optimizer, Optimizer<T>)
             RandomEngine::sharedEngine().seed(0);
 
             auto inputs = math::rand(Tensor<T>(nnImpl.model().inputShape(), true));
-            auto target = math::rand(Tensor<T>(nnImpl.model().inputShape(), true));
+            auto target = math::rand(Tensor<T>(nnImpl.model().outputShape(), true));
 
             auto before = nnImpl.model().params().copy();
             for(size_t i = 0; i < 100; ++i)
