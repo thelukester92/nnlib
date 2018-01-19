@@ -99,5 +99,8 @@ int main(int argc, const char **argv)
     NNRunTest(SoftMax);
     NNRunTest(TanH);
 
+    // Optimizers
+    NNRunTest(Adam);
+
     return 0;
 }

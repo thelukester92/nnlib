@@ -1,6 +1,7 @@
 #ifndef TEST_NADAM_HPP
 #define TEST_NADAM_HPP
 
-void TestNadam();
+#include "../test.hpp"
+NNTestClassDecl(Nadam);
 
 #endif
