@@ -82,6 +82,18 @@ Linear<T> &Linear<T>::reset()
 }
 
 template <typename T>
+size_t Linear<T>::inputs() const
+{
+    return m_weights.size(0);
+}
+
+template <typename T>
+size_t Linear<T>::outputs() const
+{
+    return m_weights.size(1);
+}
+
+template <typename T>
 Tensor<T> Linear<T>::weights()
 {
     return m_weights;

@@ -29,6 +29,9 @@ public:
 
     Linear &reset();
 
+    size_t inputs() const;
+    size_t outputs() const;
+
     Tensor<T> weights();
     Tensor<T> bias();
 

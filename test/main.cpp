@@ -89,7 +89,7 @@ int main(int argc, const char **argv)
     NNRunTest(Dropout);
     NNRunTest(ELU);
     NNRunTest(Identity);
-    // NNRunTest(Linear);
+    NNRunTest(Linear);
     NNRunTest(Logistic);
     NNRunTest(LogSoftMax);
     // NNRunTest(LSTM);

@@ -3,70 +3,145 @@
 #include "nnlib/math/math.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestLinear()
+NNTestClassImpl(Linear)
 {
-    // Linear layer with arbitrary parameters
-    Linear<NN_REAL_T> module(2, 3);
-    module.weights().copy({ -3, -2, 2, 3, 4, 5 });
-    module.bias().copy({ -5, 7, 8862.37 });
+    NNRunAbstractTest(Module, Linear, new Linear<T>(2, 3));
 
-    // Arbitrary input (batch)
-    Tensor<NN_REAL_T> inp = Tensor<NN_REAL_T>({ -5, 10, 15, -20 }).resize(2, 2);
-
-    // Arbitrary output gradient (batch)
-    Tensor<NN_REAL_T> grd = Tensor<NN_REAL_T>({ 1, 2, 3, -4, -3, 2 }).resize(2, 3);
-
-    // Output (fixed given input, weights, and bias)
-    Tensor<NN_REAL_T> out = Tensor<NN_REAL_T>({ 40, 57, 8902.37, -110, -103, 8792.37 }).resize(2, 3);
-
-    // Input gradient (fixed given input, weights, bias, and output gradient)
-    Tensor<NN_REAL_T> ing = Tensor<NN_REAL_T>({ -1, 26, 22, -14 }).resize(2, 2);
-
-    // Parameter gradient (fixed given input and output gradient)
-    Tensor<NN_REAL_T> prg = Tensor<NN_REAL_T>({ -65, -55, 15, 90, 80, -10, -3, -1, 5 });
-
-    // Test forward and backward using the parameters and targets above
-
-    module.forward(inp);
-    module.backward(inp, grd);
-
-    NNAssertLessThan(math::sum(math::square(module.output() - out)), 1e-9, "Linear::forward failed; wrong output!");
-    NNAssertLessThan(math::sum(math::square(module.inGrad() - ing)), 1e-9, "Linear::backward failed; wrong input gradient!");
-    NNAssertLessThan(math::sum(math::square(module.grad() - prg)), 1e-9, "Linear::backward failed; wrong parameter gradient!");
-
-    module.forward(inp.select(0, 0));
-    module.backward(inp.select(0, 0), grd.select(0, 0));
-
-    NNAssertLessThan(math::sum(math::square(module.output() - out.select(0, 0))), 1e-9, "Linear::forward failed for a vector; wrong output!");
-    NNAssertLessThan(math::sum(math::square(module.inGrad() - ing.select(0, 0))), 1e-9, "Linear::backward failed for a vector; wrong input gradient!");
-
-    Linear<NN_REAL_T> unbiased(2, 3, false);
-    unbiased.weights().copy(module.weights());
-
-    unbiased.forward(inp.select(0, 0));
-    unbiased.backward(inp.select(0, 0), grd.select(0, 0));
-
-    NNAssertLessThan(math::sum(math::square(unbiased.output() + module.bias() - out.select(0, 0))), 1e-9, "Linear::forward failed without bias; wrong output!");
-    NNAssertLessThan(math::sum(math::square(unbiased.inGrad() - ing.select(0, 0))), 1e-9, "Linear::backward failed without bias; wrong input gradient!");
-
-    bool ok = true;
-    try
+    NNTestMethod(Linear)
     {
-        module.forward(Tensor<NN_REAL_T>(1, 1, 1));
-        ok = false;
-    }
-    catch(const Error &e) {}
-    NNAssert(ok, "Linear::forward accepted an invalid input shape!");
+        NNTestParams(size_t, size_t)
+        {
+            Linear<T> module(2, 3);
+            NNTestEquals(module.inputs(), 2);
+            NNTestEquals(module.outputs(), 3);
+            NNTestEquals(module.weights().size(), 6);
+            NNTest(module.biased());
+            NNTestEquals(module.bias().size(), 3);
+        }
 
-    ok = true;
-    try
+        NNTestParams(size_t, size_t, bool)
+        {
+            Linear<T> module(2, 3, false);
+            NNTest(!module.biased());
+        }
+    }
+
+    NNTestMethod(operator=)
     {
-        module.backward(Tensor<NN_REAL_T>(1, 1, 1), Tensor<NN_REAL_T>(1, 1, 1));
-        ok = false;
+        NNTestParams(const Linear &)
+        {
+            Linear<T> orig(2, 3);
+            Linear<T> copy(1, 1);
+            copy = orig;
+            NNTestEquals(copy.inputs(), orig.inputs());
+            NNTestEquals(copy.outputs(), orig.outputs());
+            forEach([&](T orig, T copy)
+            {
+                NNTestAlmostEquals(orig, copy, 1e-12);
+            }, orig.params(), copy.params());
+        }
     }
-    catch(const Error &e) {}
-    NNAssert(ok, "Linear::backward accepted invalid input and outGrad shapes!");
 
-    TestModule("Linear", module, inp);
+    NNTestMethod(reset)
+    {
+        NNTestParams()
+        {
+            Linear<T> module(2, 3);
+            module.params().fill(100);
+            module.reset();
+            forEach([&](T param)
+            {
+                NNTestLessThan(param, 10);
+            }, module.params());
+        }
+    }
+
+    NNTestMethod(forward)
+    {
+        NNTestParams(const Tensor &)
+        {
+            Linear<T> module(2, 3);
+            module.weights().copy({ -3, -2, 2, 3, 4, 5 });
+            module.bias().copy({ -5, 7, 8862.37 });
+            auto input = Tensor<T>({ -5, 10, 15, -20 }).resize(2, 2);
+            auto target = Tensor<T>({ 40, 57, 8902.37, -110, -103, 8792.37 }).resize(2, 3);
+
+            module.forward(input);
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-12);
+            }, module.output(), target);
+
+            module.forward(input.select(0, 0));
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-12);
+            }, module.output(), target.select(0, 0));
+
+            Linear<T> unbiased(2, 3, false);
+            unbiased.weights().copy(module.weights());
+
+            unbiased.forward(input);
+            forEach([&](T unbiased, T bias, T target)
+            {
+                NNTestAlmostEquals(unbiased, target - bias, 1e-12);
+            }, unbiased.output(), module.bias().resize(1, 3).expand(0, 2), target);
+
+            unbiased.forward(input.select(0, 0));
+            forEach([&](T unbiased, T bias, T target)
+            {
+                NNTestAlmostEquals(unbiased, target - bias, 1e-12);
+            }, unbiased.output(), module.bias(), target.select(0, 0));
+        }
+    }
+
+    NNTestMethod(backward)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            Linear<T> module(2, 3);
+            module.weights().copy({ -3, -2, 2, 3, 4, 5 });
+            module.bias().copy({ -5, 7, 8862.37 });
+            auto input = Tensor<T>({ -5, 10, 15, -20 }).resize(2, 2);
+            auto blame = Tensor<T>({ 1, 2, 3, -4, -3, 2 }).resize(2, 3);
+            auto inGrad = Tensor<T>({ -1, 26, 22, -14 }).resize(2, 2);
+            auto pGrad = Tensor<T>({ -65, -55, 15, 90, 80, -10, -3, -1, 5 });
+
+            module.forward(input);
+            module.backward(input, blame);
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-12);
+            }, module.inGrad(), inGrad);
+
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-12);
+            }, module.grad(), pGrad);
+
+            module.backward(input.select(0, 0), blame.select(0, 0));
+            forEach([&](T actual, T target)
+            {
+                NNTestAlmostEquals(actual, target, 1e-12);
+            }, module.inGrad(), inGrad.select(0, 0));
+
+            Linear<T> unbiased(2, 3, false);
+            unbiased.weights().copy(module.weights());
+
+            unbiased.forward(input);
+            unbiased.backward(input, blame);
+            forEach([&](T unbiased, T target)
+            {
+                NNTestAlmostEquals(unbiased, target, 1e-12);
+            }, unbiased.inGrad(), inGrad);
+
+            unbiased.backward(input.select(0, 0), blame.select(0, 0));
+            forEach([&](T unbiased, T target)
+            {
+                NNTestAlmostEquals(unbiased, target, 1e-12);
+            }, unbiased.inGrad(), inGrad.select(0, 0));
+        }
+    }
 }
