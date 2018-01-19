@@ -414,26 +414,6 @@ public:
     /// Add a scalar to each element in this tensor.
     Tensor &add(T alpha);
 
-    /// \brief Sparsify the current dense tensor, dropping values with magnitude less than epsilon.
-    ///
-    /// The output will be a matrix. The number of rows will be the number of non-zero elements;
-    /// the number of columns will be D + 1 where D is the number of dimensions in the dense tensor.
-    /// The first D columns in a row are the indices and the last is the value in that slot.
-    /// The first row in the output will be the sizes of each dimension with one unused column.
-    ///
-    /// For example, a truncated identity matrix of size 3x5 could be represented like this:
-    ///
-    ///     3 5 0.0   <-- size
-    ///     0 0 1.0
-    ///     1 1 1.0
-    ///     2 2 1.0
-    Tensor sparsify(T epsilon = 1e-12) const;
-
-    /// \brief Unsparsify the current sparse tensor.
-    ///
-    /// See sparsify for an explanation of sparse tensors.
-    Tensor unsparsify() const;
-
     T &at(const Storage<size_t> &indices);
     const T &at(const Storage<size_t> &indices) const;
 

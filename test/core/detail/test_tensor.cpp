@@ -761,64 +761,6 @@ NNTestClassImpl(Tensor)
         }
     }
 
-    NNTestMethod(sparsify)
-    {
-        NNTestParams()
-        {
-            Tensor<T> t = Tensor<T>({ 0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.1 }).resize(3, 3);
-            Tensor<T> s = t.sparsify();
-            NNTestEquals(s.dims(), 2);
-            NNTestEquals(s.size(0), 4);
-            NNTestEquals(s.size(1), 3);
-            NNTestAlmostEquals(s(0, 0), 3, 1e-12);
-            NNTestAlmostEquals(s(0, 1), 3, 1e-12);
-            NNTestAlmostEquals(s(1, 0), 0, 1e-12);
-            NNTestAlmostEquals(s(1, 1), 0, 1e-12);
-            NNTestAlmostEquals(s(1, 2), 0.3, 1e-12);
-            NNTestAlmostEquals(s(2, 0), 1, 1e-12);
-            NNTestAlmostEquals(s(2, 1), 1, 1e-12);
-            NNTestAlmostEquals(s(2, 2), 0.5, 1e-12);
-            NNTestAlmostEquals(s(3, 0), 2, 1e-12);
-            NNTestAlmostEquals(s(3, 1), 2, 1e-12);
-            NNTestAlmostEquals(s(3, 2), 0.1, 1e-12);
-        }
-
-        NNTestParams(T)
-        {
-            Tensor<T> t = Tensor<T>({ 0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.1 }).resize(3, 3);
-            Tensor<T> s = t.sparsify(0.2);
-            NNTestEquals(s.dims(), 2);
-            NNTestEquals(s.size(0), 3);
-            NNTestEquals(s.size(1), 3);
-            NNTestAlmostEquals(s(0, 0), 3, 1e-12);
-            NNTestAlmostEquals(s(0, 1), 3, 1e-12);
-            NNTestAlmostEquals(s(1, 0), 0, 1e-12);
-            NNTestAlmostEquals(s(1, 1), 0, 1e-12);
-            NNTestAlmostEquals(s(1, 2), 0.3, 1e-12);
-            NNTestAlmostEquals(s(2, 0), 1, 1e-12);
-            NNTestAlmostEquals(s(2, 1), 1, 1e-12);
-            NNTestAlmostEquals(s(2, 2), 0.5, 1e-12);
-        }
-    }
-
-    NNTestMethod(unsparsify)
-    {
-        NNTestParams()
-        {
-            Tensor<T> t = Tensor<T>({ 2, 3, 0, 0, 0, 0.3, 1, 1, 0.5 }).resize(3, 3);
-            Tensor<T> s = t.unsparsify();
-            NNTestEquals(s.dims(), 2);
-            NNTestEquals(s.size(0), 2);
-            NNTestEquals(s.size(1), 3);
-            NNTestAlmostEquals(s(0, 0), 0.3, 1e-12);
-            NNTestAlmostEquals(s(0, 1), 0, 1e-12);
-            NNTestAlmostEquals(s(0, 2), 0, 1e-12);
-            NNTestAlmostEquals(s(1, 0), 0, 1e-12);
-            NNTestAlmostEquals(s(1, 1), 0.5, 1e-12);
-            NNTestAlmostEquals(s(1, 2), 0, 1e-12);
-        }
-    }
-
     NNTestMethod(at)
     {
         NNTestParams(const Storage<size_t> &)

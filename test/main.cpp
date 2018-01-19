@@ -33,7 +33,6 @@
 #include "nn/test_sequential.hpp"
 #include "nn/test_sin.hpp"
 #include "nn/test_softmax.hpp"
-#include "nn/test_sparselinear.hpp"
 #include "nn/test_tanh.hpp"
 #include "opt/test_adam.hpp"
 #include "opt/test_nadam.hpp"
@@ -98,7 +97,6 @@ int main(int argc, const char **argv)
     NNRunTest(Sequential);
     NNRunTest(Sin);
     NNRunTest(SoftMax);
-    // NNRunTest(SparseLinear);
     NNRunTest(TanH);
 
     return 0;
