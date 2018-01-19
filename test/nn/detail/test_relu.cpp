@@ -19,6 +19,18 @@ NNTestClassImpl(ReLU)
         }
     }
 
+    NNTestMethod(leak)
+    {
+        NNTestParams(T)
+        {
+            ReLU<T> module(0.7);
+            module.leak(0.3);
+            NNTestAlmostEquals(module.leak(), 0.3, 1e-12);
+            module.leak(0.6);
+            NNTestAlmostEquals(module.leak(), 0.6, 1e-12);
+        }
+    }
+
     NNTestMethod(forward)
     {
         ReLU<T> module(0.75);

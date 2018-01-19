@@ -19,6 +19,18 @@ NNTestClassImpl(ELU)
         }
     }
 
+    NNTestMethod(alpha)
+    {
+        NNTestParams(T)
+        {
+            ELU<T> module(0.7);
+            module.alpha(0.3);
+            NNTestAlmostEquals(module.alpha(), 0.3, 1e-12);
+            module.alpha(0.6);
+            NNTestAlmostEquals(module.alpha(), 0.6, 1e-12);
+        }
+    }
+
     NNTestMethod(forward)
     {
         ELU<T> module(0.5);
