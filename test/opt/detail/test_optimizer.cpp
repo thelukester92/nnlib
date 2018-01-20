@@ -92,22 +92,4 @@ NNTestAbstractClassImpl(Optimizer, Optimizer<T>)
             }, after, nnImpl.params());
         }
     }
-
-    NNTestMethod(step)
-    {
-        NNTestParams(const Tensor &, const Tensor &)
-        {
-            RandomEngine::sharedEngine().seed(0);
-            math::rand(nnImpl.params());
-
-            auto inputs = math::rand(Tensor<T>(nnImpl.model().inputShape(), true));
-            auto target = math::rand(Tensor<T>(nnImpl.model().outputShape(), true));
-
-            T errBefore = nnImpl.evaluate(inputs, target);
-            nnImpl.step(inputs, target);
-            T errAfter = nnImpl.evaluate(inputs, target);
-
-            NNTestLessThan(errAfter, errBefore);
-        }
-    }
 }
