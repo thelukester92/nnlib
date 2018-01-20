@@ -1,6 +1,7 @@
 #ifndef TEST_SERIALIZED_HPP
 #define TEST_SERIALIZED_HPP
 
-void TestSerialized();
+#include "../test.hpp"
+NNTestClassDecl(Serialized);
 
 #endif

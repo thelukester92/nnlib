@@ -4,72 +4,119 @@
 #include "nnlib/nn/linear.hpp"
 #include "nnlib/nn/sequential.hpp"
 #include "nnlib/nn/tanh.hpp"
+#include <cstdio>
+#include <fstream>
+#include <sstream>
 using namespace nnlib;
+using T = NN_REAL_T;
 
-#include <bitset>
-
-void TestBinarySerializer()
+NNTestClassImpl(BinarySerializer)
 {
-    // basic serialization
-
+    NNTestMethod(read)
     {
-        Serialized s;
-        s.set("library", "nnlib");
-        s.set("awesome", true);
-        s.set("notAwesome", false);
-        s.set("number", 32);
-        s.set("number", 42);
-        s.set("nothing", Serialized::Null);
-        s.set("emptyArray", Serialized::Array);
-        s.set("emptyObject", Serialized::Object);
-        s.set("nested", Serialized::Object);
-
-        s.get("nested")->set("indented", true);
-        s.get("nested")->set("powerLevel", "> 9000");
-
+        NNTestParams(std::istream &)
         {
+            Sequential<T> nn(new Linear<T>(10, 5), new TanH<T>(), new Linear<T>(5, 10), new TanH<T>());
+
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+            s.set("nn", nn);
+
             std::stringstream ss;
             BinarySerializer::write(s, ss);
+            Serialized t = BinarySerializer::read(ss);
 
-            Serialized d = BinarySerializer::read(ss);
+            NNTestEquals(s.type("null"), Serialized::Null);
+            NNTestEquals(s.get<bool>("bool"), true);
+            NNTestEquals(s.get<int>("int"), 42);
+            NNTestAlmostEquals(s.get<double>("double"), 3.14, 1e-12);
+            NNTestEquals(s.get<std::string>("string"), "nnlib");
+            NNTestEquals(s.size("array"), 1);
+            NNTestEquals(s.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(s.size("object"), 2);
+            NNTestAlmostEquals(s.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(s.get("object")->get<std::string>("object_prop2"), "value");
 
-            NNAssertEquals(d.get<std::string>("library"), "nnlib", "BinarySerializer failed!");
-            NNAssertEquals(d.get<bool>("awesome"), true, "BinarySerializer failed!");
-            NNAssertEquals(d.get<bool>("notAwesome"), false, "BinarySerializer failed!");
-            NNAssertEquals(d.get<size_t>("number"), 42, "BinarySerializer failed!");
-            NNAssertAlmostEquals(d.get<float>("number"), 42.0, 1e-12, "BinarySerializer failed!");
-            NNAssertEquals(d.type("nothing"), Serialized::Null, "BinarySerializer failed!");
-            NNAssertEquals(d.size("emptyArray"), 0, "BinarySerializer failed!");
-            NNAssertEquals(d.size("emptyObject"), 0, "BinarySerializer failed!");
-
-            NNAssertEquals(d.get("nested")->get<bool>("indented"), true, "BinarySerializer failed!");
-            NNAssertEquals(d.get("nested")->get<std::string>("powerLevel"), "> 9000", "BinarySerializer failed!");
+            auto *deserialized = s.get<Sequential<T> *>("nn");
+            try
+            {
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, nn.params(), deserialized->params());
+            }
+            catch(const Error &e)
+            {
+                delete deserialized;
+                throw e;
+            }
         }
-    }
 
-    // neural network serialization
-
-    {
-        Sequential<NN_REAL_T> nn(
-            new Linear<NN_REAL_T>(10, 5),
-            new TanH<NN_REAL_T>(),
-            new Linear<NN_REAL_T>(5, 10),
-            new TanH<NN_REAL_T>()
-        );
-
-        std::stringstream ss;
-        BinarySerializer::write(nn, ss);
-
-        Sequential<NN_REAL_T> *deserialized = BinarySerializer::read(ss).get<Sequential<NN_REAL_T> *>();
-
-        auto &p1 = nn.params();
-        auto &p2 = deserialized->params();
-
-        for(auto i = p1.begin(), j = p2.begin(), end = p1.end(); i != end; ++i, ++j)
+        NNTestParams(const std::string &)
         {
-            NNAssertAlmostEquals(*i, *j, 1e-12, "BinarySerializer failed!");
-        }
+            Sequential<T> nn(new Linear<T>(10, 5), new TanH<T>(), new Linear<T>(5, 10), new TanH<T>());
 
-        delete deserialized;
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+            s.set("nn", nn);
+
+            BinarySerializer::write(s, ".nnlib.tmp");
+
+            try
+            {
+                Serialized t = BinarySerializer::read(".nnlib.tmp");
+                NNTestEquals(s.type("null"), Serialized::Null);
+                NNTestEquals(s.get<bool>("bool"), true);
+                NNTestEquals(s.get<int>("int"), 42);
+                NNTestAlmostEquals(s.get<double>("double"), 3.14, 1e-12);
+                NNTestEquals(s.get<std::string>("string"), "nnlib");
+                NNTestEquals(s.size("array"), 1);
+                NNTestEquals(s.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(s.size("object"), 2);
+                NNTestAlmostEquals(s.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(s.get("object")->get<std::string>("object_prop2"), "value");
+
+                auto *deserialized = s.get<Sequential<T> *>("nn");
+                try
+                {
+                    forEach([&](T orig, T copy)
+                    {
+                        NNTestAlmostEquals(orig, copy, 1e-12);
+                    }, nn.params(), deserialized->params());
+                }
+                catch(const Error &e)
+                {
+                    delete deserialized;
+                    throw e;
+                }
+            }
+            catch(const Error &e)
+            {
+                remove(".nnlib.tmp");
+                throw e;
+            }
+
+            remove(".nnlib.tmp");
+        }
     }
 }

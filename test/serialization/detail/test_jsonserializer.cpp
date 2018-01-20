@@ -4,126 +4,145 @@
 #include "nnlib/nn/linear.hpp"
 #include "nnlib/nn/sequential.hpp"
 #include "nnlib/nn/tanh.hpp"
+#include <cstdio>
+#include <fstream>
+#include <sstream>
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestJSONSerializer()
+NNTestClassImpl(JSONSerializer)
 {
-    // basic serialization
-
+    NNTestMethod(read)
     {
-        Serialized s;
-        s.set("library", "nnlib");
-        s.set("awesome", true);
-        s.set("notAwesome", false);
-        s.set("number", 32);
-        s.set("number", 42);
-        s.set("negative", -42);
-        s.set("nothing", Serialized::Null);
-        s.set("emptyArray", Serialized::Array);
-        s.set("emptyObject", Serialized::Object);
-        s.set("nested", Serialized::Object);
-        s.get("nested")->set("indented", true);
-        s.get("nested")->set("powerLevel", "> 9000");
-
-        // minified
+        NNTestParams(std::istream &)
         {
+            Sequential<T> nn(new Linear<T>(10, 5), new TanH<T>(), new Linear<T>(5, 10), new TanH<T>());
+
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+            s.set("nn", nn);
+
             std::stringstream ss;
             JSONSerializer::write(s, ss);
+            Serialized t = JSONSerializer::read(ss);
 
-            Serialized d = JSONSerializer::read(ss);
+            NNTestEquals(s.type("null"), Serialized::Null);
+            NNTestEquals(s.get<bool>("bool"), true);
+            NNTestEquals(s.get<int>("int"), 42);
+            NNTestAlmostEquals(s.get<double>("double"), 3.14, 1e-12);
+            NNTestEquals(s.get<std::string>("string"), "nnlib");
+            NNTestEquals(s.size("array"), 1);
+            NNTestEquals(s.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(s.size("object"), 2);
+            NNTestAlmostEquals(s.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(s.get("object")->get<std::string>("object_prop2"), "value");
 
-            NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
-            NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
-            NNAssertEquals(d.get<bool>("notAwesome"), false, "JSONSerializer failed!");
-            NNAssertEquals(d.get<int>("number"), 42, "JSONSerializer failed!");
-            NNAssertEquals(d.get<int>("negative"), -42, "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<float>("number"), 42.0, 1e-12, "JSONSerializer failed!");
-            NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
-            NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
-            NNAssertEquals(d.size("emptyObject"), 0, "JSONSerializer failed!");
-            NNAssertEquals(d.get("nested")->get<bool>("indented"), true, "JSONSerializer failed!");
-            NNAssertEquals(d.get("nested")->get<std::string>("powerLevel"), "> 9000", "JSONSerializer failed!");
+            auto *deserialized = s.get<Sequential<T> *>("nn");
+            try
+            {
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, nn.params(), deserialized->params());
+            }
+            catch(const Error &e)
+            {
+                delete deserialized;
+                throw e;
+            }
         }
 
-        // pretty
+        NNTestParams(const std::string &)
         {
-            std::stringstream ss;
-            JSONSerializer::write(s, ss, true);
+            Sequential<T> nn(new Linear<T>(10, 5), new TanH<T>(), new Linear<T>(5, 10), new TanH<T>());
 
-            Serialized d = JSONSerializer::read(ss);
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+            s.set("nn", nn);
 
-            NNAssertEquals(d.get<std::string>("library"), "nnlib", "JSONSerializer failed!");
-            NNAssertEquals(d.get<bool>("awesome"), true, "JSONSerializer failed!");
-            NNAssertEquals(d.get<bool>("notAwesome"), false, "JSONSerializer failed!");
-            NNAssertEquals(d.get<int>("number"), 42, "JSONSerializer failed!");
-            NNAssertEquals(d.get<int>("negative"), -42, "JSONSerializer failed!");
-            NNAssertEquals(d.type("nothing"), Serialized::Null, "JSONSerializer failed!");
-            NNAssertEquals(d.size("emptyArray"), 0, "JSONSerializer failed!");
-            NNAssertEquals(d.size("emptyObject"), 0, "JSONSerializer failed!");
-            NNAssertEquals(d.get("nested")->get<bool>("indented"), true, "JSONSerializer failed!");
-            NNAssertEquals(d.get("nested")->get<std::string>("powerLevel"), "> 9000", "JSONSerializer failed!");
+            JSONSerializer::write(s, ".nnlib.tmp");
+
+            try
+            {
+                Serialized t = JSONSerializer::read(".nnlib.tmp");
+                NNTestEquals(s.type("null"), Serialized::Null);
+                NNTestEquals(s.get<bool>("bool"), true);
+                NNTestEquals(s.get<int>("int"), 42);
+                NNTestAlmostEquals(s.get<double>("double"), 3.14, 1e-12);
+                NNTestEquals(s.get<std::string>("string"), "nnlib");
+                NNTestEquals(s.size("array"), 1);
+                NNTestEquals(s.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(s.size("object"), 2);
+                NNTestAlmostEquals(s.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(s.get("object")->get<std::string>("object_prop2"), "value");
+
+                auto *deserialized = s.get<Sequential<T> *>("nn");
+                try
+                {
+                    forEach([&](T orig, T copy)
+                    {
+                        NNTestAlmostEquals(orig, copy, 1e-12);
+                    }, nn.params(), deserialized->params());
+                }
+                catch(const Error &e)
+                {
+                    delete deserialized;
+                    throw e;
+                }
+            }
+            catch(const Error &e)
+            {
+                remove(".nnlib.tmp");
+                throw e;
+            }
+
+            remove(".nnlib.tmp");
         }
-
-        // from string
-        {
-            std::string jsonString = "[ \"hello, my name is \\\"bingo\\\"\", 1.22e1, 512e-2, -3.14 ]";
-            std::stringstream ss(jsonString);
-
-            Serialized d = JSONSerializer::read(ss);
-
-            NNAssertEquals(d.get<std::string>(0), "hello, my name is \"bingo\"", "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<double>(1), 12.2, 1e-12, "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<double>(2), 5.12, 1e-12, "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<double>(3), -3.14, 1e-12, "JSONSerializer failed!");
-
-            std::stringstream ss2;
-            JSONSerializer::write(d, ss2);
-            d = JSONSerializer::read(ss2);
-
-            NNAssertEquals(d.get<std::string>(0), "hello, my name is \"bingo\"", "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<double>(1), 12.2, 1e-12, "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<double>(2), 5.12, 1e-12, "JSONSerializer failed!");
-            NNAssertAlmostEquals(d.get<double>(3), -3.14, 1e-12, "JSONSerializer failed!");
-        }
-
-        // incompatibility
-
-        bool ok = false;
-        try
-        {
-            std::stringstream ss("[ this is not json ]");
-            JSONSerializer::read(ss);
-        }
-        catch(const Error &)
-        {
-            ok = true;
-        }
-        NNAssert(ok, "JSONSerializer failed! Allowed invalid JSON values!");
     }
 
-    // neural network serialization
-
+    NNTestMethod(write)
     {
-        Sequential<NN_REAL_T> nn(
-            new Linear<NN_REAL_T>(10, 5),
-            new TanH<NN_REAL_T>(),
-            new Linear<NN_REAL_T>(5, 10),
-            new TanH<NN_REAL_T>()
-        );
-
-        std::stringstream ss;
-        JSONSerializer::write(nn, ss);
-
-        Sequential<NN_REAL_T> *deserialized = JSONSerializer::read(ss).get<Sequential<NN_REAL_T> *>();
-
-        auto &p1 = nn.params();
-        auto &p2 = deserialized->params();
-
-        for(auto i = p1.begin(), j = p2.begin(), end = p1.end(); i != end; ++i, ++j)
+        NNTestParams(const Serialized &, std::ostream &, bool)
         {
-            NNAssertAlmostEquals(*i, *j, 1e-12, "JSONSerializer failed!");
-        }
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
 
-        delete deserialized;
+            std::stringstream mini, pretty;
+            JSONSerializer::write(s, mini, false);
+            JSONSerializer::write(s, pretty, true);
+
+            NNTest(mini.str() == "{\"null\":null,\"bool\":true,\"int\":42,\"double\":3.14,\"string\":\"nnlib\",\"array\":[\"array_element\"],\"object\":{\"object_prop1\":3.14,\"object_prop2\":\"value\"}}");
+            NNTest(pretty.str() == "{\n\t\"null\": null,\n\t\"bool\": true,\n\t\"int\": 42,\n\t\"double\": 3.14,\n\t\"string\": \"nnlib\",\n\t\"array\": [\n\t\t\"array_element\"\n\t],\n\t\"object\": {\n\t\t\"object_prop1\": 3.14,\n\t\t\"object_prop2\": \"value\"\n\t}\n}");
+        }
     }
 }

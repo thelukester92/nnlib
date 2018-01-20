@@ -105,5 +105,12 @@ int main(int argc, const char **argv)
     NNRunTest(RMSProp);
     NNRunTest(SGD);
 
+    // Serialization
+    NNRunTest(BinarySerializer);
+    // NNRunTest(CSVSerializer);
+    // NNRunTest(FileSerializer);
+    NNRunTest(JSONSerializer);
+    // NNRunTest(Serialized);
+
     return 0;
 }
