@@ -16,11 +16,23 @@ NNTestClassImpl(Adam)
     {
         NNTestParams(T)
         {
-            Linear<T> model(1, 1);
-            model.params().fill(1);
+            Linear<T> model(1, 1, false);
+            model.params().copy({ 1 });
+
             Adam<T> opt(model);
-            opt.beta1(0.5);
-            NNTestAlmostEquals(opt.beta1(), 0.5, 1e-12);
+            opt.learningRate(0.25);
+            opt.beta1(0.25);
+            opt.beta2(0);
+            NNTestAlmostEquals(opt.beta1(), 0.25, 1e-12);
+
+            Tensor<T> inputs = { 1 };
+            Tensor<T> target = { 0 };
+
+            opt.step(inputs, target);
+            NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-9);
+
+            opt.step(inputs, target);
+            NNTestAlmostEquals(opt.params()(0), 0.48333333647, 1e-9);
         }
     }
 
@@ -28,11 +40,46 @@ NNTestClassImpl(Adam)
     {
         NNTestParams(T)
         {
-            Linear<T> model(1, 1);
-            model.params().fill(1);
+            Linear<T> model(1, 1, false);
+            model.params().copy({ 1 });
+
             Adam<T> opt(model);
-            opt.beta2(0.5);
-            NNTestAlmostEquals(opt.beta2(), 0.5, 1e-12);
+            opt.learningRate(0.25);
+            opt.beta1(0);
+            opt.beta2(0.25);
+            NNTestAlmostEquals(opt.beta2(), 0.25, 1e-12);
+
+            Tensor<T> inputs = { 1 };
+            Tensor<T> target = { 0 };
+
+            opt.step(inputs, target);
+            NNTestAlmostEquals(opt.params()(0), 0.75000000144, 1e-9);
+
+            opt.step(inputs, target);
+            NNTestAlmostEquals(opt.params()(0), 0.51743487543, 1e-9);
+        }
+    }
+
+    NNTestMethod(step)
+    {
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            Linear<T> model(1, 1, false);
+            model.params().copy({ 1 });
+
+            Adam<T> opt(model);
+            opt.learningRate(0.25);
+            opt.beta1(0);
+            opt.beta2(0);
+
+            Tensor<T> inputs = { 1 };
+            Tensor<T> target = { 0 };
+
+            opt.step(inputs, target);
+            NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-9);
+
+            opt.step(inputs, target);
+            NNTestAlmostEquals(opt.params()(0), 0.50000000291, 1e-9);
         }
     }
 }
