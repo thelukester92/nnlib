@@ -17,6 +17,9 @@ using Optimizer<T>::m_learningRate;
 public:
     RMSProp(Module<T> &model, Critic<T> *critic = nullptr);
 
+    T gamma() const;
+    RMSProp &gamma(T gamma);
+
     virtual void reset() override;
     virtual RMSProp &step(const Tensor<T> &input, const Tensor<T> &target) override;
 

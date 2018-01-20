@@ -15,6 +15,19 @@ RMSProp<T>::RMSProp(Module<T> &model, Critic<T> *critic) :
 }
 
 template <typename T>
+T RMSProp<T>::gamma() const
+{
+    return m_gamma;
+}
+
+template <typename T>
+RMSProp<T> &RMSProp<T>::gamma(T gamma)
+{
+    m_gamma = gamma;
+    return *this;
+}
+
+template <typename T>
 void RMSProp<T>::reset()
 {
     m_variance.fill(0);
