@@ -107,7 +107,7 @@ int main(int argc, const char **argv)
 
     // Serialization
     NNRunTest(BinarySerializer);
-    // NNRunTest(CSVSerializer);
+    NNRunTest(CSVSerializer);
     // NNRunTest(FileSerializer);
     NNRunTest(JSONSerializer);
     // NNRunTest(Serialized);

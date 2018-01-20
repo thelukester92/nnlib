@@ -34,7 +34,7 @@ void JSONSerializer::write(const Serialized &root, std::ostream &out, bool prett
 void JSONSerializer::write(const Serialized &root, const std::string &filename, bool pretty)
 {
     std::ofstream fout(filename);
-    writeValue(root, fout, pretty ? 0 : -1);
+    write(root, fout, pretty);
     fout.close();
 }
 

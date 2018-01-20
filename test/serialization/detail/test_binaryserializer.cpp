@@ -36,18 +36,18 @@ NNTestClassImpl(BinarySerializer)
             BinarySerializer::write(s, ss);
             Serialized t = BinarySerializer::read(ss);
 
-            NNTestEquals(s.type("null"), Serialized::Null);
-            NNTestEquals(s.get<bool>("bool"), true);
-            NNTestEquals(s.get<int>("int"), 42);
-            NNTestAlmostEquals(s.get<double>("double"), 3.14, 1e-12);
-            NNTestEquals(s.get<std::string>("string"), "nnlib");
-            NNTestEquals(s.size("array"), 1);
-            NNTestEquals(s.get("array")->get<std::string>(0), "array_element");
-            NNTestEquals(s.size("object"), 2);
-            NNTestAlmostEquals(s.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-            NNTestEquals(s.get("object")->get<std::string>("object_prop2"), "value");
+            NNTestEquals(t.type("null"), Serialized::Null);
+            NNTestEquals(t.get<bool>("bool"), true);
+            NNTestEquals(t.get<int>("int"), 42);
+            NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+            NNTestEquals(t.get<std::string>("string"), "nnlib");
+            NNTestEquals(t.size("array"), 1);
+            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.size("object"), 2);
+            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
 
-            auto *deserialized = s.get<Sequential<T> *>("nn");
+            auto *deserialized = t.get<Sequential<T> *>("nn");
             try
             {
                 forEach([&](T orig, T copy)
@@ -85,18 +85,18 @@ NNTestClassImpl(BinarySerializer)
             try
             {
                 Serialized t = BinarySerializer::read(".nnlib.tmp");
-                NNTestEquals(s.type("null"), Serialized::Null);
-                NNTestEquals(s.get<bool>("bool"), true);
-                NNTestEquals(s.get<int>("int"), 42);
-                NNTestAlmostEquals(s.get<double>("double"), 3.14, 1e-12);
-                NNTestEquals(s.get<std::string>("string"), "nnlib");
-                NNTestEquals(s.size("array"), 1);
-                NNTestEquals(s.get("array")->get<std::string>(0), "array_element");
-                NNTestEquals(s.size("object"), 2);
-                NNTestAlmostEquals(s.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-                NNTestEquals(s.get("object")->get<std::string>("object_prop2"), "value");
+                NNTestEquals(t.type("null"), Serialized::Null);
+                NNTestEquals(t.get<bool>("bool"), true);
+                NNTestEquals(t.get<int>("int"), 42);
+                NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+                NNTestEquals(t.get<std::string>("string"), "nnlib");
+                NNTestEquals(t.size("array"), 1);
+                NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(t.size("object"), 2);
+                NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
 
-                auto *deserialized = s.get<Sequential<T> *>("nn");
+                auto *deserialized = t.get<Sequential<T> *>("nn");
                 try
                 {
                     forEach([&](T orig, T copy)

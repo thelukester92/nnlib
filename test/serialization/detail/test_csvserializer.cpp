@@ -2,96 +2,136 @@
 #include "nnlib/core/tensor.hpp"
 #include "nnlib/serialization/csvserializer.hpp"
 #include "nnlib/serialization/serialized.hpp"
+#include <cstdio>
+#include <fstream>
+#include <sstream>
 using namespace nnlib;
 
-void TestCSVSerializer()
+NNTestClassImpl(CSVSerializer)
 {
-    // basic serialization
-
+    NNTestMethod(read)
     {
-        Serialized s;
-
-        s.add(Serialized::Array);
-        s.get(0)->add(3.14);
-        s.get(0)->add(-12);
-        s.get(0)->add(true);
-        s.get(0)->add(false);
-        s.get(0)->add(Serialized::Null);
-        s.get(0)->add("this is a string");
-
-        s.add(Serialized::Array);
-        s.get(1)->add("this is a \"string\"");
-        s.get(1)->add("this, is, a, string");
-        s.get(1)->add("123.456.789");
-
-        std::stringstream ss;
-        CSVSerializer::write(s, ss);
-
-        Serialized d = CSVSerializer::read(ss);
-
-        NNAssertAlmostEquals(d.get(0)->get<double>(0), 3.14, 1e-12, "CSVSerializer failed!");
-        NNAssertEquals(d.get(0)->get<int>(1), -12, "CSVSerializer failed!");
-        NNAssertEquals(d.get(0)->get<std::string>(2), "true", "CSVSerializer failed!");
-        NNAssertEquals(d.get(0)->get<std::string>(3), "false", "CSVSerializer failed!");
-        NNAssertEquals(d.get(0)->get<std::string>(4), "null", "CSVSerializer failed!");
-        NNAssertEquals(d.get(0)->get<std::string>(5), "this is a string", "CSVSerializer failed!");
-
-        NNAssertEquals(d.get(1)->get<std::string>(0), "this is a \"string\"", "CSVSerializer failed!");
-        NNAssertEquals(d.get(1)->get<std::string>(1), "this, is, a, string", "CSVSerializer failed!");
-        NNAssertEquals(d.get(1)->get<std::string>(2), "123.456.789", "CSVSerializer failed!");
-
+        NNTestParams(std::istream &)
         {
-            std::stringstream ss;
-            ss << "this\nis\na\nstring";
-
-            Serialized t = CSVSerializer::read(ss, 1);
-            NNAssertEquals(t.get(0)->get<std::string>(0), "is", "CSVSerializer failed to skip lines!");
+            std::istringstream ss("0,3.14,string\na,2");
+            Serialized s = CSVSerializer::read(ss);
+            NNTestEquals(s.size(), 2);
+            NNTestEquals(s.size(0), 3);
+            NNTestEquals(s.size(1), 2);
+            NNTestEquals(s.get(0)->get<int>(0), 0);
+            NNTestEquals(s.get(0)->get<double>(1), 3.14);
+            NNTestEquals(s.get(0)->get<std::string>(2), "string");
+            NNTestEquals(s.get(1)->get<std::string>(0), "a");
+            NNTestEquals(s.get(1)->get<int>(1), 2);
         }
 
-        bool ok = false;
-        Serialized notCompatibleWithCSV(Serialized::Object);
-        try
+        NNTestParams(const std::string &)
         {
-            CSVSerializer::write(notCompatibleWithCSV, ss);
-        }
-        catch(const Error &)
-        {
-            ok = true;
-        }
-        NNAssert(ok, "CSVSerializer failed! Accepted an object instead of an array!");
+            std::ofstream fout(".nnlib.tmp");
+            fout << "0,3.14,string\na,2" << std::flush;
+            fout.close();
 
-        ok = false;
-        notCompatibleWithCSV.add(Serialized::Object);
-        try
-        {
-            CSVSerializer::write(notCompatibleWithCSV, ss);
-        }
-        catch(const Error &)
-        {
-            ok = true;
-        }
-        NNAssert(ok, "CSVSerializer failed! Accepted an object instead of an array!");
+            try
+            {
+                Serialized s = CSVSerializer::read(".nnlib.tmp");
+                NNTestEquals(s.size(), 2);
+                NNTestEquals(s.size(0), 3);
+                NNTestEquals(s.size(1), 2);
+                NNTestEquals(s.get(0)->get<int>(0), 0);
+                NNTestEquals(s.get(0)->get<double>(1), 3.14);
+                NNTestEquals(s.get(0)->get<std::string>(2), "string");
+                NNTestEquals(s.get(1)->get<std::string>(0), "a");
+                NNTestEquals(s.get(1)->get<int>(1), 2);
+            }
+            catch(const Error &e)
+            {
+                remove(".nnlib.tmp");
+                throw e;
+            }
 
-        ok = false;
-        notCompatibleWithCSV.get(0)->add(Serialized::Object);
-        try
-        {
-            CSVSerializer::write(notCompatibleWithCSV, ss);
+            remove(".nnlib.tmp");
         }
-        catch(const Error &)
+
+        NNTestParams(std::istream &, size_t)
         {
-            ok = true;
+            std::istringstream ss("@arff relation foo\n@attribute bar number\n@attribute baz string\n@data\n0,3.14,string\na,2");
+            Serialized s = CSVSerializer::read(ss, 4);
+            NNTestEquals(s.size(), 2);
+            NNTestEquals(s.size(0), 3);
+            NNTestEquals(s.size(1), 2);
+            NNTestEquals(s.get(0)->get<int>(0), 0);
+            NNTestEquals(s.get(0)->get<double>(1), 3.14);
+            NNTestEquals(s.get(0)->get<std::string>(2), "string");
+            NNTestEquals(s.get(1)->get<std::string>(0), "a");
+            NNTestEquals(s.get(1)->get<int>(1), 2);
         }
-        NNAssert(ok, "CSVSerializer failed! Accepted an object instead of a number or string!");
-    }
 
-    {
-        std::stringstream ss;
-        ss << "1,2,3\n4,5,6";
+        NNTestParams(const std::string &, size_t)
+        {
+            std::ofstream fout(".nnlib.tmp");
+            fout << "@arff relation foo\n@attribute bar number\n@attribute baz string\n@data\n0,3.14,string\na,2" << std::flush;
+            fout.close();
 
-        Tensor<NN_REAL_T> t = CSVSerializer::read(ss);
-        NNAssertEquals(t.dims(), 2, "CSVSerializer failed to load a matrix!");
-        NNAssertEquals(t(0, 0), 1, "CSVSerializer failed to load a matrix!");
-        NNAssertEquals(t(1, 1), 5, "CSVSerializer failed to load a matrix!");
+            try
+            {
+                Serialized s = CSVSerializer::read(".nnlib.tmp", 4);
+                NNTestEquals(s.size(), 2);
+                NNTestEquals(s.size(0), 3);
+                NNTestEquals(s.size(1), 2);
+                NNTestEquals(s.get(0)->get<int>(0), 0);
+                NNTestEquals(s.get(0)->get<double>(1), 3.14);
+                NNTestEquals(s.get(0)->get<std::string>(2), "string");
+                NNTestEquals(s.get(1)->get<std::string>(0), "a");
+                NNTestEquals(s.get(1)->get<int>(1), 2);
+            }
+            catch(const Error &e)
+            {
+                remove(".nnlib.tmp");
+                throw e;
+            }
+
+            remove(".nnlib.tmp");
+        }
+
+        NNTestParams(std::istream &, size_t, bool)
+        {
+            std::istringstream ss("0:3.14:string\na:2");
+            Serialized s = CSVSerializer::read(ss, 0, ':');
+            NNTestEquals(s.size(), 2);
+            NNTestEquals(s.size(0), 3);
+            NNTestEquals(s.size(1), 2);
+            NNTestEquals(s.get(0)->get<int>(0), 0);
+            NNTestEquals(s.get(0)->get<double>(1), 3.14);
+            NNTestEquals(s.get(0)->get<std::string>(2), "string");
+            NNTestEquals(s.get(1)->get<std::string>(0), "a");
+            NNTestEquals(s.get(1)->get<int>(1), 2);
+        }
+
+        NNTestParams(const std::string &, size_t, bool)
+        {
+            std::ofstream fout(".nnlib.tmp");
+            fout << "0:3.14:string\na:2" << std::flush;
+            fout.close();
+
+            try
+            {
+                Serialized s = CSVSerializer::read(".nnlib.tmp", 0, ':');
+                NNTestEquals(s.size(), 2);
+                NNTestEquals(s.size(0), 3);
+                NNTestEquals(s.size(1), 2);
+                NNTestEquals(s.get(0)->get<int>(0), 0);
+                NNTestEquals(s.get(0)->get<double>(1), 3.14);
+                NNTestEquals(s.get(0)->get<std::string>(2), "string");
+                NNTestEquals(s.get(1)->get<std::string>(0), "a");
+                NNTestEquals(s.get(1)->get<int>(1), 2);
+            }
+            catch(const Error &e)
+            {
+                remove(".nnlib.tmp");
+                throw e;
+            }
+
+            remove(".nnlib.tmp");
+        }
     }
 }
