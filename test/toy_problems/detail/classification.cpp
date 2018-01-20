@@ -54,10 +54,10 @@ void ToyClassification()
         new Linear<NN_REAL_T>(20, 3), new LogSoftMax<NN_REAL_T>()
     );
 
-    NLL<NN_REAL_T> critic;
+    NLL<NN_REAL_T> *critic = new NLL<NN_REAL_T>();
     SGD<NN_REAL_T> opt(nn, critic);
 
-    NNAssertGreaterThan(critic.misclassifications(nn.forward(test.narrow(1, 0, 4)), test.narrow(1, 4)), 0, "Untrained model already perfect!");
+    NNAssertGreaterThan(critic->misclassifications(nn.forward(test.narrow(1, 0, 4)), test.narrow(1, 4)), 0, "Untrained model already perfect!");
 
     Batcher<NN_REAL_T> batcher(train.narrow(1, 0, 4), train.narrow(1, 4), 10);
     for(size_t epoch = 0; epoch < 1000; ++epoch)
@@ -72,5 +72,5 @@ void ToyClassification()
 
     // this amount of training should be plenty to perfectly classify the testing data
 
-    NNAssertEquals(critic.misclassifications(nn.forward(test.narrow(1, 0, 4)), test.narrow(1, 4)), 0, "Too many misclassifications!");
+    NNAssertEquals(critic->misclassifications(nn.forward(test.narrow(1, 0, 4)), test.narrow(1, 4)), 0, "Too many misclassifications!");
 }

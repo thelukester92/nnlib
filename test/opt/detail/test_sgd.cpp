@@ -1,6 +1,5 @@
 #include "../test_optimizer.hpp"
 #include "../test_sgd.hpp"
-#include "nnlib/critics/mse.hpp"
 #include "nnlib/math/math.hpp"
 #include "nnlib/math/random.hpp"
 #include "nnlib/nn/linear.hpp"
@@ -11,38 +10,7 @@ using T = NN_REAL_T;
 NNTestClassImpl(SGD)
 {
     Linear<T> model(2, 3);
-    MSE<T> critic;
-    NNRunAbstractTest(Optimizer, SGD, new SGD<T>(model, critic));
-
-    NNTestMethod(learningRate)
-    {
-        NNTestParams(T)
-        {
-            RandomEngine::sharedEngine().seed(0);
-
-            Linear<T> model(2, 3);
-            MSE<T> critic;
-            SGD<T> opt(model, critic);
-
-            auto inputs = math::rand(Tensor<T>(2));
-            auto target = math::rand(Tensor<T>(3));
-
-            opt.learningRate(0.1);
-            NNTestAlmostEquals(opt.learningRate(), 0.1, 1e-12);
-
-            auto before = model.params().copy();
-            opt.step(inputs, target);
-            T dist1 = sqrt(math::sum(math::square(before - model.params())));
-
-            model.params().copy(before);
-            opt.reset();
-            opt.learningRate(1);
-            opt.step(inputs, target);
-            T dist2 = sqrt(math::sum(math::square(before - model.params())));
-
-            NNTestAlmostEquals(dist1, 0.1 * dist2, 1e-12);
-        }
-    }
+    NNRunAbstractTest(Optimizer, SGD, new SGD<T>(model));
 
     NNTestMethod(momentum)
     {
@@ -50,8 +18,7 @@ NNTestClassImpl(SGD)
         {
             Linear<T> model(1, 1);
             model.params().fill(1);
-            MSE<T> critic;
-            SGD<T> opt(model, critic);
+            SGD<T> opt(model);
             opt.momentum(0.5);
             NNTestAlmostEquals(opt.momentum(), 0.5, 1e-12);
         }

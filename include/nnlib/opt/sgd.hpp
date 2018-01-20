@@ -11,11 +11,11 @@ class SGD : public Optimizer<T>
 {
 using Optimizer<T>::m_model;
 using Optimizer<T>::m_critic;
+using Optimizer<T>::m_params;
+using Optimizer<T>::m_grad;
+using Optimizer<T>::m_learningRate;
 public:
-    SGD(Module<T> &model, Critic<T> &critic);
-
-    SGD &learningRate(T learningRate);
-    T learningRate() const;
+    SGD(Module<T> &model, Critic<T> *critic = nullptr);
 
     SGD &momentum(T momentum);
     T momentum() const;
@@ -24,10 +24,7 @@ public:
     virtual SGD &step(const Tensor<T> &input, const Tensor<T> &target) override;
 
 private:
-    Tensor<T> &m_parameters;
-    Tensor<T> &m_grads;
     Tensor<T> m_velocity;
-    T m_learningRate;
     T m_momentum;
 };
 

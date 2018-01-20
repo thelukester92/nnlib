@@ -7,28 +7,39 @@
 namespace nnlib
 {
 
+/// \brief Base class for model optimizers.
+///
+/// This class owns the critic but not the model it is optimizing.
 template <typename T = NN_REAL_T>
 class Optimizer
 {
 public:
-    Optimizer(Module<T> &model, Critic<T> &critic);
+    Optimizer(Module<T> &model, Critic<T> *critic = nullptr);
     virtual ~Optimizer();
 
     Module<T> &model();
     Critic<T> &critic();
+    Tensor<T> &params();
+    Tensor<T> &grad();
 
-    /// Convenience method for evaluating the error given an input and output.
+    T learningRate() const;
+    Optimizer<T> &learningRate(T learningRate);
+
+    /// Evaluate the error on the given input/target pair.
     T evaluate(const Tensor<T> &input, const Tensor<T> &target);
 
-    /// Reset the state of the optimizer, if any.
-    virtual void reset();
+    /// Reset the state of the optimizer (i.e. momentum).
+    virtual void reset() = 0;
 
     /// Perform a single step of training given an input and a target.
     virtual Optimizer &step(const Tensor<T> &input, const Tensor<T> &target) = 0;
 
 protected:
     Module<T> &m_model;
-    Critic<T> &m_critic;
+    Critic<T> *m_critic;
+    Tensor<T> &m_params;
+    Tensor<T> &m_grad;
+    T m_learningRate;
 };
 
 }

@@ -24,7 +24,7 @@ void ToyTimeSeries()
         )
     );
 
-    MSE<NN_REAL_T> critic;
+    MSE<NN_REAL_T> *critic = new MSE<NN_REAL_T>();
     SGD<NN_REAL_T> opt(nn, critic);
     opt.learningRate(1e-2);
 
@@ -46,5 +46,5 @@ void ToyTimeSeries()
         preds(i, 0) = nn.output()(nn.output().size(0) - 1, 0, 0);
         nn.forward(preds.select(0, i).view(1, 1, 1));
     }
-    NNAssertLessThan(critic.forward(preds, test), 0.6, "Too much error!");
+    NNAssertLessThan(critic->forward(preds, test), 0.6, "Too much error!");
 }

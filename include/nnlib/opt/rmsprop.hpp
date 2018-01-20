@@ -11,20 +11,17 @@ class RMSProp : public Optimizer<T>
 {
 using Optimizer<T>::m_model;
 using Optimizer<T>::m_critic;
+using Optimizer<T>::m_params;
+using Optimizer<T>::m_grad;
+using Optimizer<T>::m_learningRate;
 public:
-    RMSProp(Module<T> &model, Critic<T> &critic);
-
-    RMSProp &learningRate(T learningRate);
-    T learningRate() const;
+    RMSProp(Module<T> &model, Critic<T> *critic = nullptr);
 
     virtual void reset() override;
     virtual RMSProp &step(const Tensor<T> &input, const Tensor<T> &target) override;
 
 private:
-    Tensor<T> &m_parameters;
-    Tensor<T> &m_grads;
     Tensor<T> m_variance;
-    T m_learningRate;
     T m_gamma;
 };
 
