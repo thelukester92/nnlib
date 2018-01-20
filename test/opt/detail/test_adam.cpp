@@ -29,10 +29,10 @@ NNTestClassImpl(Adam)
             Tensor<T> target = { 0 };
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-12);
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.48333333647, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.4833333364722222, 1e-12);
         }
     }
 
@@ -53,10 +53,10 @@ NNTestClassImpl(Adam)
             Tensor<T> target = { 0 };
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.75000000144, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.7500000014433756, 1e-12);
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.51743487543, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.5174348754405044, 1e-12);
         }
     }
 
@@ -79,7 +79,7 @@ NNTestClassImpl(Adam)
             NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-9);
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.50000000291, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.5000000029166667, 1e-9);
         }
     }
 }

@@ -28,10 +28,10 @@ NNTestClassImpl(RMSProp)
             Tensor<T> target = { 0 };
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.71132486707, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.7113248670718537, 1e-12);
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.47515671489, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.4751567148916899, 1e-12);
         }
     }
 
@@ -50,10 +50,10 @@ NNTestClassImpl(RMSProp)
             Tensor<T> target = { 0 };
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.75000000125, 1e-12);
 
             opt.step(inputs, target);
-            NNTestAlmostEquals(opt.params()(0), 0.50000000291, 1e-9);
+            NNTestAlmostEquals(opt.params()(0), 0.5000000029166667, 1e-12);
         }
     }
 }
