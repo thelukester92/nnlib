@@ -6,6 +6,10 @@
 #include <iomanip>
 #include <map>
 
+#ifndef NN_DBG
+    #define NN_ARGS_EXIT_ON_HELP
+#endif
+
 namespace nnlib
 {
 
@@ -230,7 +234,9 @@ ArgsParser &ArgsParser::parse(int argc, const char **argv, bool popCommand, std:
     if(m_helpOpt != '\0' && getFlag(m_helpOpt))
     {
         printHelp(out);
+#ifdef NN_ARGS_EXIT_ON_HELP
         exit(0);
+#endif
     }
 
     return *this;

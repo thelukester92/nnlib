@@ -1,10 +1,9 @@
 // force debugging asserts
-#ifdef OPTIMIZE
+#ifdef NN_OPT
     #warning Debugging asserts have been re-enabled for testing.
-    #undef OPTIMIZE
+    #undef NN_OPT
 #endif
 
-// include tests
 #include "test.hpp"
 #include "core/test_error.hpp"
 #include "core/test_storage.hpp"
@@ -49,19 +48,11 @@
 #include "util/test_args.hpp"
 #include "util/test_batcher.hpp"
 
-// other includes
-#include "nnlib/util/args.hpp"
-
 int main(int argc, const char **argv)
 {
-    nnlib::ArgsParser args;
-    args.addFlag('v', "verbose");
-    args.addFlag('V', "very-verbose");
-    args.parse(argc, argv);
-
-    if(args.getFlag('v'))
+    if(argc > 1 && argv[1] == std::string("-v"))
         nnlib::test::Test::verbosity() = 1;
-    else if(args.getFlag('V'))
+    else if(argc > 1 && argv[1] == std::string("-V"))
         nnlib::test::Test::verbosity() = 2;
 
     // Core

@@ -84,7 +84,7 @@ else
 endif
 
 override OPTFLAGS := $(CXXFLAGS) -DNN_OPT -O3
-override DBGFLAGS := $(CXXFLAGS) -g -O0
+override DBGFLAGS := $(CXXFLAGS) -DNN_DBG -g -O0
 
 override TSTFILES := $(shell find test -name *.cpp)
 override TSTFILES := $(TSTFILES:test/%.cpp=$(OBJ)/test/%.o)

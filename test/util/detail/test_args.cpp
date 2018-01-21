@@ -1,10 +1,6 @@
 #include "../test_args.hpp"
-#include <sstream>
-
-#define exit(x) ;
 #include "nnlib/util/args.hpp"
-#undef exit
-
+#include <sstream>
 using namespace nnlib;
 
 NNTestClassImpl(Args)
@@ -71,6 +67,9 @@ NNTestClassImpl(Args)
             NNTestEquals(args.nextIsNumber(), true);
             args.popString();
             NNTestEquals(args.nextIsNumber(), true);
+            args.popString();
+            NNTestEquals(args.nextIsNumber(), false);
+
         }
     }
 
@@ -252,19 +251,29 @@ NNTestClassImpl(ArgsParser)
     {
         NNTestParams(int, const char **, bool, std::ostream &)
         {
-            const char *argv[] = { "cmd", "-a", "opt", "-bc", "-5", "--dee", "3.14" };
+            const char *argv[] = { "cmd", "-a", "opt", "-bc", "-5", "--dee", "3.14", "-e" };
 
             ArgsParser args;
             args.addString('a', "ayy");
             args.addFlag('b', "bee");
             args.addInt('c', "cee");
             args.addDouble('d', "dee");
-            args.parse(7, argv);
+            args.addFlag('e', "eee");
+            args.addFlag('f', "eee");
+            args.parse(8, argv);
 
             NNTestEquals(args.getString('a'), "opt");
             NNTestEquals(args.getFlag('b'), true);
             NNTestEquals(args.getInt('c'), -5);
             NNTestAlmostEquals(args.getDouble('d'), 3.14, 1e-12);
+            NNTestEquals(args.getFlag('e'), true);
+            NNTestEquals(args.getFlag('f'), false);
+
+            std::stringstream ss;
+            const char *argv2[] = { "cmd", "-h" };
+            ArgsParser args2;
+            args2.parse(2, argv2, true, ss);
+            NNTestGreaterThan(ss.str().size(), 0);
         }
     }
 }
