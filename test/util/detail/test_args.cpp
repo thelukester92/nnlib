@@ -275,6 +275,8 @@ NNTestClassImpl(ArgsParser)
             args2.addInt('i', "int", 32);
             args2.addDouble('d', "double", 3.14);
             args2.addString('s', "string", "string");
+            args2.addFlag('f');
+            args2.addFlag("flag");
             args2.parse(2, argv2, true, ss);
             NNTestGreaterThan(ss.str().size(), 0);
         }
