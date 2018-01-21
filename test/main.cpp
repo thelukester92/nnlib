@@ -42,6 +42,7 @@
 #include "serialization/test_csvserializer.hpp"
 #include "serialization/test_fileserializer.hpp"
 #include "serialization/test_jsonserializer.hpp"
+#include "serialization/test_parser.hpp"
 #include "serialization/test_serialized.hpp"
 #include "toy_problems/classification.hpp"
 #include "toy_problems/timeseries.hpp"
@@ -110,6 +111,7 @@ int main(int argc, const char **argv)
     NNRunTest(CSVSerializer);
     NNRunTest(FileSerializer);
     NNRunTest(JSONSerializer);
+    NNRunTest(Parser);
     NNRunTest(Serialized);
 
     return 0;

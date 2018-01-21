@@ -51,13 +51,13 @@ bool Parser::consume(char c)
 
 bool Parser::consume(const std::string &sequence)
 {
-    size_t i = 0, end = sequence.length();
+    int i = 0, end = sequence.length();
     while(i != end && sequence[i] == m_in.get())
         ++i;
 
     if(i < end)
     {
-        while(i > 0)
+        while(i >= 0)
         {
             m_in.unget();
             --i;
