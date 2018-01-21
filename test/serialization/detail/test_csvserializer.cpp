@@ -145,17 +145,22 @@ NNTestClassImpl(CSVSerializer)
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
+            s.get(0)->add(nullptr);
             s.add(Serialized::Array);
             s.get(1)->add("a,\"string\"");
             s.get(1)->add(-2);
+            s.get(1)->add(false);
 
             std::stringstream ss;
             CSVSerializer::write(s, ss);
-            NNTest(ss.str() == "0,3.14,string\n\"a,\"\"string\"\"\",-2\n");
+            NNTest(ss.str() == "0,3.14,string,null\n\"a,\"\"string\"\"\",-2,false\n");
 
             try
             {
-                CSVSerializer::write(Serialized::Array, ss);
+                Serialized s;
+                s.add(Serialized::Array);
+                s.get(0)->add(Serialized::Object);
+                CSVSerializer::write(s, ss);
                 NNTest(false);
             }
             catch(const Error &e)
