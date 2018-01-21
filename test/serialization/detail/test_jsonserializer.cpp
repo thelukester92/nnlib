@@ -60,6 +60,14 @@ NNTestClassImpl(JSONSerializer)
                 delete deserialized;
                 throw e;
             }
+
+            std::stringstream ss2;
+            ss2 << "[ 1e-5, 3.1415E3, -1e+04, \"\\\"escaped\\\"\" ]";
+            auto u = JSONSerializer::read(ss2);
+            NNTestAlmostEquals(u.get<double>(0), 1e-5, 1e-12);
+            NNTestAlmostEquals(u.get<double>(1), 3.1415e3, 1e-12);
+            NNTestAlmostEquals(u.get<double>(2), -1e4, 1e-12);
+            NNTestEquals(u.get<std::string>(3), "\"escaped\"");
         }
 
         NNTestParams(const std::string &)
@@ -68,7 +76,7 @@ NNTestClassImpl(JSONSerializer)
 
             Serialized s;
             s.set("null", nullptr);
-            s.set("bool", true);
+            s.set("bool", false);
             s.set("int", 32);
             s.set("int", 42);
             s.set("double", 3.14);
@@ -86,7 +94,7 @@ NNTestClassImpl(JSONSerializer)
             {
                 Serialized t = JSONSerializer::read(".nnlib.tmp");
                 NNTestEquals(t.type("null"), Serialized::Null);
-                NNTestEquals(t.get<bool>("bool"), true);
+                NNTestEquals(t.get<bool>("bool"), false);
                 NNTestEquals(t.get<int>("int"), 42);
                 NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
                 NNTestEquals(t.get<std::string>("string"), "nnlib");
@@ -131,18 +139,21 @@ NNTestClassImpl(JSONSerializer)
             s.set("int", 42);
             s.set("double", 3.14);
             s.set("string", "nnlib");
+            s.set("escaped", "\"escaped\"");
             s.set("array", Serialized::Array);
             s.get("array")->add("array_element");
             s.set("object", Serialized::Object);
             s.get("object")->set("object_prop1", 3.14);
             s.get("object")->set("object_prop2", "value");
+            s.set("emptyArray", Serialized::Array);
+            s.set("emptyObject", Serialized::Object);
 
             std::stringstream mini, pretty;
             JSONSerializer::write(s, mini, false);
             JSONSerializer::write(s, pretty, true);
 
-            NNTest(mini.str() == "{\"null\":null,\"bool\":true,\"int\":42,\"double\":3.14,\"string\":\"nnlib\",\"array\":[\"array_element\"],\"object\":{\"object_prop1\":3.14,\"object_prop2\":\"value\"}}");
-            NNTest(pretty.str() == "{\n\t\"null\": null,\n\t\"bool\": true,\n\t\"int\": 42,\n\t\"double\": 3.14,\n\t\"string\": \"nnlib\",\n\t\"array\": [\n\t\t\"array_element\"\n\t],\n\t\"object\": {\n\t\t\"object_prop1\": 3.14,\n\t\t\"object_prop2\": \"value\"\n\t}\n}");
+            NNTest(mini.str() == "{\"null\":null,\"bool\":true,\"int\":42,\"double\":3.14,\"string\":\"nnlib\",\"escaped\":\"\\\"escaped\\\"\",\"array\":[\"array_element\"],\"object\":{\"object_prop1\":3.14,\"object_prop2\":\"value\"},\"emptyArray\":[],\"emptyObject\":{}}");
+            NNTest(pretty.str() == "{\n\t\"null\": null,\n\t\"bool\": true,\n\t\"int\": 42,\n\t\"double\": 3.14,\n\t\"string\": \"nnlib\",\n\t\"escaped\": \"\\\"escaped\\\"\",\n\t\"array\": [\n\t\t\"array_element\"\n\t],\n\t\"object\": {\n\t\t\"object_prop1\": 3.14,\n\t\t\"object_prop2\": \"value\"\n\t},\n\t\"emptyArray\": [],\n\t\"emptyObject\": {}\n}");
         }
     }
 }
