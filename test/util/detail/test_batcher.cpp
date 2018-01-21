@@ -52,6 +52,14 @@ NNTestClassImpl(Batcher)
             Batcher<T> batcher(feat, lab, 2);
             NNTestEquals(batcher.batch(), 2);
         }
+
+        NNTestParams(size_t)
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> batcher(feat, lab, 2);
+            batcher.batch(5);
+            NNTestEquals(batcher.batch(), 5);
+        }
     }
 
     NNTestMethod(batches)
@@ -107,8 +115,7 @@ NNTestClassImpl(Batcher)
         {
             Tensor<T> feat(6, 2), lab(6, 1);
             Batcher<T> batcher(feat, lab, 1);
-            NNTestEquals(&*feat.begin(), &*batcher.allFeatures().begin());
-            NNTestEquals(&*feat.end(), &*batcher.allFeatures().end());
+            NNTestEquals(&feat.data(), &batcher.allFeatures().data());
         }
     }
 
@@ -118,8 +125,7 @@ NNTestClassImpl(Batcher)
         {
             Tensor<T> feat(6, 2), lab(6, 1);
             Batcher<T> batcher(feat, lab, 1);
-            NNTestEquals(&*lab.begin(), &*batcher.allLabels().begin());
-            NNTestEquals(&*lab.end(), &*batcher.allLabels().end());
+            NNTestEquals(&lab.data(), &batcher.allLabels().data());
         }
     }
 }
@@ -205,6 +211,26 @@ NNTestClassImpl(SequenceBatcher)
                     batcher.reset();
                 }
             }
+        }
+    }
+
+    NNTestMethod(allFeatures)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            NNTestEquals(&feat.data(), &batcher.allFeatures().data());
+        }
+    }
+
+    NNTestMethod(allLabels)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            NNTestEquals(&lab.data(), &batcher.allLabels().data());
         }
     }
 }

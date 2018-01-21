@@ -214,13 +214,13 @@ Tensor<T> &SequenceBatcher<T>::labels()
 template <typename T>
 const Tensor<T> &SequenceBatcher<T>::allFeatures() const
 {
-    return m_featBatch;
+    return m_feat;
 }
 
 template <typename T>
 const Tensor<T> &SequenceBatcher<T>::allLabels() const
 {
-    return m_labBatch;
+    return m_lab;
 }
 
 }
