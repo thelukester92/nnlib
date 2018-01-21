@@ -49,6 +49,11 @@
 #include "util/test_batcher.hpp"
 #include "util/test_progress.hpp"
 #include "util/test_timer.hpp"
+#include <unordered_set>
+
+#define RunTest(Class) \
+    if(tests.size() == 0 || tests.find(#Class) != tests.end()) \
+        NNRunTest(Class);
 
 int main(int argc, const char **argv)
 {
@@ -57,63 +62,71 @@ int main(int argc, const char **argv)
     else if(argc > 1 && argv[1] == std::string("-V"))
         nnlib::test::Test::verbosity() = 2;
 
+    std::unordered_set<std::string> tests;
+    for(size_t i = 1; i < argc; ++i)
+    {
+        if(i == 1 && (argv[1] == std::string("-v") || argv[1] == std::string("-V")))
+            continue;
+        tests.emplace(argv[i]);
+    }
+
     // Core
-    NNRunTest(Error);
-    NNRunTest(Storage);
-    NNRunTest(Tensor);
-    NNRunTest(TensorIterator);
-    NNRunTest(TensorOperators);
-    NNRunTest(TensorUtil);
+    RunTest(Error);
+    RunTest(Storage);
+    RunTest(Tensor);
+    RunTest(TensorIterator);
+    RunTest(TensorOperators);
+    RunTest(TensorUtil);
 
     // Critics
-    NNRunTest(CriticSequencer);
-    NNRunTest(MSE);
-    NNRunTest(NLL);
+    RunTest(CriticSequencer);
+    RunTest(MSE);
+    RunTest(NLL);
 
     // Math
-    NNRunTest(Algebra);
-    NNRunTest(Math);
-    NNRunTest(Random);
+    RunTest(Algebra);
+    RunTest(Math);
+    RunTest(Random);
 
     // Neural Network Modules
-    NNRunTest(BatchNorm);
-    NNRunTest(Concat);
-    NNRunTest(DropConnect);
-    NNRunTest(Dropout);
-    NNRunTest(ELU);
-    NNRunTest(Identity);
-    NNRunTest(Linear);
-    NNRunTest(Logistic);
-    NNRunTest(LogSoftMax);
-    NNRunTest(LSTM);
-    NNRunTest(ReLU);
-    NNRunTest(Sequencer);
-    NNRunTest(Sequential);
-    NNRunTest(Sin);
-    NNRunTest(SoftMax);
-    NNRunTest(TanH);
+    RunTest(BatchNorm);
+    RunTest(Concat);
+    RunTest(DropConnect);
+    RunTest(Dropout);
+    RunTest(ELU);
+    RunTest(Identity);
+    RunTest(Linear);
+    RunTest(Logistic);
+    RunTest(LogSoftMax);
+    RunTest(LSTM);
+    RunTest(ReLU);
+    RunTest(Sequencer);
+    RunTest(Sequential);
+    RunTest(Sin);
+    RunTest(SoftMax);
+    RunTest(TanH);
 
     // Optimizers
-    NNRunTest(Adam);
-    NNRunTest(Nadam);
-    NNRunTest(RMSProp);
-    NNRunTest(SGD);
+    RunTest(Adam);
+    RunTest(Nadam);
+    RunTest(RMSProp);
+    RunTest(SGD);
 
     // Serialization
-    NNRunTest(BinarySerializer);
-    NNRunTest(CSVSerializer);
-    NNRunTest(FileSerializer);
-    NNRunTest(JSONSerializer);
-    NNRunTest(Parser);
-    NNRunTest(Serialized);
+    RunTest(BinarySerializer);
+    RunTest(CSVSerializer);
+    RunTest(FileSerializer);
+    RunTest(JSONSerializer);
+    RunTest(Parser);
+    RunTest(Serialized);
 
     // Utility Classes
-    NNRunTest(Args);
-    NNRunTest(ArgsParser);
-    NNRunTest(Batcher);
-    NNRunTest(SequenceBatcher);
-    NNRunTest(Progress);
-    NNRunTest(Timer);
+    RunTest(Args);
+    RunTest(ArgsParser);
+    RunTest(Batcher);
+    RunTest(SequenceBatcher);
+    RunTest(Progress);
+    RunTest(Timer);
 
     return 0;
 }
