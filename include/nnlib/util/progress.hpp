@@ -11,9 +11,8 @@ namespace nnlib
 class Progress
 {
 public:
-    inline Progress(size_t total, std::ostream &out = std::cout, size_t length = 50);
-    inline void reset();
-    inline void display(size_t current);
+    Progress(size_t total, std::ostream &out = std::cout, size_t length = 50);
+    void display(size_t current);
 
 private:
     size_t m_total, m_degreeTotal, m_length;

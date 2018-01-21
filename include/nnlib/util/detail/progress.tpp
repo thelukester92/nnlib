@@ -13,11 +13,6 @@ Progress::Progress(size_t total, std::ostream &out, size_t length) :
     m_out(out)
 {}
 
-void Progress::reset()
-{
-    m_timer.reset();
-}
-
 void Progress::display(size_t current)
 {
     if(m_total == 0)

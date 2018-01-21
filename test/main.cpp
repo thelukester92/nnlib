@@ -47,6 +47,8 @@
 #include "toy_problems/timeseries.hpp"
 #include "util/test_args.hpp"
 #include "util/test_batcher.hpp"
+#include "util/test_progress.hpp"
+#include "util/test_timer.hpp"
 
 int main(int argc, const char **argv)
 {
@@ -110,6 +112,8 @@ int main(int argc, const char **argv)
     NNRunTest(ArgsParser);
     NNRunTest(Batcher);
     NNRunTest(SequenceBatcher);
+    NNRunTest(Progress);
+    NNRunTest(Timer);
 
     return 0;
 }
