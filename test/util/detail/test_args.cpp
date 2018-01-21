@@ -7,6 +7,109 @@
 
 using namespace nnlib;
 
+NNTestClassImpl(Args)
+{
+    NNTestMethod(Args)
+    {
+        NNTestParams(int, const char **)
+        {
+            const char *argv[] = { "hello", "there" };
+            Args args(2, argv);
+            NNTestEquals(args.popString(), "hello");
+            NNTestEquals(args.popString(), "there");
+        }
+    }
+
+    NNTestMethod(unpop)
+    {
+        NNTestParams()
+        {
+            const char *argv[] = { "hello", "there" };
+            Args args(2, argv);
+            NNTestEquals(args.popString(), "hello");
+            NNTestEquals(&args.unpop(), &args);
+            NNTestEquals(args.popString(), "hello");
+        }
+    }
+
+    NNTestMethod(unpop)
+    {
+        NNTestParams()
+        {
+            const char *argv[] = { "hello", "there" };
+            Args args(2, argv);
+            NNTestEquals(args.hasNext(), true);
+            NNTestEquals(args.popString(), "hello");
+            NNTestEquals(args.hasNext(), true);
+            NNTestEquals(args.popString(), "there");
+            NNTestEquals(args.hasNext(), false);
+        }
+    }
+
+    NNTestMethod(ifPop)
+    {
+        NNTestParams(const std::string &)
+        {
+            const char *argv[] = { "hello", "there" };
+            Args args(2, argv);
+            NNTestEquals(args.ifPop("hello"), true);
+            NNTestEquals(args.ifPop("hello"), false);
+            NNTestEquals(args.ifPop("there"), true);
+        }
+    }
+
+    NNTestMethod(nextIsNumber)
+    {
+        NNTestParams()
+        {
+            const char *argv[] = { "hello", "42", "-1", "3.14" };
+            Args args(4, argv);
+            NNTestEquals(args.nextIsNumber(), false);
+            args.popString();
+            NNTestEquals(args.nextIsNumber(), true);
+            args.popString();
+            NNTestEquals(args.nextIsNumber(), true);
+            args.popString();
+            NNTestEquals(args.nextIsNumber(), true);
+        }
+    }
+
+    NNTestMethod(popString)
+    {
+        NNTestParams()
+        {
+            const char *argv[] = { "hello" };
+            Args args(1, argv);
+            NNTestEquals(args.popString(), "hello");
+        }
+    }
+
+    NNTestMethod(popDouble)
+    {
+        NNTestParams()
+        {
+            const char *argv[] = { "3.14" };
+            Args args(1, argv);
+            NNTestAlmostEquals(args.popDouble(), 3.14, 1e-12);
+        }
+    }
+
+    NNTestMethod(popInt)
+    {
+        NNTestParams()
+        {
+            const char *argv[] = { "42" };
+            Args args(1, argv);
+            NNTestEquals(args.popInt(), 42);
+        }
+    }
+}
+
+NNTestClassImpl(ArgsParser)
+{
+    // todo!
+}
+
 void TestArgs()
 {
     const int argc = 7;

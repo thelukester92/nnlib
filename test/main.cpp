@@ -114,5 +114,9 @@ int main(int argc, const char **argv)
     NNRunTest(Parser);
     NNRunTest(Serialized);
 
+    // Utility Classes
+    NNRunTest(Args);
+    NNRunTest(ArgsParser);
+
     return 0;
 }
