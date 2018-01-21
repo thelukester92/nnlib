@@ -369,6 +369,13 @@ NNTestClassImpl(Serialized)
                 NNTestEquals(Serialized(2).get<std::string>(), "2");
                 NNTestEquals(Serialized(3.14).get<std::string>(), "3.14");
                 NNTestEquals(Serialized("string").get<std::string>(), "string");
+                try
+                {
+                    Serialized(Serialized::Array).get<std::string>();
+                    NNTest(false);
+                }
+                catch(const Error &)
+                {}
             }
         }
 
