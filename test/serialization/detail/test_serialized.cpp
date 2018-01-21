@@ -181,30 +181,23 @@ NNTestClassImpl(Serialized)
 
             NNTestParams(Serialized &&)
             {
-                Serialized s, t;
-                s.set("null", nullptr);
-                s.set("bool", true);
-                s.set("int", 32);
-                s.set("int", 42);
-                s.set("double", 3.14);
-                s.set("string", "nnlib");
-                s.set("array", Serialized::Array);
-                s.get("array")->add("array_element");
-                s.set("object", Serialized::Object);
-                s.get("object")->set("object_prop1", 3.14);
-                s.get("object")->set("object_prop2", "value");
-
-                t = std::move(s);
-                NNTestEquals(t.type("null"), Serialized::Null);
-                NNTestEquals(t.get<bool>("bool"), true);
-                NNTestEquals(t.get<int>("int"), 42);
-                NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
-                NNTestEquals(t.get<std::string>("string"), "nnlib");
-                NNTestEquals(t.size("array"), 1);
-                NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
-                NNTestEquals(t.size("object"), 2);
-                NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-                NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+                Serialized t(0);
+                t = Serialized();
+                NNTestEquals(t.type(), Serialized::Null);
+                t = Serialized(true);
+                NNTestEquals(t.get<bool>(), true);
+                t = Serialized(-42);
+                NNTestEquals(t.get<int>(), -42);
+                t = Serialized(3.14);
+                NNTestAlmostEquals(t.get<double>(), 3.14, 1e-12);
+                t = Serialized("hello");
+                NNTestEquals(t.get<std::string>(), "hello");
+                t = Serialized(Serialized::Array);
+                NNTestEquals(t.type(), Serialized::Array);
+                NNTestEquals(t.size(), 0);
+                t = Serialized(Serialized::Object);
+                NNTestEquals(t.type(), Serialized::Object);
+                NNTestEquals(t.size(), 0);
             }
         }
 
@@ -407,34 +400,46 @@ NNTestClassImpl(Serialized)
             }
         }
 
-        NNTestMethod(get<Module>)
+        NNTestMethod(get<Module *>)
         {
             NNTestParams()
             {
                 Linear<T> orig(2, 3);
 
-                auto copy1 = Serialized(orig).get<Module<T> *>();
+                auto copy = Serialized(orig).get<Module<T> *>();
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, orig.params(), copy->params());
+                delete copy;
+
+                NNTestEquals(Serialized().get<Module<T> *>(), nullptr);
+            }
+        }
+
+        NNTestMethod(get<Linear *>)
+        {
+            NNTestParams()
+            {
+                Linear<T> orig(2, 3);
+
+                auto copy1 = Serialized(orig).get<Linear<T> *>();
                 forEach([&](T orig, T copy)
                 {
                     NNTestAlmostEquals(orig, copy, 1e-12);
                 }, orig.params(), copy1->params());
                 delete copy1;
 
-                auto copy2 = Serialized(orig).get<Linear<T> *>();
+                Serialized s;
+                orig.save(s);
+                auto copy2 = s.get<Linear<T> *>();
                 forEach([&](T orig, T copy)
                 {
                     NNTestAlmostEquals(orig, copy, 1e-12);
                 }, orig.params(), copy2->params());
                 delete copy2;
 
-                Serialized s;
-                orig.save(s);
-                auto copy3 = s.get<Linear<T> *>();
-                forEach([&](T orig, T copy)
-                {
-                    NNTestAlmostEquals(orig, copy, 1e-12);
-                }, orig.params(), copy3->params());
-                delete copy3;
+                NNTestEquals(Serialized().get<Linear<T> *>(), nullptr);
             }
         }
 
