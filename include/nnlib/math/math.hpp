@@ -12,22 +12,6 @@ namespace nnlib
 namespace math
 {
 
-// MARK: Convenience methods implemented directly in the header.
-
-/// Make a tensor filled with zeros.
-template <typename T, typename ... Ts>
-Tensor<T> zeros(Ts && ...dims)
-{
-    return fill(Tensor<T>(std::forward<Ts>(dims)...), 0);
-}
-
-/// Make a tensor filled with ones.
-template <typename T, typename ... Ts>
-Tensor<T> ones(Ts && ...dims)
-{
-    return fill(Tensor<T>(std::forward<Ts>(dims)...), 1);
-}
-
 // MARK: Single tensor operations.
 
 /// Returns the smallest element in x.
@@ -163,6 +147,22 @@ Tensor<T> &pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &z
 /// Sets each element in z to the product of the corresponding elements in x and y.
 template <typename T>
 Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &&z);
+
+// MARK: Convenience methods implemented directly in the header.
+
+/// Make a tensor filled with zeros.
+template <typename T, typename ... Ts>
+Tensor<T> zeros(Ts && ...dims)
+{
+    return fill(Tensor<T>(std::forward<Ts>(dims)...), 0);
+}
+
+/// Make a tensor filled with ones.
+template <typename T, typename ... Ts>
+Tensor<T> ones(Ts && ...dims)
+{
+    return fill(Tensor<T>(std::forward<Ts>(dims)...), 1);
+}
 
 #if defined NN_REAL_T && !defined NN_IMPL
     extern template NN_REAL_T min<NN_REAL_T>(const Tensor<NN_REAL_T> &);

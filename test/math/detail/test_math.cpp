@@ -7,36 +7,6 @@ using T = NN_REAL_T;
 
 NNTestClassImpl(Math)
 {
-    NNTestMethod(zeros)
-    {
-        NNTestParams(size_t, size_t)
-        {
-            Tensor<T> x = ones(3, 6);
-            NNTestEquals(ones.dims(), 3);
-            NNTestEquals(ones.size(0), 3);
-            NNTestEquals(ones.size(1), 6);
-            forEach([&](T x)
-            {
-                NNTestAlmostEquals(x, 0, 1e-12);
-            }, x);
-        }
-    }
-
-    NNTestMethod(ones)
-    {
-        NNTestParams(size_t, size_t)
-        {
-            Tensor<T> x = ones(3, 6);
-            NNTestEquals(ones.dims(), 2);
-            NNTestEquals(ones.size(0), 3);
-            NNTestEquals(ones.size(1), 6);
-            forEach([&](T x)
-            {
-                NNTestAlmostEquals(x, 1, 1e-12);
-            }, x);
-        }
-    }
-
     NNTestMethod(min)
     {
         NNTestParams(const Tensor &)
@@ -410,6 +380,36 @@ NNTestClassImpl(Math)
             NNTestAlmostEquals(z(0), 4, 1e-12);
             NNTestAlmostEquals(z(1), 10, 1e-12);
             NNTestAlmostEquals(z(2), 18, 1e-12);
+        }
+    }
+
+    NNTestMethod(zeros)
+    {
+        NNTestParams(size_t, size_t)
+        {
+            Tensor<T> x = zeros<T>(3, 6);
+            NNTestEquals(x.dims(), 3);
+            NNTestEquals(x.size(0), 3);
+            NNTestEquals(x.size(1), 6);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 0, 1e-12);
+            }, x);
+        }
+    }
+
+    NNTestMethod(ones)
+    {
+        NNTestParams(size_t, size_t)
+        {
+            Tensor<T> x = ones<T>(3, 6);
+            NNTestEquals(x.dims(), 2);
+            NNTestEquals(x.size(0), 3);
+            NNTestEquals(x.size(1), 6);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 1, 1e-12);
+            }, x);
         }
     }
 }
