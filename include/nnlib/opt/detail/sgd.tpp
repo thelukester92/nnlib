@@ -3,6 +3,7 @@
 
 #include "../sgd.hpp"
 #include "nnlib/math/algebra.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -13,7 +14,7 @@ SGD<T>::SGD(Module<T> &model, Critic<T> *critic) :
     m_velocity(m_grad.size()),
     m_momentum(0)
 {
-    m_velocity.fill(0);
+    math::fill(m_velocity, 0);
 }
 
 template <typename T>
@@ -32,20 +33,20 @@ T SGD<T>::momentum() const
 template <typename T>
 void SGD<T>::reset()
 {
-    m_velocity.fill(0);
+    math::fill(m_velocity, 0);
 }
 
 template <typename T>
 SGD<T> &SGD<T>::step(const Tensor<T> &input, const Tensor<T> &target)
 {
     // calculate gradient
-    m_grad.fill(0);
+    math::fill(m_grad, 0);
     m_model.backward(input, m_critic->backward(m_model.forward(input), target));
 
     // Nesterov momentum
     if(m_momentum)
     {
-        m_velocity.scale(m_momentum);
+        math::scale(m_velocity, m_momentum);
         math::vAdd_v(m_grad, m_velocity, -m_learningRate);
         math::vAdd_v(m_velocity, m_params, m_momentum);
     }

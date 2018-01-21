@@ -2,6 +2,7 @@
 #define OPT_ADAM_TPP
 
 #include "../adam.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -14,8 +15,8 @@ Adam<T>::Adam(Module<T> &model, Critic<T> *critic) :
     m_normalize1(1),
     m_normalize2(1)
 {
-    m_mean.resize(m_grad.size()).fill(0);
-    m_variance.resize(m_grad.size()).fill(0);
+    math::fill(m_mean.resize(m_grad.size()), 0);
+    math::fill(m_variance.resize(m_grad.size()), 0);
 }
 
 template <typename T>
@@ -49,8 +50,8 @@ void Adam<T>::reset()
 {
     m_normalize1 = 1;
     m_normalize2 = 1;
-    m_mean.fill(0);
-    m_variance.fill(0);
+    math::fill(m_mean, 0);
+    math::fill(m_variance, 0);
 }
 
 template <typename T>
@@ -62,7 +63,7 @@ Adam<T> &Adam<T>::step(const Tensor<T> &input, const Tensor<T> &target)
     T lr = m_learningRate / (1 - m_normalize1) * sqrt(1 - m_normalize2);
 
     // calculate gradient
-    m_grad.fill(0);
+    math::fill(m_grad, 0);
     m_model.backward(input, m_critic->backward(m_model.forward(input), target));
 
     for(size_t i = 0, end = m_grad.size(); i != end; ++i)

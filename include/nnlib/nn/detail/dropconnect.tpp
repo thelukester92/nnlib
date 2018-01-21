@@ -156,7 +156,7 @@ Tensor<T> &DropConnect<T>::forward(const Tensor<T> &input)
         }
     }
     else
-        m_output = m_module->forward(input).scale(1 - m_dropProbability);
+        m_output = math::scale(m_module->forward(input), 1 - m_dropProbability);
 
     return m_output;
 }
@@ -191,7 +191,7 @@ Tensor<T> &DropConnect<T>::backward(const Tensor<T> &input, const Tensor<T> &out
         }
     }
     else
-        m_inGrad = m_module->backward(input, outGrad).scale(1 - m_dropProbability);
+        m_inGrad = math::scale(m_module->backward(input, outGrad), 1 - m_dropProbability);
 
     return m_inGrad;
 }

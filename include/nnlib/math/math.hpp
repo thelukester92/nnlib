@@ -12,6 +12,22 @@ namespace nnlib
 namespace math
 {
 
+// MARK: Convenience methods implemented directly in the header.
+
+/// Make a tensor filled with zeros.
+template <typename T, typename ... Ts>
+Tensor<T> zeros(Ts && ...dims)
+{
+    return fill(Tensor<T>(std::forward<Ts>(dims)...), 0);
+}
+
+/// Make a tensor filled with ones.
+template <typename T, typename ... Ts>
+Tensor<T> ones(Ts && ...dims)
+{
+    return fill(Tensor<T>(std::forward<Ts>(dims)...), 1);
+}
+
 // MARK: Single tensor operations.
 
 /// Returns the smallest element in x.
@@ -33,6 +49,38 @@ T mean(const Tensor<T> &x);
 /// Returns the variance of elements in x.
 template <typename T>
 T variance(const Tensor<T> &x, bool sample = false);
+
+/// Fill the tensor with the given value.
+template <typename T>
+Tensor<T> &fill(Tensor<T> &x, typename traits::Identity<T>::type value);
+
+/// Fill the tensor with the given value.
+template <typename T>
+Tensor<T> &&fill(Tensor<T> &&x, typename traits::Identity<T>::type value);
+
+/// Scale the tensor by the given value.
+template <typename T>
+Tensor<T> &scale(Tensor<T> &x, typename traits::Identity<T>::type value);
+
+/// Scale the tensor by the given value.
+template <typename T>
+Tensor<T> &&scale(Tensor<T> &&x, typename traits::Identity<T>::type value);
+
+/// Shift the tensor by adding the given value to each element.
+template <typename T>
+Tensor<T> &add(Tensor<T> &x, typename traits::Identity<T>::type value);
+
+/// Shift the tensor by adding the given value to each element.
+template <typename T>
+Tensor<T> &&add(Tensor<T> &&x, typename traits::Identity<T>::type value);
+
+/// Diminish the tensor by adding or subtracting the given value to each element, capping at 0.
+template <typename T>
+Tensor<T> &diminish(Tensor<T> &x, typename traits::Identity<T>::type value);
+
+/// Diminish the tensor by adding or subtracting the given value to each element, capping at 0.
+template <typename T>
+Tensor<T> &&diminish(Tensor<T> &&x, typename traits::Identity<T>::type value);
 
 /// Scales and shifts the elements in x to lie in [from..to].
 template <typename T>
@@ -122,6 +170,14 @@ Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &
     extern template NN_REAL_T sum<NN_REAL_T>(const Tensor<NN_REAL_T> &);
     extern template NN_REAL_T mean<NN_REAL_T>(const Tensor<NN_REAL_T> &);
     extern template NN_REAL_T variance<NN_REAL_T>(const Tensor<NN_REAL_T> &, bool);
+    extern template Tensor<NN_REAL_T> &fill(Tensor<NN_REAL_T> &x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &&fill(Tensor<NN_REAL_T> &&x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &scale(Tensor<NN_REAL_T> &x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &&scale(Tensor<NN_REAL_T> &&x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &add(Tensor<NN_REAL_T> &x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &&add(Tensor<NN_REAL_T> &&x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &diminish(Tensor<NN_REAL_T> &x, NN_REAL_T value);
+    extern template Tensor<NN_REAL_T> &&diminish(Tensor<NN_REAL_T> &&x, NN_REAL_T value);
     extern template Tensor<NN_REAL_T> &normalize<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);
     extern template Tensor<NN_REAL_T> &&normalize<NN_REAL_T>(Tensor<NN_REAL_T> &&, NN_REAL_T, NN_REAL_T);
     extern template Tensor<NN_REAL_T> &clip<NN_REAL_T>(Tensor<NN_REAL_T> &, NN_REAL_T, NN_REAL_T);

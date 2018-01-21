@@ -71,14 +71,14 @@ private:
     {
         RandomEngine::sharedEngine().seed(0);
         module.forget();
-        module.grad().zeros();
+        math::fill(module.grad(), 0);
         auto o1 = module.forward(input).copy();
         auto i1 = module.backward(input, module.output()).copy();
         auto p1 = module.grad().copy();
 
         RandomEngine::sharedEngine().seed(0);
         module.forget();
-        module.grad().zeros();
+        math::fill(module.grad(), 0);
         auto o2 = module.forward(input).copy();
         auto i2 = module.backward(input, module.output());
         auto p2 = module.grad();
@@ -132,7 +132,7 @@ private:
         math::rand(module.params());
 
         M<T> copy(module);
-        copy.params().fill(0);
+        math::fill(copy.params(), 0);
         copy = module;
 
         NNAssert(testEqualParams(module, copy), name + "::operator=(const " + name + " &) failed! Parameters are not equal!");

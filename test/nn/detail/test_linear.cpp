@@ -49,7 +49,7 @@ NNTestClassImpl(Linear)
         NNTestParams()
         {
             Linear<T> module(2, 3);
-            module.params().fill(100);
+            math::fill(module.params(), 100);
             module.reset();
             forEach([&](T param)
             {

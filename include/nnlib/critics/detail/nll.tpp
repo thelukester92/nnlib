@@ -2,6 +2,7 @@
 #define CRTIICS_NLL_TPP
 
 #include "../nll.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -79,7 +80,7 @@ Tensor<T> &NLL<T>::backward(const Tensor<T> &input, const Tensor<T> &target)
     NNAssertEquals(input.dims(), 2, "Expected matrix input!");
     NNAssertEquals(target.size(1), 1, "Expected single-column target!");
 
-    m_inGrad.resize(input.shape()).fill(0);
+    math::fill(m_inGrad.resize(input.shape()), 0);
     T weight = -1.0;
 
     if(m_average)

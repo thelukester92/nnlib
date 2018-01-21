@@ -2,6 +2,7 @@
 #define NN_MODULE_TPP
 
 #include "../module.hpp"
+#include "nnlib/math/math.hpp"
 #include "nnlib/serialization/factory.hpp"
 
 namespace nnlib
@@ -67,7 +68,7 @@ void Module<T>::training(bool training)
 template <typename T>
 void Module<T>::forget()
 {
-    state().fill(0);
+    math::fill(state(), 0);
 }
 
 template <typename T>

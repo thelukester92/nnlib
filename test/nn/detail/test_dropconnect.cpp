@@ -83,18 +83,18 @@ NNTestClassImpl(DropConnect)
             size_t inps = 25, trials = 1000;
 
             auto linear = new Linear<T>(inps, 1, false);
-            linear->weights().ones();
+            math::fill(linear->weights(), 1);
 
             DropConnect<T> module(linear, p);
 
             T sum = 0;
-            auto input = Tensor<T>(4, inps).ones();
+            auto input = math::ones(4, inps);
             for(size_t i = 0; i < trials; ++i)
                 sum += math::sum(module.forward(input)) / module.output().size() / inps;
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
 
             sum = 0;
-            input.resize(inps).ones();
+            math::fill(input.resize(inps), 1);
             for(size_t i = 0; i < trials; ++i)
                 sum += math::sum(module.forward(input)) / module.output().size() / inps;
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
@@ -117,13 +117,13 @@ NNTestClassImpl(DropConnect)
             size_t inps = 25, trials = 1000;
 
             auto linear = new Linear<T>(inps, 1, false);
-            linear->weights().ones();
+            math::fill(linear->weights(), 1);
 
             DropConnect<T> module(linear, p);
 
             T sum1 = 0, sum2 = 0;
-            auto input = Tensor<T>(4, inps).ones();
-            auto blame = Tensor<T>(4, 1).ones();
+            auto input = math::ones(4, inps);
+            auto blame = math::ones(4, 1);
             for(size_t i = 0; i < trials; ++i)
             {
                 sum1 += math::sum(module.forward(input)) / module.output().size() / inps;
@@ -133,8 +133,8 @@ NNTestClassImpl(DropConnect)
             NNTestAlmostEquals(sum1, sum2, 1e-12);
 
             sum1 = 0, sum2 = 0;
-            input.resize(inps).ones();
-            blame.resize(1).ones();
+            math::fill(input.resize(inps), 1);
+            math::fill(blame.resize(1), 1);
             for(size_t i = 0; i < trials; ++i)
             {
                 sum1 += math::sum(module.forward(input)) / module.output().size() / inps;

@@ -22,13 +22,13 @@ NNTestAbstractClassImpl(Map, Map<T>)
 
             RandomEngine::sharedEngine().seed(0);
             nnImpl.forget();
-            nnImpl.grad().fill(0);
+            math::fill(nnImpl.grad(), 0);
             nnImpl.forward(input);
             nnImpl.backward(input, output);
 
             RandomEngine::sharedEngine().seed(0);
             copy->forget();
-            copy->grad().fill(0);
+            math::fill(copy->grad(), 0);
             copy->forward(input);
             copy->backward(input, output);
 

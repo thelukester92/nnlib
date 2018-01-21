@@ -83,7 +83,7 @@ Tensor<T> &Dropout<T>::forward(const Tensor<T> &input)
     if(m_training)
         return math::pointwiseProduct(input, math::bernoulli(m_mask, 1 - m_dropProbability), m_output);
     else
-        return m_output.copy(input).scale(1 - m_dropProbability);
+        return math::scale(m_output.copy(input), 1 - m_dropProbability);
 }
 
 template <typename T>
@@ -96,7 +96,7 @@ Tensor<T> &Dropout<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad
     if(m_training)
         return math::pointwiseProduct(outGrad, m_mask, m_inGrad);
     else
-        return m_inGrad.copy(outGrad).scale(1 - m_dropProbability);
+        return math::scale(m_inGrad.copy(outGrad), 1 - m_dropProbability);
 }
 
 template <typename T>

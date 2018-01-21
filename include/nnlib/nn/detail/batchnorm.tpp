@@ -88,7 +88,7 @@ BatchNorm<T> &BatchNorm<T>::reset()
     if(m_weights.size(0) > 0)
     {
         math::rand(m_weights);
-        m_biases.zeros();
+        math::fill(m_biases, 0);
     }
     return *this;
 }
@@ -162,10 +162,10 @@ Tensor<T> &BatchNorm<T>::forward(const Tensor<T> &input)
 
         // Get means
         math::sum(input, m_means, 0);
-        m_means.scale(norm);
+        math::scale(m_means, norm);
 
         // Get unnormalized variances (temporarily stored in m_invStds)
-        m_invStds.zeros();
+        math::fill(m_invStds, 0);
         for(size_t i = 0; i < n; ++i)
         {
             forEach([&](T x, T mean, T &y)
@@ -189,7 +189,7 @@ Tensor<T> &BatchNorm<T>::forward(const Tensor<T> &input)
         }, m_invStds, m_runningVars);
 
         // Now normalize variance as population; will invert and sqrt after this if statement
-        m_invStds.scale(norm);
+        math::scale(m_invStds, norm);
 
         // Use the batch statistics
         means = m_means;

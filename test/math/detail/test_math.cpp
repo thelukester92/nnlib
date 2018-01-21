@@ -7,6 +7,36 @@ using T = NN_REAL_T;
 
 NNTestClassImpl(Math)
 {
+    NNTestMethod(zeros)
+    {
+        NNTestParams(size_t, size_t)
+        {
+            Tensor<T> x = ones(3, 6);
+            NNTestEquals(ones.dims(), 3);
+            NNTestEquals(ones.size(0), 3);
+            NNTestEquals(ones.size(1), 6);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 0, 1e-12);
+            }, x);
+        }
+    }
+
+    NNTestMethod(ones)
+    {
+        NNTestParams(size_t, size_t)
+        {
+            Tensor<T> x = ones(3, 6);
+            NNTestEquals(ones.dims(), 2);
+            NNTestEquals(ones.size(0), 3);
+            NNTestEquals(ones.size(1), 6);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 1, 1e-12);
+            }, x);
+        }
+    }
+
     NNTestMethod(min)
     {
         NNTestParams(const Tensor &)
@@ -55,6 +85,100 @@ NNTestClassImpl(Math)
         {
             Tensor<T> x({ 8, -6, 7, 5, 3, 0, 9, 3.14159 });
             NNTestAlmostEquals(variance(x, true), 23.959364894584, 1e-12);
+        }
+    }
+
+    NNTestMethod(fill)
+    {
+        NNTestParams(Tensor &, T)
+        {
+            Tensor<T> x(3, 6);
+            fill(x, 3.14);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 3.14, 1e-12);
+            }, x);
+        }
+
+        NNTestParams(Tensor &&, T)
+        {
+            auto x = fill(Tensor<T>(3, 6), 3.14);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 3.14, 1e-12);
+            }, x);
+        }
+    }
+
+    NNTestMethod(scale)
+    {
+        NNTestParams(Tensor &, T)
+        {
+            Tensor<T> x(3, 6);
+            fill(x, 1);
+            scale(x, 3.14);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 3.14, 1e-12);
+            }, x);
+        }
+
+        NNTestParams(Tensor &&, T)
+        {
+            auto x = scale(fill(Tensor<T>(3, 6), 1), 3.14);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 3.14, 1e-12);
+            }, x);
+        }
+    }
+
+    NNTestMethod(add)
+    {
+        NNTestParams(Tensor &, T)
+        {
+            Tensor<T> x(3, 6);
+            fill(x, 0);
+            add(x, 3.14);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 3.14, 1e-12);
+            }, x);
+        }
+
+        NNTestParams(Tensor &&, T)
+        {
+            auto x = add(fill(Tensor<T>(3, 6), 0), 3.14);
+            forEach([&](T x)
+            {
+                NNTestAlmostEquals(x, 3.14, 1e-12);
+            }, x);
+        }
+    }
+
+    NNTestMethod(diminish)
+    {
+        NNTestParams(Tensor &, T)
+        {
+            Tensor<T> x = { -2, -1, -0.5, 0.5, 1, 2 };
+            diminish(x, 1);
+            NNTestAlmostEquals(x(0), -1, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 0, 1e-12);
+            NNTestAlmostEquals(x(3), 0, 1e-12);
+            NNTestAlmostEquals(x(4), 0, 1e-12);
+            NNTestAlmostEquals(x(5), 1, 1e-12);
+        }
+
+        NNTestParams(Tensor &&, T)
+        {
+            auto x = diminish(Tensor<T>({ -2, -1, -0.5, 0.5, 1, 2 }), 1);
+            NNTestAlmostEquals(x(0), -1, 1e-12);
+            NNTestAlmostEquals(x(1), 0, 1e-12);
+            NNTestAlmostEquals(x(2), 0, 1e-12);
+            NNTestAlmostEquals(x(3), 0, 1e-12);
+            NNTestAlmostEquals(x(4), 0, 1e-12);
+            NNTestAlmostEquals(x(5), 1, 1e-12);
         }
     }
 

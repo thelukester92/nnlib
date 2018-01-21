@@ -399,21 +399,6 @@ public:
     /// \return The stride of the given dimension.
     size_t stride(size_t dim) const;
 
-    /// Sets every element in this tensor to the given value.
-    Tensor &fill(const T &value);
-
-    /// Sets every element in this tensor to 0.
-    Tensor &zeros();
-
-    /// Sets every element in this tensor to 1.
-    Tensor &ones();
-
-    /// Multiply this tensor by a scalar.
-    Tensor &scale(T alpha);
-
-    /// Add a scalar to each element in this tensor.
-    Tensor &add(T alpha);
-
     T &at(const Storage<size_t> &indices);
     const T &at(const Storage<size_t> &indices) const;
 

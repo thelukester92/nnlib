@@ -703,64 +703,6 @@ NNTestClassImpl(Tensor)
         }
     }
 
-    NNTestMethod(fill)
-    {
-        NNTestParams(const T &)
-        {
-            Tensor<T> t(6);
-            NNTestEquals(&t.fill(0), &t);
-            for(size_t i = 0; i < 6; ++i)
-                NNTestEquals(t(i), 0);
-            t.fill(3.14);
-            for(size_t i = 0; i < 6; ++i)
-                NNTestEquals(t(i), 3.14);
-        }
-    }
-
-    NNTestMethod(zeros)
-    {
-        NNTestParams()
-        {
-            Tensor<T> t(6);
-            NNTestEquals(&t.zeros(), &t);
-            for(size_t i = 0; i < 6; ++i)
-                NNTestEquals(t(i), 0);
-        }
-    }
-
-    NNTestMethod(ones)
-    {
-        NNTestParams()
-        {
-            Tensor<T> t(6);
-            NNTestEquals(&t.ones(), &t);
-            for(size_t i = 0; i < 6; ++i)
-                NNTestEquals(t(i), 1);
-        }
-    }
-
-    NNTestMethod(scale)
-    {
-        NNTestParams(T)
-        {
-            Tensor<T> t = Tensor<T>(3).ones();
-            t.scale(3.14);
-            for(size_t i = 0; i < t.size(); ++i)
-                NNTestEquals(t(i), 3.14);
-        }
-    }
-
-    NNTestMethod(add)
-    {
-        NNTestParams(T)
-        {
-            Tensor<T> t(3);
-            t.add(3.14);
-            for(size_t i = 0; i < t.size(); ++i)
-                NNTestEquals(t(i), 3.14);
-        }
-    }
-
     NNTestMethod(at)
     {
         NNTestParams(const Storage<size_t> &)

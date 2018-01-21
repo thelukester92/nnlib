@@ -42,8 +42,8 @@ NNTestClassImpl(BatchNorm)
         NNTestParams()
         {
             BatchNorm<T> module(10);
-            module.weights().fill(10);
-            module.bias().fill(5);
+            math::fill(module.weights(), 10);
+            math::fill(module.bias(), 5);
             module.reset();
 
             forEach([&](T weight)
@@ -89,8 +89,8 @@ NNTestClassImpl(BatchNorm)
         NNTestParams(Serialized &)
         {
             BatchNorm<T> module(10);
-            module.weights().fill(1);
-            module.bias().fill(2);
+            math::fill(module.weights(), 1);
+            math::fill(module.bias(), 2);
             module.momentum(0.125);
             module.training(false);
 
@@ -119,8 +119,8 @@ NNTestClassImpl(BatchNorm)
             auto input = Tensor<T>({ 3, 6, 9, -1, 5, 4, 12, 5, 11 }).resize(3, 3);
 
             BatchNorm<T> module(3);
-            module.weights().ones();
-            module.bias().zeros();
+            math::fill(module.weights(), 1);
+            math::fill(module.bias(), 0);
             module.momentum(1.0);
 
             module.forward(input);
@@ -136,7 +136,7 @@ NNTestClassImpl(BatchNorm)
             for(size_t i = 0; i < 3; ++i)
             {
                 NNTestAlmostEquals(math::mean(module.output().select(1, i)), 0, 1e-9);
-                NNTestAlmostEquals(math::variance(module.output().select(1, i).scale(sqrt(3) / sqrt(2))), 1, 1e-9);
+                NNTestAlmostEquals(math::variance(math::scale(module.output().select(1, i), sqrt(3) / sqrt(2))), 1, 1e-9);
             }
         }
     }
@@ -151,8 +151,8 @@ NNTestClassImpl(BatchNorm)
             auto pGrad = Tensor<T>({ 14.9606, 2.82843, 0, 10, 5, 12 });
 
             BatchNorm<T> module(3);
-            module.weights().ones();
-            module.bias().zeros();
+            math::fill(module.weights(), 1);
+            math::fill(module.bias(), 0);
             module.momentum(1.0);
 
             module.forward(input);
@@ -192,7 +192,7 @@ NNTestClassImpl(BatchNorm)
         NNTestParams()
         {
             BatchNorm<T> module(10);
-            module.params().fill(3.14);
+            math::fill(module.params(), 3.14);
 
             forEach([&](T param)
             {

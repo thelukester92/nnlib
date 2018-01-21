@@ -55,7 +55,7 @@ NNTestAbstractClassImpl(Module, Module<T>)
     {
         NNTestParams()
         {
-            nnImpl.state().fill(1);
+            math::fill(nnImpl.state(), 1);
             auto oldState = nnImpl.state().copy();
             nnImpl.forget();
             forEach([&](T oldState, T newState)
@@ -89,13 +89,13 @@ NNTestAbstractClassImpl(Module, Module<T>)
 
             RandomEngine::sharedEngine().seed(0);
             nnImpl.forget();
-            nnImpl.grad().fill(0);
+            math::fill(nnImpl.grad(), 0);
             nnImpl.forward(input);
             nnImpl.backward(input, output);
 
             RandomEngine::sharedEngine().seed(0);
             copy->forget();
-            copy->grad().fill(0);
+            math::fill(copy->grad(), 0);
             copy->forward(input);
             copy->backward(input, output);
 
@@ -150,14 +150,14 @@ NNTestAbstractClassImpl(Module, Module<T>)
 
             RandomEngine::sharedEngine().seed(0);
             nnImpl.forget();
-            nnImpl.grad().fill(0);
+            math::fill(nnImpl.grad(), 0);
             nnImpl.forward(input);
             auto ing1 = nnImpl.backward(input, output).copy();
             auto prg1 = nnImpl.grad().copy();
 
             RandomEngine::sharedEngine().seed(0);
             nnImpl.forget();
-            nnImpl.grad().fill(0);
+            math::fill(nnImpl.grad(), 0);
             nnImpl.forward(input);
             auto ing2 = nnImpl.backward(input, output);
             auto prg2 = nnImpl.grad();

@@ -88,7 +88,7 @@ NNTestClassImpl(Sequencer)
         {
             auto component = new LSTM<T>(3, 2);
             Sequencer<T> module(component);
-            component->state().fill(1);
+            math::fill(component->state(), 1);
             module.forget();
             forEach([&](T state)
             {

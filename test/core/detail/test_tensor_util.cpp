@@ -1,5 +1,6 @@
 #include "../test_tensor_util.hpp"
 #include "nnlib/core/detail/tensor_util.hpp"
+#include "nnlib/math/math.hpp"
 #include <sstream>
 using namespace nnlib;
 using T = NN_REAL_T;
@@ -20,14 +21,14 @@ NNTestClassImpl(TensorUtil)
 
             t.resize(5, 3);
             Tensor<T> u = t.select(1, 1);
-            u.fill(42);
+            math::fill(u, 42);
             forEach([&](T u)
             {
                 NNTestAlmostEquals(u, 42, 1e-12);
             }, u);
 
             Tensor<T> v = t.select(1, 2);
-            v.fill(13);
+            math::fill(v, 13);
             forEach([](T &u, T v)
             {
                 u += v;

@@ -133,7 +133,7 @@ Tensor<T> &Linear<T>::forward(const Tensor<T> &input)
         m_output.resize(input.size(0), m_weights.size(1));
         math::mAdd_mm(input, m_weights, m_output, 1, 0);
         if(m_useBias)
-            math::mAdd_vv(m_ones.resize(input.size(0)).fill(1), m_bias, m_output);
+            math::mAdd_vv(math::fill(m_ones.resize(input.size(0)), 1), m_bias, m_output);
     }
 
     return m_output;
@@ -158,7 +158,7 @@ Tensor<T> &Linear<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
     {
         math::mAdd_mtm(input, outGrad, m_weightsGrad);
         if(m_useBias)
-            math::vAdd_mtv(outGrad, m_ones.resize(input.size(0)).fill(1), m_biasGrad);
+            math::vAdd_mtv(outGrad, math::fill(m_ones.resize(input.size(0)), 1), m_biasGrad);
 
         m_inGrad.resize(input.size(0), m_weights.size(0));
         math::mAdd_mmt(outGrad, m_weights, m_inGrad, 1, 0);

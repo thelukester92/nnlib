@@ -2,6 +2,7 @@
 #define NN_CONCAT_TPP
 
 #include "../concat.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -99,7 +100,7 @@ Tensor<T> &Concat<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
         offset += stride;
     }
 
-    m_inGrad.resize(m_components[0]->inGrad().shape()).zeros();
+    math::fill(m_inGrad.resize(m_components[0]->inGrad().shape()), 0);
     for(size_t i = 0, count = components(); i < count; ++i)
     {
         forEach([&](T x, T &y)

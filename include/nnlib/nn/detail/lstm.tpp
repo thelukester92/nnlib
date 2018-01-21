@@ -171,9 +171,9 @@ template <typename T>
 void LSTM<T>::forget()
 {
     Module<T>::forget();
-    m_output.fill(0);
-    m_outGrad.fill(0);
-    m_stateGrad.fill(0);
+    math::fill(m_output, 0);
+    math::fill(m_outGrad, 0);
+    math::fill(m_stateGrad, 0);
 }
 
 template <typename T>

@@ -28,7 +28,7 @@ NNTestAbstractClassImpl(Container, Container<T>)
             for(size_t i = 0; i < nnImpl.components(); ++i)
             {
                 Module<T> &component = *nnImpl.component(i);
-                component.state().fill(i);
+                math::fill(component.state(), i);
                 auto oldState = component.state().copy();
                 nnImpl.forget();
                 forEach([&](T oldState, T newState)
@@ -56,13 +56,13 @@ NNTestAbstractClassImpl(Container, Container<T>)
 
             RandomEngine::sharedEngine().seed(0);
             nnImpl.forget();
-            nnImpl.grad().fill(0);
+            math::fill(nnImpl.grad(), 0);
             nnImpl.forward(input);
             nnImpl.backward(input, output);
 
             RandomEngine::sharedEngine().seed(0);
             copy->forget();
-            copy->grad().fill(0);
+            math::fill(copy->grad(), 0);
             copy->forward(input);
             copy->backward(input, output);
 
@@ -125,7 +125,7 @@ NNTestAbstractClassImpl(Container, Container<T>)
         NNTestParams()
         {
             for(size_t i = 0; i < nnImpl.components(); ++i)
-                nnImpl.component(i)->params().fill(1);
+                math::fill(nnImpl.component(i)->params(), 1);
             forEach([&](T param)
             {
                 NNTestAlmostEquals(param, 1, 1e-12);
@@ -138,7 +138,7 @@ NNTestAbstractClassImpl(Container, Container<T>)
         NNTestParams()
         {
             for(size_t i = 0; i < nnImpl.components(); ++i)
-                nnImpl.component(i)->grad().fill(1);
+                math::fill(nnImpl.component(i)->grad(), 1);
             forEach([&](T param)
             {
                 NNTestAlmostEquals(param, 1, 1e-12);
@@ -151,7 +151,7 @@ NNTestAbstractClassImpl(Container, Container<T>)
         NNTestParams()
         {
             for(size_t i = 0; i < nnImpl.components(); ++i)
-                nnImpl.component(i)->state().fill(1);
+                math::fill(nnImpl.component(i)->state(), 1);
             forEach([&](T param)
             {
                 NNTestAlmostEquals(param, 1, 1e-12);

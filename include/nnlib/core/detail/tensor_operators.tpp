@@ -2,6 +2,7 @@
 #define CORE_TENSOR_OPERATORS_TPP
 
 #include "../tensor.hpp"
+#include "nnlib/math/math.hpp"
 #include <iomanip>
 #include <limits>
 #include <sstream>
@@ -110,7 +111,7 @@ nnlib::Tensor<T> operator-(const nnlib::Tensor<T> &lhs, const nnlib::Tensor<T> &
 template <typename T>
 nnlib::Tensor<T> &operator*=(nnlib::Tensor<T> &lhs, typename nnlib::traits::Identity<T>::type rhs)
 {
-    return lhs.scale(rhs);
+    return nnlib::math::scale(lhs, rhs);
 }
 
 template <typename T>
@@ -130,7 +131,7 @@ nnlib::Tensor<T> operator*(typename nnlib::traits::Identity<T>::type lhs, const 
 template <typename T>
 nnlib::Tensor<T> &operator/=(nnlib::Tensor<T> &lhs, typename nnlib::traits::Identity<T>::type rhs)
 {
-    return lhs.scale(1.0 / rhs);
+    return nnlib::math::scale(lhs, 1.0 / rhs);
 }
 
 template <typename T>

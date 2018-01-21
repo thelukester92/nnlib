@@ -66,11 +66,86 @@ T variance(const Tensor<T> &x, bool sample)
 }
 
 template <typename T>
+Tensor<T> &fill(Tensor<T> &x, typename traits::Identity<T>::type value)
+{
+    forEach([&](T &x)
+    {
+        x = value;
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&fill(Tensor<T> &&x, typename traits::Identity<T>::type value)
+{
+    return std::move(fill(x, value));
+}
+
+template <typename T>
+Tensor<T> &scale(Tensor<T> &x, typename traits::Identity<T>::type value)
+{
+    forEach([&](T &x)
+    {
+        x *= value;
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&scale(Tensor<T> &&x, typename traits::Identity<T>::type value)
+{
+    return std::move(scale(x, value));
+}
+
+template <typename T>
+Tensor<T> &add(Tensor<T> &x, typename traits::Identity<T>::type value)
+{
+    forEach([&](T &x)
+    {
+        x += value;
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&add(Tensor<T> &&x, typename traits::Identity<T>::type value)
+{
+    return std::move(add(x, value));
+}
+
+template <typename T>
+Tensor<T> &diminish(Tensor<T> &x, typename traits::Identity<T>::type value)
+{
+    forEach([&](T &x)
+    {
+        if(x > 0)
+        {
+            x -= value;
+            if(x < 0)
+                x = 0;
+        }
+        else if(x < 0)
+        {
+            x += value;
+            if(x > 0)
+                x = 0;
+        }
+    }, x);
+    return x;
+}
+
+template <typename T>
+Tensor<T> &&diminish(Tensor<T> &&x, typename traits::Identity<T>::type value)
+{
+    return std::move(diminish(x, value));
+}
+
+template <typename T>
 Tensor<T> &normalize(Tensor<T> &x, typename traits::Identity<T>::type from, typename traits::Identity<T>::type to)
 {
     NNAssertLessThanOrEquals(from, to, "Invalid normalization range!");
     T small = min(x), large = max(x);
-    return x.add(-small).scale((to - from) / (large - small)).add(from);
+    return add(scale(add(x, -small), (to - from) / (large - small)), from);
 }
 
 template <typename T>

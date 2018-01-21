@@ -1,6 +1,7 @@
 #include "../test_algebra.hpp"
 #include "nnlib/core/tensor.hpp"
 #include "nnlib/math/algebra.hpp"
+#include "nnlib/math/math.hpp"
 using namespace nnlib;
 using namespace nnlib::math;
 using T = NN_REAL_T;
@@ -46,8 +47,7 @@ NNTestClassImpl(Algebra)
             {
                 NNTestAlmostEquals(t, 3.14, 1e-12);
             }, t);
-            t = Tensor<T>(5, 3).select(1, 1);
-            t.fill(1);
+            t = math::fill(Tensor<T>(5, 3).select(1, 1), 1);
             vScale(t, 3.14);
             forEach([&](T t)
             {
@@ -122,8 +122,7 @@ NNTestClassImpl(Algebra)
             NNTestAlmostEquals(t(0), 3, 1e-12);
             NNTestAlmostEquals(t(1), 4.5, 1e-12);
             NNTestAlmostEquals(t(2), 6, 1e-12);
-            t = Tensor<T>(3, 5).select(1, 1);
-            t.fill(0);
+            t = math::fill(Tensor<T>(3, 5).select(1, 1), 0);
             vAdd_v(u, t, 1);
             NNTestAlmostEquals(t(0), 4, 1e-12);
             NNTestAlmostEquals(t(1), 5, 1e-12);

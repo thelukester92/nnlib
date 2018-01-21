@@ -2,6 +2,7 @@
 #define OPT_RMSPROP_TPP
 
 #include "../rmsprop.hpp"
+#include "nnlib/math/math.hpp"
 
 namespace nnlib
 {
@@ -11,7 +12,7 @@ RMSProp<T>::RMSProp(Module<T> &model, Critic<T> *critic) :
     Optimizer<T>(model, critic),
     m_gamma(0.9)
 {
-    m_variance.resize(m_grad.size()).fill(0.0);
+    math::fill(m_variance.resize(m_grad.size()), 0);
 }
 
 template <typename T>
@@ -30,14 +31,14 @@ RMSProp<T> &RMSProp<T>::gamma(T gamma)
 template <typename T>
 void RMSProp<T>::reset()
 {
-    m_variance.fill(0);
+    math::fill(m_variance, 0);
 }
 
 template <typename T>
 RMSProp<T> &RMSProp<T>::step(const Tensor<T> &input, const Tensor<T> &target)
 {
     // calculate gradient
-    m_grad.fill(0);
+    math::fill(m_grad, 0);
     m_model.backward(input, m_critic->backward(m_model.forward(input), target));
 
     for(size_t i = 0, end = m_grad.size(); i != end; ++i)

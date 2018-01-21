@@ -552,48 +552,6 @@ size_t Tensor<T>::stride(size_t dim) const
 }
 
 template <typename T>
-Tensor<T> &Tensor<T>::fill(const T &value)
-{
-    forEach([&](T &v)
-    {
-        v = value;
-    }, *this);
-    return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::zeros()
-{
-    return fill(0);
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::ones()
-{
-    return fill(1);
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::scale(T alpha)
-{
-    forEach([&](T &v)
-    {
-        v *= alpha;
-    }, *this);
-    return *this;
-}
-
-template <typename T>
-Tensor<T> &Tensor<T>::add(T alpha)
-{
-    forEach([&](T &v)
-    {
-        v += alpha;
-    }, *this);
-    return *this;
-}
-
-template <typename T>
 T &Tensor<T>::at(const Storage<size_t> &indices)
 {
     return (*m_data)[indexOf(indices)];
