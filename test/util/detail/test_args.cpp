@@ -107,71 +107,164 @@ NNTestClassImpl(Args)
 
 NNTestClassImpl(ArgsParser)
 {
-    // todo!
+    NNTestMethod(ArgsParser)
+    {
+        NNTestParams(bool)
+        {
+            ArgsParser args(false);
+            NNTestEquals(args.hasOpt('h'), false);
+            NNTestEquals(args.hasOpt("help"), false);
+
+            ArgsParser args2(true);
+            NNTestEquals(args2.hasOpt('h'), true);
+            NNTestEquals(args2.hasOpt("help"), true);
+        }
+
+        NNTestParams(char, std::string)
+        {
+            ArgsParser args('?', "helpOpt");
+            NNTestEquals(args.hasOpt('?'), true);
+            NNTestEquals(args.hasOpt("helpOpt"), true);
+        }
+    }
+
+    NNTestMethod(addFlag)
+    {
+        NNTestParams(char, std::string)
+        {
+            ArgsParser args;
+            args.addFlag('f', "flag");
+            NNTestEquals(args.hasOpt('f'), true);
+            NNTestEquals(args.hasOpt("flag"), true);
+        }
+
+        NNTestParams(std::string)
+        {
+            ArgsParser args;
+            args.addFlag("flag");
+            NNTestEquals(args.hasOpt("flag"), true);
+        }
+    }
+
+    NNTestMethod(addInt)
+    {
+        NNTestParams(char, std::string)
+        {
+            ArgsParser args;
+            args.addInt('i', "int");
+            NNTestEquals(args.optName('i'), "int");
+        }
+
+        NNTestParams(char, std::string, int)
+        {
+            ArgsParser args;
+            args.addInt('i', "int", 5);
+            NNTestEquals(args.getInt('i'), 5);
+            NNTestEquals(args.getInt("int"), 5);
+        }
+
+        NNTestParams(std::string)
+        {
+            const char *argv[] = { "cmd", "--int", "5" };
+            ArgsParser args;
+            args.addInt("int");
+            args.parse(3, argv);
+            NNTestEquals(args.getInt("int"), 5);
+        }
+
+        NNTestParams(char, int)
+        {
+            ArgsParser args;
+            args.addInt("int", 5);
+            NNTestEquals(args.getInt("int"), 5);
+        }
+    }
+
+    NNTestMethod(addDouble)
+    {
+        NNTestParams(char, std::string)
+        {
+            ArgsParser args;
+            args.addDouble('d', "double");
+            NNTestEquals(args.optName('d'), "double");
+        }
+
+        NNTestParams(char, std::string, double)
+        {
+            ArgsParser args;
+            args.addDouble('d', "double", 3.14);
+            NNTestAlmostEquals(args.getDouble('d'), 3.14, 1e-12);
+            NNTestAlmostEquals(args.getDouble("double"), 3.14, 1e-12);
+        }
+
+        NNTestParams(std::string)
+        {
+            const char *argv[] = { "cmd", "--double", "3.14" };
+            ArgsParser args;
+            args.addDouble("double");
+            args.parse(3, argv);
+            NNTestAlmostEquals(args.getDouble("double"), 3.14, 1e-12);
+        }
+
+        NNTestParams(char, double)
+        {
+            ArgsParser args;
+            args.addDouble("double", 3.14);
+            NNTestAlmostEquals(args.getDouble("double"), 3.14, 1e-12);
+        }
+    }
+
+    NNTestMethod(addString)
+    {
+        NNTestParams(char, std::string)
+        {
+            ArgsParser args;
+            args.addString('s', "string");
+            NNTestEquals(args.optName('s'), "string");
+        }
+
+        NNTestParams(char, std::string, int)
+        {
+            ArgsParser args;
+            args.addString('s', "string", "hello");
+            NNTestEquals(args.getString('s'), "hello");
+            NNTestEquals(args.getString("string"), "hello");
+        }
+
+        NNTestParams(std::string)
+        {
+            const char *argv[] = { "cmd", "--string", "hello" };
+            ArgsParser args;
+            args.addString("string");
+            args.parse(3, argv);
+            NNTestEquals(args.getString("string"), "hello");
+        }
+
+        NNTestParams(char, int)
+        {
+            ArgsParser args;
+            args.addString("string", "hello");
+            NNTestEquals(args.getString("string"), "hello");
+        }
+    }
+
+    NNTestMethod(parse)
+    {
+        NNTestParams(int, const char **, bool, std::ostream &)
+        {
+            const char *argv[] = { "cmd", "-a", "opt", "-bc", "-5", "--dee", "3.14" };
+
+            ArgsParser args;
+            args.addString('a', "ayy");
+            args.addFlag('b', "bee");
+            args.addInt('c', "cee");
+            args.addDouble('d', "dee");
+            args.parse(7, argv);
+
+            NNTestEquals(args.getString('a'), "opt");
+            NNTestEquals(args.getFlag('b'), true);
+            NNTestEquals(args.getInt('c'), -5);
+            NNTestAlmostEquals(args.getDouble('d'), 3.14, 1e-12);
+        }
+    }
 }
-
-void TestArgs()
-{
-    const int argc = 7;
-    const char *argv[argc];
-    argv[0] = "ignore";
-    argv[1] = "-qi";
-    argv[2] = "5";
-    argv[3] = "--pi";
-    argv[4] = "3.14";
-    argv[5] = "-f";
-    argv[6] = "file.txt";
-
-    ArgsParser argsParser;
-    argsParser.addFlag('w');
-    argsParser.addFlag('q');
-    argsParser.addInt('i');
-    argsParser.addInt('s', "six", 6);
-    argsParser.addInt("unnamedInt");
-    argsParser.addInt("unnamedInt2", 2);
-    argsParser.addDouble('p', "pi");
-    argsParser.addDouble('x', "chi", 2.12);
-    argsParser.addDouble("unnamedDouble");
-    argsParser.addDouble("unnamedDouble2", 3.14);
-    argsParser.addString('f', "infile");
-    argsParser.addString('o', "outfile", "nothing.txt");
-    argsParser.addString("unnamedString");
-    argsParser.addString("unnamedString2", "string!");
-    argsParser.parse(argc, argv);
-
-    NNAssert(!argsParser.hasOpt("unnamedInt"), "ArgsParser::hasOpt(string) failed for unset option!");
-    NNAssert(argsParser.hasOpt('s'), "ArgsParser::hasOpt(char) failed for set option!");
-    NNAssert(!argsParser.getFlag('w'), "ArgsParser::getFlag failed for unset flag!");
-    NNAssert(argsParser.getFlag('q'), "ArgsParser::getFlag failed for set flag!");
-    NNAssertEquals(argsParser.getInt('i'), 5, "ArgsParser::getInt(char) failed!");
-    NNAssertEquals(argsParser.getInt("unnamedInt2"), 2, "ArgsParser::getInt(string) failed!");
-    NNAssertEquals(argsParser.getDouble('x'), 2.12, "ArgsParser::getDouble(char) failed!");
-    NNAssertEquals(argsParser.getDouble("pi"), 3.14, "ArgsParser::getDouble(string) failed!");
-    NNAssertEquals(argsParser.getString('f'), "file.txt", "ArgsParser::getString(char) failed!");
-    NNAssertEquals(argsParser.getString("outfile"), "nothing.txt", "ArgsParser::getString(string) failed!");
-
-    ArgsParser two;
-    two.addFlag('q');
-    two.addFlag('i');
-    argv[2] = "-h";
-
-    {
-        std::stringstream ss;
-        two.parse(2, argv + 1, false, ss);
-        NNAssertNotEquals(ss.str(), "", "ArgsParser::parse with -h set failed!");
-    }
-
-    {
-        std::stringstream ss;
-        argsParser.printHelp(ss);
-        NNAssertNotEquals(ss.str(), "", "ArgsParser::printHelp failed!");
-    }
-
-    {
-        std::stringstream ss;
-        argsParser.printOpts(ss);
-        NNAssertNotEquals(ss.str(), "", "ArgsParser::printOpts failed!");
-    }
-}
-
-#undef exit
