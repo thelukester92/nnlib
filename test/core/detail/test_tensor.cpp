@@ -755,7 +755,7 @@ NNTestClassImpl(Tensor)
         NNTestParams(T)
         {
             Tensor<T> t(3);
-            t.push(3.14);
+            t.add(3.14);
             for(size_t i = 0; i < t.size(); ++i)
                 NNTestEquals(t(i), 3.14);
         }
