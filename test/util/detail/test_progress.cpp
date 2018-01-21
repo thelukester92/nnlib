@@ -29,6 +29,8 @@ NNTestClassImpl(Progress)
             Progress p(100, ss);
             p.display(0);
             NNTestEquals(ss.str().find('\n'), std::string::npos);
+            p.display(50);
+            NNTestEquals(ss.str().find('\n'), std::string::npos);
             p.display(100);
             NNTestNotEquals(ss.str().find('\n'), std::string::npos);
 
