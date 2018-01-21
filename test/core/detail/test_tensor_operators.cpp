@@ -10,14 +10,14 @@ NNTestClassImpl(TensorOperators)
     {
         NNTestParams(std::ostream &, const Tensor &)
         {
-            Tensor<T> t(1);
+            Tensor<T> t = { 1, -2, 3.14159265, 123456789, 0, 42 };
             std::stringstream ss;
             NNTestEquals(&(ss << t), &ss);
-            NNTestEquals(ss.str(), std::string("0.00000\n[ Tensor of dimension 1 ]"));
-            t.resize(1, 1);
+            NNTest(ss.str() == "1\n-2\n3.14159265\n123456789\n0\n42\n[ Tensor of dimension 6 ]");
+            t.resize(2, 3);
             std::stringstream ss2;
             ss2 << t;
-            NNTestEquals(ss2.str(), std::string("0.00000   \n[ Tensor of dimension 1 x 1 ]"));
+            NNTest(ss2.str() == "1            -2  3.14159  \n1.23457e+08  0   42       \n[ Tensor of dimension 2 x 3 ]");
         }
     }
 
