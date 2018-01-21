@@ -88,7 +88,7 @@ size_t Container<T>::components() const
 template <typename T>
 Container<T> &Container<T>::add(Module<T> *component)
 {
-    m_components.push_back(component);
+    m_components.push(component);
     return *this;
 }
 

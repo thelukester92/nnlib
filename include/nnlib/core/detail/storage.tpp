@@ -126,7 +126,7 @@ Storage<T> &Storage<T>::reserve(size_t n)
 }
 
 template <typename T>
-Storage<T> &Storage<T>::push_back(const T &value)
+Storage<T> &Storage<T>::push(const T &value)
 {
     resize(m_size + 1);
     m_ptr[m_size - 1] = value;
@@ -134,7 +134,7 @@ Storage<T> &Storage<T>::push_back(const T &value)
 }
 
 template <typename T>
-Storage<T> &Storage<T>::pop_back()
+Storage<T> &Storage<T>::pop()
 {
     --m_size;
     return *this;
@@ -145,7 +145,7 @@ Storage<T> &Storage<T>::append(const Storage<T> &other)
 {
     reserve(m_size + other.m_size);
     for(const T &value : other)
-        push_back(value);
+        push(value);
     return *this;
 }
 

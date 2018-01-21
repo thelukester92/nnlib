@@ -29,8 +29,8 @@ public:
     Storage &resize(size_t n, const T &defaultValue = T());
     Storage &reserve(size_t n);
 
-    Storage &push_back(const T &value);
-    Storage &pop_back();
+    Storage &push(const T &value);
+    Storage &pop();
     Storage &append(const Storage &other);
     Storage &erase(size_t index);
     Storage &clear();

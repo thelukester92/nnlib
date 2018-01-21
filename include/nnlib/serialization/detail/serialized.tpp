@@ -365,16 +365,24 @@ typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::
 }
 
 template <typename T, typename ... Ts>
-void Serialized::add(T && value, Ts && ...values)
+void Serialized::push(T && value, Ts && ...values)
 {
     type(Array);
     m_array.push_back(new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
 }
 
-void Serialized::add(Serialized *value)
+void Serialized::push(Serialized *value)
 {
     type(Array);
     m_array.push_back(value);
+}
+
+Serialized *Serialized::pop()
+{
+    NNHardAssertGreaterThan(m_array.size(), 0);
+    Serialized *x = m_array.back();
+    m_array.pop_back();
+    return x;
 }
 
 Serialized::Type Serialized::type(size_t i) const

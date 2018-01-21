@@ -188,7 +188,7 @@ Storage<Tensor<T> *> Sequencer<T>::gradList()
 template <typename T>
 Storage<Tensor<T> *> Sequencer<T>::stateList()
 {
-    return Module<T>::stateList().append(m_module->stateList()).push_back(&m_states);
+    return Module<T>::stateList().append(m_module->stateList()).push(&m_states);
 }
 
 }

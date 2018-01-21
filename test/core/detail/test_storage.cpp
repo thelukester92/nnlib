@@ -105,10 +105,10 @@ NNTestClassImpl(Storage)
             int *a, *b, *c;
             s.reserve(2);
             a = s.ptr();
-            s.push_back(0);
-            s.push_back(0);
+            s.push(0);
+            s.push(0);
             b = s.ptr();
-            s.push_back(0);
+            s.push(0);
             c = s.ptr();
             NNTestEquals(s.size(), 3ul);
             NNTestEquals(a, b);
@@ -116,23 +116,23 @@ NNTestClassImpl(Storage)
         }
     }
 
-    NNTestMethod(push_back)
+    NNTestMethod(push)
     {
         NNTestParams(const T &)
         {
             Storage<int> s;
-            NNTestEquals(s.push_back(42), s);
+            NNTestEquals(s.push(42), s);
             NNTestEquals(s.size(), 1ul);
             NNTestEquals(s[0], 42);
         }
     }
 
-    NNTestMethod(pop_back)
+    NNTestMethod(pop)
     {
         NNTestParams(const T &)
         {
             Storage<int> s(5, 42);
-            NNTestEquals(s, s.pop_back());
+            NNTestEquals(s, s.pop());
             NNTestEquals(s.size(), 4ul);
         }
     }

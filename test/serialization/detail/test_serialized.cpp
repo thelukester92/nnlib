@@ -225,7 +225,7 @@ NNTestClassImpl(Serialized)
             NNTestParams(size_t, Serialized::Type)
             {
                 Serialized s;
-                s.add(0);
+                s.push(0);
                 s.type(0, Serialized::Null);
                 NNTestEquals(s.type(0), Serialized::Null);
                 s.type(0, Serialized::Boolean);
@@ -269,8 +269,8 @@ NNTestClassImpl(Serialized)
             {
                 Serialized s;
                 NNTestEquals(s.size(), 1);
-                s.add(1);
-                s.add(2);
+                s.push(1);
+                s.push(2);
                 NNTestEquals(s.size(), 2);
                 s.set("foo", 1);
                 s.set("bar", 2);
@@ -281,7 +281,7 @@ NNTestClassImpl(Serialized)
             NNTestParams(size_t)
             {
                 Serialized s;
-                s.add(Serialized::Array);
+                s.push(Serialized::Array);
                 s.get(0)->add(1);
                 s.get(0)->add(2);
                 NNTestEquals(s.size(0), 2);
@@ -326,7 +326,7 @@ NNTestClassImpl(Serialized)
             {
                 Serialized s;
                 const Serialized &t = s;
-                s.add(12);
+                s.push(12);
                 NNTestEquals(s.get<int>(0), 12);
                 NNTestEquals(t.get<int>(0), 12);
             }
@@ -455,12 +455,12 @@ NNTestClassImpl(Serialized)
             NNTestParams(T, const T &)
             {
                 Serialized s;
-                s.add(0);
-                s.add(1);
-                s.add(2);
-                s.add(3);
-                s.add(4);
-                s.add(5);
+                s.push(0);
+                s.push(1);
+                s.push(2);
+                s.push(3);
+                s.push(4);
+                s.push(5);
 
                 std::vector<int> v(6);
                 s.get(v.begin(), v.end());
@@ -472,7 +472,7 @@ NNTestClassImpl(Serialized)
             NNTestParams(size_t, T, const T &)
             {
                 Serialized s;
-                s.add(Serialized::Array);
+                s.push(Serialized::Array);
                 s.get(0)->add(0);
                 s.get(0)->add(1);
                 s.get(0)->add(2);
@@ -632,7 +632,7 @@ NNTestClassImpl(Serialized)
             NNTestParams(size_t, int)
             {
                 Serialized s;
-                s.add(0);
+                s.push(0);
                 s.set(0, 12);
                 NNTestEquals(s.get<int>(0), 12);
             }
@@ -646,12 +646,12 @@ NNTestClassImpl(Serialized)
             }
         }
 
-        NNTestMethod(add)
+        NNTestMethod(push)
         {
             NNTestParams(int)
             {
                 Serialized s;
-                s.add(12);
+                s.push(12);
                 NNTestEquals(s.type(), Serialized::Array);
                 NNTestEquals(s.size(), 1);
                 NNTestEquals(s.get<int>(0), 12);
@@ -660,10 +660,24 @@ NNTestClassImpl(Serialized)
             NNTestParams(Serialized *)
             {
                 Serialized s;
-                s.add(new Serialized(12));
+                s.push(new Serialized(12));
                 NNTestEquals(s.type(), Serialized::Array);
                 NNTestEquals(s.size(), 1);
                 NNTestEquals(s.get<int>(0), 12);
+            }
+        }
+
+        NNTestMethod(pop)
+        {
+            NNTestParams()
+            {
+                Serialized s;
+                s.push(12);
+                s.push("string");
+                Serialized *t = s.pop();
+                NNTestEquals(t->get<std::string>(), "string");
+                t = s.pop();
+                NNTestEquals(t->get<int>(), 12);
             }
         }
 

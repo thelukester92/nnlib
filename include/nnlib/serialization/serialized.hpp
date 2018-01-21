@@ -121,8 +121,9 @@ public:
     // Array Operations / Convenience Methods
 
     template <typename T, typename ... Ts>
-    void add(T && value, Ts && ...values);
-    inline void add(Serialized *value);
+    void push(T && value, Ts && ...values);
+    inline void push(Serialized *value);
+    inline Serialized *pop();
 
     inline Type type(size_t i) const;
     inline void type(size_t i, Type type);

@@ -102,7 +102,7 @@ Tensor<T> &Dropout<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad
 template <typename T>
 Storage<Tensor<T> *> Dropout<T>::stateList()
 {
-    return Module<T>::stateList().push_back(&m_mask);
+    return Module<T>::stateList().push(&m_mask);
 }
 
 }
