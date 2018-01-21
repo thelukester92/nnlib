@@ -71,7 +71,7 @@ int main(int argc, const char **argv)
         nnlib::test::Test::verbosity() = 2;
 
     std::unordered_set<std::string> tests;
-    for(size_t i = 1; i < argc; ++i)
+    for(int i = 1; i < argc; ++i)
     {
         if(i == 1 && (argv[1] == std::string("-v") || argv[1] == std::string("-V")))
             continue;

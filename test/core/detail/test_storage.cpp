@@ -10,20 +10,20 @@ NNTestClassImpl(Storage)
         NNTestParams()
         {
             Storage<int> s;
-            NNTestEquals(s.size(), 0);
+            NNTestEquals(s.size(), 0ul);
         }
 
         NNTestParams(size_t)
         {
             Storage<int> s(1);
-            NNTestEquals(s.size(), 1);
+            NNTestEquals(s.size(), 1ul);
             NNTestEquals(s[0], 0);
         }
 
         NNTestParams(size_t, T)
         {
             Storage<int> s(5, 42);
-            NNTestEquals(s.size(), 5);
+            NNTestEquals(s.size(), 5ul);
             for(size_t i = 0; i < 5; ++i)
                 NNTestEquals(s[i], 42);
         }
@@ -32,7 +32,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s(5, 42);
             Storage<int> t(s);
-            NNTestEquals(t.size(), 5);
+            NNTestEquals(t.size(), 5ul);
             for(size_t i = 0; i < 5; ++i)
                 NNTestEquals(t[i], 42);
         }
@@ -41,7 +41,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s(5, 42);
             Storage<int> t(std::move(s));
-            NNTestEquals(t.size(), 5);
+            NNTestEquals(t.size(), 5ul);
             for(size_t i = 0; i < 5; ++i)
                 NNTestEquals(t[i], 42);
         }
@@ -49,8 +49,8 @@ NNTestClassImpl(Storage)
         NNTestParams(const std::initializer_list &)
         {
             Storage<int> s({ 0, 1, 2, 3, 4, 5 });
-            NNTestEquals(s.size(), 6);
-            for(size_t i = 0; i < 6; ++i)
+            NNTestEquals(s.size(), 6ul);
+            for(int i = 0; i < 6; ++i)
                 NNTestEquals(s[i], i);
         }
 
@@ -58,7 +58,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s(5, 42);
             Storage<int> t((Serialized(s)));
-            NNTestEquals(t.size(), 5);
+            NNTestEquals(t.size(), 5ul);
             for(size_t i = 0; i < 5; ++i)
                 NNTestEquals(t[i], 42);
         }
@@ -70,7 +70,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s(5, 42), t;
             t = s;
-            NNTestEquals(t.size(), 5);
+            NNTestEquals(t.size(), 5ul);
             for(size_t i = 0; i < 5; ++i)
                 NNTestEquals(t[i], 42);
         }
@@ -79,8 +79,8 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s;
             s = { 0, 1, 2, 3, 4, 5 };
-            NNTestEquals(s.size(), 6);
-            for(size_t i = 0; i < 6; ++i)
+            NNTestEquals(s.size(), 6ul);
+            for(int i = 0; i < 6; ++i)
                 NNTestEquals(s[i], i);
         }
     }
@@ -91,7 +91,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s;
             s.resize(5, 42);
-            NNTestEquals(s.size(), 5);
+            NNTestEquals(s.size(), 5ul);
             for(size_t i = 0; i < 5; ++i)
                 NNTestEquals(s[i], 42);
         }
@@ -110,7 +110,7 @@ NNTestClassImpl(Storage)
             b = s.ptr();
             s.push_back(0);
             c = s.ptr();
-            NNTestEquals(s.size(), 3);
+            NNTestEquals(s.size(), 3ul);
             NNTestEquals(a, b);
             NNTestNotEquals(b, c);
         }
@@ -122,7 +122,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s;
             NNTestEquals(s.push_back(42), s);
-            NNTestEquals(s.size(), 1);
+            NNTestEquals(s.size(), 1ul);
             NNTestEquals(s[0], 42);
         }
     }
@@ -133,7 +133,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s(5, 42);
             NNTestEquals(s, s.pop_back());
-            NNTestEquals(s.size(), 4);
+            NNTestEquals(s.size(), 4ul);
         }
     }
 
@@ -144,7 +144,7 @@ NNTestClassImpl(Storage)
             Storage<int> s(2, 42);
             Storage<int> t(3, -3);
             NNTestEquals(s.append(t), s);
-            NNTestEquals(s.size(), 5);
+            NNTestEquals(s.size(), 5ul);
             NNTestEquals(s[0], 42);
             NNTestEquals(s[1], 42);
             NNTestEquals(s[2], -3);
@@ -159,13 +159,13 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s({ 0, 1, 2, 3, 4, 5 });
             NNTestEquals(s.erase(0), s);
-            NNTestEquals(s.size(), 5);
+            NNTestEquals(s.size(), 5ul);
             NNTestEquals(s[0], 1);
             s.erase(1);
-            NNTestEquals(s.size(), 4);
+            NNTestEquals(s.size(), 4ul);
             NNTestEquals(s[1], 3);
             s.erase(3);
-            NNTestEquals(s.size(), 3);
+            NNTestEquals(s.size(), 3ul);
             NNTestEquals(s[2], 4);
         }
     }
@@ -176,7 +176,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s(5, 42);
             NNTestEquals(s.clear(), s);
-            NNTestEquals(s.size(), 0);
+            NNTestEquals(s.size(), 0ul);
         }
     }
 
@@ -196,9 +196,9 @@ NNTestClassImpl(Storage)
         NNTestParams()
         {
             Storage<int> s, t(1), u(2, 3);
-            NNTestEquals(s.size(), 0);
-            NNTestEquals(t.size(), 1);
-            NNTestEquals(u.size(), 2);
+            NNTestEquals(s.size(), 0ul);
+            NNTestEquals(t.size(), 1ul);
+            NNTestEquals(u.size(), 2ul);
         }
     }
 
@@ -230,7 +230,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s = { 0, 1, 2, 3, 4, 5 };
             const Storage<int> &t = s;
-            for(size_t i = 0; i < 6; ++i)
+            for(int i = 0; i < 6; ++i)
             {
                 NNTestEquals(s.at(i), i);
                 NNTestEquals(t.at(i), i);
@@ -247,7 +247,7 @@ NNTestClassImpl(Storage)
         {
             Storage<int> s = { 0, 1, 2, 3, 4, 5 };
             const Storage<int> &t = s;
-            for(size_t i = 0; i < 6; ++i)
+            for(int i = 0; i < 6; ++i)
             {
                 NNTestEquals(s[i], i);
                 NNTestEquals(t[i], i);
@@ -315,8 +315,8 @@ NNTestClassImpl(Storage)
             Serialized s;
             Storage<int>({ 0, 1, 2, 3, 4, 5 }).save(s);
             Storage<int> t(s);
-            NNTestEquals(t.size(), 6);
-            for(size_t i = 0; i < 6; ++i)
+            NNTestEquals(t.size(), 6ul);
+            for(int i = 0; i < 6; ++i)
                 NNTestEquals(t[i], i);
         }
     }

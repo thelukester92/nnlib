@@ -852,7 +852,7 @@ NNTestClassImpl(Tensor)
         {
             Tensor<T> t({ 0, 1, 2, 3, 4, 5 });
             const Tensor<T> &s = t;
-            NNTestEquals(std::distance(t.begin(), t.end()), t.size());
+            NNTestEquals(std::distance(t.begin(), t.end()), (int) t.size());
             size_t idx = 0;
             for(auto i = t.begin(); i != t.end(); ++i, ++idx)
                 NNTestEquals(*i, idx);
