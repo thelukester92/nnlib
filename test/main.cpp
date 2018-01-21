@@ -51,9 +51,17 @@
 #include "util/test_timer.hpp"
 #include <unordered_set>
 
-#define RunTest(Class) \
+#define RunTest(Class)                                         \
     if(tests.size() == 0 || tests.find(#Class) != tests.end()) \
         NNRunTest(Class);
+
+#define RunToyProblem(Name)                                      \
+    if(tests.size() == 0 || tests.find(#Name) != tests.end())    \
+    {                                                            \
+        std::cout << "Testing " << #Name << "..." << std::flush; \
+        Toy##Name();                                             \
+        std::cout << " Done!" << std::endl;                      \
+    }
 
 int main(int argc, const char **argv)
 {
@@ -127,6 +135,10 @@ int main(int argc, const char **argv)
     RunTest(SequenceBatcher);
     RunTest(Progress);
     RunTest(Timer);
+
+    // Toy Problems
+    RunToyProblem(Classification);
+    RunToyProblem(TimeSeries);
 
     return 0;
 }
