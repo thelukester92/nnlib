@@ -259,21 +259,51 @@ NNTestClassImpl(ArgsParser)
             args.addInt('c', "cee");
             args.addDouble('d', "dee");
             args.addFlag('e', "eee");
-            args.addFlag('f', "eee");
+            args.addFlag('f');
             args.parse(8, argv);
 
             NNTestEquals(args.getString('a'), "opt");
             NNTestEquals(args.getFlag('b'), true);
             NNTestEquals(args.getInt('c'), -5);
             NNTestAlmostEquals(args.getDouble('d'), 3.14, 1e-12);
-            NNTestEquals(args.getFlag('e'), true);
+            NNTestEquals(args.getFlag("eee"), true);
             NNTestEquals(args.getFlag('f'), false);
 
             std::stringstream ss;
             const char *argv2[] = { "cmd", "-h" };
             ArgsParser args2;
+            args2.addInt('i', "int", 32);
+            args2.addDouble('d', "double", 3.14);
+            args2.addString('s', "string", "string");
             args2.parse(2, argv2, true, ss);
             NNTestGreaterThan(ss.str().size(), 0);
+        }
+    }
+
+    NNTestMethod(printOpts)
+    {
+        NNTestParams(std::ostream &)
+        {
+            std::stringstream ss;
+            const char *argv[] = { "cmd", "-h" };
+            ArgsParser args;
+            args.addInt('i', "int", 32);
+            args.addDouble('d', "double", 3.14);
+            args.addString('s', "string", "string");
+            args.printOpts(ss);
+            NNTestGreaterThan(ss.str().size(), 0);
+        }
+    }
+
+    NNTestMethod(optName)
+    {
+        NNTestParams(char)
+        {
+            ArgsParser args;
+            args.addFlag('f', "flag");
+            args.addFlag('g');
+            NNTestEquals(args.optName('f'), "flag");
+            NNTestEquals(args.optName('g'), "g");
         }
     }
 }
