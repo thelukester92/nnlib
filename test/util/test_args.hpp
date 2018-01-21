@@ -1,6 +1,8 @@
 #ifndef TEST_ARGS_HPP
 #define TEST_ARGS_HPP
 
-void TestArgs();
+#include "../test.hpp"
+NNTestClassDecl(Args);
+NNTestClassDecl(ArgsParser);
 
 #endif
