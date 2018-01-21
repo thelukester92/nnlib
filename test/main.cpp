@@ -110,7 +110,7 @@ int main(int argc, const char **argv)
     NNRunTest(CSVSerializer);
     NNRunTest(FileSerializer);
     NNRunTest(JSONSerializer);
-    // NNRunTest(Serialized);
+    NNRunTest(Serialized);
 
     return 0;
 }
