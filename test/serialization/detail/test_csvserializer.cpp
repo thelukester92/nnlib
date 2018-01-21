@@ -141,12 +141,12 @@ NNTestClassImpl(CSVSerializer)
         NNTestParams(const Serialized &, std::ostream &)
         {
             Serialized s;
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
             s.get(0)->add(nullptr);
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(1)->add("a,\"string\"");
             s.get(1)->add(-2);
             s.get(1)->add(false);
@@ -158,7 +158,7 @@ NNTestClassImpl(CSVSerializer)
             try
             {
                 Serialized s;
-                s.add(Serialized::Array);
+                s.push(Serialized::Array);
                 s.get(0)->add(Serialized::Object);
                 CSVSerializer::write(s, ss);
                 NNTest(false);
@@ -170,11 +170,11 @@ NNTestClassImpl(CSVSerializer)
         NNTestParams(const Serialized &, const std::string &)
         {
             Serialized s;
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(1)->add("a,\"string\"");
             s.get(1)->add(-2);
 
@@ -207,11 +207,11 @@ NNTestClassImpl(CSVSerializer)
         NNTestParams(const Serialized &, std::ostream &, char)
         {
             Serialized s;
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(1)->add("a:\"string\"");
             s.get(1)->add(-2);
 
@@ -223,11 +223,11 @@ NNTestClassImpl(CSVSerializer)
         NNTestParams(const Serialized &, const std::string &, char)
         {
             Serialized s;
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(1)->add("a:\"string\"");
             s.get(1)->add(-2);
 

@@ -151,7 +151,7 @@ void JSONSerializer::readArray(Serialized &node, Parser &p)
         Serialized *value = new Serialized();
         readValue(*value, p);
 
-        node.add(value);
+        node.push(value);
         p.consumeWhitespace();
 
         ++i;

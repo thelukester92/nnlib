@@ -20,7 +20,7 @@ Serialized CSVSerializer::read(std::istream &in, size_t skipLines, char delim)
 
     while(row != nullptr)
     {
-        rows.add(row);
+        rows.push(row);
         row = readRow(p, delim);
     }
 
@@ -66,9 +66,9 @@ Serialized *CSVSerializer::readRow(Parser &p, char delim)
 
         p.consumeWhitespace();
         if(p.peek() == '"')
-            row->add(readQuoted(p, delim));
+            row->push(readQuoted(p, delim));
         else
-            row->add(readUnquoted(p, delim));
+            row->push(readUnquoted(p, delim));
 
         ++i;
     }

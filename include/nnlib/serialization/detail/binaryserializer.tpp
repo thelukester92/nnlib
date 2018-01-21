@@ -137,7 +137,7 @@ void BinarySerializer::readArray(Serialized &node, std::istream &in)
     {
         Serialized *value = new Serialized();
         read(*value, in);
-        node.add(value);
+        node.push(value);
     }
 }
 

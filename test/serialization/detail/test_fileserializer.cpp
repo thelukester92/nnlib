@@ -15,11 +15,11 @@ NNTestClassImpl(FileSerializer)
         NNTestParams(const std::string &)
         {
             Serialized s;
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(1)->add("a,string");
             s.get(1)->add(-2);
 
@@ -90,11 +90,11 @@ NNTestClassImpl(FileSerializer)
         NNTestParams(const Serialized &, const std::string &)
         {
             Serialized s;
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(0)->add(0);
             s.get(0)->add(3.14);
             s.get(0)->add("string");
-            s.add(Serialized::Array);
+            s.push(Serialized::Array);
             s.get(1)->add("a,string");
             s.get(1)->add(-2);
 

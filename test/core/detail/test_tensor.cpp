@@ -136,8 +136,8 @@ NNTestClassImpl(Tensor)
             for(size_t i = 0; i < 6; ++i)
                 NNTestEquals(t(i), i);
             Serialized s;
-            s.add(new Serialized());
-            s.add(new Serialized());
+            s.push(new Serialized());
+            s.push(new Serialized());
             s.get(0)->add(0);
             s.get(0)->add(1);
             s.get(0)->add(2);
@@ -755,7 +755,7 @@ NNTestClassImpl(Tensor)
         NNTestParams(T)
         {
             Tensor<T> t(3);
-            t.add(3.14);
+            t.push(3.14);
             for(size_t i = 0; i < t.size(); ++i)
                 NNTestEquals(t(i), 3.14);
         }
