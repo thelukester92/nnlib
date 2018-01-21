@@ -21,6 +21,19 @@ Batcher<T>::Batcher(Tensor<T> &feat, Tensor<T> &lab, size_t bats, bool copy) :
 }
 
 template <typename T>
+Batcher<T>::Batcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t bats, bool copy) :
+    m_feat(copy ? feat.copy() : feat),
+    m_lab(copy ? lab.copy() : lab),
+    m_featBatch(m_feat),
+    m_labBatch(m_lab),
+    m_batch(bats)
+{
+    NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
+    NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
+    reset();
+}
+
+template <typename T>
 Batcher<T>::Batcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t bats) :
     m_feat(feat.copy()),
     m_lab(lab.copy()),
@@ -78,13 +91,9 @@ bool Batcher<T>::next(bool autoReset)
     if(m_offset + m_batch > m_feat.size(0))
     {
         if(autoReset)
-        {
             reset();
-        }
         else
-        {
             return false;
-        }
     }
 
     m_feat.sub(m_featBatch, { { m_offset, m_batch }, {} });
@@ -118,26 +127,9 @@ Tensor<T> &Batcher<T>::allLabels()
 }
 
 template <typename T>
-SequenceBatcher<T>::SequenceBatcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t sequenceLength, size_t bats) :
-    m_feat(std::move(feat)),
-    m_lab(std::move(lab)),
-    m_featBatch(sequenceLength, bats, m_feat.size(1)),
-    m_labBatch(sequenceLength, bats, m_lab.size(1)),
-    m_batch(bats),
-    m_sequenceLength(sequenceLength)
-{
-    NNHardAssertEquals(feat.dims(), 2, "Invalid features!");
-    NNHardAssertEquals(lab.dims(), 2, "Invalid labels!");
-    NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
-    NNHardAssertLessThanOrEquals(sequenceLength, feat.size(0), "Invalid sequence length!");
-    NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
-    reset();
-}
-
-template <typename T>
 SequenceBatcher<T>::SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength, size_t bats) :
-    m_feat(feat.copy()),
-    m_lab(lab.copy()),
+    m_feat(feat),
+    m_lab(lab),
     m_featBatch(sequenceLength, bats, m_feat.size(1)),
     m_labBatch(sequenceLength, bats, m_lab.size(1)),
     m_batch(bats),
@@ -215,6 +207,18 @@ Tensor<T> &SequenceBatcher<T>::features()
 
 template <typename T>
 Tensor<T> &SequenceBatcher<T>::labels()
+{
+    return m_labBatch;
+}
+
+template <typename T>
+const Tensor<T> &SequenceBatcher<T>::allFeatures() const
+{
+    return m_featBatch;
+}
+
+template <typename T>
+const Tensor<T> &SequenceBatcher<T>::allLabels() const
 {
     return m_labBatch;
 }

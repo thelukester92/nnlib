@@ -287,7 +287,6 @@ NNTestClassImpl(ArgsParser)
         NNTestParams(std::ostream &)
         {
             std::stringstream ss;
-            const char *argv[] = { "cmd", "-h" };
             ArgsParser args;
             args.addInt('i', "int", 32);
             args.addDouble('d', "double", 3.14);

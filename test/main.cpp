@@ -108,6 +108,8 @@ int main(int argc, const char **argv)
     // Utility Classes
     NNRunTest(Args);
     NNRunTest(ArgsParser);
+    NNRunTest(Batcher);
+    NNRunTest(SequenceBatcher);
 
     return 0;
 }

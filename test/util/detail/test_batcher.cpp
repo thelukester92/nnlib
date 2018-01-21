@@ -1,43 +1,210 @@
 #include "../test_batcher.hpp"
+#include "nnlib/math/random.hpp"
 #include "nnlib/util/batcher.hpp"
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestBatcher()
+NNTestClassImpl(Batcher)
 {
-    Tensor<NN_REAL_T> feat(4, 3), lab(4, 2);
-
+    NNTestMethod(Batcher)
     {
-        Batcher<NN_REAL_T> batcher(feat, lab);
-        batcher.batch(2);
-        NNAssertEquals(batcher.batch(), 2, "Batcher::batch failed!");
-        NNAssertEquals(batcher.batches(), 2, "Batcher::batches is incorrect!");
-        batcher.next();
-        NNAssertEquals(batcher.features().shape(), Storage<size_t>({ 2, 3 }), "Batcher::features is the wrong shape!");
-        NNAssertEquals(batcher.labels().shape(), Storage<size_t>({ 2, 2 }), "Batcher::labels is the wrong shape!");
-        NNAssertEquals(batcher.allFeatures().shape(), Storage<size_t>({ 4, 3 }), "Batcher::allFeatures is the wrong shape!");
-        NNAssertEquals(batcher.allLabels().shape(), Storage<size_t>({ 4, 2 }), "Batcher::allLabels is the wrong shape!");
+        NNTestParams(Tensor &, Tensor &, size_t, bool)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> copied(feat, lab, 2, true);
+            Batcher<T> notCopied(feat, lab, 2, false);
+            NNTestEquals(copied.features().sharedWith(feat), false);
+            NNTestEquals(copied.labels().sharedWith(lab), false);
+            NNTestEquals(notCopied.features().sharedWith(feat), true);
+            NNTestEquals(notCopied.labels().sharedWith(lab), true);
+        }
+
+        NNTestParams(Tensor &&, Tensor &&, size_t, bool)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> copied(std::move(feat), std::move(lab), 2, true);
+            Batcher<T> notCopied(std::move(feat), std::move(lab), 2, false);
+            NNTestEquals(copied.features().sharedWith(feat), false);
+            NNTestEquals(copied.labels().sharedWith(lab), false);
+            NNTestEquals(notCopied.features().sharedWith(feat), true);
+            NNTestEquals(notCopied.labels().sharedWith(lab), true);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, size_t)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> feat(6, 2), lab(6, 1);
+            const Tensor<T> &cFeat = feat;
+            const Tensor<T> &cLab = lab;
+            Batcher<T> batcher(cFeat, cLab, 2);
+            NNTestEquals(batcher.features().sharedWith(cFeat), false);
+            NNTestEquals(batcher.labels().sharedWith(cLab), false);
+        }
     }
 
+    NNTestMethod(batch)
     {
-        Batcher<NN_REAL_T> batcher(feat, lab, 1, true);
-        batcher.batch(2);
-        NNAssertEquals(batcher.batch(), 2, "Batcher::batch with copy failed!");
-        NNAssertEquals(batcher.batches(), 2, "Batcher::batches with copy is incorrect!");
-        batcher.next();
-        NNAssertEquals(batcher.features().shape(), Storage<size_t>({ 2, 3 }), "Batcher::features is the wrong shape!");
-        NNAssertEquals(batcher.labels().shape(), Storage<size_t>({ 2, 2 }), "Batcher::labels is the wrong shape!");
-
-        NNAssert(batcher.next() == false, "Batcher::next(false) failed to indicate end-of-batches!");
-        NNAssert(batcher.next(true), "Batcher::next(true) failed to reset the batcher!");
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> batcher(feat, lab, 2);
+            NNTestEquals(batcher.batch(), 2);
+        }
     }
 
+    NNTestMethod(batches)
     {
-        SequenceBatcher<NN_REAL_T> batcher(feat, lab);
-        batcher.sequenceLength(2);
-        NNAssertEquals(batcher.sequenceLength(), 2, "SequenceBatcher::sequenceLength failed!");
-        batcher.batch(2);
-        NNAssertEquals(batcher.batch(), 2, "SequenceBatcher::batch failed!");
-        NNAssertEquals(batcher.features().shape(), Storage<size_t>({ 2, 2, 3 }), "SequenceBatcher::features is the wrong shape!");
-        NNAssertEquals(batcher.labels().shape(), Storage<size_t>({ 2, 2, 2 }), "SequenceBatcher::labels is the wrong shape!");
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> batcher(feat, lab, 2);
+            NNTestEquals(batcher.batches(), 3);
+        }
+    }
+
+    NNTestMethod(reset)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> batcher(feat, lab, 1);
+            Storage<bool> included(6);
+
+            for(size_t trial = 0; trial < 10; ++trial)
+            {
+                batcher.reset();
+                for(size_t i = 0; i < 6; ++i)
+                    included[i] = false;
+
+                for(size_t i = 0; i < 6; ++i)
+                {
+                    for(size_t j = 0; j < 6; ++j)
+                    {
+                        if(&feat(j, 0) == &batcher.features()(0, 0))
+                        {
+                            included[j] = true;
+                            break;
+                        }
+                    }
+                    batcher.next();
+                }
+
+                NNTestEquals(batcher.next(), false);
+                for(size_t i = 0; i < 6; ++i)
+                    NNTestEquals(included[i], true);
+            }
+
+            NNTestEquals(batcher.next(), false);
+            NNTestEquals(batcher.next(true), true);
+        }
+    }
+
+    NNTestMethod(allFeatures)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> batcher(feat, lab, 1);
+            NNTestEquals(&*feat.begin(), &*batcher.allFeatures().begin());
+            NNTestEquals(&*feat.end(), &*batcher.allFeatures().end());
+        }
+    }
+
+    NNTestMethod(allLabels)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> batcher(feat, lab, 1);
+            NNTestEquals(&*lab.begin(), &*batcher.allLabels().begin());
+            NNTestEquals(&*lab.end(), &*batcher.allLabels().end());
+        }
+    }
+}
+
+NNTestClassImpl(SequenceBatcher)
+{
+    NNTestMethod(SequenceBatcher)
+    {
+        NNTestParams(const Tensor &, const Tensor &, size_t, size_t)
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            NNTestEquals(batcher.features().sharedWith(feat), false);
+            NNTestEquals(batcher.labels().sharedWith(lab), false);
+        }
+    }
+
+    NNTestMethod(sequenceLength)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            NNTestEquals(batcher.sequenceLength(), 3);
+        }
+
+        NNTestParams(size_t)
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            batcher.sequenceLength(4);
+            NNTestEquals(batcher.sequenceLength(), 4);
+        }
+    }
+
+    NNTestMethod(batch)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            NNTestEquals(batcher.batch(), 1);
+        }
+
+        NNTestParams(size_t)
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            batcher.batch(4);
+            NNTestEquals(batcher.batch(), 4);
+        }
+    }
+
+    NNTestMethod(reset)
+    {
+        NNTestParams()
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            for(size_t i = 0; i < 6; ++i)
+            {
+                feat(i, 0) = i;
+                lab(i, 0) = i;
+            }
+
+            SequenceBatcher<T> batcher(feat, lab, 3, 1);
+            size_t maxIterations = 10000;
+
+            for(size_t i = 0; i < 4; ++i)
+            {
+                for(size_t j = 0; j < maxIterations; ++j)
+                {
+                    if(fabs(batcher.features()(0, 0, 0) - feat(i, 0)) < 1e-12)
+                    {
+                        NNTestAlmostEquals(batcher.features()(0, 0, 1), feat(i, 1), 1e-12);
+                        NNTestAlmostEquals(batcher.features()(1, 0, 0), feat(i + 1, 0), 1e-12);
+                        NNTestAlmostEquals(batcher.features()(1, 0, 1), feat(i + 1, 1), 1e-12);
+                        NNTestAlmostEquals(batcher.features()(2, 0, 0), feat(i + 2, 0), 1e-12);
+                        NNTestAlmostEquals(batcher.features()(2, 0, 1), feat(i + 2, 1), 1e-12);
+                        break;
+                    }
+                    if(j == maxIterations - 1)
+                        NNTest(false);
+                    batcher.reset();
+                }
+            }
+        }
     }
 }
