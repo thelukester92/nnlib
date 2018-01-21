@@ -8,24 +8,24 @@ NNTestClassImpl(Batcher)
 {
     NNTestMethod(Batcher)
     {
-        NNTestParams(Tensor &, Tensor &, size_t, bool)
-        {
-            RandomEngine::sharedEngine().seed(0);
-            Tensor<T> feat(6, 2), lab(6, 1);
-            Batcher<T> copied(feat, lab, 2, true);
-            Batcher<T> notCopied(feat, lab, 2, false);
-            NNTestEquals(copied.features().sharedWith(feat), false);
-            NNTestEquals(copied.labels().sharedWith(lab), false);
-            NNTestEquals(notCopied.features().sharedWith(feat), true);
-            NNTestEquals(notCopied.labels().sharedWith(lab), true);
-        }
-
         NNTestParams(Tensor &&, Tensor &&, size_t, bool)
         {
             RandomEngine::sharedEngine().seed(0);
             Tensor<T> feat(6, 2), lab(6, 1);
             Batcher<T> copied(std::move(feat), std::move(lab), 2, true);
             Batcher<T> notCopied(std::move(feat), std::move(lab), 2, false);
+            NNTestEquals(copied.features().sharedWith(feat), false);
+            NNTestEquals(copied.labels().sharedWith(lab), false);
+            NNTestEquals(notCopied.features().sharedWith(feat), true);
+            NNTestEquals(notCopied.labels().sharedWith(lab), true);
+        }
+
+        NNTestParams(Tensor &, Tensor &, size_t, bool)
+        {
+            RandomEngine::sharedEngine().seed(0);
+            Tensor<T> feat(6, 2), lab(6, 1);
+            Batcher<T> copied(feat, lab, 2, true);
+            Batcher<T> notCopied(feat, lab, 2, false);
             NNTestEquals(copied.features().sharedWith(feat), false);
             NNTestEquals(copied.labels().sharedWith(lab), false);
             NNTestEquals(notCopied.features().sharedWith(feat), true);
@@ -134,12 +134,37 @@ NNTestClassImpl(SequenceBatcher)
 {
     NNTestMethod(SequenceBatcher)
     {
-        NNTestParams(const Tensor &, const Tensor &, size_t, size_t)
+        NNTestParams(Tensor &&, Tensor &&, size_t, size_t, bool)
         {
             Tensor<T> feat(6, 2), lab(6, 1);
-            SequenceBatcher<T> batcher(feat, lab, 3, 1);
-            NNTestEquals(batcher.features().sharedWith(feat), false);
-            NNTestEquals(batcher.labels().sharedWith(lab), false);
+            SequenceBatcher<T> batcher(std::move(feat), std::move(lab), 3, 1, true);
+            NNTestEquals(batcher.allFeatures().sharedWith(feat), false);
+            NNTestEquals(batcher.allLabels().sharedWith(lab), false);
+            SequenceBatcher<T> noCopy(std::move(feat), std::move(lab), 3, 1, false);
+            NNTestEquals(noCopy.allFeatures().sharedWith(feat), true);
+            NNTestEquals(noCopy.allLabels().sharedWith(lab), true);
+        }
+
+        NNTestParams(Tensor &, Tensor &, size_t, size_t, bool)
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1, true);
+            NNTestEquals(batcher.allFeatures().sharedWith(feat), false);
+            NNTestEquals(batcher.allLabels().sharedWith(lab), false);
+            SequenceBatcher<T> noCopy(feat, lab, 3, 1, false);
+            NNTestEquals(noCopy.allFeatures().sharedWith(feat), true);
+            NNTestEquals(noCopy.allLabels().sharedWith(lab), true);
+        }
+
+        NNTestParams(const Tensor &, const Tensor &, size_t, size_t, bool)
+        {
+            Tensor<T> feat(6, 2), lab(6, 1);
+            SequenceBatcher<T> batcher(feat, lab, 3, 1, true);
+            NNTestEquals(batcher.allFeatures().sharedWith(feat), false);
+            NNTestEquals(batcher.allLabels().sharedWith(lab), false);
+            SequenceBatcher<T> noCopy(feat, lab, 3, 1, false);
+            NNTestEquals(noCopy.allFeatures().sharedWith(feat), true);
+            NNTestEquals(noCopy.allLabels().sharedWith(lab), true);
         }
     }
 

@@ -14,8 +14,8 @@ template <typename T = NN_REAL_T>
 class Batcher
 {
 public:
-    Batcher(Tensor<T> &feat, Tensor<T> &lab, size_t bats = 1, bool copy = false);
     Batcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t bats = 1, bool copy = false);
+    Batcher(Tensor<T> &feat, Tensor<T> &lab, size_t bats = 1, bool copy = false);
     Batcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t bats);
 
     Batcher &batch(size_t bats);
@@ -47,6 +47,8 @@ template <typename T = NN_REAL_T>
 class SequenceBatcher
 {
 public:
+    SequenceBatcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t sequenceLength = 1, size_t bats = 1, bool copy = false);
+    SequenceBatcher(Tensor<T> &feat, Tensor<T> &lab, size_t sequenceLength = 1, size_t bats = 1, bool copy = false);
     SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength = 1, size_t bats = 1);
 
     SequenceBatcher &sequenceLength(size_t sequenceLength);
@@ -59,13 +61,12 @@ public:
 
     Tensor<T> &features();
     Tensor<T> &labels();
-
-    const Tensor<T> &allFeatures() const;
-    const Tensor<T> &allLabels() const;
+    Tensor<T> &allFeatures();
+    Tensor<T> &allLabels();
 
 private:
-    const Tensor<T> &m_feat;
-    const Tensor<T> &m_lab;
+    Tensor<T> m_feat;
+    Tensor<T> m_lab;
     Tensor<T> m_featBatch;
     Tensor<T> m_labBatch;
     size_t m_batch;

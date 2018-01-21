@@ -8,19 +8,6 @@ namespace nnlib
 {
 
 template <typename T>
-Batcher<T>::Batcher(Tensor<T> &feat, Tensor<T> &lab, size_t bats, bool copy) :
-    m_feat(copy ? feat.copy() : feat),
-    m_lab(copy ? lab.copy() : lab),
-    m_featBatch(m_feat),
-    m_labBatch(m_lab),
-    m_batch(bats)
-{
-    NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
-    NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
-    reset();
-}
-
-template <typename T>
 Batcher<T>::Batcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t bats, bool copy) :
     m_feat(copy ? feat.copy() : feat),
     m_lab(copy ? lab.copy() : lab),
@@ -34,17 +21,14 @@ Batcher<T>::Batcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t bats, bool copy) :
 }
 
 template <typename T>
+Batcher<T>::Batcher(Tensor<T> &feat, Tensor<T> &lab, size_t bats, bool copy) :
+    Batcher(std::move(feat), std::move(lab), bats, copy)
+{}
+
+template <typename T>
 Batcher<T>::Batcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t bats) :
-    m_feat(feat.copy()),
-    m_lab(lab.copy()),
-    m_featBatch(m_feat),
-    m_labBatch(m_lab),
-    m_batch(bats)
-{
-    NNHardAssertEquals(feat.size(0), lab.size(0), "Incompatible features and labels!");
-    NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
-    reset();
-}
+    Batcher(feat.copy(), lab.copy(), bats, false)
+{}
 
 template <typename T>
 Batcher<T> &Batcher<T>::batch(size_t bats)
@@ -127,9 +111,9 @@ Tensor<T> &Batcher<T>::allLabels()
 }
 
 template <typename T>
-SequenceBatcher<T>::SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength, size_t bats) :
-    m_feat(feat),
-    m_lab(lab),
+SequenceBatcher<T>::SequenceBatcher(Tensor<T> &&feat, Tensor<T> &&lab, size_t sequenceLength, size_t bats, bool copy) :
+    m_feat(copy ? feat.copy() : feat),
+    m_lab(copy ? lab.copy() : lab),
     m_featBatch(sequenceLength, bats, m_feat.size(1)),
     m_labBatch(sequenceLength, bats, m_lab.size(1)),
     m_batch(bats),
@@ -142,6 +126,16 @@ SequenceBatcher<T>::SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab,
     NNHardAssertLessThanOrEquals(bats, feat.size(0), "Invalid batch size!");
     reset();
 }
+
+template <typename T>
+SequenceBatcher<T>::SequenceBatcher(Tensor<T> &feat, Tensor<T> &lab, size_t sequenceLength, size_t bats, bool copy) :
+    SequenceBatcher(std::move(feat), std::move(lab), sequenceLength, bats, copy)
+{}
+
+template <typename T>
+SequenceBatcher<T>::SequenceBatcher(const Tensor<T> &feat, const Tensor<T> &lab, size_t sequenceLength, size_t bats) :
+    SequenceBatcher(feat.copy(), lab.copy(), sequenceLength, bats, false)
+{}
 
 template <typename T>
 SequenceBatcher<T> &SequenceBatcher<T>::sequenceLength(size_t sequenceLength)
@@ -182,9 +176,7 @@ SequenceBatcher<T> &SequenceBatcher<T>::reset()
 {
     Storage<size_t> indices(m_batch);
     for(size_t &index : indices)
-    {
         index = Random<size_t>::sharedRandom().uniform(m_feat.size(0) - m_sequenceLength + 1);
-    }
 
     for(size_t i = 0; i < m_sequenceLength; ++i)
     {
@@ -212,13 +204,13 @@ Tensor<T> &SequenceBatcher<T>::labels()
 }
 
 template <typename T>
-const Tensor<T> &SequenceBatcher<T>::allFeatures() const
+Tensor<T> &SequenceBatcher<T>::allFeatures()
 {
     return m_feat;
 }
 
 template <typename T>
-const Tensor<T> &SequenceBatcher<T>::allLabels() const
+Tensor<T> &SequenceBatcher<T>::allLabels()
 {
     return m_lab;
 }
