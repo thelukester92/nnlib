@@ -159,10 +159,12 @@ NNTestClassImpl(SequenceBatcher)
         NNTestParams(const Tensor &, const Tensor &, size_t, size_t, bool)
         {
             Tensor<T> feat(6, 2), lab(6, 1);
-            SequenceBatcher<T> batcher(feat, lab, 3, 1, true);
+            const Tensor<T> &cFeat = feat;
+            const Tensor<T> &cLab = lab;
+            SequenceBatcher<T> batcher(cFeat, cLab, 3, 1, true);
             NNTestEquals(batcher.allFeatures().sharedWith(feat), false);
             NNTestEquals(batcher.allLabels().sharedWith(lab), false);
-            SequenceBatcher<T> noCopy(feat, lab, 3, 1, false);
+            SequenceBatcher<T> noCopy(cFeat, cLab, 3, 1, false);
             NNTestEquals(noCopy.allFeatures().sharedWith(feat), true);
             NNTestEquals(noCopy.allLabels().sharedWith(lab), true);
         }
