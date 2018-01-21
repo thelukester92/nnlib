@@ -26,7 +26,7 @@ NNTestClassImpl(JSONSerializer)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->add("array_element");
+            s.get("array")->push("array_element");
             s.set("object", Serialized::Object);
             s.get("object")->set("object_prop1", 3.14);
             s.get("object")->set("object_prop2", "value");
@@ -82,7 +82,7 @@ NNTestClassImpl(JSONSerializer)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->add("array_element");
+            s.get("array")->push("array_element");
             s.set("object", Serialized::Object);
             s.get("object")->set("object_prop1", 3.14);
             s.get("object")->set("object_prop2", "value");
@@ -141,7 +141,7 @@ NNTestClassImpl(JSONSerializer)
             s.set("string", "nnlib");
             s.set("escaped", "\"escaped\"");
             s.set("array", Serialized::Array);
-            s.get("array")->add("array_element");
+            s.get("array")->push("array_element");
             s.set("object", Serialized::Object);
             s.get("object")->set("object_prop1", 3.14);
             s.get("object")->set("object_prop2", "value");

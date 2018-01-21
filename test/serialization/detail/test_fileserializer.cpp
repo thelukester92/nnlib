@@ -16,12 +16,12 @@ NNTestClassImpl(FileSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->add(0);
-            s.get(0)->add(3.14);
-            s.get(0)->add("string");
+            s.get(0)->push(0);
+            s.get(0)->push(3.14);
+            s.get(0)->push("string");
             s.push(Serialized::Array);
-            s.get(1)->add("a,string");
-            s.get(1)->add(-2);
+            s.get(1)->push("a,string");
+            s.get(1)->push(-2);
 
             BinarySerializer::write(s, ".nnlib.bin");
             try
@@ -91,12 +91,12 @@ NNTestClassImpl(FileSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->add(0);
-            s.get(0)->add(3.14);
-            s.get(0)->add("string");
+            s.get(0)->push(0);
+            s.get(0)->push(3.14);
+            s.get(0)->push("string");
             s.push(Serialized::Array);
-            s.get(1)->add("a,string");
-            s.get(1)->add(-2);
+            s.get(1)->push("a,string");
+            s.get(1)->push(-2);
 
             FileSerializer::write(s, ".nnlib.bin");
             try
