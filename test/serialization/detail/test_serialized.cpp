@@ -1,226 +1,682 @@
 #include "../test_serialized.hpp"
 #include "nnlib/core/tensor.hpp"
-#include "nnlib/nn/module.hpp"
+#include "nnlib/nn/linear.hpp"
 #include "nnlib/serialization/serialized.hpp"
 #include <vector>
 using namespace nnlib;
+using T = NN_REAL_T;
 
-void TestSerialized()
+NNTestClassImpl(Serialized)
 {
+    NNTestMethod(Serialized)
     {
-        NNAssertEquals(Serialized(Serialized::Null).type(), Serialized::Null, "Serialized::Serialized(Type) failed!");
-        NNAssertEquals(Serialized(Serialized::Boolean).type(), Serialized::Boolean, "Serialized::Serialized(Type) failed!");
-        NNAssertEquals(Serialized(Serialized::Integer).type(), Serialized::Integer, "Serialized::Serialized(Type) failed!");
-        NNAssertEquals(Serialized(Serialized::Float).type(), Serialized::Float, "Serialized::Serialized(Type) failed!");
-        NNAssertEquals(Serialized(Serialized::String).type(), Serialized::String, "Serialized::Serialized(Type) failed!");
-        NNAssertEquals(Serialized(Serialized::Array).type(), Serialized::Array, "Serialized::Serialized(Type) failed!");
-        NNAssertEquals(Serialized(Serialized::Object).type(), Serialized::Object, "Serialized::Serialized(Type) failed!");
+        NNTestParams()
+        {
+            NNTestEquals(Serialized().type(), Serialized::Null);
+        }
+
+        NNTestParams(const Serialized &)
+        {
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+
+            Serialized t(const_cast<const Serialized &>(s));
+            NNTestEquals(t.type("null"), Serialized::Null);
+            NNTestEquals(t.get<bool>("bool"), true);
+            NNTestEquals(t.get<int>("int"), 42);
+            NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+            NNTestEquals(t.get<std::string>("string"), "nnlib");
+            NNTestEquals(t.size("array"), 1);
+            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.size("object"), 2);
+            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+        }
+
+        NNTestParams(Serialized &)
+        {
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+
+            Serialized t(s);
+            NNTestEquals(t.type("null"), Serialized::Null);
+            NNTestEquals(t.get<bool>("bool"), true);
+            NNTestEquals(t.get<int>("int"), 42);
+            NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+            NNTestEquals(t.get<std::string>("string"), "nnlib");
+            NNTestEquals(t.size("array"), 1);
+            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.size("object"), 2);
+            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+        }
+
+        NNTestParams(Serialized &&)
+        {
+            Serialized s;
+            s.set("null", nullptr);
+            s.set("bool", true);
+            s.set("int", 32);
+            s.set("int", 42);
+            s.set("double", 3.14);
+            s.set("string", "nnlib");
+            s.set("array", Serialized::Array);
+            s.get("array")->add("array_element");
+            s.set("object", Serialized::Object);
+            s.get("object")->set("object_prop1", 3.14);
+            s.get("object")->set("object_prop2", "value");
+
+            Serialized t(std::move(s));
+            NNTestEquals(t.type("null"), Serialized::Null);
+            NNTestEquals(t.get<bool>("bool"), true);
+            NNTestEquals(t.get<int>("int"), 42);
+            NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+            NNTestEquals(t.get<std::string>("string"), "nnlib");
+            NNTestEquals(t.size("array"), 1);
+            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.size("object"), 2);
+            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+        }
+
+        NNTestParams(Serialized::Type)
+        {
+            NNTestEquals(Serialized(Serialized::Null).type(), Serialized::Null);
+            NNTestEquals(Serialized(Serialized::Boolean).type(), Serialized::Boolean);
+            NNTestEquals(Serialized(Serialized::Integer).type(), Serialized::Integer);
+            NNTestEquals(Serialized(Serialized::Float).type(), Serialized::Float);
+            NNTestEquals(Serialized(Serialized::String).type(), Serialized::String);
+            NNTestEquals(Serialized(Serialized::Array).type(), Serialized::Array);
+            NNTestEquals(Serialized(Serialized::Object).type(), Serialized::Object);
+        }
+
+        NNTestParams(nullptr_t)
+        {
+            NNTestEquals(Serialized(nullptr).type(), Serialized::Null);
+        }
+
+        NNTestParams(bool)
+        {
+            NNTestEquals(Serialized(true).type(), Serialized::Boolean);
+        }
+
+        NNTestParams(int)
+        {
+            NNTestEquals(Serialized(42).type(), Serialized::Integer);
+        }
+
+        NNTestParams(double)
+        {
+            NNTestEquals(Serialized(3.14).type(), Serialized::Float);
+        }
+
+        NNTestParams(const char *)
+        {
+            NNTestEquals(Serialized("hello").type(), Serialized::String);
+        }
+
+        NNTestParams(T, const T &)
+        {
+            std::vector<int> v(10);
+            v[0] = 5;
+
+            Serialized s(v.begin(), v.end());
+            NNTestEquals(s.type(), Serialized::Array);
+            NNTestEquals(s.size(), 10);
+            NNTestEquals(s.get<int>(0), 5);
+        }
     }
 
+    NNTestMethod(operator=)
     {
-        NNAssertEquals(Serialized().type(), Serialized::Null, "Serialized::Serialized) failed!");
-        NNAssertEquals(Serialized(nullptr).type(), Serialized::Null, "Serialized::Serialized) failed!");
-        NNAssertEquals(Serialized(true).type(), Serialized::Boolean, "Serialized::Serialized(bool) failed!");
-        NNAssertEquals(Serialized(42).type(), Serialized::Integer, "Serialized::Serialized(int) failed!");
-        NNAssertEquals(Serialized(3.14).type(), Serialized::Float, "Serialized::Serialized(double) failed!");
-        NNAssertEquals(Serialized("hello").type(), Serialized::String, "Serialized::Serialized(std::string) failed!");
-
-        std::vector<int> v(10);
-        v[0] = 5;
-
-        Serialized s(v.begin(), v.end());
-        NNAssertEquals(s.type(), Serialized::Array, "Serialized::Serialized(iterator, iterator) failed!");
-        NNAssertEquals(s.size(), 10, "Serialized::Serialized(iterator, iterator) failed!");
-        NNAssertEquals(s.get<int>(0), 5, "Serialized::Serialized(iterator, iterator) failed!");
-
-        Serialized t(s);
-        NNAssertEquals(t.type(), Serialized::Array, "Serialized::Serialized(iterator, iterator) failed!");
-        NNAssertEquals(t.size(), 10, "Serialized::Serialized(iterator, iterator) failed!");
-        NNAssertEquals(t.get<int>(0), 5, "Serialized::Serialized(iterator, iterator) failed!");
-    }
-
-    {
-        NNAssertEquals(Serialized(true).get<bool>(), true, "Serialized::as<bool>() failed!");
-        NNAssertEquals(Serialized(42).get<int>(), 42, "Serialized::as<int>() failed!");
-        NNAssertAlmostEquals(Serialized(3.14).get<double>(), 3.14, 1e-12, "Serialized::as<double>() failed!");
-        NNAssertEquals(Serialized("hello").get<std::string>(), "hello", "Serialized::as<std::string>() failed!");
-    }
-
-    {
-        Serialized s;
-        s.add(42);
-        s.add("hello");
-        s.add(Serialized::Array);
-        s.add(nullptr);
-
-        NNAssertEquals(s.type(0), Serialized::Integer, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.type(1), Serialized::String, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.type(2), Serialized::Array, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.type(3), Serialized::Null, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.get<int>(0), 42, "Serialized::get<int>(int) failed!");
-        NNAssertEquals(s.get<std::string>(1), "hello", "Serialized::get<std::string>(int) failed!");
-        NNAssertEquals(s.size(2), 0, "Serialized::size(int) failed!");
-        NNAssertEquals(s.get(2)->type(), Serialized::Array, "Serialized::get(int) failed!");
-        NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(3), nullptr, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
-        NNAssertEquals(s.get<Module<NN_REAL_T> *>(3), nullptr, "Serialized::get<Module<NN_REAL_T> *>(int) failed!");
-
-        s.set(0, 365);
-        NNAssertEquals(s.get<int>(0), 365, "Serialized::set<int>(int) failed!");
-
-        s.set(1, new Serialized());
-        NNAssertEquals(s.type(1), Serialized::Null, "Serialized::set<Serialized *>(int) failed!");
-
-        Module<NN_REAL_T> *m = nullptr;
-        s.set(2, m);
-        NNAssertEquals(s.type(2), Serialized::Null, "Serialized::set<Module<T> *>(int) failed!");
-    }
-
-    {
-        Serialized t;
-        t.add(42);
-        t.add("hello");
-        t.add(Serialized::Array);
-        t.add(nullptr);
-        t.add(Tensor<NN_REAL_T>(5).fill(3.14));
-
-        const Serialized &s = t;
-
-        NNAssertEquals(s.type(0), Serialized::Integer, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.type(1), Serialized::String, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.type(2), Serialized::Array, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.type(3), Serialized::Null, "Serialized::type(size_t) failed!");
-        NNAssertEquals(s.get<int>(0), 42, "Serialized::get<int>(int) failed!");
-        NNAssertEquals(s.get<std::string>(1), "hello", "Serialized::get<std::string>(int) failed!");
-        NNAssertEquals(s.size(2), 0, "Serialized::size(int) failed!");
-        NNAssertEquals(s.get(2)->type(), Serialized::Array, "Serialized::get(int) failed!");
-        NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(3), nullptr, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
-        NNAssertEquals(s.get<Tensor<NN_REAL_T> *>(4)->at(0), 3.14, "Serialized::get<Tensor<NN_REAL_T> *>(int) failed!");
-        NNAssertEquals(s.get<Module<NN_REAL_T> *>(3), nullptr, "Serialized::get<Module<NN_REAL_T> *>(int) failed!");
-    }
-
-    {
-        Serialized obj;
-        obj.set("null", Serialized::Null);
-        obj.set("bool", true);
-        obj.set("itgr", 42);
-        obj.set("flot", 3.14);
-        obj.set("stng", "hello");
-        obj.set("arry", Serialized::Array);
-        obj.set("objt", Serialized::Object);
-        obj.set("nptr", nullptr);
-
-        NNAssertEquals(obj.get("null")->size(), 1, "Serialized::size() failed!");
-        NNAssertEquals(obj.size(), 8, "Serialized::size() failed!");
-        NNAssert(obj.has("null"), "Serialized::has(string) failed!");
-        NNAssert(!obj.has("bull"), "Serialized::has(string) failed!");
-
-        NNAssertEquals(obj.get("null")->get<bool>(), false, "Serialized::get<bool>() failed for a null value!");
-        NNAssertEquals(obj.get("bool")->get<bool>(), true, "Serialized::get<bool>() failed for a bool value!");
-        NNAssertEquals(obj.get("itgr")->get<bool>(), true, "Serialized::get<bool>() failed for an integer value!");
-        NNAssertEquals(obj.get("flot")->get<bool>(), true, "Serialized::get<bool>() failed for a floating point value!");
-
-        bool ok = false;
-        try
+        NNTestParams(const Serialized &)
         {
-            obj.get("stng")->get<bool>();
+            NNTestParams(Serialized &)
+            {
+                Serialized s, t;
+                s.set("null", nullptr);
+                s.set("bool", true);
+                s.set("int", 32);
+                s.set("int", 42);
+                s.set("double", 3.14);
+                s.set("string", "nnlib");
+                s.set("array", Serialized::Array);
+                s.get("array")->add("array_element");
+                s.set("object", Serialized::Object);
+                s.get("object")->set("object_prop1", 3.14);
+                s.get("object")->set("object_prop2", "value");
+
+                t = s;
+                NNTestEquals(t.type("null"), Serialized::Null);
+                NNTestEquals(t.get<bool>("bool"), true);
+                NNTestEquals(t.get<int>("int"), 42);
+                NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+                NNTestEquals(t.get<std::string>("string"), "nnlib");
+                NNTestEquals(t.size("array"), 1);
+                NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(t.size("object"), 2);
+                NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+            }
+
+            NNTestParams(Serialized &&)
+            {
+                Serialized s, t;
+                s.set("null", nullptr);
+                s.set("bool", true);
+                s.set("int", 32);
+                s.set("int", 42);
+                s.set("double", 3.14);
+                s.set("string", "nnlib");
+                s.set("array", Serialized::Array);
+                s.get("array")->add("array_element");
+                s.set("object", Serialized::Object);
+                s.get("object")->set("object_prop1", 3.14);
+                s.get("object")->set("object_prop2", "value");
+
+                t = std::move(s);
+                NNTestEquals(t.type("null"), Serialized::Null);
+                NNTestEquals(t.get<bool>("bool"), true);
+                NNTestEquals(t.get<int>("int"), 42);
+                NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
+                NNTestEquals(t.get<std::string>("string"), "nnlib");
+                NNTestEquals(t.size("array"), 1);
+                NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(t.size("object"), 2);
+                NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+            }
         }
-        catch(const Error &)
+
+        NNTestMethod(type)
         {
-            ok = true;
+            NNTestParams(Serialized::Type)
+            {
+                Serialized s;
+                s.type(Serialized::Null);
+                NNTestEquals(s.type(), Serialized::Null);
+                s.type(Serialized::Boolean);
+                NNTestEquals(s.type(), Serialized::Boolean);
+                s.type(Serialized::Integer);
+                NNTestEquals(s.type(), Serialized::Integer);
+                s.type(Serialized::Float);
+                NNTestEquals(s.type(), Serialized::Float);
+                s.type(Serialized::String);
+                NNTestEquals(s.type(), Serialized::String);
+                s.type(Serialized::Array);
+                NNTestEquals(s.type(), Serialized::Array);
+                s.type(Serialized::Object);
+                NNTestEquals(s.type(), Serialized::Object);
+            }
+
+            NNTestParams(size_t, Serialized::Type)
+            {
+                Serialized s;
+                s.add(0);
+                s.type(0, Serialized::Null);
+                NNTestEquals(s.type(0), Serialized::Null);
+                s.type(0, Serialized::Boolean);
+                NNTestEquals(s.type(0), Serialized::Boolean);
+                s.type(0, Serialized::Integer);
+                NNTestEquals(s.type(0), Serialized::Integer);
+                s.type(0, Serialized::Float);
+                NNTestEquals(s.type(0), Serialized::Float);
+                s.type(0, Serialized::String);
+                NNTestEquals(s.type(0), Serialized::String);
+                s.type(0, Serialized::Array);
+                NNTestEquals(s.type(0), Serialized::Array);
+                s.type(0, Serialized::Object);
+                NNTestEquals(s.type(0), Serialized::Object);
+            }
+
+            NNTestParams(const std::string &, Serialized::Type)
+            {
+                Serialized s;
+                s.set("foo", 0);
+                s.type("foo", Serialized::Null);
+                NNTestEquals(s.type("foo"), Serialized::Null);
+                s.type("foo", Serialized::Boolean);
+                NNTestEquals(s.type("foo"), Serialized::Boolean);
+                s.type("foo", Serialized::Integer);
+                NNTestEquals(s.type("foo"), Serialized::Integer);
+                s.type("foo", Serialized::Float);
+                NNTestEquals(s.type("foo"), Serialized::Float);
+                s.type("foo", Serialized::String);
+                NNTestEquals(s.type("foo"), Serialized::String);
+                s.type("foo", Serialized::Array);
+                NNTestEquals(s.type("foo"), Serialized::Array);
+                s.type("foo", Serialized::Object);
+                NNTestEquals(s.type("foo"), Serialized::Object);
+            }
         }
-        NNAssert(ok, "Serialized::get<bool> did not throw an error for an unexpected type!");
 
-        NNAssertEquals(obj.get("null")->get<int>(), 0, "Serialized::get<int>() failed for a null value!");
-        NNAssertEquals(obj.get("bool")->get<int>(), 1, "Serialized::get<int>() failed for a bool value!");
-        NNAssertEquals(obj.get("itgr")->get<int>(), 42, "Serialized::get<int>() failed for an integer value!");
-        NNAssertEquals(obj.get("flot")->get<int>(), 3, "Serialized::get<int>() failed for a floating point value!");
-
-        ok = false;
-        try
+        NNTestMethod(size)
         {
-            obj.get("stng")->get<int>();
+            NNTestParams()
+            {
+                Serialized s;
+                NNTestEquals(s.size(), 1);
+                s.add(1);
+                s.add(2);
+                NNTestEquals(s.size(), 2);
+                s.set("foo", 1);
+                s.set("bar", 2);
+                s.set("baz", 3);
+                NNTestEquals(s.size(), 3);
+            }
+
+            NNTestParams(size_t)
+            {
+                Serialized s;
+                s.add(Serialized::Array);
+                s.get(0)->add(1);
+                s.get(0)->add(2);
+                NNTestEquals(s.size(0), 2);
+                s.get(0)->set("foo", 1);
+                s.get(0)->set("bar", 2);
+                s.get(0)->set("baz", 3);
+                NNTestEquals(s.size(0), 3);
+            }
+
+            NNTestParams(const std::string &)
+            {
+                Serialized s;
+                s.set("foo", Serialized::Array);
+                s.get("foo")->add(1);
+                s.get("foo")->add(2);
+                NNTestEquals(s.size("foo"), 2);
+                s.get("foo")->set("foo", 1);
+                s.get("foo")->set("bar", 2);
+                s.get("foo")->set("baz", 3);
+                NNTestEquals(s.size("foo"), 3);
+            }
         }
-        catch(const Error &)
+
+        NNTestMethod(get<int>)
         {
-            ok = true;
+            NNTestParams()
+            {
+                NNTestEquals(Serialized().get<int>(), 0);
+                NNTestEquals(Serialized(true).get<int>(), 1);
+                NNTestEquals(Serialized(2).get<int>(), 2);
+                NNTestEquals(Serialized(3.14).get<int>(), 3);
+                try
+                {
+                    Serialized("string").get<int>();
+                    NNTest(false);
+                }
+                catch(const Error &)
+                {}
+            }
+
+            NNTestParams(size_t)
+            {
+                Serialized s;
+                const Serialized &t = s;
+                s.add(12);
+                NNTestEquals(s.get<int>(0), 12);
+                NNTestEquals(t.get<int>(0), 12);
+            }
+
+            NNTestParams(const std::string &)
+            {
+                Serialized s;
+                const Serialized &t = s;
+                s.set("foo", -12);
+                NNTestEquals(s.get<int>("foo"), -12);
+                NNTestEquals(t.get<int>("foo"), -12);
+            }
         }
-        NNAssert(ok, "Serialized::get<int> did not throw an error for an unexpected type!");
 
-        NNAssertEquals(obj.get("null")->get<double>(), 0, "Serialized::get<double>() failed for a null value!");
-        NNAssertEquals(obj.get("bool")->get<double>(), 1, "Serialized::get<double>() failed for a bool value!");
-        NNAssertEquals(obj.get("itgr")->get<double>(), 42, "Serialized::get<double>() failed for an integer value!");
-        NNAssertAlmostEquals(obj.get("flot")->get<double>(), 3.14, 1e-12, "Serialized::get<double>() failed for a floating point value!");
-
-        ok = false;
-        try
+        NNTestMethod(get<double>)
         {
-            obj.get("stng")->get<double>();
+            NNTestParams()
+            {
+                NNTestAlmostEquals(Serialized().get<double>(), 0, 1e-12);
+                NNTestAlmostEquals(Serialized(true).get<double>(), 1, 1e-12);
+                NNTestAlmostEquals(Serialized(2).get<double>(), 2, 1e-12);
+                NNTestAlmostEquals(Serialized(3.14).get<double>(), 3.14, 1e-12);
+                try
+                {
+                    Serialized("string").get<double>();
+                    NNTest(false);
+                }
+                catch(const Error &)
+                {}
+            }
         }
-        catch(const Error &)
+
+        NNTestMethod(get<std::string>)
         {
-            ok = true;
+            NNTestParams()
+            {
+                NNTestEquals(Serialized().get<std::string>(), "null");
+                NNTestEquals(Serialized(false).get<std::string>(), "false");
+                NNTestEquals(Serialized(true).get<std::string>(), "true");
+                NNTestEquals(Serialized(2).get<std::string>(), "2");
+                NNTestEquals(Serialized(3.14).get<std::string>(), "3.14");
+                NNTestEquals(Serialized("string").get<std::string>(), "string");
+            }
         }
-        NNAssert(ok, "Serialized::get<double> did not throw an error for an unexpected type!");
 
-        NNAssertEquals(obj.get("null")->get<std::string>(), "null", "Serialized::get<string>() failed for a null value!");
-        NNAssertEquals(obj.get("bool")->get<std::string>(), "true", "Serialized::get<string>() failed for a bool value!");
-        NNAssertEquals(obj.get("itgr")->get<std::string>(), "42", "Serialized::get<string>() failed for an integer value!");
-        NNAssertAlmostEquals(std::atof(obj.get("flot")->get<std::string>().c_str()), 3.14, 1e-12, "Serialized::get<string>() failed for a floating point value!");
-        NNAssertEquals(obj.get("stng")->get<std::string>(), "hello", "Serialized::get<string>() failed for a string value!");
-
-        ok = false;
-        try
+        NNTestMethod(get<Storage>)
         {
-            obj.get("arry")->get<std::string>();
+            NNTestParams()
+            {
+                Storage<size_t> s = { 0, 1, 2, 3, 4, 5 };
+                Storage<size_t> t = Serialized(s).get<Storage<size_t>>();
+                NNTestEquals(s, t);
+            }
         }
-        catch(const Error &)
+
+        NNTestMethod(get<const Serialized *>)
         {
-            ok = true;
+            NNTestParams()
+            {
+                Serialized s;
+                NNTestEquals(&s, s.get<const Serialized *>());
+            }
         }
-        NNAssert(ok, "Serialized::get<string> did not throw an error for an unexpected type!");
 
-        Serialized s;
+        NNTestMethod(get<Serialized *>)
+        {
+            NNTestParams()
+            {
+                Serialized s;
+                NNTestEquals(&s, s.get<Serialized *>());
+            }
+        }
 
-        s = *obj.get("null");
-        NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(const Serialized &other) failed!");
+        NNTestMethod(get<Module>)
+        {
+            NNTestParams()
+            {
+                Linear<T> orig(2, 3);
 
-        s = *obj.get("bool");
-        NNAssertEquals(s.type(), Serialized::Boolean, "Serialized::operator=(const Serialized &other) failed!");
+                auto copy1 = Serialized(orig).get<Module<T> *>();
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, orig.params(), copy1->params());
+                delete copy1;
 
-        s = *obj.get("itgr");
-        NNAssertEquals(s.type(), Serialized::Integer, "Serialized::operator=(const Serialized &other) failed!");
+                auto copy2 = Serialized(orig).get<Linear<T> *>();
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, orig.params(), copy2->params());
+                delete copy2;
 
-        s = *obj.get("flot");
-        NNAssertEquals(s.type(), Serialized::Float, "Serialized::operator=(const Serialized &other) failed!");
+                Serialized s;
+                orig.save(s);
+                auto copy3 = s.get<Linear<T> *>();
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, orig.params(), copy3->params());
+                delete copy3;
+            }
+        }
 
-        s = *obj.get("stng");
-        NNAssertEquals(s.type(), Serialized::String, "Serialized::operator=(const Serialized &other) failed!");
+        NNTestMethod(get<T>)
+        {
+            NNTestParams(T, const T &)
+            {
+                Serialized s;
+                s.add(0);
+                s.add(1);
+                s.add(2);
+                s.add(3);
+                s.add(4);
+                s.add(5);
 
-        s = *obj.get("objt");
-        NNAssertEquals(s.type(), Serialized::Object, "Serialized::operator=(const Serialized &other) failed!");
+                std::vector<int> v(6);
+                s.get(v.begin(), v.end());
 
-        s = *obj.get("nptr");
-        NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(const Serialzied &other) failed!");
+                for(size_t i = 0; i < 6; ++i)
+                    NNTestEquals(v[i], i);
+            }
 
-        s = std::move(*obj.get("null"));
-        NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(Serialized &&other) failed!");
+            NNTestParams(size_t, T, const T &)
+            {
+                Serialized s;
+                s.add(Serialized::Array);
+                s.get(0)->add(0);
+                s.get(0)->add(1);
+                s.get(0)->add(2);
+                s.get(0)->add(3);
+                s.get(0)->add(4);
+                s.get(0)->add(5);
 
-        s = std::move(*obj.get("bool"));
-        NNAssertEquals(s.type(), Serialized::Boolean, "Serialized::operator=(Serialized &&other) failed!");
+                std::vector<int> v(6);
+                s.get(0, v.begin(), v.end());
 
-        s = std::move(*obj.get("itgr"));
-        NNAssertEquals(s.type(), Serialized::Integer, "Serialized::operator=(Serialized &&other) failed!");
+                for(size_t i = 0; i < 6; ++i)
+                    NNTestEquals(v[i], i);
+            }
 
-        s = std::move(*obj.get("flot"));
-        NNAssertEquals(s.type(), Serialized::Float, "Serialized::operator=(Serialized &&other) failed!");
+            NNTestParams(const std::string &, T, const T &)
+            {
+                Serialized s;
+                s.set("foo", Serialized::Array);
+                s.get("foo")->add(0);
+                s.get("foo")->add(1);
+                s.get("foo")->add(2);
+                s.get("foo")->add(3);
+                s.get("foo")->add(4);
+                s.get("foo")->add(5);
 
-        s = std::move(*obj.get("stng"));
-        NNAssertEquals(s.type(), Serialized::String, "Serialized::operator=(Serialized &&other) failed!");
+                std::vector<int> v(6);
+                s.get("foo", v.begin(), v.end());
 
-        s = std::move(*obj.get("objt"));
-        NNAssertEquals(s.type(), Serialized::Object, "Serialized::operator=(Serialized &&other) failed!");
+                for(size_t i = 0; i < 6; ++i)
+                    NNTestEquals(v[i], i);
+            }
+        }
 
-        s = std::move(*obj.get("nptr"));
-        NNAssertEquals(s.type(), Serialized::Null, "Serialized::operator=(Serialized &&other) failed!");
+        NNTestMethod(set)
+        {
+            NNTestParams(Serialized::Type)
+            {
+                Serialized s;
+                s.set(Serialized::Null);
+                NNTestEquals(s.type(), Serialized::Null);
+                s.set(Serialized::Boolean);
+                NNTestEquals(s.type(), Serialized::Boolean);
+                s.set(Serialized::Integer);
+                NNTestEquals(s.type(), Serialized::Integer);
+                s.set(Serialized::Float);
+                NNTestEquals(s.type(), Serialized::Float);
+                s.set(Serialized::String);
+                NNTestEquals(s.type(), Serialized::String);
+                s.set(Serialized::Array);
+                NNTestEquals(s.type(), Serialized::Array);
+                s.set(Serialized::Object);
+                NNTestEquals(s.type(), Serialized::Object);
+            }
+
+            NNTestParams(bool)
+            {
+                Serialized s;
+                s.set(true);
+                NNTestEquals(s.type(), Serialized::Boolean);
+                NNTestEquals(s.get<bool>(), true);
+                s.set(false);
+                NNTestEquals(s.get<bool>(), false);
+            }
+
+            NNTestParams(int)
+            {
+                Serialized s;
+                s.set(-12);
+                NNTestEquals(s.type(), Serialized::Integer);
+                NNTestEquals(s.get<int>(), -12);
+            }
+
+            NNTestParams(double)
+            {
+                Serialized s;
+                s.set(3.14159);
+                NNTestEquals(s.type(), Serialized::Float);
+                NNTestEquals(s.get<double>(), 3.14159);
+            }
+
+            NNTestParams(const char *)
+            {
+                Serialized s;
+                s.set("string");
+                NNTestEquals(s.type(), Serialized::String);
+                NNTestEquals(s.get<std::string>(), "string");
+            }
+
+            NNTestParams(Storage)
+            {
+                Storage<size_t> orig = { 0, 1, 2, 3, 4, 5 };
+                Serialized s;
+                s.set(orig);
+
+                Storage<size_t> copy = s.get<Storage<size_t>>();
+                for(size_t i = 0; i < 6; ++i)
+                    NNTestEquals(copy[i], i);
+            }
+
+            NNTestParams(Linear)
+            {
+                Linear<T> orig(2, 3);
+                Serialized s;
+                s.set(orig);
+                Linear<T> copy = s.get<Linear<T>>();
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, orig.params(), copy.params());
+            }
+
+            NNTestParams(Module *)
+            {
+                Serialized s;
+                Module<T> *m = nullptr;
+                s.set(m);
+                NNTestEquals(s.type(), Serialized::Null);
+
+                m = new Linear<T>(2, 3);
+                s.set(m);
+                Linear<T> copy = s.get<Linear<T>>();
+                forEach([&](T orig, T copy)
+                {
+                    NNTestAlmostEquals(orig, copy, 1e-12);
+                }, m->params(), copy.params());
+
+                delete m;
+            }
+
+            NNTestParams(nullptr_t)
+            {
+                Serialized s(12);
+                s.set(nullptr);
+                NNTestEquals(s.type(), Serialized::Null);
+            }
+
+            NNTestParams(const Serialized &)
+            {
+                Serialized s(12), t;
+                t.set(s);
+                NNTestEquals(t.type(), Serialized::Integer);
+                NNTestEquals(t.get<int>(), 12);
+            }
+
+            NNTestParams(T, const T &)
+            {
+                std::vector<int> v(10);
+                v[0] = 5;
+
+                Serialized s;
+                s.set(v.begin(), v.end());
+                NNTestEquals(s.type(), Serialized::Array);
+                NNTestEquals(s.size(), 10);
+                NNTestEquals(s.get<int>(0), 5);
+            }
+
+            NNTestParams(size_t, int)
+            {
+                Serialized s;
+                s.add(0);
+                s.set(0, 12);
+                NNTestEquals(s.get<int>(0), 12);
+            }
+
+            NNTestParams(const std::string &, int)
+            {
+                Serialized s;
+                s.set("foo", 0);
+                s.set("foo", -1.5);
+                NNTestAlmostEquals(s.get<double>("foo"), -1.5, 1e-12);
+            }
+        }
+
+        NNTestMethod(add)
+        {
+            NNTestParams(int)
+            {
+                Serialized s;
+                s.add(12);
+                NNTestEquals(s.type(), Serialized::Array);
+                NNTestEquals(s.size(), 1);
+                NNTestEquals(s.get<int>(0), 12);
+            }
+
+            NNTestParams(Serialized *)
+            {
+                Serialized s;
+                s.add(new Serialized(12));
+                NNTestEquals(s.type(), Serialized::Array);
+                NNTestEquals(s.size(), 1);
+                NNTestEquals(s.get<int>(0), 12);
+            }
+        }
+
+        NNTestMethod(has)
+        {
+            NNTestParams(const std::string &)
+            {
+                Serialized s;
+                s.set("foo", 42);
+                NNTestEquals(s.has("foo"), true);
+                NNTestEquals(s.has("bar"), false);
+            }
+        }
+
+        NNTestMethod(keys)
+        {
+            NNTestParams()
+            {
+                Serialized s;
+                s.set("foo", 42);
+                s.set("bar", 3.14);
+                auto keys = s.keys();
+                NNTestEquals(keys[0], "foo");
+                NNTestEquals(keys[1], "bar");
+            }
+        }
     }
 }

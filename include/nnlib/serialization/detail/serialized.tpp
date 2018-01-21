@@ -3,6 +3,8 @@
 
 #include "../factory.hpp"
 #include "../serialized.hpp"
+#include <limits>
+#include <sstream>
 
 namespace nnlib
 {
@@ -70,7 +72,7 @@ Serialized &Serialized::operator=(const Serialized &other)
             break;
         case Object:
             m_object = other.m_object;
-            for(auto p : m_object.map)
+            for(auto &p : m_object.map)
                 p.second = new Serialized(p.second);
             break;
         }
@@ -202,9 +204,9 @@ typename std::enable_if<std::is_same<T, std::string>::value, T>::type Serialized
     case Boolean:
         return m_int ? "true" : "false";
     case Integer:
-        return std::to_string(m_int);
+        return intToString(m_int);
     case Float:
-        return std::to_string(m_float);
+        return floatToString(m_float);
     case String:
         return m_string;
     default:
@@ -496,6 +498,22 @@ void Serialized::set(const std::string &key, T && first, Ts && ...values)
     }
     else
         m_object.map.at(key)->set(std::forward<T>(first), std::forward<Ts>(values)...);
+}
+
+std::string Serialized::intToString(long long value) const
+{
+    std::stringstream ss;
+    ss.precision(std::numeric_limits<double>::digits10);
+    ss << value;
+    return ss.str();
+}
+
+std::string Serialized::floatToString(double value) const
+{
+    std::stringstream ss;
+    ss.precision(std::numeric_limits<double>::digits10);
+    ss << value;
+    return ss.str();
 }
 
 }

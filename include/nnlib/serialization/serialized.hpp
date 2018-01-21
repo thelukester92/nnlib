@@ -168,6 +168,9 @@ private:
         std::vector<std::string> keys;
     };
 
+    inline std::string intToString(long long value) const;
+    inline std::string floatToString(double value) const;
+
     Type m_type;
     union
     {
