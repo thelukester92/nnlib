@@ -25,10 +25,10 @@ NNTestClassImpl(Serialized)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->push("array_element");
+            s.get("array").push("array_element");
             s.set("object", Serialized::Object);
-            s.get("object")->set("object_prop1", 3.14);
-            s.get("object")->set("object_prop2", "value");
+            s.get("object").set("object_prop1", 3.14);
+            s.get("object").set("object_prop2", "value");
 
             Serialized t(const_cast<const Serialized &>(s));
             NNTestEquals(t.type("null"), Serialized::Null);
@@ -37,10 +37,10 @@ NNTestClassImpl(Serialized)
             NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
             NNTestEquals(t.get<std::string>("string"), "nnlib");
             NNTestEquals(t.size("array"), 1);
-            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.get("array").get<std::string>(0), "array_element");
             NNTestEquals(t.size("object"), 2);
-            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+            NNTestAlmostEquals(t.get("object").get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object").get<std::string>("object_prop2"), "value");
         }
 
         NNTestParams(Serialized &)
@@ -53,10 +53,10 @@ NNTestClassImpl(Serialized)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->push("array_element");
+            s.get("array").push("array_element");
             s.set("object", Serialized::Object);
-            s.get("object")->set("object_prop1", 3.14);
-            s.get("object")->set("object_prop2", "value");
+            s.get("object").set("object_prop1", 3.14);
+            s.get("object").set("object_prop2", "value");
 
             Serialized t(s);
             NNTestEquals(t.type("null"), Serialized::Null);
@@ -65,10 +65,10 @@ NNTestClassImpl(Serialized)
             NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
             NNTestEquals(t.get<std::string>("string"), "nnlib");
             NNTestEquals(t.size("array"), 1);
-            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.get("array").get<std::string>(0), "array_element");
             NNTestEquals(t.size("object"), 2);
-            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+            NNTestAlmostEquals(t.get("object").get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object").get<std::string>("object_prop2"), "value");
         }
 
         NNTestParams(Serialized &&)
@@ -81,10 +81,10 @@ NNTestClassImpl(Serialized)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->push("array_element");
+            s.get("array").push("array_element");
             s.set("object", Serialized::Object);
-            s.get("object")->set("object_prop1", 3.14);
-            s.get("object")->set("object_prop2", "value");
+            s.get("object").set("object_prop1", 3.14);
+            s.get("object").set("object_prop2", "value");
 
             Serialized t(std::move(s));
             NNTestEquals(t.type("null"), Serialized::Null);
@@ -93,10 +93,10 @@ NNTestClassImpl(Serialized)
             NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
             NNTestEquals(t.get<std::string>("string"), "nnlib");
             NNTestEquals(t.size("array"), 1);
-            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.get("array").get<std::string>(0), "array_element");
             NNTestEquals(t.size("object"), 2);
-            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+            NNTestAlmostEquals(t.get("object").get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object").get<std::string>("object_prop2"), "value");
         }
 
         NNTestParams(Serialized::Type)
@@ -161,10 +161,10 @@ NNTestClassImpl(Serialized)
                 s.set("double", 3.14);
                 s.set("string", "nnlib");
                 s.set("array", Serialized::Array);
-                s.get("array")->push("array_element");
+                s.get("array").push("array_element");
                 s.set("object", Serialized::Object);
-                s.get("object")->set("object_prop1", 3.14);
-                s.get("object")->set("object_prop2", "value");
+                s.get("object").set("object_prop1", 3.14);
+                s.get("object").set("object_prop2", "value");
 
                 t = s;
                 NNTestEquals(t.type("null"), Serialized::Null);
@@ -173,10 +173,10 @@ NNTestClassImpl(Serialized)
                 NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
                 NNTestEquals(t.get<std::string>("string"), "nnlib");
                 NNTestEquals(t.size("array"), 1);
-                NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(t.get("array").get<std::string>(0), "array_element");
                 NNTestEquals(t.size("object"), 2);
-                NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-                NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+                NNTestAlmostEquals(t.get("object").get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(t.get("object").get<std::string>("object_prop2"), "value");
             }
 
             NNTestParams(Serialized &&)
@@ -282,12 +282,12 @@ NNTestClassImpl(Serialized)
             {
                 Serialized s;
                 s.push(Serialized::Array);
-                s.get(0)->push(1);
-                s.get(0)->push(2);
+                s.get(0).push(1);
+                s.get(0).push(2);
                 NNTestEquals(s.size(0), 2);
-                s.get(0)->set("foo", 1);
-                s.get(0)->set("bar", 2);
-                s.get(0)->set("baz", 3);
+                s.get(0).set("foo", 1);
+                s.get(0).set("bar", 2);
+                s.get(0).set("baz", 3);
                 NNTestEquals(s.size(0), 3);
             }
 
@@ -295,12 +295,12 @@ NNTestClassImpl(Serialized)
             {
                 Serialized s;
                 s.set("foo", Serialized::Array);
-                s.get("foo")->push(1);
-                s.get("foo")->push(2);
+                s.get("foo").push(1);
+                s.get("foo").push(2);
                 NNTestEquals(s.size("foo"), 2);
-                s.get("foo")->set("foo", 1);
-                s.get("foo")->set("bar", 2);
-                s.get("foo")->set("baz", 3);
+                s.get("foo").set("foo", 1);
+                s.get("foo").set("bar", 2);
+                s.get("foo").set("baz", 3);
                 NNTestEquals(s.size("foo"), 3);
             }
         }
@@ -407,6 +407,24 @@ NNTestClassImpl(Serialized)
             }
         }
 
+        NNTestMethod(get<const Serialized &>)
+        {
+            NNTestParams()
+            {
+                Serialized s;
+                NNTestEquals(&s, &s.get<const Serialized &>());
+            }
+        }
+
+        NNTestMethod(get<Serialized &>)
+        {
+            NNTestParams()
+            {
+                Serialized s;
+                NNTestEquals(&s, &s.get<Serialized &>());
+            }
+        }
+
         NNTestMethod(get<Module *>)
         {
             NNTestParams()
@@ -473,12 +491,12 @@ NNTestClassImpl(Serialized)
             {
                 Serialized s;
                 s.push(Serialized::Array);
-                s.get(0)->push(0);
-                s.get(0)->push(1);
-                s.get(0)->push(2);
-                s.get(0)->push(3);
-                s.get(0)->push(4);
-                s.get(0)->push(5);
+                s.get(0).push(0);
+                s.get(0).push(1);
+                s.get(0).push(2);
+                s.get(0).push(3);
+                s.get(0).push(4);
+                s.get(0).push(5);
 
                 std::vector<int> v(6);
                 s.get(0, v.begin(), v.end());
@@ -491,12 +509,12 @@ NNTestClassImpl(Serialized)
             {
                 Serialized s;
                 s.set("foo", Serialized::Array);
-                s.get("foo")->push(0);
-                s.get("foo")->push(1);
-                s.get("foo")->push(2);
-                s.get("foo")->push(3);
-                s.get("foo")->push(4);
-                s.get("foo")->push(5);
+                s.get("foo").push(0);
+                s.get("foo").push(1);
+                s.get("foo").push(2);
+                s.get("foo").push(3);
+                s.get("foo").push(4);
+                s.get("foo").push(5);
 
                 std::vector<int> v(6);
                 s.get("foo", v.begin(), v.end());

@@ -26,10 +26,10 @@ NNTestClassImpl(JSONSerializer)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->push("array_element");
+            s.get("array").push("array_element");
             s.set("object", Serialized::Object);
-            s.get("object")->set("object_prop1", 3.14);
-            s.get("object")->set("object_prop2", "value");
+            s.get("object").set("object_prop1", 3.14);
+            s.get("object").set("object_prop2", "value");
             s.set("nn", nn);
 
             std::stringstream ss;
@@ -42,10 +42,10 @@ NNTestClassImpl(JSONSerializer)
             NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
             NNTestEquals(t.get<std::string>("string"), "nnlib");
             NNTestEquals(t.size("array"), 1);
-            NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+            NNTestEquals(t.get("array").get<std::string>(0), "array_element");
             NNTestEquals(t.size("object"), 2);
-            NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-            NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+            NNTestAlmostEquals(t.get("object").get<double>("object_prop1"), 3.14, 1e-12);
+            NNTestEquals(t.get("object").get<std::string>("object_prop2"), "value");
 
             auto *deserialized = t.get<Sequential<T> *>("nn");
             try
@@ -82,10 +82,10 @@ NNTestClassImpl(JSONSerializer)
             s.set("double", 3.14);
             s.set("string", "nnlib");
             s.set("array", Serialized::Array);
-            s.get("array")->push("array_element");
+            s.get("array").push("array_element");
             s.set("object", Serialized::Object);
-            s.get("object")->set("object_prop1", 3.14);
-            s.get("object")->set("object_prop2", "value");
+            s.get("object").set("object_prop1", 3.14);
+            s.get("object").set("object_prop2", "value");
             s.set("nn", nn);
 
             JSONSerializer::write(s, ".nnlib.tmp");
@@ -99,10 +99,10 @@ NNTestClassImpl(JSONSerializer)
                 NNTestAlmostEquals(t.get<double>("double"), 3.14, 1e-12);
                 NNTestEquals(t.get<std::string>("string"), "nnlib");
                 NNTestEquals(t.size("array"), 1);
-                NNTestEquals(t.get("array")->get<std::string>(0), "array_element");
+                NNTestEquals(t.get("array").get<std::string>(0), "array_element");
                 NNTestEquals(t.size("object"), 2);
-                NNTestAlmostEquals(t.get("object")->get<double>("object_prop1"), 3.14, 1e-12);
-                NNTestEquals(t.get("object")->get<std::string>("object_prop2"), "value");
+                NNTestAlmostEquals(t.get("object").get<double>("object_prop1"), 3.14, 1e-12);
+                NNTestEquals(t.get("object").get<std::string>("object_prop2"), "value");
 
                 auto *deserialized = t.get<Sequential<T> *>("nn");
                 try
@@ -141,10 +141,10 @@ NNTestClassImpl(JSONSerializer)
             s.set("string", "nnlib");
             s.set("escaped", "\"escaped\"");
             s.set("array", Serialized::Array);
-            s.get("array")->push("array_element");
+            s.get("array").push("array_element");
             s.set("object", Serialized::Object);
-            s.get("object")->set("object_prop1", 3.14);
-            s.get("object")->set("object_prop2", "value");
+            s.get("object").set("object_prop1", 3.14);
+            s.get("object").set("object_prop2", "value");
             s.set("emptyArray", Serialized::Array);
             s.set("emptyObject", Serialized::Object);
 

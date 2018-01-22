@@ -40,7 +40,7 @@ void CSVSerializer::write(const Serialized &rows, std::ostream &out, char delim)
     NNHardAssertEquals(rows.type(), Serialized::Array, "Expected an array!");
     out.precision(std::numeric_limits<double>::digits10);
     for(size_t i = 0, len = rows.size(); i < len; ++i)
-        writeRow(*rows.get(i), out, delim);
+        writeRow(rows.get(i), out, delim);
 }
 
 void CSVSerializer::write(const Serialized &rows, const std::string &filename, char delim)
@@ -143,27 +143,27 @@ void CSVSerializer::writeRow(const Serialized &row, std::ostream &out, char deli
     NNHardAssertEquals(row.type(), Serialized::Array, "Expected an array!");
     for(size_t i = 0, len = row.size(); i < len; ++i)
     {
-        const Serialized *value = row.get(i);
+        const Serialized &value = row.get(i);
 
         if(i > 0)
             out << delim;
 
-        switch(value->type())
+        switch(value.type())
         {
         case Serialized::Null:
             out << "null";
             break;
         case Serialized::Boolean:
-            out << (value->get<bool>() ? "true" : "false");
+            out << (value.get<bool>() ? "true" : "false");
             break;
         case Serialized::Integer:
-            out << value->get<long long>();
+            out << value.get<long long>();
             break;
         case Serialized::Float:
-            out << value->get<double>();
+            out << value.get<double>();
             break;
         case Serialized::String:
-            writeString(value->get<std::string>(), out, delim);
+            writeString(value.get<std::string>(), out, delim);
             break;
         default:
             throw Error("Expected primitive value or string!");

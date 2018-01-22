@@ -62,7 +62,6 @@ public:
     ///
     /// This method simply returns self. Without this overload,
     /// a null node self-getter is null rather than a null node.
-    /// This method is not const because it can self-modify.
     template <typename T>
     typename std::enable_if<std::is_same<T, const Serialized *>::value, T>::type get() const;
 
@@ -70,9 +69,22 @@ public:
     ///
     /// This method simply returns self. Without this overload,
     /// a null node self-getter is null rather than a null node.
-    /// This method is not const because it can self-modify.
     template <typename T>
     typename std::enable_if<std::is_same<T, Serialized *>::value, T>::type get();
+
+    /// Self-getter for a consistent interface.
+    ///
+    /// This method simply returns self. Without this overload,
+    /// a null node self-getter is null rather than a null node.
+    template <typename T>
+    typename std::enable_if<std::is_same<T, const Serialized &>::value, T>::type get() const;
+
+    /// Self-getter for a consistent interface.
+    ///
+    /// This method simply returns self. Without this overload,
+    /// a null node self-getter is null rather than a null node.
+    template <typename T>
+    typename std::enable_if<std::is_same<T, Serialized &>::value, T>::type get();
 
     template <typename T>
     typename std::enable_if<std::is_pointer<T>::value && std::is_abstract<typename std::remove_pointer<T>::type>::value, T>::type get() const;
@@ -129,10 +141,10 @@ public:
     inline void type(size_t i, Type type);
     inline size_t size(size_t i) const;
 
-    template <typename T = const Serialized *>
+    template <typename T = const Serialized &>
     T get(size_t i) const;
 
-    template <typename T = Serialized *>
+    template <typename T = Serialized &>
     T get(size_t i);
 
     template <typename T>
@@ -150,10 +162,10 @@ public:
     inline void type(const std::string &key, Type type);
     inline size_t size(const std::string &key) const;
 
-    template <typename T = const Serialized *>
+    template <typename T = const Serialized &>
     T get(const std::string &key) const;
 
-    template <typename T = Serialized *>
+    template <typename T = Serialized &>
     T get(const std::string &key);
 
     template <typename T>

@@ -16,12 +16,12 @@ NNTestClassImpl(FileSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->push(0);
-            s.get(0)->push(3.14);
-            s.get(0)->push("string");
+            s.get(0).push(0);
+            s.get(0).push(3.14);
+            s.get(0).push("string");
             s.push(Serialized::Array);
-            s.get(1)->push("a,string");
-            s.get(1)->push(-2);
+            s.get(1).push("a,string");
+            s.get(1).push(-2);
 
             BinarySerializer::write(s, ".nnlib.bin");
             try
@@ -30,11 +30,11 @@ NNTestClassImpl(FileSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,string");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,string");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -50,11 +50,11 @@ NNTestClassImpl(FileSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,string");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,string");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -70,11 +70,11 @@ NNTestClassImpl(FileSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,string");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,string");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -91,12 +91,12 @@ NNTestClassImpl(FileSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->push(0);
-            s.get(0)->push(3.14);
-            s.get(0)->push("string");
+            s.get(0).push(0);
+            s.get(0).push(3.14);
+            s.get(0).push("string");
             s.push(Serialized::Array);
-            s.get(1)->push("a,string");
-            s.get(1)->push(-2);
+            s.get(1).push("a,string");
+            s.get(1).push(-2);
 
             FileSerializer::write(s, ".nnlib.bin");
             try
@@ -105,11 +105,11 @@ NNTestClassImpl(FileSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,string");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,string");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -125,11 +125,11 @@ NNTestClassImpl(FileSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,string");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,string");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -145,11 +145,11 @@ NNTestClassImpl(FileSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,string");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,string");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {

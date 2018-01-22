@@ -148,10 +148,10 @@ Tensor<T>::Tensor(const Serialized &node) :
     }
     else
     {
-        resize(node.size(), node.get(0)->size());
+        resize(node.size(), node.size(0));
         for(size_t i = 0; i < node.size(); ++i)
-            for(size_t j = 0; j < node.get(0)->size(); ++j)
-                at(i, j) = node.get(i)->get<T>(j);
+            for(size_t j = 0; j < node.size(0); ++j)
+                at(i, j) = node.get(i).get<T>(j);
     }
 }
 

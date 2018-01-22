@@ -207,7 +207,7 @@ void BinarySerializer::writeArray(const Serialized &node, std::ostream &out)
     size_t size = node.size();
     out.write((const char *) &size, sizeof(size_t));
     for(size_t i = 0; i < size; ++i)
-        write(*node.get(i), out);
+        write(node.get(i), out);
 }
 
 void BinarySerializer::writeObject(const Serialized &node, std::ostream &out)
@@ -217,7 +217,7 @@ void BinarySerializer::writeObject(const Serialized &node, std::ostream &out)
     for(const auto &key : node.keys())
     {
         writeString(key, out);
-        write(*node.get(key), out);
+        write(node.get(key), out);
     }
 }
 

@@ -18,12 +18,12 @@ NNTestClassImpl(CSVSerializer)
             NNTestEquals(s.size(), 2);
             NNTestEquals(s.size(0), 4);
             NNTestEquals(s.size(1), 2);
-            NNTestEquals(s.get(0)->get<int>(0), 0);
-            NNTestEquals(s.get(0)->get<double>(1), 3.14);
-            NNTestEquals(s.get(0)->get<std::string>(2), "string");
-            NNTestEquals(s.get(0)->get<std::string>(3), "123.456.789");
-            NNTestEquals(s.get(1)->get<std::string>(0), "a,\"string\"");
-            NNTestEquals(s.get(1)->get<int>(1), -2);
+            NNTestEquals(s.get(0).get<int>(0), 0);
+            NNTestEquals(s.get(0).get<double>(1), 3.14);
+            NNTestEquals(s.get(0).get<std::string>(2), "string");
+            NNTestEquals(s.get(0).get<std::string>(3), "123.456.789");
+            NNTestEquals(s.get(1).get<std::string>(0), "a,\"string\"");
+            NNTestEquals(s.get(1).get<int>(1), -2);
         }
 
         NNTestParams(const std::string &)
@@ -38,11 +38,11 @@ NNTestClassImpl(CSVSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,\"string\"");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,\"string\"");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -60,11 +60,11 @@ NNTestClassImpl(CSVSerializer)
             NNTestEquals(s.size(), 2);
             NNTestEquals(s.size(0), 3);
             NNTestEquals(s.size(1), 2);
-            NNTestEquals(s.get(0)->get<int>(0), 0);
-            NNTestEquals(s.get(0)->get<double>(1), 3.14);
-            NNTestEquals(s.get(0)->get<std::string>(2), "string");
-            NNTestEquals(s.get(1)->get<std::string>(0), "a,\"string\"");
-            NNTestEquals(s.get(1)->get<int>(1), -2);
+            NNTestEquals(s.get(0).get<int>(0), 0);
+            NNTestEquals(s.get(0).get<double>(1), 3.14);
+            NNTestEquals(s.get(0).get<std::string>(2), "string");
+            NNTestEquals(s.get(1).get<std::string>(0), "a,\"string\"");
+            NNTestEquals(s.get(1).get<int>(1), -2);
         }
 
         NNTestParams(const std::string &, size_t)
@@ -79,11 +79,11 @@ NNTestClassImpl(CSVSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a,\"string\"");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a,\"string\"");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -101,11 +101,11 @@ NNTestClassImpl(CSVSerializer)
             NNTestEquals(s.size(), 2);
             NNTestEquals(s.size(0), 3);
             NNTestEquals(s.size(1), 2);
-            NNTestEquals(s.get(0)->get<int>(0), 0);
-            NNTestEquals(s.get(0)->get<double>(1), 3.14);
-            NNTestEquals(s.get(0)->get<std::string>(2), "string");
-            NNTestEquals(s.get(1)->get<std::string>(0), "a:\"string\"");
-            NNTestEquals(s.get(1)->get<int>(1), -2);
+            NNTestEquals(s.get(0).get<int>(0), 0);
+            NNTestEquals(s.get(0).get<double>(1), 3.14);
+            NNTestEquals(s.get(0).get<std::string>(2), "string");
+            NNTestEquals(s.get(1).get<std::string>(0), "a:\"string\"");
+            NNTestEquals(s.get(1).get<int>(1), -2);
         }
 
         NNTestParams(const std::string &, size_t, char)
@@ -120,11 +120,11 @@ NNTestClassImpl(CSVSerializer)
                 NNTestEquals(s.size(), 2);
                 NNTestEquals(s.size(0), 3);
                 NNTestEquals(s.size(1), 2);
-                NNTestEquals(s.get(0)->get<int>(0), 0);
-                NNTestEquals(s.get(0)->get<double>(1), 3.14);
-                NNTestEquals(s.get(0)->get<std::string>(2), "string");
-                NNTestEquals(s.get(1)->get<std::string>(0), "a:\"string\"");
-                NNTestEquals(s.get(1)->get<int>(1), -2);
+                NNTestEquals(s.get(0).get<int>(0), 0);
+                NNTestEquals(s.get(0).get<double>(1), 3.14);
+                NNTestEquals(s.get(0).get<std::string>(2), "string");
+                NNTestEquals(s.get(1).get<std::string>(0), "a:\"string\"");
+                NNTestEquals(s.get(1).get<int>(1), -2);
             }
             catch(const Error &e)
             {
@@ -142,14 +142,14 @@ NNTestClassImpl(CSVSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->push(0);
-            s.get(0)->push(3.14);
-            s.get(0)->push("string");
-            s.get(0)->push(nullptr);
+            s.get(0).push(0);
+            s.get(0).push(3.14);
+            s.get(0).push("string");
+            s.get(0).push(nullptr);
             s.push(Serialized::Array);
-            s.get(1)->push("a,\"string\"");
-            s.get(1)->push(-2);
-            s.get(1)->push(false);
+            s.get(1).push("a,\"string\"");
+            s.get(1).push(-2);
+            s.get(1).push(false);
 
             std::stringstream ss;
             CSVSerializer::write(s, ss);
@@ -159,7 +159,7 @@ NNTestClassImpl(CSVSerializer)
             {
                 Serialized s;
                 s.push(Serialized::Array);
-                s.get(0)->push(Serialized::Object);
+                s.get(0).push(Serialized::Object);
                 CSVSerializer::write(s, ss);
                 NNTest(false);
             }
@@ -171,12 +171,12 @@ NNTestClassImpl(CSVSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->push(0);
-            s.get(0)->push(3.14);
-            s.get(0)->push("string");
+            s.get(0).push(0);
+            s.get(0).push(3.14);
+            s.get(0).push("string");
             s.push(Serialized::Array);
-            s.get(1)->push("a,\"string\"");
-            s.get(1)->push(-2);
+            s.get(1).push("a,\"string\"");
+            s.get(1).push(-2);
 
             CSVSerializer::write(s, ".nnlib.tmp");
 
@@ -208,12 +208,12 @@ NNTestClassImpl(CSVSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->push(0);
-            s.get(0)->push(3.14);
-            s.get(0)->push("string");
+            s.get(0).push(0);
+            s.get(0).push(3.14);
+            s.get(0).push("string");
             s.push(Serialized::Array);
-            s.get(1)->push("a:\"string\"");
-            s.get(1)->push(-2);
+            s.get(1).push("a:\"string\"");
+            s.get(1).push(-2);
 
             std::stringstream ss;
             CSVSerializer::write(s, ss, ':');
@@ -224,12 +224,12 @@ NNTestClassImpl(CSVSerializer)
         {
             Serialized s;
             s.push(Serialized::Array);
-            s.get(0)->push(0);
-            s.get(0)->push(3.14);
-            s.get(0)->push("string");
+            s.get(0).push(0);
+            s.get(0).push(3.14);
+            s.get(0).push("string");
             s.push(Serialized::Array);
-            s.get(1)->push("a:\"string\"");
-            s.get(1)->push(-2);
+            s.get(1).push("a:\"string\"");
+            s.get(1).push(-2);
 
             CSVSerializer::write(s, ".nnlib.tmp", ':');
 

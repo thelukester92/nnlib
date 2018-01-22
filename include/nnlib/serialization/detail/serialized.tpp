@@ -218,7 +218,7 @@ template <typename T>
 typename std::enable_if<traits::HasLoadAndSave<T>::value, T>::type Serialized::get() const
 {
     if(m_type == Object && has("polymorphic"))
-        return T(*get("data"));
+        return T(get("data"));
     else
         return T(*this);
 }
@@ -236,6 +236,18 @@ typename std::enable_if<std::is_same<T, Serialized *>::value, T>::type Serialize
 }
 
 template <typename T>
+typename std::enable_if<std::is_same<T, const Serialized &>::value, T>::type Serialized::get() const
+{
+    return *this;
+}
+
+template <typename T>
+typename std::enable_if<std::is_same<T, Serialized &>::value, T>::type Serialized::get()
+{
+    return *this;
+}
+
+template <typename T>
 typename std::enable_if<std::is_pointer<T>::value && std::is_abstract<typename std::remove_pointer<T>::type>::value, T>::type Serialized::get() const
 {
     if(m_type == Null)
@@ -243,8 +255,8 @@ typename std::enable_if<std::is_pointer<T>::value && std::is_abstract<typename s
     NNHardAssert(m_type == Object && has("polymorphic"), "Expected a polymorphic type!");
     return static_cast<T>(
         Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(
-            get("type")->get<std::string>(),
-            *get("data")
+            get("type").get<std::string>(),
+            get("data")
         )
     );
 }
@@ -260,8 +272,8 @@ typename std::enable_if<
     else if(m_type == Object && has("polymorphic"))
         return static_cast<T>(
             Factory<typename traits::BaseOf<typename std::remove_pointer<T>::type>::type>::construct(
-                get("type")->get<std::string>(),
-                *get("data")
+                get("type").get<std::string>(),
+                get("data")
             )
         );
     else

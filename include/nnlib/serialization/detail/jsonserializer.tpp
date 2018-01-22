@@ -261,7 +261,7 @@ void JSONSerializer::writeArray(const Serialized &node, std::ostream &out, int l
 
         newline(out, level);
         indent(out, level >= 0 ? level + 1 : level);
-        writeValue(*node.get(i), out, level >= 0 ? level + 1 : level);
+        writeValue(node.get(i), out, level >= 0 ? level + 1 : level);
     }
 
     newline(out, level);
@@ -291,7 +291,7 @@ void JSONSerializer::writeObject(const Serialized &node, std::ostream &out, int 
         out << ':';
         if(level >= 0)
             out << ' ';
-        writeValue(*node.get(key), out, level >= 0 ? level + 1 : level);
+        writeValue(node.get(key), out, level >= 0 ? level + 1 : level);
 
         ++i;
     }
