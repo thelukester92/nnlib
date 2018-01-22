@@ -75,13 +75,14 @@ long long Args::popInt()
     return std::stoi(popString());
 }
 
-ArgsParser::ArgsParser(bool help) : m_helpOpt(help ? 'h' : '\0'), m_nextUnnamedOpt(0)
-{
-    if(m_helpOpt != '\0')
-        addFlag(m_helpOpt, "help");
-}
+ArgsParser::ArgsParser(bool help) :
+    ArgsParser(help ? 'h' : '\0')
+{}
 
-ArgsParser::ArgsParser(char helpOpt, std::string helpLong) : m_helpOpt(helpOpt), m_nextUnnamedOpt(0)
+ArgsParser::ArgsParser(char helpOpt, std::string helpLong) :
+    m_arrayFirst(true),
+    m_helpOpt(helpOpt),
+    m_nextUnnamedOpt(0)
 {
     if(m_helpOpt != '\0')
         addFlag(m_helpOpt, helpLong);
@@ -123,6 +124,12 @@ ArgsParser &ArgsParser::addInt(std::string longOpt, long long defaultValue)
     return addInt(++m_nextUnnamedOpt, longOpt, defaultValue);
 }
 
+ArgsParser &ArgsParser::addInt()
+{
+    addArrayOpt(Type::Integer);
+    return *this;
+}
+
 ArgsParser &ArgsParser::addDouble(char opt, std::string longOpt)
 {
     addOpt(opt, longOpt);
@@ -145,6 +152,12 @@ ArgsParser &ArgsParser::addDouble(std::string longOpt)
 ArgsParser &ArgsParser::addDouble(std::string longOpt, double defaultValue)
 {
     return addDouble(++m_nextUnnamedOpt, longOpt, defaultValue);
+}
+
+ArgsParser &ArgsParser::addDouble()
+{
+    addArrayOpt(Type::Float);
+    return *this;
 }
 
 ArgsParser &ArgsParser::addString(char opt, std::string longOpt)
@@ -171,6 +184,12 @@ ArgsParser &ArgsParser::addString(std::string longOpt, std::string defaultValue)
     return addString(++m_nextUnnamedOpt, longOpt, defaultValue);
 }
 
+ArgsParser &ArgsParser::addString()
+{
+    addArrayOpt(Type::String);
+    return *this;
+}
+
 ArgsParser &ArgsParser::parse(int argc, const char **argv, bool popCommand, std::ostream &out)
 {
     Args args(argc, argv);
@@ -178,21 +197,66 @@ ArgsParser &ArgsParser::parse(int argc, const char **argv, bool popCommand, std:
     if(popCommand)
         args.popString();
 
+    if(m_arrayFirst && m_arrayExpected.size() > 0)
+    {
+        m_arrayData.resize(m_arrayExpected.size());
+        for(size_t i = 0; i < m_arrayExpected.size(); ++i)
+        {
+            NNHardAssert(args.hasNext(), "Unexpected end of arguments!");
+            if(m_arrayExpected[i] == Type::Integer)
+                m_arrayData[i].set(args.popInt());
+            else if(m_arrayExpected[i] == Type::Float)
+                m_arrayData[i].set(args.popDouble());
+            else if(m_arrayExpected[i] == Type::String)
+                m_arrayData[i].set(args.popString());
+        }
+    }
+
     while(args.hasNext())
     {
-        NNHardAssert(!args.nextIsNumber(), "Unexpected number!");
-
-        std::string arg = args.popString();
+        std::string arg = args.popString(), longOpt;
         char opt;
 
-        if(arg.length() > 1 && arg[0] == '-' && arg[1] == '-')
+        if(arg == "--")
         {
-            auto i = m_longToChar.find(std::string(arg.c_str() + 2));
-            NNHardAssert(i != m_longToChar.end(), "Unexpected argument '" + std::string(arg.c_str() + 2) + "'!");
-            opt = i->second;
+            // end of named arguments; skip to array args
+            break;
         }
-        else if(arg.length() > 1 && arg[0] == '-')
+        else if(arg.length() < 2 || arg[0] != '-')
         {
+            // not a named option; forward it to array args
+            args.unpop();
+            break;
+        }
+        else if(arg.length() == 2)
+        {
+            // a single option
+            opt = arg[1];
+            auto i = m_expected.find(opt);
+            if(i == m_expected.end())
+            {
+                // unrecognized option; forward it to array args
+                args.unpop();
+                break;
+            }
+        }
+        else if(arg[1] == '-')
+        {
+            // a single long option
+            longOpt = std::string(arg.c_str() + 2);
+            auto i = m_longToChar.find(longOpt);
+            if(i != m_longToChar.end())
+                opt = i->second;
+            else
+            {
+                // unrecognized option; forward it to array args
+                args.unpop();
+                break;
+            }
+        }
+        else
+        {
+            // a multiple-flag option; may not be forwarded to array args (use -- if needed)
             for(size_t i = 1; i < arg.length() - 1; ++i)
             {
                 auto j = m_expected.find(arg[i]);
@@ -215,6 +279,23 @@ ArgsParser &ArgsParser::parse(int argc, const char **argv, bool popCommand, std:
         else if(i->second == Type::String)
             m_data[opt].set(args.popString());
     }
+
+    if(!m_arrayFirst && m_arrayExpected.size() > 0)
+    {
+        m_arrayData.resize(m_arrayExpected.size());
+        for(size_t i = 0; i < m_arrayExpected.size(); ++i)
+        {
+            NNHardAssert(args.hasNext(), "Unexpected end of arguments!");
+            if(m_arrayExpected[i] == Type::Integer)
+                m_arrayData[i].set(args.popInt());
+            else if(m_arrayExpected[i] == Type::Float)
+                m_arrayData[i].set(args.popDouble());
+            else if(m_arrayExpected[i] == Type::String)
+                m_arrayData[i].set(args.popString());
+        }
+    }
+
+    NNHardAssert(!args.hasNext(), "Unexpected argument '" + args.popString() + "'!");
 
     if(m_helpOpt != '\0' && getFlag(m_helpOpt))
     {
@@ -372,10 +453,18 @@ std::string ArgsParser::getString(std::string opt) const
     return getString(i->second);
 }
 
+void ArgsParser::addArrayOpt(Type type)
+{
+    m_arrayExpected.push_back(type);
+}
+
 void ArgsParser::addOpt(char opt, std::string longOpt)
 {
     NNHardAssert(m_expected.find(opt) == m_expected.end(), "Attempted to redefine '" + optName(opt) + "'!");
     m_expected[opt] = Type::Boolean;
+
+    if(opt != m_helpOpt && m_arrayExpected.size() == 0)
+        m_arrayFirst = false;
 
     if(longOpt != "")
     {

@@ -177,6 +177,15 @@ NNTestClassImpl(ArgsParser)
             args.addInt("int", 5);
             NNTestEquals(args.getInt("int"), 5);
         }
+
+        NNTestParams()
+        {
+            const char *argv[] = { "cmd", "42" };
+            ArgsParser args;
+            args.addInt();
+            args.parse(2, argv);
+            NNTestEquals(args.getInt(0), 42);
+        }
     }
 
     NNTestMethod(addDouble)
@@ -210,6 +219,15 @@ NNTestClassImpl(ArgsParser)
             ArgsParser args;
             args.addDouble("double", 3.14);
             NNTestAlmostEquals(args.getDouble("double"), 3.14, 1e-12);
+        }
+
+        NNTestParams()
+        {
+            const char *argv[] = { "cmd", "3.14" };
+            ArgsParser args;
+            args.addDouble();
+            args.parse(2, argv);
+            NNTestAlmostEquals(args.getDouble(0), 3.14, 1e-12);
         }
     }
 
@@ -245,23 +263,38 @@ NNTestClassImpl(ArgsParser)
             args.addString("string", "hello");
             NNTestEquals(args.getString("string"), "hello");
         }
+
+        NNTestParams()
+        {
+            const char *argv[] = { "cmd", "string" };
+            ArgsParser args;
+            args.addString();
+            args.parse(2, argv);
+            NNTestEquals(args.getString(0), "string");
+        }
     }
 
     NNTestMethod(parse)
     {
         NNTestParams(int, const char **, bool, std::ostream &)
         {
-            const char *argv[] = { "cmd", "-a", "opt", "-bc", "-5", "--dee", "3.14", "-e" };
+            const char *argv[] = { "cmd", "1", "2.1", "three", "-a", "opt", "-bc", "-5", "--dee", "3.14", "-e" };
 
             ArgsParser args;
+            args.addInt();
+            args.addDouble();
+            args.addString();
             args.addString('a', "ayy");
             args.addFlag('b', "bee");
             args.addInt('c', "cee");
             args.addDouble('d', "dee");
             args.addFlag('e', "eee");
             args.addFlag('f');
-            args.parse(8, argv);
+            args.parse(11, argv);
 
+            NNTestEquals(args.getInt(0), 1);
+            NNTestAlmostEquals(args.getDouble(1), 2.1, 1e-12);
+            NNTestEquals(args.getString(2), "three");
             NNTestEquals(args.getString('a'), "opt");
             NNTestEquals(args.getFlag('b'), true);
             NNTestEquals(args.getInt('c'), -5);
@@ -270,15 +303,51 @@ NNTestClassImpl(ArgsParser)
             NNTestEquals(args.getFlag('f'), false);
 
             std::stringstream ss;
-            const char *argv2[] = { "cmd", "-h" };
+            const char *argv2[] = { "cmd", "-h", "1", "2.1", "three" };
             ArgsParser args2;
             args2.addInt('i', "int", 32);
             args2.addDouble('d', "double", 3.14);
             args2.addString('s', "string", "string");
             args2.addFlag('f');
             args2.addFlag("flag");
-            args2.parse(2, argv2, true, ss);
+            args2.addInt();
+            args2.addDouble();
+            args2.addString();
+            args2.parse(5, argv2, true, ss);
             NNTestGreaterThan(ss.str().size(), 0);
+            NNTestEquals(args2.getInt(0), 1);
+            NNTestAlmostEquals(args2.getDouble(1), 2.1, 1e-12);
+            NNTestEquals(args2.getString(2), "three");
+
+            const char *argv3[] = { "cmd", "-3", "-4" };
+            ArgsParser args3;
+            args3.addFlag('3');
+            args3.addInt();
+            args3.parse(3, argv3);
+            NNTestEquals(args3.getFlag('3'), true);
+            NNTestEquals(args3.getInt(0), -4);
+
+            const char *argv4[] = { "cmd", "--", "-3" };
+            ArgsParser args4;
+            args4.addFlag('3');
+            args4.addInt();
+            args4.parse(3, argv4);
+            NNTestEquals(args4.getFlag('3'), false);
+            NNTestEquals(args4.getInt(0), -3);
+
+            const char *argv5[] = { "cmd", "-3" };
+            ArgsParser args5;
+            args5.addFlag('f');
+            args5.addInt();
+            args5.parse(2, argv5);
+            NNTestEquals(args5.getInt(0), -3);
+
+            const char *argv6[] = { "cmd", "--string" };
+            ArgsParser args6;
+            args6.addFlag('f', "flag");
+            args6.addString();
+            args6.parse(2, argv6);
+            NNTestEquals(args6.getString(0), "--string");
         }
     }
 

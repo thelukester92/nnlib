@@ -44,16 +44,19 @@ public:
     ArgsParser &addInt(char opt, std::string longOpt, long long defaultValue);
     ArgsParser &addInt(std::string longOpt);
     ArgsParser &addInt(std::string longOpt, long long defaultValue);
+    ArgsParser &addInt();
 
     ArgsParser &addDouble(char opt, std::string longOpt = "");
     ArgsParser &addDouble(char opt, std::string longOpt, double defaultValue);
     ArgsParser &addDouble(std::string longOpt);
     ArgsParser &addDouble(std::string longOpt, double defaultValue);
+    ArgsParser &addDouble();
 
     ArgsParser &addString(char opt, std::string longOpt = "");
     ArgsParser &addString(char opt, std::string longOpt, std::string defaultValue);
     ArgsParser &addString(std::string longOpt);
     ArgsParser &addString(std::string longOpt, std::string defaultValue);
+    ArgsParser &addString();
 
     /// \brief Parses command line arguments.
     ///
@@ -80,8 +83,40 @@ public:
     std::string getString(char opt) const;
     std::string getString(std::string opt) const;
 
+    template <typename T>
+    typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, char>::value, long long>::type
+    getInt(T i) const
+    {
+        NNHardAssertLessThan(i, m_arrayData.size(), "Attempted to get undefined array option!");
+        NNHardAssert(m_arrayExpected[i] == Type::Integer, "Attempted to get an incompatible type!");
+        return m_arrayData[i].template get<long long>();
+    }
+
+    template <typename T>
+    typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, char>::value, double>::type
+    getDouble(T i) const
+    {
+        NNHardAssertLessThan(i, m_arrayData.size(), "Attempted to get undefined array option!");
+        NNHardAssert(m_arrayExpected[i] == Type::Float, "Attempted to get an incompatible type!");
+        return m_arrayData[i].template get<double>();
+    }
+
+    template <typename T>
+    typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, char>::value, std::string>::type
+    getString(T i) const
+    {
+        NNHardAssertLessThan(i, m_arrayData.size(), "Attempted to get undefined array option!");
+        NNHardAssert(m_arrayExpected[i] == Type::String, "Attempted to get an incompatible type!");
+        return m_arrayData[i].template get<std::string>();
+    }
+
 private:
+    void addArrayOpt(Type type);
     void addOpt(char opt, std::string longOpt);
+
+    bool m_arrayFirst;
+    std::vector<Serialized::Type> m_arrayExpected;
+    std::vector<Serialized> m_arrayData;
 
     char m_helpOpt, m_nextUnnamedOpt;
     std::unordered_map<char, Serialized::Type> m_expected;
