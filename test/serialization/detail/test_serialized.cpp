@@ -483,7 +483,7 @@ NNTestClassImpl(Serialized)
                 std::vector<int> v(6);
                 s.get(v.begin(), v.end());
 
-                for(size_t i = 0; i < 6; ++i)
+                for(int i = 0; i < 6; ++i)
                     NNTestEquals(v[i], i);
             }
 
@@ -501,7 +501,7 @@ NNTestClassImpl(Serialized)
                 std::vector<int> v(6);
                 s.get(0, v.begin(), v.end());
 
-                for(size_t i = 0; i < 6; ++i)
+                for(int i = 0; i < 6; ++i)
                     NNTestEquals(v[i], i);
             }
 
@@ -519,7 +519,7 @@ NNTestClassImpl(Serialized)
                 std::vector<int> v(6);
                 s.get("foo", v.begin(), v.end());
 
-                for(size_t i = 0; i < 6; ++i)
+                for(int i = 0; i < 6; ++i)
                     NNTestEquals(v[i], i);
             }
         }
@@ -586,7 +586,7 @@ NNTestClassImpl(Serialized)
                 s.set(orig);
 
                 Storage<size_t> copy = s.get<Storage<size_t>>();
-                for(size_t i = 0; i < 6; ++i)
+                for(int i = 0; i < 6; ++i)
                     NNTestEquals(copy[i], i);
             }
 
