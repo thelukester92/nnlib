@@ -19,6 +19,7 @@ Serialized BinarySerializer::read(std::istream &in)
 Serialized BinarySerializer::read(const std::string &filename)
 {
     std::ifstream fin(filename);
+    NNHardAssert(fin, "Unable to open file '" + filename + "'!");
     Serialized result = read(fin);
     fin.close();
     return result;
@@ -63,6 +64,7 @@ void BinarySerializer::write(const Serialized &root, std::ostream &out)
 void BinarySerializer::write(const Serialized &root, const std::string &filename)
 {
     std::ofstream fout(filename, std::ofstream::binary);
+    NNHardAssert(fout, "Unable to open file '" + filename + "'!");
     write(root, fout);
     fout.close();
 }

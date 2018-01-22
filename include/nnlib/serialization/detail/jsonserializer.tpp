@@ -20,6 +20,7 @@ Serialized JSONSerializer::read(std::istream &in)
 Serialized JSONSerializer::read(const std::string &filename)
 {
     std::ifstream fin(filename);
+    NNHardAssert(fin, "Unable to open file '" + filename + "'!");
     Serialized result = read(fin);
     fin.close();
     return result;
@@ -34,6 +35,7 @@ void JSONSerializer::write(const Serialized &root, std::ostream &out, bool prett
 void JSONSerializer::write(const Serialized &root, const std::string &filename, bool pretty)
 {
     std::ofstream fout(filename);
+    NNHardAssert(fout, "Unable to open file '" + filename + "'!");
     write(root, fout, pretty);
     fout.close();
 }

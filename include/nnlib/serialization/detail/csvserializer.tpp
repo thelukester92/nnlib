@@ -30,6 +30,7 @@ Serialized CSVSerializer::read(std::istream &in, size_t skipLines, char delim)
 Serialized CSVSerializer::read(const std::string &filename, size_t skipLines, char delim)
 {
     std::ifstream fin(filename);
+    NNHardAssert(fin, "Unable to open file '" + filename + "'!");
     Serialized result = read(fin, skipLines, delim);
     fin.close();
     return result;
@@ -46,6 +47,7 @@ void CSVSerializer::write(const Serialized &rows, std::ostream &out, char delim)
 void CSVSerializer::write(const Serialized &rows, const std::string &filename, char delim)
 {
     std::ofstream fout(filename);
+    NNHardAssert(fout, "Unable to open file '" + filename + "'!");
     write(rows, fout, delim);
     fout.close();
 }
