@@ -48,6 +48,10 @@ It is highly recommended that you do *not* use this flag until you are certain y
 
 Check out the [examples repository](https://github.com/thelukester92/nnlib-examples) for complete examples!
 
+# Tools
+
+Check out the [tools repository](https://github.com/thelukester92/nnlib-tools) for useful machine learning CLI utilities!
+
 ## Simple Neural Network
 
 A standard neural network can be built as a `Sequential` module.
@@ -75,7 +79,7 @@ We will also randomly batch the data into batches of size 25 using `Batcher`.
 			data(i, j) = row.get<double>(j);
 		}
 	}
-	
+
 	Tensor<> features = data.narrow(1, 0, 500), labels = data.narrow(1, 500, 1);
 	Batcher<> batcher(features, labels, 25);
 
@@ -83,7 +87,7 @@ Finally, we will create our critic (target function) and optimizer and train for
 
 	MSE<> critic;
 	SGD<> optimizer(nn, critic);
-	
+
 	for(size_t i = 0; i < 100; ++i)
 	{
 		batcher.reset();
