@@ -9,6 +9,7 @@ group: edge
 cache:
     directories:
     - cache
+    - obj
 before_install:
     - cd $TRAVIS_BUILD_DIR
     - sudo apt-get update -qq -y || true
@@ -21,7 +22,7 @@ before_install:
     - make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib"
+    - make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib" || make clean && make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib"
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - lcov -c -b . -d obj --no-external -o obj/lcov.info
