@@ -312,11 +312,22 @@ const ArgsParser &ArgsParser::printHelp(std::ostream &out) const
 {
     out << std::left;
 
+    if(m_arrayFirst)
+    {
+        for(auto &p : m_arrayExpected)
+        {
+            if(p == Type::Integer)
+                out << "Int" << std::endl;
+            else if(p == Type::Float)
+                out << "Float" << std::endl;
+            else if(p == Type::String)
+                out << "String" << std::endl;
+        }
+    }
+
     std::map<std::string, Type> orderedOpts;
     for(auto &p : m_expected)
-    {
         orderedOpts.emplace(optName(p.first), p.second);
-    }
 
     for(auto &p : orderedOpts)
     {
@@ -357,6 +368,19 @@ const ArgsParser &ArgsParser::printHelp(std::ostream &out) const
         out << std::endl;
     }
 
+    if(!m_arrayFirst)
+    {
+        for(auto &p : m_arrayExpected)
+        {
+            if(p == Type::Integer)
+                out << "Int" << std::endl;
+            else if(p == Type::Float)
+                out << "Float" << std::endl;
+            else if(p == Type::String)
+                out << "String" << std::endl;
+        }
+    }
+
     return *this;
 }
 
@@ -364,14 +388,48 @@ const ArgsParser &ArgsParser::printOpts(std::ostream &out) const
 {
     out << std::left;
 
+    if(m_arrayFirst)
+    {
+        for(size_t i = 0; i < m_arrayExpected.size(); ++i)
+        {
+            if(m_arrayExpected[i] == Type::Integer)
+                out << "Int";
+            else if(m_arrayExpected[i] == Type::Float)
+                out << "Float";
+            else if(m_arrayExpected[i] == Type::String)
+                out << "String";
+
+            if(i < m_arrayData.size())
+                out << " = " << m_arrayData[i].get<std::string>();
+
+            out << std::endl;
+        }
+    }
+
     std::map<std::string, Serialized> orderedOpts;
     for(auto &p : m_data)
-    {
         orderedOpts.emplace(optName(p.first), p.second);
-    }
 
     for(auto &p : orderedOpts)
         out << std::setw(20) << p.first << "= " << p.second.get<std::string>() << std::endl;
+
+    if(!m_arrayFirst)
+    {
+        for(size_t i = 0; i < m_arrayExpected.size(); ++i)
+        {
+            if(m_arrayExpected[i] == Type::Integer)
+                out << "Int";
+            else if(m_arrayExpected[i] == Type::Float)
+                out << "Float";
+            else if(m_arrayExpected[i] == Type::String)
+                out << "String";
+
+            if(i < m_arrayData.size())
+                out << " = " << m_arrayData[i].get<std::string>();
+
+            out << std::endl;
+        }
+    }
 
     return *this;
 }

@@ -279,7 +279,6 @@ NNTestClassImpl(ArgsParser)
         NNTestParams(int, const char **, bool, std::ostream &)
         {
             const char *argv[] = { "cmd", "1", "2.1", "three", "-a", "opt", "-bc", "-5", "--dee", "3.14", "-e" };
-
             ArgsParser args;
             args.addInt();
             args.addDouble();
@@ -291,7 +290,6 @@ NNTestClassImpl(ArgsParser)
             args.addFlag('e', "eee");
             args.addFlag('f');
             args.parse(11, argv);
-
             NNTestEquals(args.getInt(0), 1);
             NNTestAlmostEquals(args.getDouble(1), 2.1, 1e-12);
             NNTestEquals(args.getString(2), "three");
@@ -351,17 +349,57 @@ NNTestClassImpl(ArgsParser)
         }
     }
 
+    NNTestMethod(printHelp)
+    {
+        NNTestParams(std::ostream &)
+        {
+            const char *argv[] = { "cmd", "1", "2.1", "three" };
+            std::stringstream ss;
+            ArgsParser args;
+            args.addInt();
+            args.addDouble();
+            args.addString();
+            args.addInt('i', "int", 32);
+            args.addDouble('d', "double", 3.14);
+            args.addString('s', "string", "string");
+            args.parse(4, argv);
+            args.printHelp(ss);
+            NNTestGreaterThan(ss.str().size(), 0);
+
+            ArgsParser args2;
+            args2.addFlag('f');
+            args2.addInt();
+            args2.addDouble();
+            args2.addString();
+            args2.parse(4, argv);
+            args2.printHelp(ss);
+        }
+    }
+
     NNTestMethod(printOpts)
     {
         NNTestParams(std::ostream &)
         {
+            const char *argv[] = { "cmd", "1", "2.1", "three" };
             std::stringstream ss;
             ArgsParser args;
+            args.addInt();
+            args.addDouble();
+            args.addString();
             args.addInt('i', "int", 32);
             args.addDouble('d', "double", 3.14);
             args.addString('s', "string", "string");
+            args.parse(4, argv);
             args.printOpts(ss);
             NNTestGreaterThan(ss.str().size(), 0);
+
+            ArgsParser args2;
+            args2.addFlag('f');
+            args2.addInt();
+            args2.addDouble();
+            args2.addString();
+            args2.parse(4, argv);
+            args2.printOpts(ss);
         }
     }
 
