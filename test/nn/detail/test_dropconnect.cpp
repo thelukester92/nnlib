@@ -88,7 +88,7 @@ NNTestClassImpl(DropConnect)
             DropConnect<T> module(linear, p);
 
             T sum = 0;
-            auto input = math::ones(4, inps);
+            auto input = math::ones<T>(4, inps);
             for(size_t i = 0; i < trials; ++i)
                 sum += math::sum(module.forward(input)) / module.output().size() / inps;
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
@@ -122,8 +122,8 @@ NNTestClassImpl(DropConnect)
             DropConnect<T> module(linear, p);
 
             T sum1 = 0, sum2 = 0;
-            auto input = math::ones(4, inps);
-            auto blame = math::ones(4, 1);
+            auto input = math::ones<T>(4, inps);
+            auto blame = math::ones<T>(4, 1);
             for(size_t i = 0; i < trials; ++i)
             {
                 sum1 += math::sum(module.forward(input)) / module.output().size() / inps;
