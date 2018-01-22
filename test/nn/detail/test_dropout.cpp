@@ -69,7 +69,7 @@ NNTestClassImpl(Dropout)
             Dropout<T> module(p);
 
             T sum = 0;
-            auto input = math::ones<T>(4, 25);
+            auto input = math::ones(4, 25);
             for(size_t i = 0; i < trials; ++i)
                 sum += math::sum(module.forward(input)) / input.size();
             NNTestAlmostEquals(sum / trials, 1 - p, 0.01);
@@ -94,7 +94,7 @@ NNTestClassImpl(Dropout)
             Dropout<T> module(p);
 
             T sum1 = 0, sum2 = 0;
-            auto input = math::ones<T>(4, 25);
+            auto input = math::ones(4, 25);
             for(size_t i = 0; i < trials; ++i)
             {
                 sum1 += math::sum(module.forward(input)) / input.size();

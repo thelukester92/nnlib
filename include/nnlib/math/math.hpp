@@ -151,14 +151,14 @@ Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &
 // MARK: Convenience methods implemented directly in the header.
 
 /// Make a tensor filled with zeros.
-template <typename T, typename ... Ts>
+template <typename T = NN_REAL_T, typename ... Ts>
 Tensor<T> zeros(Ts && ...dims)
 {
     return fill(Tensor<T>(std::forward<Ts>(dims)...), 0);
 }
 
 /// Make a tensor filled with ones.
-template <typename T, typename ... Ts>
+template <typename T = NN_REAL_T, typename ... Ts>
 Tensor<T> ones(Ts && ...dims)
 {
     return fill(Tensor<T>(std::forward<Ts>(dims)...), 1);

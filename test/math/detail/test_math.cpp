@@ -402,7 +402,7 @@ NNTestClassImpl(Math)
     {
         NNTestParams(size_t, size_t)
         {
-            Tensor<T> x = ones<T>(3, 6);
+            Tensor<T> x = ones(3, 6);
             NNTestEquals(x.dims(), 2);
             NNTestEquals(x.size(0), 3);
             NNTestEquals(x.size(1), 6);
