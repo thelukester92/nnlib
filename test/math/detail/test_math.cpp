@@ -388,7 +388,7 @@ NNTestClassImpl(Math)
         NNTestParams(size_t, size_t)
         {
             Tensor<T> x = zeros<T>(3, 6);
-            NNTestEquals(x.dims(), 3);
+            NNTestEquals(x.dims(), 2);
             NNTestEquals(x.size(0), 3);
             NNTestEquals(x.size(1), 6);
             forEach([&](T x)
