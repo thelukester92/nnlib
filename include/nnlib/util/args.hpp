@@ -1,7 +1,7 @@
 #ifndef UTIL_ARGS_HPP
 #define UTIL_ARGS_HPP
 
-#include "../core/type.hpp"
+#include "../serialization/serialized.hpp"
 #include <unordered_map>
 #include <vector>
 #include <iostream>
@@ -21,7 +21,7 @@ public:
 
     std::string popString();
     double popDouble();
-    int popInt();
+    long long popInt();
 
 private:
     int m_argc;
@@ -32,6 +32,8 @@ private:
 class ArgsParser
 {
 public:
+    using Type = Serialized::Type;
+
     explicit ArgsParser(bool help = true);
     explicit ArgsParser(char helpOpt, std::string helpLong = "help");
 
@@ -39,9 +41,9 @@ public:
     ArgsParser &addFlag(std::string longOpt);
 
     ArgsParser &addInt(char opt, std::string longOpt = "");
-    ArgsParser &addInt(char opt, std::string longOpt, int defaultValue);
+    ArgsParser &addInt(char opt, std::string longOpt, long long defaultValue);
     ArgsParser &addInt(std::string longOpt);
-    ArgsParser &addInt(std::string longOpt, int defaultValue);
+    ArgsParser &addInt(std::string longOpt, long long defaultValue);
 
     ArgsParser &addDouble(char opt, std::string longOpt = "");
     ArgsParser &addDouble(char opt, std::string longOpt, double defaultValue);
@@ -71,41 +73,21 @@ public:
 
     bool getFlag(char opt) const;
     bool getFlag(std::string opt) const;
-    int getInt(char opt) const;
-    int getInt(std::string opt) const;
+    long long getInt(char opt) const;
+    long long getInt(std::string opt) const;
     double getDouble(char opt) const;
     double getDouble(std::string opt) const;
     std::string getString(char opt) const;
     std::string getString(std::string opt) const;
 
 private:
-    enum class Type
-    {
-        Bool,
-        Int,
-        Double,
-        String
-    };
-
-    struct Data
-    {
-        Type type;
-        union
-        {
-            bool b;
-            int i;
-            double d;
-        };
-    };
-
     void addOpt(char opt, std::string longOpt);
 
     char m_helpOpt, m_nextUnnamedOpt;
-    std::unordered_map<char, Type> m_expected;
-    std::unordered_map<char, Data> m_data;
+    std::unordered_map<char, Serialized::Type> m_expected;
+    std::unordered_map<char, Serialized> m_data;
     std::unordered_map<std::string, char> m_longToChar;
     std::unordered_map<char, std::string> m_charToLong;
-    std::vector<std::string> m_stringStorage;
 };
 
 }

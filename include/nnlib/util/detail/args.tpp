@@ -69,7 +69,7 @@ double Args::popDouble()
     return std::stod(popString());
 }
 
-int Args::popInt()
+long long Args::popInt()
 {
     NNHardAssert(nextIsNumber(), "Attempted to pop a string as a number!");
     return std::stoi(popString());
@@ -90,8 +90,7 @@ ArgsParser::ArgsParser(char helpOpt, std::string helpLong) : m_helpOpt(helpOpt),
 ArgsParser &ArgsParser::addFlag(char opt, std::string longOpt)
 {
     addOpt(opt, longOpt);
-    m_data[opt].type = Type::Bool;
-    m_data[opt].b = false;
+    m_data[opt].set(false);
     return *this;
 }
 
@@ -103,15 +102,14 @@ ArgsParser &ArgsParser::addFlag(std::string longOpt)
 ArgsParser &ArgsParser::addInt(char opt, std::string longOpt)
 {
     addOpt(opt, longOpt);
-    m_expected[opt] = Type::Int;
+    m_expected[opt] = Type::Integer;
     return *this;
 }
 
-ArgsParser &ArgsParser::addInt(char opt, std::string longOpt, int defaultValue)
+ArgsParser &ArgsParser::addInt(char opt, std::string longOpt, long long defaultValue)
 {
     addInt(opt, longOpt);
-    m_data[opt].type = Type::Int;
-    m_data[opt].i = defaultValue;
+    m_data[opt].set(defaultValue);
     return *this;
 }
 
@@ -120,7 +118,7 @@ ArgsParser &ArgsParser::addInt(std::string longOpt)
     return addInt(++m_nextUnnamedOpt, longOpt);
 }
 
-ArgsParser &ArgsParser::addInt(std::string longOpt, int defaultValue)
+ArgsParser &ArgsParser::addInt(std::string longOpt, long long defaultValue)
 {
     return addInt(++m_nextUnnamedOpt, longOpt, defaultValue);
 }
@@ -128,15 +126,14 @@ ArgsParser &ArgsParser::addInt(std::string longOpt, int defaultValue)
 ArgsParser &ArgsParser::addDouble(char opt, std::string longOpt)
 {
     addOpt(opt, longOpt);
-    m_expected[opt] = Type::Double;
+    m_expected[opt] = Type::Float;
     return *this;
 }
 
 ArgsParser &ArgsParser::addDouble(char opt, std::string longOpt, double defaultValue)
 {
     addDouble(opt, longOpt);
-    m_data[opt].type = Type::Double;
-    m_data[opt].d = defaultValue;
+    m_data[opt].set(defaultValue);
     return *this;
 }
 
@@ -160,9 +157,7 @@ ArgsParser &ArgsParser::addString(char opt, std::string longOpt)
 ArgsParser &ArgsParser::addString(char opt, std::string longOpt, std::string defaultValue)
 {
     addString(opt, longOpt);
-    m_data[opt].type = Type::String;
-    m_stringStorage.push_back(defaultValue);
-    m_data[opt].i = m_stringStorage.size() - 1;
+    m_data[opt].set(defaultValue);
     return *this;
 }
 
@@ -202,33 +197,23 @@ ArgsParser &ArgsParser::parse(int argc, const char **argv, bool popCommand, std:
             {
                 auto j = m_expected.find(arg[i]);
                 NNHardAssert(j != m_expected.end(), "Unexpected argument '" + std::string(1, arg[i]) + "'!");
-                NNHardAssert(j->second == Type::Bool, "Multiple options for a single - must be flags!");
-                m_data[arg[i]].type = Type::Bool;
-                m_data[arg[i]].b = true;
+                NNHardAssert(j->second == Type::Boolean, "Multiple options for a single - must be flags!");
+                m_data[arg[i]].set(true);
             }
             opt = arg.back();
         }
 
         auto i = m_expected.find(opt);
         NNHardAssert(i != m_expected.end(), "Unexpected argument '" + std::string(1, opt) + "'!");
-        m_data[opt].type = i->second;
 
-        switch(i->second)
-        {
-        case Type::Bool:
-            m_data[opt].b = true;
-            break;
-        case Type::Int:
-            m_data[opt].i = args.popInt();
-            break;
-        case Type::Double:
-            m_data[opt].d = args.popDouble();
-            break;
-        case Type::String:
-            m_stringStorage.push_back(args.popString());
-            m_data[opt].i = m_stringStorage.size() - 1;
-            break;
-        }
+        if(i->second == Type::Boolean)
+            m_data[opt].set(true);
+        else if(i->second == Type::Integer)
+            m_data[opt].set(args.popInt());
+        else if(i->second == Type::Float)
+            m_data[opt].set(args.popDouble());
+        else if(i->second == Type::String)
+            m_data[opt].set(args.popString());
     }
 
     if(m_helpOpt != '\0' && getFlag(m_helpOpt))
@@ -273,42 +258,19 @@ const ArgsParser &ArgsParser::printHelp(std::ostream &out) const
 
         out << std::setw(25) << name;
 
-        switch(p.second)
-        {
-        case Type::Bool:
+        if(p.second == Type::Boolean)
             out << "Flag";
-            break;
-        case Type::Int:
+        else if(p.second == Type::Integer)
             out << "Int";
-            break;
-        case Type::Double:
+        else if(p.second == Type::Float)
             out << "Double";
-            break;
-        case Type::String:
+        else if(p.second == Type::String)
             out << "String";
-            break;
-        }
 
         auto d = m_data.find(opt);
         if(d != m_data.end())
         {
-            out << " [value = ";
-            switch(d->second.type)
-            {
-            case Type::Bool:
-                out << (d->second.b ? "true" : "false");
-                break;
-            case Type::Int:
-                out << d->second.i;
-                break;
-            case Type::Double:
-                out << d->second.d;
-                break;
-            case Type::String:
-                out << "\"" << m_stringStorage[d->second.i] << "\"";
-                break;
-            }
-            out << "]";
+            out << " [value = " << d->second.get<std::string>() << "]";
         }
 
         out << std::endl;
@@ -321,32 +283,14 @@ const ArgsParser &ArgsParser::printOpts(std::ostream &out) const
 {
     out << std::left;
 
-    std::map<std::string, Data> orderedOpts;
+    std::map<std::string, Serialized> orderedOpts;
     for(auto &p : m_data)
     {
         orderedOpts.emplace(optName(p.first), p.second);
     }
 
     for(auto &p : orderedOpts)
-    {
-        out << std::setw(20) << p.first << "= ";
-        switch(p.second.type)
-        {
-        case Type::Bool:
-            out << p.second.b;
-            break;
-        case Type::Int:
-            out << p.second.i;
-            break;
-        case Type::Double:
-            out << p.second.d;
-            break;
-        case Type::String:
-            out << m_stringStorage[p.second.i];
-            break;
-        }
-        out << std::endl;
-    }
+        out << std::setw(20) << p.first << "= " << p.second.get<std::string>() << std::endl;
 
     return *this;
 }
@@ -375,8 +319,8 @@ std::string ArgsParser::optName(char opt) const
 bool ArgsParser::getFlag(char opt) const
 {
     NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-    NNHardAssert(m_data.at(opt).type == Type::Bool, "Attempted to get an incompatible type!");
-    return m_data.at(opt).b;
+    NNHardAssert(m_data.at(opt).type() == Type::Boolean, "Attempted to get an incompatible type!");
+    return m_data.at(opt).get<bool>();
 }
 
 bool ArgsParser::getFlag(std::string opt) const
@@ -386,14 +330,14 @@ bool ArgsParser::getFlag(std::string opt) const
     return getFlag(i->second);
 }
 
-int ArgsParser::getInt(char opt) const
+long long ArgsParser::getInt(char opt) const
 {
     NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-    NNHardAssert(m_data.at(opt).type == Type::Int, "Attempted to get an incompatible type!");
-    return m_data.at(opt).i;
+    NNHardAssert(m_data.at(opt).type() == Type::Integer, "Attempted to get an incompatible type!");
+    return m_data.at(opt).get<long long>();
 }
 
-int ArgsParser::getInt(std::string opt) const
+long long ArgsParser::getInt(std::string opt) const
 {
     auto i = m_longToChar.find(opt);
     NNHardAssert(i != m_longToChar.end(), "Attempted to get undefined option '" + opt + "'!");
@@ -403,8 +347,8 @@ int ArgsParser::getInt(std::string opt) const
 double ArgsParser::getDouble(char opt) const
 {
     NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-    NNHardAssert(m_data.at(opt).type == Type::Double, "Attempted to get an incompatible type!");
-    return m_data.at(opt).d;
+    NNHardAssert(m_data.at(opt).type() == Type::Float, "Attempted to get an incompatible type!");
+    return m_data.at(opt).get<double>();
 }
 
 double ArgsParser::getDouble(std::string opt) const
@@ -417,8 +361,8 @@ double ArgsParser::getDouble(std::string opt) const
 std::string ArgsParser::getString(char opt) const
 {
     NNHardAssert(hasOpt(opt), "Attempted to get undefined option '" + optName(opt) + "'!");
-    NNHardAssert(m_data.at(opt).type == Type::String, "Attempted to get an incompatible type!");
-    return m_stringStorage[m_data.at(opt).i];
+    NNHardAssert(m_data.at(opt).type() == Type::String, "Attempted to get an incompatible type!");
+    return m_data.at(opt).get<std::string>();
 }
 
 std::string ArgsParser::getString(std::string opt) const
@@ -431,7 +375,7 @@ std::string ArgsParser::getString(std::string opt) const
 void ArgsParser::addOpt(char opt, std::string longOpt)
 {
     NNHardAssert(m_expected.find(opt) == m_expected.end(), "Attempted to redefine '" + optName(opt) + "'!");
-    m_expected[opt] = Type::Bool;
+    m_expected[opt] = Type::Boolean;
 
     if(longOpt != "")
     {
