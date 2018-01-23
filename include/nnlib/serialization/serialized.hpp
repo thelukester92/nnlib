@@ -179,8 +179,13 @@ public:
 private:
     struct SerializedObject
     {
-        std::unordered_map<std::string, Serialized> map;
+        std::unordered_map<std::string, size_t> map;
         std::vector<std::string> keys;
+        std::vector<Serialized> values;
+        size_t size() const { return map.size(); }
+        size_t count(const std::string &key) const { return map.count(key); }
+        Serialized &at(const std::string &key) { return values[map.at(key)]; }
+        const Serialized &at(const std::string &key) const { return values[map.at(key)]; }
     };
 
     inline std::string intToString(long long value) const;

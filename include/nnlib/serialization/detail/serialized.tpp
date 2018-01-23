@@ -141,7 +141,7 @@ size_t Serialized::size() const
     if(m_type == Array)
         return m_array.size();
     else if(m_type == Object)
-        return m_object.map.size();
+        return m_object.size();
     else
         return 1;
 }
@@ -322,7 +322,7 @@ typename std::enable_if<traits::HasSave<T>::value>::type Serialized::set(const T
         set("polymorphic", true);
         set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(value)));
         set("data", Null);
-        value.save(m_object.map.at("data"));
+        value.save(m_object.at("data"));
     }
     else
         value.save(*this);
@@ -451,7 +451,7 @@ void Serialized::set(size_t i, T && first, Ts && ...values)
 bool Serialized::has(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    return m_object.map.count(key) == 1;
+    return m_object.count(key) == 1;
 }
 
 const std::vector<std::string> &Serialized::keys() const
@@ -463,59 +463,60 @@ const std::vector<std::string> &Serialized::keys() const
 Serialized::Type Serialized::type(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key).type();
+    NNHardAssert(m_object.count(key) == 1, "Invalid key '" + key + "'!");
+    return m_object.at(key).type();
 }
 
 void Serialized::type(const std::string &key, Type type)
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    m_object.map.at(key).type(type);
+    NNHardAssert(m_object.count(key) == 1, "Invalid key '" + key + "'!");
+    m_object.at(key).type(type);
 }
 
 size_t Serialized::size(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key).size();
+    NNHardAssert(m_object.count(key) == 1, "Invalid key '" + key + "'!");
+    return m_object.at(key).size();
 }
 
 template <typename T>
 T Serialized::get(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key).get<T>();
+    NNHardAssert(m_object.count(key) == 1, "Invalid key '" + key + "'!");
+    return m_object.at(key).get<T>();
 }
 
 template <typename T>
 T Serialized::get(const std::string &key)
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key).get<T>();
+    NNHardAssert(m_object.count(key) == 1, "Invalid key '" + key + "'!");
+    return m_object.at(key).get<T>();
 }
 
 template <typename T>
 void Serialized::get(const std::string &key, T itr, const T &end) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
-    NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    m_object.map.at(key).get(itr, end);
+    NNHardAssert(m_object.count(key) == 1, "Invalid key '" + key + "'!");
+    m_object.at(key).get(itr, end);
 }
 
 template <typename T, typename ... Ts>
 void Serialized::set(const std::string &key, T && first, Ts && ...values)
 {
     type(Object);
-    if(m_object.map.count(key) == 0)
+    if(m_object.count(key) == 0)
     {
-        m_object.map.emplace(key, Serialized(std::forward<T>(first), std::forward<Ts>(values)...));
+        m_object.map.emplace(key, m_object.keys.size());
         m_object.keys.push_back(key);
+        m_object.values.emplace_back(std::forward<T>(first), std::forward<Ts>(values)...);
     }
     else
-        m_object.map.at(key).set(std::forward<T>(first), std::forward<Ts>(values)...);
+        m_object.at(key).set(std::forward<T>(first), std::forward<Ts>(values)...);
 }
 
 std::string Serialized::intToString(long long value) const
