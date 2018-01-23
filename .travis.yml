@@ -8,23 +8,23 @@ dist:
 group: edge
 cache:
     directories:
-    - cache/openblas-build/lib
-    - obj
+        - openblas-build
+        - obj
 before_install:
     - cd $TRAVIS_BUILD_DIR
     - sudo apt-get update -qq -y || true
     - sudo apt-get install -y gfortran
     - sudo apt-get install -y lcov
-    - mkdir -p cache
+    - mkdir -p openblas-build
     - |
-      if [ ! -e cache/openblas-build/lib/libopenblas.so.0 ]; then
-        git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS cache/openblas
-        cd cache/openblas
-        make && make PREFIX=$TRAVIS_BUILD_DIR/cache/openblas-build install
+      if [ ! -e openblas-build/lib/libopenblas.so.0 ]; then
+        git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS openblas
+        cd openblas
+        make && make PREFIX=$TRAVIS_BUILD_DIR/openblas-build install
       fi
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/cache/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/cache/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/cache/openblas-build/lib"
+    - make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/openblas-build/lib"
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - lcov -c -b . -d obj --no-external -o obj/lcov.info
