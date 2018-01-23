@@ -16,8 +16,8 @@ public:
     using Container<T>::components;
 
     template <typename ... Ms>
-    Sequential(Module<T> *first, Ms... rest) :
-        Container<T>(first->inputShape(), Storage<Module<T> *>({ first, rest... }).back()->outputShape(), first, rest...)
+    Sequential(Ms... components) :
+        Container<T>({ 1 }, { 1 }, components...)
     {}
 
     virtual Tensor<T> &forward(const Tensor<T> &input) override;
