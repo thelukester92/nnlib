@@ -76,7 +76,7 @@ Tensor<T> &fill(Tensor<T> &x, typename traits::Identity<T>::type value)
 }
 
 template <typename T>
-Tensor<T> &&fill(Tensor<T> &&x, typename traits::Identity<T>::type value)
+Tensor<T> fill(Tensor<T> &&x, typename traits::Identity<T>::type value)
 {
     return std::move(fill(x, value));
 }
@@ -92,7 +92,7 @@ Tensor<T> &scale(Tensor<T> &x, typename traits::Identity<T>::type value)
 }
 
 template <typename T>
-Tensor<T> &&scale(Tensor<T> &&x, typename traits::Identity<T>::type value)
+Tensor<T> scale(Tensor<T> &&x, typename traits::Identity<T>::type value)
 {
     return std::move(scale(x, value));
 }
@@ -108,7 +108,7 @@ Tensor<T> &add(Tensor<T> &x, typename traits::Identity<T>::type value)
 }
 
 template <typename T>
-Tensor<T> &&add(Tensor<T> &&x, typename traits::Identity<T>::type value)
+Tensor<T> add(Tensor<T> &&x, typename traits::Identity<T>::type value)
 {
     return std::move(add(x, value));
 }
@@ -135,7 +135,7 @@ Tensor<T> &diminish(Tensor<T> &x, typename traits::Identity<T>::type value)
 }
 
 template <typename T>
-Tensor<T> &&diminish(Tensor<T> &&x, typename traits::Identity<T>::type value)
+Tensor<T> diminish(Tensor<T> &&x, typename traits::Identity<T>::type value)
 {
     return std::move(diminish(x, value));
 }
@@ -149,7 +149,7 @@ Tensor<T> &normalize(Tensor<T> &x, typename traits::Identity<T>::type from, type
 }
 
 template <typename T>
-Tensor<T> &&normalize(Tensor<T> &&x, typename traits::Identity<T>::type from, typename traits::Identity<T>::type to)
+Tensor<T> normalize(Tensor<T> &&x, typename traits::Identity<T>::type from, typename traits::Identity<T>::type to)
 {
     return std::move(normalize(x, from, to));
 }
@@ -171,7 +171,7 @@ Tensor<T> &sum(const Tensor<T> &x, Tensor<T> &y, size_t dim)
 }
 
 template <typename T>
-Tensor<T> &&sum(const Tensor<T> &x, Tensor<T> &&y, size_t dim)
+Tensor<T> sum(const Tensor<T> &x, Tensor<T> &&y, size_t dim)
 {
     return std::move(sum(x, y, dim));
 }
@@ -191,7 +191,7 @@ Tensor<T> &clip(Tensor<T> &x, typename traits::Identity<T>::type min, typename t
 }
 
 template <typename T>
-Tensor<T> &&clip(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
+Tensor<T> clip(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
 {
     return std::move(clip(x, min, max));
 }
@@ -203,7 +203,7 @@ Tensor<T> &square(Tensor<T> &x)
 }
 
 template <typename T>
-Tensor<T> &&square(Tensor<T> &&x)
+Tensor<T> square(Tensor<T> &&x)
 {
     return std::move(pointwiseProduct(x, x));
 }
@@ -219,7 +219,7 @@ Tensor<T> &rand(Tensor<T> &x, typename traits::Identity<T>::type min, typename t
 }
 
 template <typename T>
-Tensor<T> &&rand(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
+Tensor<T> rand(Tensor<T> &&x, typename traits::Identity<T>::type min, typename traits::Identity<T>::type max)
 {
     return std::move(rand(x, min, max));
 }
@@ -235,7 +235,7 @@ Tensor<T> &randn(Tensor<T> &x, typename traits::Identity<T>::type mean, typename
 }
 
 template <typename T>
-Tensor<T> &&randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev)
+Tensor<T> randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev)
 {
     return std::move(randn(x, mean, stddev));
 }
@@ -251,7 +251,7 @@ Tensor<T> &randn(Tensor<T> &x, typename traits::Identity<T>::type mean, typename
 }
 
 template <typename T>
-Tensor<T> &&randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev, typename traits::Identity<T>::type cap)
+Tensor<T> randn(Tensor<T> &&x, typename traits::Identity<T>::type mean, typename traits::Identity<T>::type stddev, typename traits::Identity<T>::type cap)
 {
     return std::move(randn(x, mean, stddev, cap));
 }
@@ -267,7 +267,7 @@ Tensor<T> &bernoulli(Tensor<T> &x, typename traits::Identity<T>::type p)
 }
 
 template <typename T>
-Tensor<T> &&bernoulli(Tensor<T> &&x, typename traits::Identity<T>::type p)
+Tensor<T> bernoulli(Tensor<T> &&x, typename traits::Identity<T>::type p)
 {
     return std::move(bernoulli(x, p));
 }
@@ -284,7 +284,7 @@ Tensor<T> &pointwiseProduct(const Tensor<T> &x, Tensor<T> &y)
 }
 
 template <typename T>
-Tensor<T> &&pointwiseProduct(const Tensor<T> &x, Tensor<T> &&y)
+Tensor<T> pointwiseProduct(const Tensor<T> &x, Tensor<T> &&y)
 {
     return std::move(pointwiseProduct(x, y));
 }
@@ -302,7 +302,7 @@ Tensor<T> &pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &z
 }
 
 template <typename T>
-Tensor<T> &&pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &&z)
+Tensor<T> pointwiseProduct(const Tensor<T> &x, const Tensor<T> &y, Tensor<T> &&z)
 {
     return std::move(pointwiseProduct(x, y, z));
 }
