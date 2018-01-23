@@ -147,8 +147,7 @@ Tensor<T> &DropConnect<T>::forward(const Tensor<T> &input)
             for(size_t i = 0; i < input.size(0); ++i)
             {
                 math::pointwiseProduct(m_backup, m_mask.select(0, i), m_module->params());
-                m_module->forward(input.select(0, i));
-                NNAssertEquals(m_module->output().dims(), 1, "Expected a vector!");
+                m_module->forward(input.narrow(0, i));
                 m_output.resizeDim(1, m_module->output().size());
                 m_output.select(0, i).copy(m_module->output());
             }
