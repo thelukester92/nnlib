@@ -37,7 +37,7 @@ Serialized::Serialized(Serialized &other) :
 Serialized::Serialized(Serialized &&other) :
     m_type(Null)
 {
-    *this = other;
+    *this = std::forward<Serialized &&>(other);
 }
 
 Serialized::~Serialized()
@@ -67,13 +67,9 @@ Serialized &Serialized::operator=(const Serialized &other)
             break;
         case Array:
             m_array = other.m_array;
-            for(Serialized *&s : m_array)
-                s = new Serialized(*s);
             break;
         case Object:
             m_object = other.m_object;
-            for(auto &p : m_object.map)
-                p.second = new Serialized(p.second);
             break;
         }
     }
@@ -98,15 +94,13 @@ Serialized &Serialized::operator=(Serialized &&other)
             m_float = other.m_float;
             break;
         case String:
-            m_string = other.m_string;
+            m_string = std::move(other.m_string);
             break;
         case Array:
             m_array = std::move(other.m_array);
-            other.m_array.clear();
             break;
         case Object:
             m_object = std::move(other.m_object);
-            other.m_object.map.clear();
             break;
         }
 
@@ -128,22 +122,14 @@ void Serialized::type(Type type)
     if(m_type == String)
         m_string.~basic_string<char>();
     else if(m_type == Array)
-    {
-        for(Serialized *s : m_array)
-            delete s;
-        m_array.~vector<Serialized *>();
-    }
+        m_array.~vector<Serialized>();
     else if(m_type == Object)
-    {
-        for(auto p : m_object.map)
-            delete p.second;
         m_object.~SerializedObject();
-    }
 
     if(type == Type::String)
         new (&m_string) std::string;
     else if(type == Type::Array)
-        new (&m_array) std::vector<Serialized *>;
+        new (&m_array) std::vector<Serialized>;
     else if(type == Type::Object)
         new (&m_object) SerializedObject;
 
@@ -288,7 +274,7 @@ typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::
     size_t idx = 0;
     while(itr != end)
     {
-        *itr = m_array[idx]->get<typename std::remove_reference<decltype(*itr)>::type>();
+        *itr = m_array[idx].get<typename std::remove_reference<decltype(*itr)>::type>();
         ++itr;
         ++idx;
     }
@@ -335,8 +321,8 @@ typename std::enable_if<traits::HasSave<T>::value>::type Serialized::set(const T
     {
         set("polymorphic", true);
         set("type", Factory<typename traits::BaseOf<T>::type>::derivedName(typeid(value)));
-        set("data", new Serialized());
-        value.save(*m_object.map.at("data"));
+        set("data", Null);
+        value.save(m_object.map.at("data"));
     }
     else
         value.save(*this);
@@ -371,7 +357,7 @@ typename std::enable_if<!std::is_fundamental<T>::value && !std::is_same<T, std::
     m_array.reserve(std::distance(itr, end));
     while(itr != end)
     {
-        m_array.push_back(new Serialized(*itr));
+        m_array.emplace_back(*itr);
         ++itr;
     }
 }
@@ -380,19 +366,25 @@ template <typename T, typename ... Ts>
 void Serialized::push(T && value, Ts && ...values)
 {
     type(Array);
-    m_array.push_back(new Serialized(std::forward<T>(value), std::forward<Ts>(values)...));
+    m_array.emplace_back(std::forward<T>(value), std::forward<Ts>(values)...);
 }
 
-void Serialized::push(Serialized *value)
+void Serialized::push(Serialized &value)
 {
     type(Array);
-    m_array.push_back(value);
+    m_array.emplace_back(value);
 }
 
-Serialized *Serialized::pop()
+void Serialized::push(Serialized &&value)
+{
+    type(Array);
+    m_array.emplace_back(std::forward<Serialized &&>(value));
+}
+
+Serialized Serialized::pop()
 {
     NNHardAssertGreaterThan(m_array.size(), 0);
-    Serialized *x = m_array.back();
+    Serialized x = std::move(m_array.back());
     m_array.pop_back();
     return x;
 }
@@ -401,21 +393,27 @@ Serialized::Type Serialized::type(size_t i) const
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    return m_array[i]->type();
+    return m_array[i].type();
 }
 
 void Serialized::type(size_t i, Type type)
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    m_array[i]->type(type);
+    m_array[i].type(type);
 }
 
 size_t Serialized::size(size_t i) const
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    return m_array[i]->size();
+    return m_array[i].size();
+}
+
+void Serialized::resize(size_t n)
+{
+    type(Array);
+    m_array.resize(n, Null);
 }
 
 template <typename T>
@@ -423,7 +421,7 @@ T Serialized::get(size_t i) const
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    return m_array[i]->get<T>();
+    return m_array[i].get<T>();
 }
 
 template <typename T>
@@ -431,7 +429,7 @@ T Serialized::get(size_t i)
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    return m_array[i]->get<T>();
+    return m_array[i].get<T>();
 }
 
 template <typename T>
@@ -439,7 +437,7 @@ void Serialized::get(size_t i, T itr, const T &end) const
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    m_array[i]->get(itr, end);
+    m_array[i].get(itr, end);
 }
 
 template <typename T, typename ... Ts>
@@ -447,7 +445,7 @@ void Serialized::set(size_t i, T && first, Ts && ...values)
 {
     NNHardAssertEquals(m_type, Array, "Invalid type!");
     NNHardAssertLessThan(i, m_array.size(), "Invalid index!");
-    m_array[i]->set(std::forward<T>(first), std::forward<Ts>(values)...);
+    m_array[i].set(std::forward<T>(first), std::forward<Ts>(values)...);
 }
 
 bool Serialized::has(const std::string &key) const
@@ -466,21 +464,21 @@ Serialized::Type Serialized::type(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
     NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key)->type();
+    return m_object.map.at(key).type();
 }
 
 void Serialized::type(const std::string &key, Type type)
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
     NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    m_object.map.at(key)->type(type);
+    m_object.map.at(key).type(type);
 }
 
 size_t Serialized::size(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
     NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key)->size();
+    return m_object.map.at(key).size();
 }
 
 template <typename T>
@@ -488,7 +486,7 @@ T Serialized::get(const std::string &key) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
     NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key)->get<T>();
+    return m_object.map.at(key).get<T>();
 }
 
 template <typename T>
@@ -496,7 +494,7 @@ T Serialized::get(const std::string &key)
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
     NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    return m_object.map.at(key)->get<T>();
+    return m_object.map.at(key).get<T>();
 }
 
 template <typename T>
@@ -504,7 +502,7 @@ void Serialized::get(const std::string &key, T itr, const T &end) const
 {
     NNHardAssertEquals(m_type, Object, "Invalid type!");
     NNHardAssert(m_object.map.count(key) == 1, "Invalid key '" + key + "'!");
-    m_object.map.at(key)->get(itr, end);
+    m_object.map.at(key).get(itr, end);
 }
 
 template <typename T, typename ... Ts>
@@ -513,11 +511,11 @@ void Serialized::set(const std::string &key, T && first, Ts && ...values)
     type(Object);
     if(m_object.map.count(key) == 0)
     {
-        m_object.map.emplace(key, new Serialized(std::forward<T>(first), std::forward<Ts>(values)...));
+        m_object.map.emplace(key, Serialized(std::forward<T>(first), std::forward<Ts>(values)...));
         m_object.keys.push_back(key);
     }
     else
-        m_object.map.at(key)->set(std::forward<T>(first), std::forward<Ts>(values)...);
+        m_object.map.at(key).set(std::forward<T>(first), std::forward<Ts>(values)...);
 }
 
 std::string Serialized::intToString(long long value) const

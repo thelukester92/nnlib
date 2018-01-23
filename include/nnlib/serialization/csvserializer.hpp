@@ -22,9 +22,9 @@ public:
     static void write(const Serialized &rows, const std::string &filename, char delim = ',');
 
 private:
-    static Serialized *readRow(Parser &p, char delim);
-    static Serialized *readQuoted(Parser &p, char delim);
-    static Serialized *readUnquoted(Parser &p, char delim);
+    static void readRow(Serialized &node, Parser &p, char delim);
+    static void readQuoted(Serialized &node, Parser &p, char delim);
+    static void readUnquoted(Serialized &node, Parser &p, char delim);
 
     static void writeRow(const Serialized &row, std::ostream &out, char delim);
     static void writeString(const std::string &str, std::ostream &out, char delim);

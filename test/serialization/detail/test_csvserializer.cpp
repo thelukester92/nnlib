@@ -24,6 +24,14 @@ NNTestClassImpl(CSVSerializer)
             NNTestEquals(s.get(0).get<std::string>(3), "123.456.789");
             NNTestEquals(s.get(1).get<std::string>(0), "a,\"string\"");
             NNTestEquals(s.get(1).get<int>(1), -2);
+
+            std::istringstream ss2("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
+            Serialized t = CSVSerializer::read(ss2);
+            NNTestEquals(t.size(), 40);
+
+            std::istringstream ss3("0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9");
+            Serialized u = CSVSerializer::read(ss3);
+            NNTestEquals(u.size(0), 40);
         }
 
         NNTestParams(const std::string &)

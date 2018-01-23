@@ -149,11 +149,8 @@ void JSONSerializer::readArray(Serialized &node, Parser &p)
             NNHardAssert(p.consume(','), "Expected comma or closing bracket!");
 
         p.consumeWhitespace();
-
-        Serialized *value = new Serialized();
-        readValue(*value, p);
-
-        node.push(value);
+        node.push(Serialized::Null);
+        readValue(node.get(i), p);
         p.consumeWhitespace();
 
         ++i;
@@ -183,11 +180,10 @@ void JSONSerializer::readObject(Serialized &node, Parser &p)
 
         NNHardAssert(p.consume(':'), "Expected :!");
 
-        Serialized *value = new Serialized();
-        readValue(*value, p);
-
-        node.set(key.get<std::string>(), value);
+        node.set(key.get<std::string>(), Serialized::Null);
+        readValue(node.get(key.get<std::string>()), p);
         p.consumeWhitespace();
+
         ++i;
     }
 

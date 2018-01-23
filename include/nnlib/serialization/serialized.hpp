@@ -134,12 +134,14 @@ public:
 
     template <typename T, typename ... Ts>
     void push(T && value, Ts && ...values);
-    inline void push(Serialized *value);
-    inline Serialized *pop();
+    inline void push(Serialized &value);
+    inline void push(Serialized &&value);
+    inline Serialized pop();
 
     inline Type type(size_t i) const;
     inline void type(size_t i, Type type);
     inline size_t size(size_t i) const;
+    inline void resize(size_t i);
 
     template <typename T = const Serialized &>
     T get(size_t i) const;
@@ -177,7 +179,7 @@ public:
 private:
     struct SerializedObject
     {
-        std::unordered_map<std::string, Serialized *> map;
+        std::unordered_map<std::string, Serialized> map;
         std::vector<std::string> keys;
     };
 
@@ -190,7 +192,7 @@ private:
         long long m_int;
         double m_float;
         std::string m_string;
-        std::vector<Serialized *> m_array;
+        std::vector<Serialized> m_array;
         SerializedObject m_object;
     };
 };

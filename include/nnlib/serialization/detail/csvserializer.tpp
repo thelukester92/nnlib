@@ -15,14 +15,19 @@ Serialized CSVSerializer::read(std::istream &in, size_t skipLines, char delim)
     for(size_t i = 0; i < skipLines; ++i)
         p.skipLine();
 
-    Serialized rows(Serialized::Array);
-    Serialized *row = readRow(p, delim);
-
-    while(row != nullptr)
+    p.pushState();
+    size_t rowCount = 0;
+    while(!p.eof())
     {
-        rows.push(row);
-        row = readRow(p, delim);
+        p.skipLine();
+        ++rowCount;
     }
+    p.popState();
+
+    Serialized rows;
+    rows.resize(rowCount);
+    for(size_t i = 0; i < rowCount; ++i)
+        readRow(rows.get(i), p, delim);
 
     return rows;
 }
@@ -52,33 +57,54 @@ void CSVSerializer::write(const Serialized &rows, const std::string &filename, c
     fout.close();
 }
 
-Serialized *CSVSerializer::readRow(Parser &p, char delim)
+void CSVSerializer::readRow(Serialized &row, Parser &p, char delim)
 {
     p.consumeWhitespace();
     if(p.peek() == EOF)
-        return nullptr;
+        return;
 
-    Serialized *row = new Serialized(Serialized::Array);
-
-    size_t i = 0;
+    p.pushState();
+    size_t elementCount = 0;
+    std::string until = "\"\n" + std::string(1, delim);
     while(!p.eof() && p.peek() != '\n')
+    {
+        p.consumeUntil(until);
+        if(p.peek() == '"')
+        {
+            p.ignore();
+            while(true)
+            {
+                p.consumeUntil("\"");
+                p.ignore();
+                if(p.peek() == '"')
+                    p.ignore();
+                else
+                    break;
+            }
+        }
+        if(p.peek() != '\n')
+            p.ignore();
+        ++elementCount;
+    }
+    p.popState();
+
+    row.resize(elementCount);
+
+    for(size_t i = 0; i < elementCount; ++i)
     {
         if(i > 0)
             NNHardAssert(p.consume(delim), "Expected delimiter!");
 
         p.consumeWhitespace();
+
         if(p.peek() == '"')
-            row->push(readQuoted(p, delim));
+            readQuoted(row.get(i), p, delim);
         else
-            row->push(readUnquoted(p, delim));
-
-        ++i;
+            readUnquoted(row.get(i), p, delim);
     }
-
-    return row;
 }
 
-Serialized *CSVSerializer::readQuoted(Parser &p, char delim)
+void CSVSerializer::readQuoted(Serialized &node, Parser &p, char delim)
 {
     NNHardAssert(p.consume('"'), "Expected quoted string!");
 
@@ -102,10 +128,10 @@ Serialized *CSVSerializer::readQuoted(Parser &p, char delim)
     }
 
     NNHardAssert(ok, "Expected end quote!");
-    return new Serialized(value);
+    node.set(value);
 }
 
-Serialized *CSVSerializer::readUnquoted(Parser &p, char delim)
+void CSVSerializer::readUnquoted(Serialized &node, Parser &p, char delim)
 {
     bool couldBeNumber = true, foundDecimal = false;
     std::string value;
@@ -133,11 +159,11 @@ Serialized *CSVSerializer::readUnquoted(Parser &p, char delim)
     couldBeNumber = couldBeNumber && value.length() <= 10;
 
     if(couldBeNumber && foundDecimal)
-        return new Serialized(std::stod(value));
+        node.set(std::stod(value));
     else if(couldBeNumber)
-        return new Serialized(std::stoi(value));
+        node.set(std::stoi(value));
     else
-        return new Serialized(value);
+        node.set(value);
 }
 
 void CSVSerializer::writeRow(const Serialized &row, std::ostream &out, char delim)

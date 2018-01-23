@@ -2,6 +2,7 @@
 #define SERIALIZATION_PARSER_TPP
 
 #include "../parser.hpp"
+#include "nnlib/core/error.hpp"
 #include <sstream>
 
 namespace nnlib
@@ -37,6 +38,19 @@ void Parser::skipLine()
         ignore();
     if(!eof())
         ignore();
+}
+
+void Parser::pushState()
+{
+    m_checkpoints.push_back(m_in.tellg());
+}
+
+void Parser::popState()
+{
+    NNHardAssertGreaterThan(m_checkpoints.size(), 0, "No state to pop!");
+    m_in.clear();
+    m_in.seekg(m_checkpoints.back());
+    m_checkpoints.pop_back();
 }
 
 bool Parser::consume(char c)

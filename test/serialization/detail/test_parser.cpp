@@ -63,6 +63,42 @@ NNTestClassImpl(Parser)
         }
     }
 
+    NNTestMethod(pushState)
+    {
+        NNTestParams()
+        {
+            std::stringstream ss;
+            ss << "hello\ni";
+            Parser p(ss);
+            p.pushState();
+            p.skipLine();
+            p.popState();
+            NNTestEquals(p.get(), 'h');
+        }
+    }
+
+    NNTestMethod(popState)
+    {
+        NNTestParams()
+        {
+            std::stringstream ss;
+            ss << "leho";
+            Parser p(ss);
+            p.pushState();
+            p.ignore();
+            p.pushState();
+            p.ignore();
+            NNTestEquals(p.get(), 'h');
+            p.popState();
+            NNTestEquals(p.get(), 'e');
+            p.popState();
+            NNTestEquals(p.get(), 'l');
+            p.ignore();
+            p.ignore();
+            NNTestEquals(p.get(), 'o');
+        }
+    }
+
     NNTestMethod(consume)
     {
         NNTestParams(char)

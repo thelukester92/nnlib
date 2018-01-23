@@ -134,13 +134,9 @@ void BinarySerializer::readArray(Serialized &node, std::istream &in)
     in.read((char *) &size, sizeof(size_t));
     NNHardAssert(in, "Unexpected end-of-stream!");
 
-    node.type(Serialized::Array);
+    node.resize(size);
     for(size_t i = 0; i < size; ++i)
-    {
-        Serialized *value = new Serialized();
-        read(*value, in);
-        node.push(value);
-    }
+        read(node.get(i), in);
 }
 
 void BinarySerializer::readObject(Serialized &node, std::istream &in)
@@ -154,10 +150,8 @@ void BinarySerializer::readObject(Serialized &node, std::istream &in)
     {
         Serialized key;
         readString(key, in);
-
-        Serialized *value = new Serialized();
-        read(*value, in);
-        node.set(key.get<std::string>(), value);
+        node.set(key.get<std::string>(), Serialized::Null);
+        read(node.get(key.get<std::string>()), in);
     }
 }
 

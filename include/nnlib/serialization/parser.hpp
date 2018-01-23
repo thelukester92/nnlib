@@ -3,6 +3,7 @@
 
 #include "../core/type.hpp"
 #include <iostream>
+#include <vector>
 
 namespace nnlib
 {
@@ -23,6 +24,9 @@ public:
     void ignore();
     void skipLine();
 
+    void pushState();
+    void popState();
+
     bool consume(char c);
     bool consume(const std::string &sequence);
     std::string consumeCombinationOf(const std::string &chars);
@@ -32,6 +36,7 @@ public:
 
 private:
     std::istream &m_in;
+    std::vector<size_t> m_checkpoints;
 };
 
 }
