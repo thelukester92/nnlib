@@ -20,11 +20,11 @@ before_install:
       if [ ! -e openblas-build/lib/libopenblas.so.0 ]; then
         git clone -q --branch v0.2.20 --depth 1 https://github.com/xianyi/OpenBLAS openblas
         cd openblas
-        make && make PREFIX=$TRAVIS_BUILD_DIR/openblas-build install
+        make && make PREFIX=../openblas-build install
       fi
 script:
     - cd $TRAVIS_BUILD_DIR
-    - make test CXXFLAGS="-Wall -I$TRAVIS_BUILD_DIR/openblas-build/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/openblas-build/lib -Wl,-rpath,$TRAVIS_BUILD_DIR/openblas-build/lib"
+    - make test CXXFLAGS="-Wall -Iopenblas-build/include" LDFLAGS="-Lopenblas-build/lib -Wl,-rpath,openblas-build/lib"
 after_success:
     - cd $TRAVIS_BUILD_DIR
     - lcov -c -b . -d obj --no-external -o obj/lcov.info
