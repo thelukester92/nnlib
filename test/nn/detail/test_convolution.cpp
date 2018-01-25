@@ -7,9 +7,8 @@ using T = NN_REAL_T;
 
 NNTestClassImpl(Convolution)
 {
-/*
     NNRunAbstractTest(Module, Convolution, new Convolution<T>(3, 5, 3, 3));
-
+/*
     NNTestMethod(Linear)
     {
         NNTestParams(size_t, size_t)
