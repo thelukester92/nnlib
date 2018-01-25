@@ -9,7 +9,7 @@ namespace nnlib
 {
 
 template <typename T>
-Convolution<T>::Convolution(size_t channels, size_t filters, size_t kWidth, size_t kHeight, size_t strideX, size_t strideY, bool pad, bool interleaved) :
+Convolution<T>::Convolution(size_t filters, size_t channels, size_t kWidth, size_t kHeight, size_t strideX, size_t strideY, bool pad, bool interleaved) :
     Module<T>(
         { 1, interleaved ? kHeight : channels, interleaved ? kWidth : kHeight, interleaved ? channels : kWidth },
         { 1, interleaved ? 1 : filters, 1, interleaved ? filters : 1 }
@@ -75,27 +75,27 @@ size_t Convolution<T>::channels() const
 }
 
 template <typename T>
-size_t Convolution<T>::kernelWidth() const
+size_t Convolution<T>::kernelHeight() const
 {
     return m_filters.size(2);
 }
 
 template <typename T>
-size_t Convolution<T>::kernelHeight() const
+size_t Convolution<T>::kernelWidth() const
 {
     return m_filters.size(3);
-}
-
-template <typename T>
-size_t Convolution<T>::strideX() const
-{
-    return m_strideX;
 }
 
 template <typename T>
 size_t Convolution<T>::strideY() const
 {
     return m_strideY;
+}
+
+template <typename T>
+size_t Convolution<T>::strideX() const
+{
+    return m_strideX;
 }
 
 template <typename T>

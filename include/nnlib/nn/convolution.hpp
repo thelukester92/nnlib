@@ -11,7 +11,7 @@ template <typename T = NN_REAL_T>
 class Convolution : public Module<T>
 {
 public:
-    Convolution(size_t channels, size_t filters, size_t kWidth, size_t kHeight, size_t strideX = 1, size_t strideY = 1, bool pad = false, bool interleaved = false);
+    Convolution(size_t filters, size_t channels, size_t kWidth, size_t kHeight, size_t strideX = 1, size_t strideY = 1, bool pad = false, bool interleaved = false);
     Convolution(const Convolution &module);
     Convolution(const Serialized &node);
 
@@ -19,12 +19,10 @@ public:
 
     size_t filters() const;
     size_t channels() const;
-    size_t kernelWidth() const;
     size_t kernelHeight() const;
-
-    size_t strideX() const;
+    size_t kernelWidth() const;
     size_t strideY() const;
-
+    size_t strideX() const;
     bool padded() const;
     bool interleaved() const;
 

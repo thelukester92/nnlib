@@ -8,23 +8,30 @@ using T = NN_REAL_T;
 NNTestClassImpl(Convolution)
 {
     NNRunAbstractTest(Module, Convolution, new Convolution<T>(3, 5, 3, 3));
-/*
-    NNTestMethod(Linear)
-    {
-        NNTestParams(size_t, size_t)
-        {
-            Linear<T> module(2, 3);
-            NNTestEquals(module.inputs(), 2);
-            NNTestEquals(module.outputs(), 3);
-            NNTestEquals(module.weights().size(), 6);
-            NNTest(module.biased());
-            NNTestEquals(module.bias().size(), 3);
-        }
 
-        NNTestParams(size_t, size_t, bool)
+    NNTestMethod(Convolution)
+    {
+        NNTestParams(size_t, size_t, size_t, size_t, size_t, size_t, bool, bool)
         {
-            Linear<T> module(2, 3, false);
-            NNTest(!module.biased());
+            Convolution<T> module(1, 2, 3, 4, 5, 6, true, false);
+            NNTestEquals(module.filters(), 1);
+            NNTestEquals(module.channels(), 2);
+            NNTestEquals(module.kernelWidth(), 3);
+            NNTestEquals(module.kernelHeight(), 4);
+            NNTestEquals(module.strideX(), 5);
+            NNTestEquals(module.strideY(), 6);
+            NNTestEquals(module.padded(), true);
+            NNTestEquals(module.interleaved(), false);
+
+            Convolution<T> module2(6, 5, 4, 3, 2, 1, false, true);
+            NNTestEquals(module2.filters(), 6);
+            NNTestEquals(module2.channels(), 5);
+            NNTestEquals(module2.kernelWidth(), 4);
+            NNTestEquals(module2.kernelHeight(), 3);
+            NNTestEquals(module2.strideX(), 2);
+            NNTestEquals(module2.strideY(), 1);
+            NNTestEquals(module2.padded(), false);
+            NNTestEquals(module2.interleaved(), true);
         }
     }
 
@@ -32,11 +39,19 @@ NNTestClassImpl(Convolution)
     {
         NNTestParams(const Linear &)
         {
-            Linear<T> orig(2, 3);
-            Linear<T> copy(1, 1);
+            Convolution<T> orig(1, 2, 3, 4, 5, 6, true, false);
+            Convolution<T> copy(1, 2, 3, 4);
             copy = orig;
-            NNTestEquals(copy.inputs(), orig.inputs());
-            NNTestEquals(copy.outputs(), orig.outputs());
+
+            NNTestEquals(copy.filters(), 1);
+            NNTestEquals(copy.channels(), 2);
+            NNTestEquals(copy.kernelWidth(), 3);
+            NNTestEquals(copy.kernelHeight(), 4);
+            NNTestEquals(copy.strideX(), 5);
+            NNTestEquals(copy.strideY(), 6);
+            NNTestEquals(copy.padded(), true);
+            NNTestEquals(copy.interleaved(), false);
+
             forEach([&](T orig, T copy)
             {
                 NNTestAlmostEquals(orig, copy, 1e-12);
@@ -48,7 +63,7 @@ NNTestClassImpl(Convolution)
     {
         NNTestParams()
         {
-            Linear<T> module(2, 3);
+            Convolution<T> module(1, 2, 3, 4, 5, 6, true, false);
             math::fill(module.params(), 100);
             module.reset();
             forEach([&](T param)
@@ -62,38 +77,8 @@ NNTestClassImpl(Convolution)
     {
         NNTestParams(const Tensor &)
         {
-            Linear<T> module(2, 3);
-            module.weights().copy({ -3, -2, 2, 3, 4, 5 });
-            module.bias().copy({ -5, 7, 8862.37 });
-            auto input = Tensor<T>({ -5, 10, 15, -20 }).resize(2, 2);
-            auto target = Tensor<T>({ 40, 57, 8902.37, -110, -103, 8792.37 }).resize(2, 3);
-
-            module.forward(input);
-            forEach([&](T actual, T target)
-            {
-                NNTestAlmostEquals(actual, target, 1e-12);
-            }, module.output(), target);
-
-            module.forward(input.select(0, 0));
-            forEach([&](T actual, T target)
-            {
-                NNTestAlmostEquals(actual, target, 1e-12);
-            }, module.output(), target.select(0, 0));
-
-            Linear<T> unbiased(2, 3, false);
-            unbiased.weights().copy(module.weights());
-
-            unbiased.forward(input);
-            forEach([&](T unbiased, T bias, T target)
-            {
-                NNTestAlmostEquals(unbiased, target - bias, 1e-12);
-            }, unbiased.output(), module.bias().resize(1, 3).expand(0, 2), target);
-
-            unbiased.forward(input.select(0, 0));
-            forEach([&](T unbiased, T bias, T target)
-            {
-                NNTestAlmostEquals(unbiased, target - bias, 1e-12);
-            }, unbiased.output(), module.bias(), target.select(0, 0));
+            // todo: test padded/unpadded
+            // todo: test interlaved/uninterleaved
         }
     }
 
@@ -101,48 +86,8 @@ NNTestClassImpl(Convolution)
     {
         NNTestParams(const Tensor &, const Tensor &)
         {
-            Linear<T> module(2, 3);
-            module.weights().copy({ -3, -2, 2, 3, 4, 5 });
-            module.bias().copy({ -5, 7, 8862.37 });
-            auto input = Tensor<T>({ -5, 10, 15, -20 }).resize(2, 2);
-            auto blame = Tensor<T>({ 1, 2, 3, -4, -3, 2 }).resize(2, 3);
-            auto inGrad = Tensor<T>({ -1, 26, 22, -14 }).resize(2, 2);
-            auto pGrad = Tensor<T>({ -65, -55, 15, 90, 80, -10, -3, -1, 5 });
-
-            module.forward(input);
-            module.backward(input, blame);
-            forEach([&](T actual, T target)
-            {
-                NNTestAlmostEquals(actual, target, 1e-12);
-            }, module.inGrad(), inGrad);
-
-            forEach([&](T actual, T target)
-            {
-                NNTestAlmostEquals(actual, target, 1e-12);
-            }, module.grad(), pGrad);
-
-            module.backward(input.select(0, 0), blame.select(0, 0));
-            forEach([&](T actual, T target)
-            {
-                NNTestAlmostEquals(actual, target, 1e-12);
-            }, module.inGrad(), inGrad.select(0, 0));
-
-            Linear<T> unbiased(2, 3, false);
-            unbiased.weights().copy(module.weights());
-
-            unbiased.forward(input);
-            unbiased.backward(input, blame);
-            forEach([&](T unbiased, T target)
-            {
-                NNTestAlmostEquals(unbiased, target, 1e-12);
-            }, unbiased.inGrad(), inGrad);
-
-            unbiased.backward(input.select(0, 0), blame.select(0, 0));
-            forEach([&](T unbiased, T target)
-            {
-                NNTestAlmostEquals(unbiased, target, 1e-12);
-            }, unbiased.inGrad(), inGrad.select(0, 0));
+            // todo: test padded/unpadded
+            // todo: test interlaved/uninterleaved
         }
     }
-*/
 }
