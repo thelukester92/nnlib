@@ -11,7 +11,7 @@ namespace nnlib
 template <typename T>
 Convolution<T>::Convolution(size_t channels, size_t filters, size_t kWidth, size_t kHeight, size_t strideX, size_t strideY, bool pad, bool interleaved) :
     Module<T>(
-        { 1, interleaved ? kWidth : channels, interleaved ? kHeight : kWidth, interleaved ? channels : kHeight },
+        { 1, interleaved ? kHeight : channels, interleaved ? kWidth : kHeight, interleaved ? channels : kWidth },
         { 1, interleaved ? 1 : filters, 1, interleaved ? filters : 1 }
     ),
     m_filters(filters, channels, kHeight, kWidth),
