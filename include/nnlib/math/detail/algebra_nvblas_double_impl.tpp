@@ -11,7 +11,7 @@
 #endif
 
 #define gemm dgemm
-#include "algebra_blas_impl.tpp"
+#include "algebra_nvblas_impl.tpp"
 #undef gemm
 
 #endif
