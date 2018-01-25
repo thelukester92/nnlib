@@ -14,7 +14,7 @@ NNTestClassImpl(Convolution)
         NNTestParams(size_t, size_t, size_t, size_t, size_t, size_t, bool, bool)
         {
             Convolution<T> module(1, 2, 3, 4, 5, 6, true, false);
-            NNTestEquals(module.filters(), 1);
+            NNTestEquals(module.filterCount(), 1);
             NNTestEquals(module.channels(), 2);
             NNTestEquals(module.kernelWidth(), 3);
             NNTestEquals(module.kernelHeight(), 4);
@@ -24,7 +24,7 @@ NNTestClassImpl(Convolution)
             NNTestEquals(module.interleaved(), false);
 
             Convolution<T> module2(6, 5, 4, 3, 2, 1, false, true);
-            NNTestEquals(module2.filters(), 6);
+            NNTestEquals(module2.filterCount(), 6);
             NNTestEquals(module2.channels(), 5);
             NNTestEquals(module2.kernelWidth(), 4);
             NNTestEquals(module2.kernelHeight(), 3);
@@ -43,7 +43,7 @@ NNTestClassImpl(Convolution)
             Convolution<T> copy(1, 2, 3, 4);
             copy = orig;
 
-            NNTestEquals(copy.filters(), 1);
+            NNTestEquals(copy.filterCount(), 1);
             NNTestEquals(copy.channels(), 2);
             NNTestEquals(copy.kernelWidth(), 3);
             NNTestEquals(copy.kernelHeight(), 4);
@@ -77,6 +77,42 @@ NNTestClassImpl(Convolution)
     {
         NNTestParams(const Tensor &)
         {
+            Tensor<T> input;
+
+            Convolution<T> module(2, 3, 3, 3, 2, 2);
+
+            input = Tensor<T>({
+                2, 2, 2, 2, 0,
+                0, 0, 2, 2, 1,
+                2, 0, 1, 1, 2,
+                1, 0, 1, 1, 0,
+                2, 1, 0, 1, 2,
+
+                2, 1, 0, 1, 1,
+                2, 2, 1, 2, 0,
+                2, 2, 1, 1, 0,
+                2, 2, 1, 1, 1,
+                0, 0, 0, 1, 0,
+
+                1, 2, 2, 0, 0,
+                2, 0, 0, 1, 0,
+                1, 0, 2, 1, 2,
+                0, 2, 1, 1, 1,
+                2, 2, 2, 2, 1
+            }).resize(3, 5, 5);
+
+            module.filters().copy({
+                -1,  1, -1,   0, -1,  1,    1, -1, -1,
+                 0, -1,  1,   0,  1, -1,    0, -1,  1,
+                 0,  1,  0,   0, -1,  1,    0,  1,  0,
+
+                -1,  1,  0,   0,  0,  0,   -1,  1, -1,
+                -1,  1,  0,   1,  1, -1,   -1,  0, -1,
+                 0,  1, -1,   1,  1,  1,    0,  1, -1
+            });
+
+            module.bias().copy({ 1, 0 });
+
             // todo: test padded/unpadded
             // todo: test interlaved/uninterleaved
         }

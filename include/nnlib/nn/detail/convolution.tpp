@@ -16,6 +16,8 @@ Convolution<T>::Convolution(size_t filters, size_t channels, size_t kWidth, size
     ),
     m_filters(filters, channels, kHeight, kWidth),
     m_filtersGrad(filters, channels, kHeight, kWidth),
+    m_bias(filters),
+    m_biasGrad(filters),
     m_strideX(strideX),
     m_strideY(strideY),
     m_pad(pad),
@@ -29,6 +31,8 @@ Convolution<T>::Convolution(const Convolution<T> &module) :
     Module<T>(module),
     m_filters(module.m_filters.copy()),
     m_filtersGrad(m_filters.shape(), true),
+    m_bias(module.m_bias.copy()),
+    m_biasGrad(m_bias.shape(), true),
     m_strideX(module.m_strideX),
     m_strideY(module.m_strideY),
     m_pad(module.m_pad),
@@ -40,6 +44,8 @@ Convolution<T>::Convolution(const Serialized &node) :
     Module<T>(node),
     m_filters(node.get<Tensor<T>>("filters")),
     m_filtersGrad(m_filters.shape(), true),
+    m_bias(node.get<Tensor<T>>("bias")),
+    m_biasGrad(m_bias.shape(), true),
     m_strideX(node.get<size_t>("strideX")),
     m_strideY(node.get<size_t>("strideY")),
     m_pad(node.get<bool>("pad")),
@@ -54,6 +60,8 @@ Convolution<T> &Convolution<T>::operator=(const Convolution<T> &module)
     {
         m_filters = module.m_filters.copy();
         m_filtersGrad.resize(m_filters.shape());
+        m_bias = module.m_bias.copy();
+        m_biasGrad.resize(m_bias.shape());
         m_strideX = module.m_strideX;
         m_strideY = module.m_strideY;
         m_pad = module.m_pad;
@@ -63,7 +71,7 @@ Convolution<T> &Convolution<T>::operator=(const Convolution<T> &module)
 }
 
 template <typename T>
-size_t Convolution<T>::filters() const
+size_t Convolution<T>::filterCount() const
 {
     return m_filters.size(0);
 }
@@ -111,10 +119,23 @@ bool Convolution<T>::interleaved() const
 }
 
 template <typename T>
+Tensor<T> Convolution<T>::filters()
+{
+    return m_filters;
+}
+
+template <typename T>
+Tensor<T> Convolution<T>::bias()
+{
+    return m_bias;
+}
+
+template <typename T>
 Convolution<T> &Convolution<T>::reset()
 {
     T dev = 1.0 / sqrt(m_filters.size(1) * m_filters.size(2) * m_filters.size(3));
     math::rand(m_filters, -dev, dev);
+    math::rand(m_bias, -dev, dev);
     return *this;
 }
 
@@ -123,6 +144,7 @@ void Convolution<T>::save(Serialized &node) const
 {
     Module<T>::save(node);
     node.set("filters", m_filters);
+    node.set("bias", m_bias);
     node.set("strideX", m_strideX);
     node.set("strideY", m_strideY);
     node.set("pad", m_pad);
@@ -164,13 +186,13 @@ Tensor<T> &Convolution<T>::backward(const Tensor<T> &input, const Tensor<T> &out
 template <typename T>
 Storage<Tensor<T> *> Convolution<T>::paramsList()
 {
-    return { &m_filters };
+    return { &m_filters, &m_bias };
 }
 
 template <typename T>
 Storage<Tensor<T> *> Convolution<T>::gradList()
 {
-    return { &m_filtersGrad };
+    return { &m_filtersGrad, &m_biasGrad };
 }
 
 }

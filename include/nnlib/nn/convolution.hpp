@@ -17,7 +17,7 @@ public:
 
     Convolution &operator=(const Convolution &module);
 
-    size_t filters() const;
+    size_t filterCount() const;
     size_t channels() const;
     size_t kernelHeight() const;
     size_t kernelWidth() const;
@@ -25,6 +25,9 @@ public:
     size_t strideX() const;
     bool padded() const;
     bool interleaved() const;
+
+    Tensor<T> filters();
+    Tensor<T> bias();
 
     Convolution &reset();
 
@@ -42,6 +45,8 @@ protected:
 
     Tensor<T> m_filters;
     Tensor<T> m_filtersGrad;
+    Tensor<T> m_bias;
+    Tensor<T> m_biasGrad;
 
     size_t m_strideX;
     size_t m_strideY;
