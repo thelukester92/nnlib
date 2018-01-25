@@ -1,6 +1,7 @@
 #include "../test_dropout.hpp"
 #include "../test_module.hpp"
 #include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 #include "nnlib/nn/dropout.hpp"
 using namespace nnlib;
 using T = NN_REAL_T;

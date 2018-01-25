@@ -1,5 +1,7 @@
 #include "../test_module.hpp"
 #include "../test_map.hpp"
+#include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 using namespace nnlib;
 using T = NN_REAL_T;
 

@@ -1,6 +1,7 @@
 #include "../test_dropconnect.hpp"
 #include "../test_module.hpp"
 #include "nnlib/math/math.hpp"
+#include "nnlib/math/random.hpp"
 #include "nnlib/nn/dropconnect.hpp"
 #include "nnlib/nn/linear.hpp"
 using namespace nnlib;
