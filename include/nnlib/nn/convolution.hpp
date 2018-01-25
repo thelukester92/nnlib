@@ -11,22 +11,24 @@ template <typename T = NN_REAL_T>
 class Convolution : public Module<T>
 {
 public:
-    Convolution(size_t filters, size_t channels, size_t kWidth, size_t kHeight, size_t strideX = 1, size_t strideY = 1, bool pad = false, bool interleaved = false);
+    static Storage<size_t> calcInputShape(size_t kernelCount, size_t inChannels, const Storage<size_t> &kernelShape, const Storage<size_t> &stride, bool interleaved);
+    static Storage<size_t> calcOutputShape(size_t kernelCount, size_t inChannels, const Storage<size_t> &stride, const Storage<size_t> &pad, bool interleaved);
+
+    Convolution(size_t kernelCount, size_t inChannels, const Storage<size_t> &kernelShape, const Storage<size_t> &stride = { 1, 1 }, const Storage<size_t> &pad = { 0, 0 }, bool interleaved = false);
+    Convolution(size_t kernelCount, size_t inChannels, size_t kernelShape, size_t stride = 1, size_t pad = 0, bool interleaved = false);
     Convolution(const Convolution &module);
     Convolution(const Serialized &node);
 
     Convolution &operator=(const Convolution &module);
 
-    size_t filterCount() const;
-    size_t channels() const;
-    size_t kernelHeight() const;
-    size_t kernelWidth() const;
-    size_t strideY() const;
-    size_t strideX() const;
-    bool padded() const;
+    size_t kernelCount() const;
+    size_t inChannels() const;
+    Storage<size_t> kernelShape() const;
+    const Storage<size_t> &stride() const;
+    const Storage<size_t> &pad() const;
     bool interleaved() const;
 
-    Tensor<T> filters();
+    Tensor<T> kernels();
     Tensor<T> bias();
 
     Convolution &reset();
@@ -43,15 +45,13 @@ protected:
     using Module<T>::m_output;
     using Module<T>::m_inGrad;
 
-    Tensor<T> m_filters;
-    Tensor<T> m_filtersGrad;
+    Tensor<T> m_kernels;
+    Tensor<T> m_kernelsGrad;
     Tensor<T> m_bias;
     Tensor<T> m_biasGrad;
 
-    size_t m_strideX;
-    size_t m_strideY;
-
-    bool m_pad;
+    Storage<size_t> m_stride;
+    Storage<size_t> m_pad;
     bool m_interleaved;
 };
 
