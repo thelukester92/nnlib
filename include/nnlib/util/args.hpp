@@ -87,7 +87,7 @@ public:
     typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, char>::value, long long>::type
     getInt(T i) const
     {
-        NNHardAssertLessThan(i, m_arrayData.size(), "Attempted to get undefined array option!");
+        NNHardAssertLessThan((size_t) i, m_arrayData.size(), "Attempted to get undefined array option!");
         NNHardAssert(m_arrayExpected[i] == Type::Integer, "Attempted to get an incompatible type!");
         return m_arrayData[i].template get<long long>();
     }
@@ -96,7 +96,7 @@ public:
     typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, char>::value, double>::type
     getDouble(T i) const
     {
-        NNHardAssertLessThan(i, m_arrayData.size(), "Attempted to get undefined array option!");
+        NNHardAssertLessThan((size_t) i, m_arrayData.size(), "Attempted to get undefined array option!");
         NNHardAssert(m_arrayExpected[i] == Type::Float, "Attempted to get an incompatible type!");
         return m_arrayData[i].template get<double>();
     }
@@ -105,7 +105,7 @@ public:
     typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, char>::value, std::string>::type
     getString(T i) const
     {
-        NNHardAssertLessThan(i, m_arrayData.size(), "Attempted to get undefined array option!");
+        NNHardAssertLessThan((size_t) i, m_arrayData.size(), "Attempted to get undefined array option!");
         NNHardAssert(m_arrayExpected[i] == Type::String, "Attempted to get an incompatible type!");
         return m_arrayData[i].template get<std::string>();
     }
