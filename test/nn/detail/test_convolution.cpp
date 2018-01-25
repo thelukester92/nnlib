@@ -77,10 +77,7 @@ NNTestClassImpl(Convolution)
     {
         NNTestParams(const Tensor &)
         {
-            Tensor<T> input;
-
-            Convolution<T> module(2, 3, 3, 3, 2, 2);
-
+            Tensor<T> input, target;
             input = Tensor<T>({
                 2, 2, 2, 2, 0,
                 0, 0, 2, 2, 1,
@@ -99,19 +96,36 @@ NNTestClassImpl(Convolution)
                 1, 0, 2, 1, 2,
                 0, 2, 1, 1, 1,
                 2, 2, 2, 2, 1
-            }).resize(3, 5, 5);
+            }).resize(1, 3, 5, 5);
 
+            Convolution<T> module(2, 3, 3, 3, 2, 2);
             module.filters().copy({
-                -1,  1, -1,   0, -1,  1,    1, -1, -1,
-                 0, -1,  1,   0,  1, -1,    0, -1,  1,
-                 0,  1,  0,   0, -1,  1,    0,  1,  0,
+                -1,  1, -1,  0, -1,  1,  1, -1, -1,
+                 0, -1,  1,  0,  1, -1,  0, -1,  1,
+                 0,  1,  0,  0, -1,  1,  0,  1,  0,
 
-                -1,  1,  0,   0,  0,  0,   -1,  1, -1,
-                -1,  1,  0,   1,  1, -1,   -1,  0, -1,
-                 0,  1, -1,   1,  1,  1,    0,  1, -1
+                -1,  1,  0,  0,  0,  0, -1,  1, -1,
+                -1,  1,  0,  1,  1, -1, -1,  0, -1,
+                 0,  1, -1,  1,  1,  1,  0,  1, -1
             });
-
             module.bias().copy({ 1, 0 });
+
+            target = Tensor<T>({
+                 5, -5,  3,
+                -1,  0, -3,
+                 1,  2, -3,
+
+                 4, -1, -1,
+                 2,  2,  0,
+                 5,  5,  4
+            }).resize(1, 2, 3, 3);
+
+            module.forward(input);
+
+            forEach([&](T output, T target)
+            {
+                NNTestAlmostEquals(output, target, 1e-12);
+            }, module.output(), target);
 
             // todo: test padded/unpadded
             // todo: test interlaved/uninterleaved
