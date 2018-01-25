@@ -11,8 +11,8 @@ namespace nnlib
 template <typename T>
 Convolution<T>::Convolution(size_t channels, size_t filters, size_t kWidth, size_t kHeight, size_t strideX, size_t strideY, bool pad, bool interleaved) :
     Module<T>(
-        { 1, interleaved ? height : channels, interleaved ? width : height, interleaved ? channels : width },
-        { 1, interleaved ? kHeight : filters, interleaved ? kWidth : kHeight, interleaved ? filters : kWidth }
+        { 1, interleaved ? 1 : channels, 1, interleaved ? channels : 1 },
+        { 1, interleaved ? 1 : filters, 1, interleaved ? filters : 1 }
     ),
     m_filters(filters, channels, kHeight, kWidth),
     m_filtersGrad(filters, channels, kHeight, kWidth),
@@ -26,7 +26,7 @@ Convolution<T>::Convolution(size_t channels, size_t filters, size_t kWidth, size
 
 template <typename T>
 Convolution<T>::Convolution(const Convolution<T> &module) :
-    Convolution<T>(module),
+    Module<T>(module),
     m_filters(module.m_filters.copy()),
     m_filtersGrad(m_filters.shape(), true),
     m_strideX(module.m_strideX),
@@ -54,8 +54,6 @@ Convolution<T> &Convolution<T>::operator=(const Convolution<T> &module)
     {
         m_filters = module.m_filters.copy();
         m_filtersGrad.resize(m_filters.shape());
-        m_kWidth = module.m_kWidth;
-        m_kHeight = module.m_kHeight;
         m_strideX = module.m_strideX;
         m_strideY = module.m_strideY;
         m_pad = module.m_pad;
@@ -68,6 +66,12 @@ template <typename T>
 size_t Convolution<T>::filters() const
 {
     return m_filters.size(0);
+}
+
+template <typename T>
+size_t Convolution<T>::channels() const
+{
+    return m_filters.size(1);
 }
 
 template <typename T>
@@ -128,11 +132,29 @@ void Convolution<T>::save(Serialized &node) const
 template <typename T>
 Tensor<T> &Convolution<T>::forward(const Tensor<T> &input)
 {
+    NNAssertEquals(input.dims(), 4, "Expected 4D input!");
+
+    size_t inChannels = m_interleaved ? input.size(3) : input.size(1);
+    size_t inWidth    = m_interleaved ? input.size(1) : input.size(2);
+    size_t inHeight   = m_interleaved ? input.size(2) : input.size(3);
+
+    NNAssertEquals(inChannels, m_filters.size(1), "Incopatible input channels!");
+
+    size_t outWidth   = (inWidth - m_filters.size(2) + m_strideX - 1) / m_strideX + 1;
+    size_t outHeight  = (inHeight - m_filters.size(3) + m_strideY - 1) / m_strideY + 1;
+
+    if(m_interleaved)
+        m_output.resize(input.size(0), outWidth, outHeight, m_filters.size(0));
+    else
+        m_output.resize(input.size(0), m_filters.size(0), outWidth, outHeight);
+
+    // todo: the actual convolution
+
     return m_output;
 }
 
 template <typename T>
-Tensor<T> &Linear<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
+Tensor<T> &Convolution<T>::backward(const Tensor<T> &input, const Tensor<T> &outGrad)
 {
     return m_inGrad;
 }
@@ -144,7 +166,7 @@ Storage<Tensor<T> *> Convolution<T>::paramsList()
 }
 
 template <typename T>
-Storage<Tensor<T> *> Linear<T>::gradList()
+Storage<Tensor<T> *> Convolution<T>::gradList()
 {
     return { &m_filtersGrad };
 }

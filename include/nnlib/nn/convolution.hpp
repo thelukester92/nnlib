@@ -18,6 +18,7 @@ public:
     Convolution &operator=(const Convolution &module);
 
     size_t filters() const;
+    size_t channels() const;
     size_t kernelWidth() const;
     size_t kernelHeight() const;
 

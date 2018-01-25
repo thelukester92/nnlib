@@ -19,6 +19,7 @@
 #include "math/test_random.hpp"
 #include "nn/test_batchnorm.hpp"
 #include "nn/test_concat.hpp"
+#include "nn/test_convolution.hpp"
 #include "nn/test_dropconnect.hpp"
 #include "nn/test_dropout.hpp"
 #include "nn/test_elu.hpp"
@@ -99,6 +100,7 @@ int main(int argc, const char **argv)
     // Neural Network Modules
     RunTest(BatchNorm);
     RunTest(Concat);
+    RunTest(Convolution);
     RunTest(DropConnect);
     RunTest(Dropout);
     RunTest(ELU);
