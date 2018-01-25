@@ -4,11 +4,7 @@
 #include "../algebra.hpp"
 #include "nnlib/core/detail/tensor.tpp"
 
-#ifdef __APPLE__
-    #include <Accelerate/Accelerate.h>
-#else
-    #include <cblas.h>
-#endif
+#include <nvblas.h>
 
 #define gemm dgemm
 #include "algebra_nvblas_impl.tpp"
