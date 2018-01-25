@@ -11,7 +11,7 @@ namespace nnlib
 template <typename T>
 Convolution<T>::Convolution(size_t channels, size_t filters, size_t kWidth, size_t kHeight, size_t strideX, size_t strideY, bool pad, bool interleaved) :
     Module<T>(
-        { 1, interleaved ? 1 : channels, 1, interleaved ? channels : 1 },
+        { 1, interleaved ? kWidth : channels, interleaved ? kHeight : kWidth, interleaved ? channels : kHeight },
         { 1, interleaved ? 1 : filters, 1, interleaved ? filters : 1 }
     ),
     m_filters(filters, channels, kHeight, kWidth),
@@ -138,7 +138,9 @@ Tensor<T> &Convolution<T>::forward(const Tensor<T> &input)
     size_t inWidth    = m_interleaved ? input.size(1) : input.size(2);
     size_t inHeight   = m_interleaved ? input.size(2) : input.size(3);
 
-    NNAssertEquals(inChannels, m_filters.size(1), "Incopatible input channels!");
+    NNAssertEquals(inChannels, m_filters.size(1), "Incompatible input channels!");
+    NNAssertGreaterThanOrEquals(inWidth, m_filters.size(2) - m_strideX + 1, "Incopatible input width!");
+    NNAssertGreaterThanOrEquals(inHeight, m_filters.size(3) - m_strideY + 1, "Incopatible input height!");
 
     size_t outWidth   = (inWidth - m_filters.size(2) + m_strideX - 1) / m_strideX + 1;
     size_t outHeight  = (inHeight - m_filters.size(3) + m_strideY - 1) / m_strideY + 1;
