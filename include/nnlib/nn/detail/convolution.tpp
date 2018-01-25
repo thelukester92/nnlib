@@ -176,6 +176,7 @@ Tensor<T> &Convolution<T>::forward(const Tensor<T> &input)
     else
         shape = input.shape();
 
+    size_t inBatch    = shape[0];
     size_t inChannels = m_interleaved ? shape[3] : shape[1];
     size_t inHeight   = m_interleaved ? shape[1] : shape[2];
     size_t inWidth    = m_interleaved ? shape[2] : shape[3];
@@ -188,9 +189,32 @@ Tensor<T> &Convolution<T>::forward(const Tensor<T> &input)
     size_t outWidth   = (inWidth - m_kernels.size(3) + m_pad[0] + m_stride[0] - 1) / m_stride[0] + 1;
 
     if(m_interleaved)
-        m_output.resize(input.size(0), outWidth, outHeight, m_kernels.size(0));
+        m_output.resize(inBatch, outWidth, outHeight, m_kernels.size(0));
     else
-        m_output.resize(input.size(0), m_kernels.size(0), outWidth, outHeight);
+        m_output.resize(inBatch, m_kernels.size(0), outWidth, outHeight);
+
+    for(size_t i = 0; i < inBatch; ++i)
+    {
+        for(size_t j = 0; j < inChannels; ++j)
+        {
+            for(size_t k = 0; k < inHeight; ++k)
+            {
+                for(size_t l = 0; l < m_kernels.size(0); ++l)
+                {
+                    for(size_t m = 0; m < m_kernels.size(1); ++m)
+                    {
+                        for(size_t n = 0; n < m_kernels.size(2); ++n)
+                        {
+                            for(size_t o = 0; o < m_kernels.size(3); ++o)
+                            {
+                                m_output(i, l, );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // todo: the actual convolution
 
