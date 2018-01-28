@@ -41,7 +41,7 @@ PReLU<T> &PReLU<T>::operator=(const PReLU<T> &module)
 template <typename T>
 void PReLU<T>::save(Serialized &node) const
 {
-    Map<T>::save(node);
+    Module<T>::save(node);
     node.set("leaks", m_leaks);
 }
 
