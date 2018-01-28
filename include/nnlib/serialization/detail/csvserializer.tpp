@@ -194,7 +194,7 @@ void CSVSerializer::writeRow(const Serialized &row, std::ostream &out, char deli
             writeString(value.get<std::string>(), out, delim);
             break;
         default:
-            throw Error("Expected primitive value or string!");
+            NNHardAssert(false, "Expected primitive value or string!");
         }
     }
     out << std::endl;

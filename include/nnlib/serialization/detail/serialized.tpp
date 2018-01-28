@@ -159,7 +159,7 @@ typename std::enable_if<std::is_integral<T>::value, T>::type Serialized::get() c
     case Float:
         return m_float;
     default:
-        throw Error("Invalid type!");
+        NNHardAssert(false, "Invalid type!");
     }
 }
 
@@ -176,7 +176,7 @@ typename std::enable_if<std::is_floating_point<T>::value, T>::type Serialized::g
     case Float:
         return m_float;
     default:
-        throw Error("Invalid type!");
+        NNHardAssert(false, "Invalid type!");
     }
 }
 
@@ -196,7 +196,7 @@ typename std::enable_if<std::is_same<T, std::string>::value, T>::type Serialized
     case String:
         return m_string;
     default:
-        throw Error("Invalid type!");
+        NNHardAssert(false, "Invalid type!");
     }
 }
 
