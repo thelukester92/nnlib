@@ -33,20 +33,26 @@ NNTestClassImpl(ReLU)
 
     NNTestMethod(forward)
     {
-        ReLU<T> module(0.75);
-        module.forward({ -1.3, 1.0, 3.14 });
-        NNTestAlmostEquals(module.output()(0), -0.975, 1e-12);
-        NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
-        NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+        NNTestParams(const Tensor &)
+        {
+            ReLU<T> module(0.75);
+            module.forward({ -1.3, 1.0, 3.14 });
+            NNTestAlmostEquals(module.output()(0), -0.975, 1e-12);
+            NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
+            NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+        }
     }
 
     NNTestMethod(backward)
     {
-        ReLU<T> module(0.75);
-        module.forward({ -1.3, 1.0, 3.14 });
-        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
-        NNTestAlmostEquals(module.inGrad()(0), 1.5, 1e-12);
-        NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
-        NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+        NNTestParams(const Tensor &)
+        {
+            ReLU<T> module(0.75);
+            module.forward({ -1.3, 1.0, 3.14 });
+            module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+            NNTestAlmostEquals(module.inGrad()(0), 1.5, 1e-12);
+            NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
+            NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+        }
     }
 }

@@ -27,6 +27,7 @@
 #include "nn/test_logistic.hpp"
 #include "nn/test_logsoftmax.hpp"
 #include "nn/test_lstm.hpp"
+#include "nn/test_prelu.hpp"
 #include "nn/test_relu.hpp"
 #include "nn/test_sequencer.hpp"
 #include "nn/test_sequential.hpp"
@@ -107,6 +108,7 @@ int main(int argc, const char **argv)
     RunTest(Logistic);
     RunTest(LogSoftMax);
     RunTest(LSTM);
+    RunTest(PReLU);
     RunTest(ReLU);
     RunTest(Sequencer);
     RunTest(Sequential);

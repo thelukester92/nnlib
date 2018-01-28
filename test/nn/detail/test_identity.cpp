@@ -10,20 +10,26 @@ NNTestClassImpl(Identity)
 
     NNTestMethod(forward)
     {
-        Identity<T> module;
-        module.forward({ -1.3, 1.0, 3.14 });
-        NNTestAlmostEquals(module.output()(0), -1.3, 1e-12);
-        NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
-        NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+        NNTestParams(const Tensor &)
+        {
+            Identity<T> module;
+            module.forward({ -1.3, 1.0, 3.14 });
+            NNTestAlmostEquals(module.output()(0), -1.3, 1e-12);
+            NNTestAlmostEquals(module.output()(1), 1.0, 1e-12);
+            NNTestAlmostEquals(module.output()(2), 3.14, 1e-12);
+        }
     }
 
     NNTestMethod(backward)
     {
-        Identity<T> module;
-        module.forward({ -1.3, 1.0, 3.14 });
-        module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
-        NNTestAlmostEquals(module.inGrad()(0), 2, 1e-12);
-        NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
-        NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+        NNTestParams(const Tensor &, const Tensor &)
+        {
+            Identity<T> module;
+            module.forward({ -1.3, 1.0, 3.14 });
+            module.backward({ -1.3, 1.0, 3.14 }, { 2, -3, 1 });
+            NNTestAlmostEquals(module.inGrad()(0), 2, 1e-12);
+            NNTestAlmostEquals(module.inGrad()(1), -3, 1e-12);
+            NNTestAlmostEquals(module.inGrad()(2), 1, 1e-12);
+        }
     }
 }

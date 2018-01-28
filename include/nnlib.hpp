@@ -29,6 +29,7 @@
 #include "nnlib/nn/lstm.hpp"
 #include "nnlib/nn/map.hpp"
 #include "nnlib/nn/module.hpp"
+#include "nnlib/nn/prelu.hpp"
 #include "nnlib/nn/relu.hpp"
 #include "nnlib/nn/sequencer.hpp"
 #include "nnlib/nn/sequential.hpp"
