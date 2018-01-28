@@ -14,7 +14,7 @@ Serialized FileSerializer::read(const std::string &filename)
 {
     std::string ext = filename.substr(filename.size() - 4);
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    NNAssert(ext == ".bin" || ext == ".csv" || ext == "json", "Expectd bin, csv, or json file extension!");
+    NNAssert(ext == ".bin" || ext == ".csv" || ext == "json", "Expected bin, csv, or json file extension!");
 
     if(ext == ".bin")
         return BinarySerializer::read(filename);
@@ -28,7 +28,7 @@ void FileSerializer::write(const Serialized &root, const std::string &filename)
 {
     std::string ext = filename.substr(filename.size() - 4);
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    NNAssert(ext == ".bin" || ext == ".csv" || ext == "json", "Expectd bin, csv, or json file extension!");
+    NNAssert(ext == ".bin" || ext == ".csv" || ext == "json", "Expected bin, csv, or json file extension!");
 
     if(ext == ".bin")
         BinarySerializer::write(root, filename);
